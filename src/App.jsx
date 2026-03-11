@@ -60,6 +60,10 @@ function App() {
             <div className="hero-actions">
               <button className="main-button">VER MENÚ</button>
               <button className="outline-button">LOCAL</button>
+              <button className="delivery-button">
+                <span className="delivery-icon">🛵</span>
+                PEDÍ A DOMICILIO
+              </button>
             </div>
           </div>
           <div className="hero-image-container">

@@ -138,6 +138,29 @@
   color: black;
 }
 
+.delivery-button {
+  background: #ffcc00;
+  color: black;
+  padding: 1.2rem 2.5rem;
+  font-size: 1.2rem;
+  border-radius: 2px;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  font-weight: 900;
+  box-shadow: 0 4px 15px rgba(255, 204, 0, 0.3);
+}
+
+.delivery-button:hover {
+  background: white;
+  transform: translateY(-3px);
+  box-shadow: 0 8px 25px rgba(255, 255, 255, 0.4);
+}
+
+.delivery-icon {
+  font-size: 1.8rem;
+}
+
 .hero-image-container {
   flex: 1.5;
   /* Give more space to image container */
@@ -427,9 +450,11 @@
   }
 
   .main-button,
-  .outline-button {
+  .outline-button,
+  .delivery-button {
     width: 100%;
-    padding: 1rem;
+    padding: 1.2rem;
+    justify-content: center;
   }
 
   .footer {
