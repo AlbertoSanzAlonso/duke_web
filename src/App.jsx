@@ -3,22 +3,22 @@ import './App.css';
 
 const MENU_DATA = {
   Burgers: [
-    { id: 1, name: 'Duke', description: 'Nuestra firma. Doble carne, cheddar, cebolla caramelizada.', price: '12.90€' },
-    { id: 2, name: 'Marqués', description: 'Para los que saben. Queso de cabra, miel y nueces.', price: '13.50€' },
-    { id: 3, name: 'Conde', description: 'Elegancia pura. Boletus, aceite de trufa y parmesano.', price: '14.20€' },
-    { id: 4, name: 'Plebeyo', description: 'La de toda la vida. Lechuga, tomate, cebolla y pepinillo.', price: '10.90€' },
+    { id: 1, name: 'Duke', description: 'Nuestra firma. Doble carne, cheddar, cebolla caramelizada.', price: '$12.900' },
+    { id: 2, name: 'Marqués', description: 'Para los que saben. Queso de cabra, miel y nueces.', price: '$13.500' },
+    { id: 3, name: 'Conde', description: 'Elegancia pura. Boletus, aceite de trufa y parmesano.', price: '$14.200' },
+    { id: 4, name: 'Plebeyo', description: 'La de toda la vida. Lechuga, tomate, cebolla y pepinillo.', price: '$10.900' },
   ],
   Pachatas: [
-    { id: 5, name: 'Provolone', description: 'Queso provolone fundido y chimichurri.', price: '9.50€' },
-    { id: 6, name: 'BBQ', description: 'Salsa barbacoa casera y cebolla frita.', price: '9.50€' },
-    { id: 7, name: 'Completa', description: 'Jamón, queso, huevo y ensalada.', price: '11.00€' },
-    { id: 8, name: 'Especial', description: 'Nuestra mezcla secreta de la casa.', price: '11.50€' },
+    { id: 5, name: 'Provolone', description: 'Queso provolone fundido y chimichurri.', price: '$9.500' },
+    { id: 6, name: 'BBQ', description: 'Salsa barbacoa casera y cebolla frita.', price: '$9.500' },
+    { id: 7, name: 'Completa', description: 'Jamón, queso, huevo y ensalada.', price: '$11.000' },
+    { id: 8, name: 'Especial', description: 'Nuestra mezcla secreta de la casa.', price: '$11.500' },
   ],
   Pizzas: [
-    { id: 9, name: 'Mozzarella', description: 'Tomate, mozzarella y orégano.', price: '9.00€' },
-    { id: 10, name: 'Especial', description: 'Jamón York, champiñones y pimiento.', price: '11.50€' },
-    { id: 11, name: 'Napolitana', description: 'Anchoas, aceitunas negras y alcaparras.', price: '12.00€' },
-    { id: 12, name: '4 Quesos', description: 'Mozzarella, gorgonzola, parmesano y emmental.', price: '13.00€' },
+    { id: 9, name: 'Mozzarella', description: 'Tomate, mozzarella y orégano.', price: '$9.000' },
+    { id: 10, name: 'Especial', description: 'Jamón York, champiñones y pimiento.', price: '$11.500' },
+    { id: 11, name: 'Napolitana', description: 'Anchoas, aceitunas negras y alcaparras.', price: '$12.000' },
+    { id: 12, name: '4 Quesos', description: 'Mozzarella, gorgonzola, parmesano y emmental.', price: '$13.000' },
   ],
 };
 
@@ -69,7 +69,7 @@ function App() {
         </div>
         <div className="marquee">
           <div className="marquee-content">
-            BURGER - PACHATA - LOMO - PIZZA - SAN JUAN - 2025 - DUKE - BURGER - PACHATA - LOMO - PIZZA - SAN JUAN - 2025 - DUKE
+            BURGER - PACHATA - LOMO - PIZZA - SAN JUAN - BURGER - PACHATA - LOMO - PIZZA - SAN JUAN - BURGER - PACHATA - LOMO - PIZZA - SAN JUAN - BURGER - PACHATA - LOMO - PIZZA - SAN JUAN
           </div>
         </div>
       </header>
@@ -81,8 +81,8 @@ function App() {
             <h2 className="section-title">NUESTRA CARTA</h2>
             <div className="menu-tabs">
               {Object.keys(MENU_DATA).map(cat => (
-                <button 
-                  key={cat} 
+                <button
+                  key={cat}
                   className={`tab-item ${activeCategory === cat ? 'active' : ''}`}
                   onClick={() => setActiveCategory(cat)}
                 >
