@@ -66,7 +66,7 @@ function App() {
             </div>
           </div>
           <div className="hero-image-container">
-            <img src="/brand/hero_burger.png" alt="Duke Burger" className="hero-burger-img" />
+            <img src="/brand/hero_burger_hand.png" alt="Duke Burger" className="hero-burger-img" />
             <img src="/brand/duke burger 3 negativo.png" alt="Duke Sticker" className="sticker float-1" />
           </div>
         </div>
