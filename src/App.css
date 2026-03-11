@@ -423,15 +423,26 @@
     padding: 0.5rem 0.8rem;
     font-size: 0.9rem;
     font-weight: 900;
+    transform: none;
+    /* Remove skew on mobile to prevent overflow */
+  }
+
+  .cta-button:hover {
+    transform: scale(1.05);
+    /* Simpler hover on mobile */
   }
 
   .nav-container {
-    padding: 0 0.8rem;
-    gap: 0.3rem;
+    padding: 0 1rem;
+    gap: 0.5rem;
+    width: 100%;
   }
 
   .nav-logo {
-    height: 1.8rem;
+    height: 2.5rem;
+    /* Larger logo as requested */
+    max-width: 60%;
+    object-fit: contain;
   }
 
   .footer-grid {
