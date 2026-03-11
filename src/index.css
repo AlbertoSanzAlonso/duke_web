@@ -1,15 +1,17 @@
 @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Montserrat:wght@300;400;700;900&display=swap');
 
 :root {
+  font-size: 150%;
   --font-heading: 'Bebas Neue', cursive;
   --font-body: 'Montserrat', sans-serif;
-  
+
   --color-bg: #000000;
   --color-text: #ffffff;
-  --color-primary: #e31b23; /* Vicio Red */
+  --color-primary: #e31b23;
+  /* Vicio Red */
   --color-secondary: #ffffff;
   --color-accent: #1a1a1a;
-  
+
   --vicio-red: #e31b23;
   --fitz-pink: #E9A6D2;
 
@@ -31,7 +33,12 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
-h1, h2, h3, h4, h5, h6 {
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
   font-family: var(--font-heading);
   text-transform: uppercase;
   letter-spacing: 1px;
@@ -64,9 +71,17 @@ button {
 
 /* Animations */
 @keyframes float {
-  0% { transform: translateY(0px) rotate(0deg); }
-  50% { transform: translateY(-10px) rotate(2deg); }
-  100% { transform: translateY(0px) rotate(0deg); }
+  0% {
+    transform: translateY(0px) rotate(0deg);
+  }
+
+  50% {
+    transform: translateY(-10px) rotate(2deg);
+  }
+
+  100% {
+    transform: translateY(0px) rotate(0deg);
+  }
 }
 
 .sticker-float {
