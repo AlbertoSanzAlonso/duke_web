@@ -50,9 +50,10 @@
 .cta-button {
   background: var(--color-primary);
   color: white;
-  padding: 0.8rem 2rem;
+  padding: 1rem 2.5rem;
   border-radius: 5px;
-  font-weight: 700;
+  font-weight: 900;
+  font-size: 1.4rem;
   transform: skew(-10deg);
   transition: var(--transition-smooth);
 }
@@ -384,12 +385,22 @@
     left: 5%;
   }
 
-  .nav-links {
+  .nav-links a {
     display: none;
   }
 
+  .nav-links {
+    display: flex;
+    gap: 1rem;
+  }
+
+  .cta-button {
+    padding: 0.6rem 1.2rem;
+    font-size: 1.1rem;
+  }
+
   .nav-container {
-    padding: 0 2rem;
+    padding: 0 1.5rem;
   }
 
   .footer-grid {
