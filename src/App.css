@@ -420,11 +420,14 @@
   }
 
   .cta-button {
-    padding: 0.5rem 0.8rem;
-    font-size: 0.9rem;
+    padding: 0.5rem 0.7rem;
+    font-size: 0.75rem;
     font-weight: 900;
     transform: none;
-    /* Remove skew on mobile to prevent overflow */
+    white-space: nowrap;
+    max-width: 120px;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
 
   .cta-button:hover {
