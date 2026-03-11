@@ -115,7 +115,7 @@ function App() {
           <div className="footer-grid">
             <div className="footer-brand">
               <img src="/brand/duke burger 1 negativo.png" alt="Duke Logo" className="footer-logo" />
-              <p>© 2025 DUKE BURGER. SAN JUAN, ESPAÑA.</p>
+              <p>© 2025 DUKE BURGER. SAN JUAN, ARGENTINA.</p>
             </div>
             <div className="footer-links">
               <h3>SOCIAL</h3>
@@ -125,7 +125,7 @@ function App() {
             <div className="footer-info">
               <h3>UBICACIÓN</h3>
               <p>Av. Principal, 42</p>
-              <p>San Juan, Alicante</p>
+              <p>San Juan, Argentina</p>
             </div>
           </div>
         </div>
