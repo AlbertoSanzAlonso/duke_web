@@ -194,7 +194,7 @@
   bottom: 8%;
   left: -5%;
   animation: floatSticker 5s ease-in-out infinite;
-  z-index: 10;
+  z-index: 2000;
 }
 
 @keyframes floatSticker {
