@@ -417,34 +417,42 @@
   .nav-links {
     display: flex;
     gap: 0.5rem;
+    flex-shrink: 0;
+    /* don't shrink the button container */
   }
 
   .cta-button {
-    padding: 0.5rem 0.7rem;
-    font-size: 0.75rem;
+    padding: 0.4rem 0.8rem;
+    font-size: 0.7rem;
     font-weight: 900;
     transform: none;
     white-space: nowrap;
-    max-width: 120px;
-    overflow: hidden;
-    text-overflow: ellipsis;
+    border-radius: 4px;
   }
 
   .cta-button:hover {
     transform: scale(1.05);
-    /* Simpler hover on mobile */
   }
 
   .nav-container {
-    padding: 0 1rem;
-    gap: 0.5rem;
+    padding: 0 0.8rem;
+    gap: 0;
     width: 100%;
+    box-sizing: border-box;
+    overflow: hidden;
+    /* prevent any child from spilling out */
+  }
+
+  .navbar {
+    overflow: hidden;
+    /* belt and braces: clip any overflow at the nav level too */
   }
 
   .nav-logo {
     height: 2.5rem;
-    /* Larger logo as requested */
-    max-width: 60%;
+    flex-shrink: 1;
+    /* logo can shrink if needed */
+    min-width: 0;
     object-fit: contain;
   }
 
