@@ -43,7 +43,7 @@ function App() {
           <div className="nav-links">
             <a href="#menu">CARTA</a>
             <a href="#about">NOSOTROS</a>
-            <button className="cta-button">¡PIDE YA!</button>
+            <button className="cta-button">¡PEDÍ YA!</button>
           </div>
         </div>
       </nav>
@@ -59,7 +59,7 @@ function App() {
             <p className="hero-subtitle">Sabor brutal. Espíritu Duke.</p>
             <div className="hero-actions">
               <button className="main-button">VER MENÚ</button>
-              <button className="outline-button">LOCALES</button>
+              <button className="outline-button">LOCAL</button>
             </div>
           </div>
           <div className="hero-image-container">
