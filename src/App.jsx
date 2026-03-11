@@ -119,12 +119,13 @@ function App() {
             </div>
             <div className="footer-links">
               <h3>SOCIAL</h3>
-              <a href="#">INSTAGRAM</a>
-              <a href="#">TIKTOK</a>
+              <a href="https://www.instagram.com/dukeburger.sj" target="_blank" rel="noopener noreferrer">@DUKEBURGER.SJ</a>
+              <p>WSP: 264 5142897</p>
             </div>
             <div className="footer-info">
               <h3>UBICACIÓN</h3>
-              <p>Av. Principal, 42</p>
+              <p>Bº Frondizi - Rivadavia</p>
+              <p>(Laprida y Avelín)</p>
               <p>San Juan, Argentina</p>
             </div>
           </div>
