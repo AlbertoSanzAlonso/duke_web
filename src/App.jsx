@@ -61,8 +61,13 @@ function App() {
               <button className="main-button">VER MENÚ</button>
               <button className="outline-button">LOCAL</button>
               <button className="delivery-button">
-                <span className="delivery-icon">🛵</span>
-                PEDÍ A DOMICILIO
+                <svg className="delivery-svg" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M19,15V13.5L16,10H13V7H8V9H5V11H3V13H5V15H3V17H21V15H19M11,15H7V13H11V15M11,11H7V9H11V11M16,11.5L17.5,13.5H13V11.5H16Z" />
+                  <circle cx="7" cy="18" r="2" />
+                  <circle cx="17" cy="18" r="2" />
+                  <path d="M7,2C5.9,2 5,2.9 5,4V5H13V4C13,2.9 12.1,2 11,2H7M7,4H11V5H7V4Z" />
+                </svg>
+                A DOMICILIO
               </button>
             </div>
           </div>

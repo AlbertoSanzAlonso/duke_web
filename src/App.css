@@ -20,7 +20,7 @@
 .nav-container {
   max-width: 1400px;
   margin: 0 auto;
-  padding: 0 4rem;
+  padding: 0 2rem;
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -110,7 +110,8 @@
 
 .hero-actions {
   display: flex;
-  gap: 1.5rem;
+  gap: 1rem;
+  flex-wrap: wrap;
 }
 
 .main-button {
@@ -157,8 +158,9 @@
   box-shadow: 0 8px 25px rgba(255, 255, 255, 0.4);
 }
 
-.delivery-icon {
-  font-size: 1.8rem;
+.delivery-svg {
+  width: 2rem;
+  height: 2rem;
 }
 
 .hero-image-container {
@@ -423,7 +425,12 @@
   }
 
   .nav-container {
-    padding: 0 1.5rem;
+    padding: 0 1rem;
+    gap: 0.5rem;
+  }
+
+  .nav-logo {
+    height: 2rem;
   }
 
   .footer-grid {
