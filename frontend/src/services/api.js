@@ -1,27 +1,52 @@
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000/api';
 
-export const fetchDishes = async () => {
-    const response = await fetch(`${API_URL}/dishes/`);
-    if (!response.ok) throw new Error('Error al cargar los platos');
+export const fetchProducts = async () => {
+    const response = await fetch(`${API_URL}/products/`);
+    if (!response.ok) throw new Error('Error al cargar los productos');
     return await response.json();
 };
 
-export const createDish = async (dishData) => {
-    const isFormData = dishData instanceof FormData;
-    const response = await fetch(`${API_URL}/dishes/`, {
+export const createProduct = async (productData) => {
+    const isFormData = productData instanceof FormData;
+    const response = await fetch(`${API_URL}/products/`, {
         method: 'POST',
         headers: isFormData ? {} : { 'Content-Type': 'application/json' },
-        body: isFormData ? dishData : JSON.stringify(dishData)
+        body: isFormData ? productData : JSON.stringify(productData)
     });
-    if (!response.ok) throw new Error('Error al crear el plato');
+    if (!response.ok) throw new Error('Error al crear el producto');
     return await response.json();
 };
 
-export const deleteDish = async (id) => {
-    const response = await fetch(`${API_URL}/dishes/${id}/`, {
+export const deleteProduct = async (id) => {
+    const response = await fetch(`${API_URL}/products/${id}/`, {
         method: 'DELETE',
     });
-    if (!response.ok) throw new Error('Error al eliminar el plato');
+    if (!response.ok) throw new Error('Error al eliminar el producto');
+    return true;
+};
+
+// CARTA (MENU ENTRIES)
+export const fetchMenuEntries = async () => {
+    const response = await fetch(`${API_URL}/menu-entries/`);
+    if (!response.ok) throw new Error('Error al cargar elementos de la carta');
+    return await response.json();
+};
+
+export const createMenuEntry = async (data) => {
+    const response = await fetch(`${API_URL}/menu-entries/`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
+    });
+    if (!response.ok) throw new Error('Error al añadir producto a la carta');
+    return await response.json();
+};
+
+export const deleteMenuEntry = async (id) => {
+    const response = await fetch(`${API_URL}/menu-entries/${id}/`, {
+        method: 'DELETE',
+    });
+    if (!response.ok) throw new Error('Error al retirarlo de la carta');
     return true;
 };
 

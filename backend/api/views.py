@@ -1,11 +1,15 @@
 from rest_framework import viewsets
-from .models import Dish, Sale, Expense, InventoryItem, SupplierOrder
-from .serializers import (DishSerializer, SaleSerializer, SaleCreateSerializer, ExpenseSerializer,
+from .models import Product, MenuEntry, Sale, Expense, InventoryItem, SupplierOrder
+from .serializers import (ProductSerializer, MenuEntrySerializer, SaleSerializer, SaleCreateSerializer, ExpenseSerializer,
                           InventoryItemSerializer, SupplierOrderSerializer, SupplierOrderCreateSerializer)
 
-class DishViewSet(viewsets.ModelViewSet):
-    queryset = Dish.objects.all().order_by('-created_at')
-    serializer_class = DishSerializer
+class ProductViewSet(viewsets.ModelViewSet):
+    queryset = Product.objects.all().order_by('-created_at')
+    serializer_class = ProductSerializer
+
+class MenuEntryViewSet(viewsets.ModelViewSet):
+    queryset = MenuEntry.objects.all()
+    serializer_class = MenuEntrySerializer
 
 class SaleViewSet(viewsets.ModelViewSet):
     queryset = Sale.objects.all().order_by('-date')

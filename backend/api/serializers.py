@@ -1,17 +1,27 @@
 from rest_framework import serializers
-from .models import Dish, Sale, SaleItem, Expense, InventoryItem, SupplierOrder, SupplierOrderItem
+from .models import Product, MenuEntry, Sale, SaleItem, Expense, InventoryItem, SupplierOrder, SupplierOrderItem
 
-class DishSerializer(serializers.ModelSerializer):
+class ProductSerializer(serializers.ModelSerializer):
     class Meta:
-        model = Dish
+        model = Product
         fields = '__all__'
 
+class MenuEntrySerializer(serializers.ModelSerializer):
+    product = ProductSerializer(read_only=True)
+    product_id = serializers.PrimaryKeyRelatedField(
+        queryset=Product.objects.all(), source='product', write_only=True
+    )
+
+    class Meta:
+        model = MenuEntry
+        fields = ['id', 'product', 'product_id', 'price', 'category', 'is_available']
+
 class SaleItemSerializer(serializers.ModelSerializer):
-    dish_name = serializers.ReadOnlyField(source='dish.name')
+    entry_name = serializers.ReadOnlyField(source='menu_entry.product.name')
     
     class Meta:
         model = SaleItem
-        fields = ['id', 'dish', 'dish_name', 'quantity', 'price_at_sale']
+        fields = ['id', 'menu_entry', 'entry_name', 'quantity', 'price_at_sale']
 
 class SaleSerializer(serializers.ModelSerializer):
     items = SaleItemSerializer(many=True, read_only=True)
