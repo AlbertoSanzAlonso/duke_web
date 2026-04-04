@@ -10,6 +10,7 @@ function MenuList() {
     const [name, setName] = useState('');
     const [description, setDescription] = useState('');
     const [price, setPrice] = useState('');
+    const [image, setImage] = useState(null);
 
     useEffect(() => {
         loadDishes();
@@ -32,16 +33,21 @@ function MenuList() {
         if (!name || !price) return;
         
         try {
-            await createDish({
-                name,
-                description,
-                price: parseFloat(price),
-                is_available: true
-            });
+            const formData = new FormData();
+            formData.append('name', name);
+            formData.append('description', description);
+            formData.append('price', price);
+            formData.append('is_available', true);
+            if (image) {
+                formData.append('image', image);
+            }
+
+            await createDish(formData);
             // Clear form
             setName('');
             setDescription('');
             setPrice('');
+            setImage(null);
             // Reload list
             loadDishes();
         } catch (err) {
@@ -63,7 +69,7 @@ function MenuList() {
         <div className="admin-card">
             <h2>Gestión de la Carta</h2>
             
-            <form onSubmit={handleCreate} style={{ display: 'flex', gap: '10px', marginBottom: '20px', flexWrap: 'wrap' }}>
+            <form onSubmit={handleCreate} style={{ display: 'flex', gap: '10px', marginBottom: '20px', flexWrap: 'wrap', alignItems: 'center' }}>
                 <input 
                     type="text" 
                     placeholder="Nombre del plato" 
@@ -74,7 +80,7 @@ function MenuList() {
                 />
                 <input 
                     type="text" 
-                    placeholder="Descripción" 
+                    placeholder="Descripción resumida" 
                     value={description} 
                     onChange={e => setDescription(e.target.value)} 
                     style={{ padding: '8px', flex: 2, minWidth: '200px' }}
@@ -88,16 +94,26 @@ function MenuList() {
                     required 
                     style={{ padding: '8px', width: '100px' }}
                 />
+                <div style={{ flex: '1 1 200px' }}>
+                    <label style={{ fontSize: '12px', color: '#666', display: 'block' }}>Subir Fotografía</label>
+                    <input 
+                        type="file" 
+                        accept="image/*"
+                        onChange={e => setImage(e.target.files[0])} 
+                        style={{ padding: '4px', width: '100%' }}
+                    />
+                </div>
                 <button type="submit" className="main-button" style={{ padding: '8px 16px', background: 'var(--admin-primary)', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer' }}>
                     Añadir Plato
                 </button>
             </form>
 
-            <div style={{ marginTop: '20px' }}>
+            <div style={{ marginTop: '30px' }}>
                 {loading ? <p>Cargando platos...</p> : error ? <p style={{ color: 'red' }}>{error}</p> : (
                     <table style={{ width: '100%', textAlign: 'left', borderCollapse: 'collapse' }}>
                         <thead>
                             <tr style={{ borderBottom: '2px solid #eee' }}>
+                                <th style={{ padding: '10px', width: '80px' }}>Foto</th>
                                 <th style={{ padding: '10px' }}>Nombre</th>
                                 <th style={{ padding: '10px' }}>Descripción</th>
                                 <th style={{ padding: '10px' }}>Precio</th>
@@ -107,16 +123,23 @@ function MenuList() {
                         <tbody>
                             {dishes.length === 0 ? (
                                 <tr>
-                                    <td colSpan="4" style={{ padding: '10px', textAlign: 'center' }}>No hay platos registrados.</td>
+                                    <td colSpan="5" style={{ padding: '20px', textAlign: 'center' }}>No hay platos en la carta.</td>
                                 </tr>
                             ) : (
                                 dishes.map(dish => (
                                     <tr key={dish.id} style={{ borderBottom: '1px solid #eee' }}>
-                                        <td style={{ padding: '10px' }}><strong>{dish.name}</strong></td>
-                                        <td style={{ padding: '10px', color: '#666' }}>{dish.description}</td>
-                                        <td style={{ padding: '10px' }}>${dish.price}</td>
                                         <td style={{ padding: '10px' }}>
-                                            <button onClick={() => handleDelete(dish.id)} style={{ padding: '5px 10px', background: '#e03131', color: 'white', border: 'none', borderRadius: '3px', cursor: 'pointer' }}>Borrar</button>
+                                            {dish.image ? (
+                                                <img src={dish.image} alt={dish.name} style={{ width: '60px', height: '60px', objectFit: 'cover', borderRadius: '4px' }} />
+                                            ) : (
+                                                <div style={{ width: '60px', height: '60px', backgroundColor: '#f0f0f0', borderRadius: '4px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '10px', color: '#999' }}>Ninguna</div>
+                                            )}
+                                        </td>
+                                        <td style={{ padding: '10px' }}><strong>{dish.name}</strong></td>
+                                        <td style={{ padding: '10px', color: '#666', fontSize: '0.9rem' }}>{dish.description}</td>
+                                        <td style={{ padding: '10px', fontWeight: 'bold' }}>${dish.price}</td>
+                                        <td style={{ padding: '10px' }}>
+                                            <button onClick={() => handleDelete(dish.id)} style={{ padding: '6px 12px', background: '#e03131', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer' }}>Borrar</button>
                                         </td>
                                     </tr>
                                 ))
