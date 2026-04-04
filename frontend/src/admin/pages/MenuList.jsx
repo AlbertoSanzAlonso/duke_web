@@ -13,6 +13,7 @@ function MenuList() {
 
     const [editingId, setEditingId] = useState(null);
     const [editPrice, setEditPrice] = useState('');
+    const [hoveredId, setHoveredId] = useState(null);
 
     useEffect(() => {
         loadData();
@@ -131,14 +132,19 @@ function MenuList() {
                         gap: '20px' 
                     }}>
                         {entries.map(entry => (
-                            <div key={entry.id} style={{ 
+                            <div 
+                                key={entry.id} 
+                                onMouseEnter={() => setHoveredId(entry.id)}
+                                onMouseLeave={() => setHoveredId(null)}
+                                style={{ 
                                 background: '#fff', 
                                 border: '1px solid #ebebeb', 
                                 borderRadius: '12px', 
                                 overflow: 'hidden', 
-                                boxShadow: '0 4px 15px rgba(0,0,0,0.05)',
+                                boxShadow: hoveredId === entry.id ? '0 12px 30px rgba(0,0,0,0.1)' : '0 4px 15px rgba(0,0,0,0.05)',
                                 display: 'flex',
-                                flexDirection: 'column'
+                                flexDirection: 'column',
+                                transition: 'all 0.3s ease'
                             }}>
                                 <div style={{ width: '100%', height: '220px', backgroundColor: '#f0f0f0', display: 'flex', justifyContent: 'center', alignItems: 'center', position: 'relative' }}>
                                     {entry.product?.image ? (
@@ -146,61 +152,80 @@ function MenuList() {
                                     ) : (
                                         <span style={{ color: '#999', fontSize: '0.9rem' }}>Sin Fotografía</span>
                                     )}
-                                    <div style={{ position: 'absolute', top: '10px', right: '10px', background: 'var(--admin-primary)', color: 'white', padding: '6px 12px', borderRadius: '20px', fontWeight: 'bold', boxShadow: '0 2px 10px rgba(0,0,0,0.2)' }}>
-                                        ${entry.price}
-                                    </div>
+                                    
+                                    {/* Inline Price Edit / View */}
+                                    {editingId === entry.id ? (
+                                        <div style={{ position: 'absolute', top: '10px', right: '10px', display: 'flex', gap: '5px', background: 'white', padding: '4px', borderRadius: '8px', boxShadow: '0 4px 15px rgba(0,0,0,0.2)' }}>
+                                            <input 
+                                                type="number" 
+                                                step="0.01" 
+                                                autoFocus
+                                                value={editPrice} 
+                                                onChange={e => setEditPrice(e.target.value)} 
+                                                onKeyDown={e => { if(e.key === 'Enter') handleEditSave(entry.id) }}
+                                                style={{ width: '70px', padding: '4px 8px', border: '1px solid #ccc', borderRadius: '4px', fontSize: '1rem', fontWeight: 'bold', outline: 'none' }} 
+                                            />
+                                            <button 
+                                                onClick={() => handleEditSave(entry.id)} 
+                                                style={{ padding: '4px 8px', background: '#222', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer', fontWeight: 'bold' }}
+                                                title="Guardar"
+                                            >
+                                                ✓
+                                            </button>
+                                            <button 
+                                                onClick={() => setEditingId(null)} 
+                                                style={{ padding: '4px 8px', background: '#ccc', color: '#333', border: 'none', borderRadius: '4px', cursor: 'pointer', fontWeight: 'bold' }}
+                                                title="Cancelar"
+                                            >
+                                                ✕
+                                            </button>
+                                        </div>
+                                    ) : (
+                                        <div 
+                                            onClick={() => handleEditStart(entry)}
+                                            title="Clic para editar precio"
+                                            style={{ 
+                                                position: 'absolute', top: '10px', right: '10px', 
+                                                background: 'var(--admin-primary)', color: 'white', 
+                                                padding: '6px 12px', borderRadius: '20px', 
+                                                fontWeight: 'bold', boxShadow: '0 2px 10px rgba(0,0,0,0.2)',
+                                                cursor: 'pointer', userSelect: 'none', transition: 'transform 0.1s'
+                                            }}
+                                            onMouseOver={(e) => { e.target.style.transform = 'scale(1.05)'; }}
+                                            onMouseOut={(e) => { e.target.style.transform = 'scale(1)'; }}
+                                        >
+                                            ${entry.price} ✎
+                                        </div>
+                                    )}
+
                                     <div style={{ position: 'absolute', top: '10px', left: '10px', background: 'rgba(0,0,0,0.7)', color: 'white', padding: '4px 10px', borderRadius: '4px', fontSize: '0.8rem' }}>
                                         {entry.category}
                                     </div>
                                 </div>
                                 <div style={{ padding: '20px', flex: '1', display: 'flex', flexDirection: 'column' }}>
                                     <h3 style={{ margin: '0 0 10px 0', fontSize: '1.4rem', color: '#222' }}>{entry.product?.name}</h3>
-                                    <p style={{ margin: '0 0 20px 0', color: '#666', fontSize: '0.95rem', lineHeight: '1.4', flex: '1' }}>{entry.product?.description}</p>
                                     
-                                    {editingId === entry.id ? (
-                                        <div style={{ display: 'flex', gap: '10px', marginTop: '10px' }}>
-                                            <input 
-                                                type="number" 
-                                                step="0.01" 
-                                                value={editPrice} 
-                                                onChange={e => setEditPrice(e.target.value)} 
-                                                style={{ flex: 1, padding: '8px', border: '1px solid #ccc', borderRadius: '4px', fontSize: '1.1rem', fontWeight: 'bold' }} 
-                                            />
-                                            <button 
-                                                onClick={() => handleEditSave(entry.id)} 
-                                                style={{ padding: '8px 12px', background: '#4CAF50', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer', fontWeight: 'bold' }}
-                                            >
-                                                ✓
-                                            </button>
-                                            <button 
-                                                onClick={() => setEditingId(null)} 
-                                                style={{ padding: '8px 12px', background: '#ccc', color: '#333', border: 'none', borderRadius: '4px', cursor: 'pointer', fontWeight: 'bold' }}
-                                            >
-                                                ✕
-                                            </button>
-                                        </div>
-                                    ) : (
-                                        <div style={{ display: 'flex', gap: '10px' }}>
-                                            <button 
-                                                onClick={() => handleEditStart(entry)} 
-                                                style={{ 
-                                                    flex: 1, padding: '10px 0', background: '#fff', border: '1px solid var(--admin-primary)', color: 'var(--admin-primary)', 
-                                                    borderRadius: '6px', cursor: 'pointer', fontWeight: 'bold', transition: 'all 0.2s'
-                                                }}
-                                            >
-                                                Cambiar Precio
-                                            </button>
-                                            <button 
-                                                onClick={() => handleDelete(entry.id)} 
-                                                style={{ 
-                                                    flex: 1, padding: '10px 0', background: '#fff', border: '1px solid #ff4d4d', color: '#ff4d4d', 
-                                                    borderRadius: '6px', cursor: 'pointer', fontWeight: 'bold', transition: 'all 0.2s'
-                                                }}
-                                            >
-                                                Retirar
-                                            </button>
-                                        </div>
-                                    )}
+                                    <div style={{ 
+                                        height: hoveredId === entry.id ? 'auto' : '0', 
+                                        opacity: hoveredId === entry.id ? 1 : 0, 
+                                        overflow: 'hidden', 
+                                        transition: 'opacity 0.2s ease-in-out',
+                                        marginBottom: hoveredId === entry.id ? '20px' : '0' 
+                                    }}>
+                                        <p style={{ margin: '0', color: '#666', fontSize: '0.95rem', lineHeight: '1.4' }}>{entry.product?.description}</p>
+                                    </div>
+                                    
+                                    <div style={{ display: 'flex', gap: '10px', marginTop: 'auto' }}>
+                                        <button 
+                                            onClick={() => handleDelete(entry.id)} 
+                                            style={{ 
+                                                flex: 1, padding: '10px 0', background: '#fff', border: '1px solid #ff4d4d', color: '#ff4d4d', 
+                                                borderRadius: '6px', cursor: 'pointer', fontWeight: 'bold', transition: 'all 0.2s'
+                                            }}
+                                        >
+                                            Retirar de Carta
+                                        </button>
+                                    </div>
                                 </div>
                             </div>
                         ))}
