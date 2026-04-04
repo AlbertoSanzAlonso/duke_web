@@ -133,4 +133,17 @@ STATIC_URL = 'static/'
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
 
+# Supabase S3 Storage Configuration
+USE_S3 = env('USE_S3', default=False)
+if USE_S3:
+    AWS_ACCESS_KEY_ID = env('AWS_ACCESS_KEY_ID')
+    AWS_SECRET_ACCESS_KEY = env('AWS_SECRET_ACCESS_KEY')
+    AWS_STORAGE_BUCKET_NAME = env('AWS_STORAGE_BUCKET_NAME', default='media')
+    AWS_S3_ENDPOINT_URL = env('AWS_S3_ENDPOINT_URL')
+    AWS_S3_REGION_NAME = env('AWS_S3_REGION_NAME', default='eu-west-1') # Typical EU region
+    AWS_DEFAULT_ACL = 'public-read'
+    AWS_S3_CUSTOM_DOMAIN = f'{env("SUPABASE_REF", default="")}.supabase.co/storage/v1/object/public/{AWS_STORAGE_BUCKET_NAME}'
+    
+    DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
+
 CORS_ALLOW_ALL_ORIGINS = True
