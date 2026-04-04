@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Outlet, NavLink } from 'react-router-dom';
 import {
   LayoutDashboard,
@@ -7,11 +7,15 @@ import {
   Boxes,
   History,
   TrendingUp,
-  Truck
+  Truck,
+  Menu,
+  X
 } from 'lucide-react';
 import './Admin.css';
 
 const AdminLayout = () => {
+  const [isMobileOpen, setIsMobileOpen] = useState(false);
+
   const menuItems = [
     { name: 'Dashboard', path: '/admin', icon: <LayoutDashboard size={20} /> },
     { name: 'Productos', path: '/admin/productos', icon: <Package size={20} /> },
@@ -24,13 +28,20 @@ const AdminLayout = () => {
 
   return (
     <div className="admin-container">
-      <aside className="sidebar">
+      {/* Overlay to close sidebar on mobile when clicking outside */}
+      {isMobileOpen && <div className="sidebar-overlay" onClick={() => setIsMobileOpen(false)}></div>}
+      
+      <aside className={`sidebar ${isMobileOpen ? 'open' : ''}`}>
         <div className="sidebar-header">
           <h2>Duke Admin</h2>
+          <button className="close-sidebar-btn" onClick={() => setIsMobileOpen(false)}>
+            <X size={24} color="#fff" />
+          </button>
         </div>
         <nav className="sidebar-nav">
           {menuItems.map((item) => (
             <NavLink
+              onClick={() => setIsMobileOpen(false)}
               key={item.path}
               to={item.path}
               end={item.path === '/admin'}
@@ -45,6 +56,9 @@ const AdminLayout = () => {
       
       <main className="admin-main">
         <header className="admin-header">
+          <button className="admin-mobile-toggle" onClick={() => setIsMobileOpen(!isMobileOpen)}>
+            <Menu size={24} />
+          </button>
           <h3>Panel de Control</h3>
         </header>
         <div className="admin-content">

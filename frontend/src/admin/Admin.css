@@ -100,3 +100,69 @@ body.admin-mode {
   padding: 20px;
   box-shadow: 0 2px 8px rgba(0,0,0,0.05);
 }
+
+.admin-mobile-toggle {
+  display: none;
+  background: none;
+  border: none;
+  cursor: pointer;
+  margin-right: 15px;
+  color: #333;
+}
+
+.close-sidebar-btn {
+  display: none;
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+
+.sidebar-overlay {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0,0,0,0.5);
+  z-index: 1000;
+}
+
+@media (max-width: 768px) {
+  .admin-mobile-toggle {
+    display: flex;
+    align-items: center;
+  }
+  
+  .close-sidebar-btn {
+    display: block;
+    margin-left: auto;
+  }
+  
+  .sidebar-overlay {
+    display: block;
+  }
+  
+  .sidebar {
+    position: fixed;
+    top: 0;
+    left: -100%;
+    height: 100vh;
+    z-index: 2000;
+    transition: left 0.3s ease;
+  }
+  
+  .sidebar.open {
+    left: 0;
+    box-shadow: 2px 0 15px rgba(0,0,0,0.5);
+  }
+  
+  .admin-header {
+    padding: 0 15px;
+  }
+  
+  .sidebar-header {
+    justify-content: space-between;
+  }
+}
+
