@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { Menu, X } from 'lucide-react';
 
 const MENU_DATA = {
   Burgers: [
@@ -24,6 +25,7 @@ const MENU_DATA = {
 function Home() {
   const [activeCategory, setActiveCategory] = useState('Burgers');
   const [isScrolled, setIsScrolled] = useState(false);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -39,10 +41,13 @@ function Home() {
       <nav className={`navbar ${isScrolled ? 'scrolled' : ''}`}>
         <div className="nav-container">
           <img src="/brand/duke burger 2 negativo.png" alt="Duke Logo" className="nav-logo" />
-          <div className="nav-links">
-            <a href="#menu">CARTA</a>
-            <a href="#about">NOSOTROS</a>
-            <button className="cta-button">¡PEDÍ YA!</button>
+          <div className={`nav-links ${isMobileMenuOpen ? 'mobile-open' : ''}`}>
+            <a href="#menu" onClick={() => setIsMobileMenuOpen(false)}>CARTA</a>
+            <a href="#about" onClick={() => setIsMobileMenuOpen(false)}>NOSOTROS</a>
+            <button className="cta-button" onClick={() => setIsMobileMenuOpen(false)}>¡PEDÍ YA!</button>
+          </div>
+          <div className="mobile-toggle" onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}>
+            {isMobileMenuOpen ? <X size={28} color="white" /> : <Menu size={28} color="white" />}
           </div>
         </div>
       </nav>
