@@ -28,7 +28,7 @@ export const deleteProduct = async (id) => {
 export const updateProduct = async (id, productData) => {
     const isFormData = productData instanceof FormData;
     const response = await fetch(`${API_URL}/products/${id}/`, {
-        method: 'PUT',
+        method: 'PATCH',
         headers: isFormData ? {} : { 'Content-Type': 'application/json' },
         body: isFormData ? productData : JSON.stringify(productData)
     });
