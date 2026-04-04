@@ -94,41 +94,58 @@ function Products() {
             </form>
 
             <div style={{ marginTop: '30px' }}>
-                {loading ? <p>Cargando catálogo...</p> : error ? <p style={{ color: 'red' }}>{error}</p> : (
-                    <table style={{ width: '100%', textAlign: 'left', borderCollapse: 'collapse' }}>
-                        <thead>
-                            <tr style={{ borderBottom: '2px solid #eee' }}>
-                                <th style={{ padding: '10px', width: '80px' }}>Foto</th>
-                                <th style={{ padding: '10px' }}>Nombre</th>
-                                <th style={{ padding: '10px' }}>Descripción</th>
-                                <th style={{ padding: '10px' }}>Acciones</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {products.length === 0 ? (
-                                <tr>
-                                    <td colSpan="4" style={{ padding: '20px', textAlign: 'center' }}>No hay productos en el catálogo base.</td>
-                                </tr>
-                            ) : (
-                                products.map(prod => (
-                                    <tr key={prod.id} style={{ borderBottom: '1px solid #eee' }}>
-                                        <td style={{ padding: '10px' }}>
-                                            {prod.image ? (
-                                                <img src={prod.image} alt={prod.name} style={{ width: '60px', height: '60px', objectFit: 'cover', borderRadius: '4px' }} />
-                                            ) : (
-                                                <div style={{ width: '60px', height: '60px', backgroundColor: '#f0f0f0', borderRadius: '4px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '10px', color: '#999' }}>Ninguna</div>
-                                            )}
-                                        </td>
-                                        <td style={{ padding: '10px' }}><strong>{prod.name}</strong></td>
-                                        <td style={{ padding: '10px', color: '#666', fontSize: '0.9rem' }}>{prod.description}</td>
-                                        <td style={{ padding: '10px' }}>
-                                            <button onClick={() => handleDelete(prod.id)} style={{ padding: '6px 12px', background: '#e03131', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer' }}>Borrar</button>
-                                        </td>
-                                    </tr>
-                                ))
-                            )}
-                        </tbody>
-                    </table>
+                {loading ? <p>Cargando catálogo...</p> : error ? <p style={{ color: 'red' }}>{error}</p> : products.length === 0 ? (
+                    <div style={{ padding: '40px', textAlign: 'center', background: '#f9f9f9', borderRadius: '8px', color: '#888' }}>
+                        No hay productos en el catálogo base. ¡Añade tu primera receta!
+                    </div>
+                ) : (
+                    <div style={{ 
+                        display: 'grid', 
+                        gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', 
+                        gap: '20px' 
+                    }}>
+                        {products.map(prod => (
+                            <div key={prod.id} style={{ 
+                                background: '#fff', 
+                                border: '1px solid #ebebeb', 
+                                borderRadius: '12px', 
+                                overflow: 'hidden', 
+                                boxShadow: '0 4px 15px rgba(0,0,0,0.05)',
+                                display: 'flex',
+                                flexDirection: 'column'
+                            }}>
+                                <div style={{ width: '100%', height: '220px', backgroundColor: '#f0f0f0', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+                                    {prod.image ? (
+                                        <img src={prod.image} alt={prod.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                                    ) : (
+                                        <span style={{ color: '#999', fontSize: '0.9rem' }}>Sin Fotografía</span>
+                                    )}
+                                </div>
+                                <div style={{ padding: '20px', flex: '1', display: 'flex', flexDirection: 'column' }}>
+                                    <h3 style={{ margin: '0 0 10px 0', fontSize: '1.4rem', color: '#222' }}>{prod.name}</h3>
+                                    <p style={{ margin: '0 0 20px 0', color: '#666', fontSize: '0.95rem', lineHeight: '1.4', flex: '1' }}>{prod.description}</p>
+                                    <button 
+                                        onClick={() => handleDelete(prod.id)} 
+                                        style={{ 
+                                            width: '100%', 
+                                            padding: '10px 0', 
+                                            background: '#fff', 
+                                            border: '1px solid #ff4d4d', 
+                                            color: '#ff4d4d', 
+                                            borderRadius: '6px', 
+                                            cursor: 'pointer',
+                                            fontWeight: 'bold',
+                                            transition: 'all 0.2s',
+                                        }}
+                                        onMouseOver={(e) => { e.target.style.background = '#ffe6e6'; }}
+                                        onMouseOut={(e) => { e.target.style.background = '#fff'; }}
+                                    >
+                                        Retirar Catálogo
+                                    </button>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
                 )}
             </div>
         </div>

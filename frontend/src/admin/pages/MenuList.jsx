@@ -101,46 +101,64 @@ function MenuList() {
             </form>
 
             <div style={{ marginTop: '30px' }}>
-                {loading ? <p>Cargando menú...</p> : error ? <p style={{ color: 'red' }}>{error}</p> : (
-                    <table style={{ width: '100%', textAlign: 'left', borderCollapse: 'collapse' }}>
-                        <thead>
-                            <tr style={{ borderBottom: '2px solid #eee' }}>
-                                <th style={{ padding: '10px', width: '60px' }}>Foto</th>
-                                <th style={{ padding: '10px' }}>Plato</th>
-                                <th style={{ padding: '10px' }}>Categoría</th>
-                                <th style={{ padding: '10px' }}>Precio</th>
-                                <th style={{ padding: '10px' }}>Acciones</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {entries.length === 0 ? (
-                                <tr>
-                                    <td colSpan="5" style={{ padding: '20px', textAlign: 'center' }}>No hay platos en la carta a la vista del público.</td>
-                                </tr>
-                            ) : (
-                                entries.map(entry => (
-                                    <tr key={entry.id} style={{ borderBottom: '1px solid #eee' }}>
-                                        <td style={{ padding: '10px' }}>
-                                            {entry.product?.image ? (
-                                                <img src={entry.product.image} alt={entry.product.name} style={{ width: '40px', height: '40px', objectFit: 'cover', borderRadius: '4px' }} />
-                                            ) : (
-                                                <span>-</span>
-                                            )}
-                                        </td>
-                                        <td style={{ padding: '10px' }}>
-                                            <strong>{entry.product?.name}</strong>
-                                            <div style={{ fontSize: '0.8rem', color: '#777' }}>{entry.product?.description}</div>
-                                        </td>
-                                        <td style={{ padding: '10px' }}>{entry.category}</td>
-                                        <td style={{ padding: '10px', fontWeight: 'bold' }}>${entry.price}</td>
-                                        <td style={{ padding: '10px' }}>
-                                            <button onClick={() => handleDelete(entry.id)} style={{ padding: '6px 12px', background: '#e03131', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer' }}>Retirar</button>
-                                        </td>
-                                    </tr>
-                                ))
-                            )}
-                        </tbody>
-                    </table>
+                {loading ? <p>Cargando menú...</p> : error ? <p style={{ color: 'red' }}>{error}</p> : entries.length === 0 ? (
+                    <div style={{ padding: '40px', textAlign: 'center', background: '#f9f9f9', borderRadius: '8px', color: '#888' }}>
+                        No hay platos en la carta a la vista del público.
+                    </div>
+                ) : (
+                    <div style={{ 
+                        display: 'grid', 
+                        gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', 
+                        gap: '20px' 
+                    }}>
+                        {entries.map(entry => (
+                            <div key={entry.id} style={{ 
+                                background: '#fff', 
+                                border: '1px solid #ebebeb', 
+                                borderRadius: '12px', 
+                                overflow: 'hidden', 
+                                boxShadow: '0 4px 15px rgba(0,0,0,0.05)',
+                                display: 'flex',
+                                flexDirection: 'column'
+                            }}>
+                                <div style={{ width: '100%', height: '220px', backgroundColor: '#f0f0f0', display: 'flex', justifyContent: 'center', alignItems: 'center', position: 'relative' }}>
+                                    {entry.product?.image ? (
+                                        <img src={entry.product.image} alt={entry.product.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                                    ) : (
+                                        <span style={{ color: '#999', fontSize: '0.9rem' }}>Sin Fotografía</span>
+                                    )}
+                                    <div style={{ position: 'absolute', top: '10px', right: '10px', background: 'var(--admin-primary)', color: 'white', padding: '6px 12px', borderRadius: '20px', fontWeight: 'bold', boxShadow: '0 2px 10px rgba(0,0,0,0.2)' }}>
+                                        ${entry.price}
+                                    </div>
+                                    <div style={{ position: 'absolute', top: '10px', left: '10px', background: 'rgba(0,0,0,0.7)', color: 'white', padding: '4px 10px', borderRadius: '4px', fontSize: '0.8rem' }}>
+                                        {entry.category}
+                                    </div>
+                                </div>
+                                <div style={{ padding: '20px', flex: '1', display: 'flex', flexDirection: 'column' }}>
+                                    <h3 style={{ margin: '0 0 10px 0', fontSize: '1.4rem', color: '#222' }}>{entry.product?.name}</h3>
+                                    <p style={{ margin: '0 0 20px 0', color: '#666', fontSize: '0.95rem', lineHeight: '1.4', flex: '1' }}>{entry.product?.description}</p>
+                                    <button 
+                                        onClick={() => handleDelete(entry.id)} 
+                                        style={{ 
+                                            width: '100%', 
+                                            padding: '10px 0', 
+                                            background: '#fff', 
+                                            border: '1px solid #ff4d4d', 
+                                            color: '#ff4d4d', 
+                                            borderRadius: '6px', 
+                                            cursor: 'pointer',
+                                            fontWeight: 'bold',
+                                            transition: 'all 0.2s',
+                                        }}
+                                        onMouseOver={(e) => { e.target.style.background = '#ffe6e6'; }}
+                                        onMouseOut={(e) => { e.target.style.background = '#fff'; }}
+                                    >
+                                        Ocultar del Menú Público
+                                    </button>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
                 )}
             </div>
         </div>
