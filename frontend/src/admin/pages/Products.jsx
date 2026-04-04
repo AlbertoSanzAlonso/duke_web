@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { fetchProducts, createProduct, deleteProduct } from '../../services/api';
+import { fetchProducts, createProduct, deleteProduct, updateProduct } from '../../services/api';
 
 function Products() {
     const [products, setProducts] = useState([]);
@@ -9,6 +9,9 @@ function Products() {
     const [name, setName] = useState('');
     const [description, setDescription] = useState('');
     const [image, setImage] = useState(null);
+
+    const [editingId, setEditingId] = useState(null);
+    const [editData, setEditData] = useState({ name: '', description: '', image: null });
 
     useEffect(() => {
         loadProducts();
@@ -52,6 +55,28 @@ function Products() {
         if (!window.confirm("¿Seguro que quieres eliminar este producto de la base de datos?")) return;
         try {
             await deleteProduct(id);
+            loadProducts();
+        } catch (err) {
+            alert(err.message);
+        }
+    };
+
+    const handleEditStart = (prod) => {
+        setEditingId(prod.id);
+        setEditData({ name: prod.name, description: prod.description, image: null });
+    };
+
+    const handleEditSave = async (e) => {
+        e.preventDefault();
+        try {
+            const formData = new FormData();
+            formData.append('name', editData.name);
+            formData.append('description', editData.description);
+            if (editData.image) {
+                formData.append('image', editData.image);
+            }
+            await updateProduct(editingId, formData);
+            setEditingId(null);
             loadProducts();
         } catch (err) {
             alert(err.message);
@@ -122,26 +147,43 @@ function Products() {
                                     )}
                                 </div>
                                 <div style={{ padding: '20px', flex: '1', display: 'flex', flexDirection: 'column' }}>
-                                    <h3 style={{ margin: '0 0 10px 0', fontSize: '1.4rem', color: '#222' }}>{prod.name}</h3>
-                                    <p style={{ margin: '0 0 20px 0', color: '#666', fontSize: '0.95rem', lineHeight: '1.4', flex: '1' }}>{prod.description}</p>
-                                    <button 
-                                        onClick={() => handleDelete(prod.id)} 
-                                        style={{ 
-                                            width: '100%', 
-                                            padding: '10px 0', 
-                                            background: '#fff', 
-                                            border: '1px solid #ff4d4d', 
-                                            color: '#ff4d4d', 
-                                            borderRadius: '6px', 
-                                            cursor: 'pointer',
-                                            fontWeight: 'bold',
-                                            transition: 'all 0.2s',
-                                        }}
-                                        onMouseOver={(e) => { e.target.style.background = '#ffe6e6'; }}
-                                        onMouseOut={(e) => { e.target.style.background = '#fff'; }}
-                                    >
-                                        Retirar Catálogo
-                                    </button>
+                                    {editingId === prod.id ? (
+                                        <form onSubmit={handleEditSave} style={{ display: 'flex', flexDirection: 'column', flex: '1', gap: '10px' }}>
+                                            <input type="text" value={editData.name} onChange={e => setEditData({...editData, name: e.target.value})} required style={{ padding: '8px', fontSize: '1.2rem', fontWeight: 'bold', border: '1px solid #ccc', borderRadius: '4px' }} />
+                                            <textarea value={editData.description} onChange={e => setEditData({...editData, description: e.target.value})} style={{ padding: '8px', flex: '1', border: '1px solid #ccc', borderRadius: '4px', resize: 'vertical', minHeight: '60px' }} />
+                                            <input type="file" accept="image/*" onChange={e => setEditData({...editData, image: e.target.files[0]})} style={{ fontSize: '0.8rem' }} />
+                                            
+                                            <div style={{ display: 'flex', gap: '10px', marginTop: '10px' }}>
+                                                <button type="submit" style={{ flex: 1, padding: '8px', background: '#4CAF50', color: 'white', border: 'none', borderRadius: '6px', cursor: 'pointer', fontWeight: 'bold' }}>Guardar</button>
+                                                <button type="button" onClick={() => setEditingId(null)} style={{ flex: 1, padding: '8px', background: '#ccc', color: '#333', border: 'none', borderRadius: '6px', cursor: 'pointer', fontWeight: 'bold' }}>Cancelar</button>
+                                            </div>
+                                        </form>
+                                    ) : (
+                                        <>
+                                            <h3 style={{ margin: '0 0 10px 0', fontSize: '1.4rem', color: '#222' }}>{prod.name}</h3>
+                                            <p style={{ margin: '0 0 20px 0', color: '#666', fontSize: '0.95rem', lineHeight: '1.4', flex: '1' }}>{prod.description}</p>
+                                            <div style={{ display: 'flex', gap: '10px' }}>
+                                                <button 
+                                                    onClick={() => handleEditStart(prod)} 
+                                                    style={{ 
+                                                        flex: 1, padding: '10px 0', background: '#fff', border: '1px solid var(--admin-primary)', color: 'var(--admin-primary)', 
+                                                        borderRadius: '6px', cursor: 'pointer', fontWeight: 'bold', transition: 'all 0.2s'
+                                                    }}
+                                                >
+                                                    Editar
+                                                </button>
+                                                <button 
+                                                    onClick={() => handleDelete(prod.id)} 
+                                                    style={{ 
+                                                        flex: 1, padding: '10px 0', background: '#fff', border: '1px solid #ff4d4d', color: '#ff4d4d', 
+                                                        borderRadius: '6px', cursor: 'pointer', fontWeight: 'bold', transition: 'all 0.2s'
+                                                    }}
+                                                >
+                                                    Retirar
+                                                </button>
+                                            </div>
+                                        </>
+                                    )}
                                 </div>
                             </div>
                         ))}

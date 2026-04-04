@@ -25,6 +25,17 @@ export const deleteProduct = async (id) => {
     return true;
 };
 
+export const updateProduct = async (id, productData) => {
+    const isFormData = productData instanceof FormData;
+    const response = await fetch(`${API_URL}/products/${id}/`, {
+        method: 'PUT',
+        headers: isFormData ? {} : { 'Content-Type': 'application/json' },
+        body: isFormData ? productData : JSON.stringify(productData)
+    });
+    if (!response.ok) throw new Error('Error al actualizar el producto');
+    return await response.json();
+};
+
 // CARTA (MENU ENTRIES)
 export const fetchMenuEntries = async () => {
     const response = await fetch(`${API_URL}/menu-entries/`);
@@ -48,6 +59,16 @@ export const deleteMenuEntry = async (id) => {
     });
     if (!response.ok) throw new Error('Error al retirarlo de la carta');
     return true;
+};
+
+export const updateMenuEntry = async (id, data) => {
+    const response = await fetch(`${API_URL}/menu-entries/${id}/`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
+    });
+    if (!response.ok) throw new Error('Error al modificar precio de la carta');
+    return await response.json();
 };
 
 // INVENTORY

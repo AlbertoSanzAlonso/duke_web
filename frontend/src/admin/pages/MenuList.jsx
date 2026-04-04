@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { fetchMenuEntries, createMenuEntry, deleteMenuEntry, fetchProducts } from '../../services/api';
+import { fetchMenuEntries, createMenuEntry, deleteMenuEntry, updateMenuEntry, fetchProducts } from '../../services/api';
 
 function MenuList() {
     const [entries, setEntries] = useState([]);
@@ -10,6 +10,9 @@ function MenuList() {
     const [selectedProductId, setSelectedProductId] = useState('');
     const [price, setPrice] = useState('');
     const [category, setCategory] = useState('Burgers');
+
+    const [editingId, setEditingId] = useState(null);
+    const [editPrice, setEditPrice] = useState('');
 
     useEffect(() => {
         loadData();
@@ -52,6 +55,22 @@ function MenuList() {
         if (!window.confirm("¿Seguro que quieres retirar este producto de LA CARTA? (Seguirá en catálogo)")) return;
         try {
             await deleteMenuEntry(id);
+            loadData();
+        } catch (err) {
+            alert(err.message);
+        }
+    };
+
+    const handleEditStart = (entry) => {
+        setEditingId(entry.id);
+        setEditPrice(entry.price);
+    };
+
+    const handleEditSave = async (id) => {
+        try {
+            if (!editPrice || isNaN(editPrice)) return alert("El precio debe ser un número válido");
+            await updateMenuEntry(id, { price: parseFloat(editPrice) });
+            setEditingId(null);
             loadData();
         } catch (err) {
             alert(err.message);
@@ -137,24 +156,51 @@ function MenuList() {
                                 <div style={{ padding: '20px', flex: '1', display: 'flex', flexDirection: 'column' }}>
                                     <h3 style={{ margin: '0 0 10px 0', fontSize: '1.4rem', color: '#222' }}>{entry.product?.name}</h3>
                                     <p style={{ margin: '0 0 20px 0', color: '#666', fontSize: '0.95rem', lineHeight: '1.4', flex: '1' }}>{entry.product?.description}</p>
-                                    <button 
-                                        onClick={() => handleDelete(entry.id)} 
-                                        style={{ 
-                                            width: '100%', 
-                                            padding: '10px 0', 
-                                            background: '#fff', 
-                                            border: '1px solid #ff4d4d', 
-                                            color: '#ff4d4d', 
-                                            borderRadius: '6px', 
-                                            cursor: 'pointer',
-                                            fontWeight: 'bold',
-                                            transition: 'all 0.2s',
-                                        }}
-                                        onMouseOver={(e) => { e.target.style.background = '#ffe6e6'; }}
-                                        onMouseOut={(e) => { e.target.style.background = '#fff'; }}
-                                    >
-                                        Ocultar del Menú Público
-                                    </button>
+                                    
+                                    {editingId === entry.id ? (
+                                        <div style={{ display: 'flex', gap: '10px', marginTop: '10px' }}>
+                                            <input 
+                                                type="number" 
+                                                step="0.01" 
+                                                value={editPrice} 
+                                                onChange={e => setEditPrice(e.target.value)} 
+                                                style={{ flex: 1, padding: '8px', border: '1px solid #ccc', borderRadius: '4px', fontSize: '1.1rem', fontWeight: 'bold' }} 
+                                            />
+                                            <button 
+                                                onClick={() => handleEditSave(entry.id)} 
+                                                style={{ padding: '8px 12px', background: '#4CAF50', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer', fontWeight: 'bold' }}
+                                            >
+                                                ✓
+                                            </button>
+                                            <button 
+                                                onClick={() => setEditingId(null)} 
+                                                style={{ padding: '8px 12px', background: '#ccc', color: '#333', border: 'none', borderRadius: '4px', cursor: 'pointer', fontWeight: 'bold' }}
+                                            >
+                                                ✕
+                                            </button>
+                                        </div>
+                                    ) : (
+                                        <div style={{ display: 'flex', gap: '10px' }}>
+                                            <button 
+                                                onClick={() => handleEditStart(entry)} 
+                                                style={{ 
+                                                    flex: 1, padding: '10px 0', background: '#fff', border: '1px solid var(--admin-primary)', color: 'var(--admin-primary)', 
+                                                    borderRadius: '6px', cursor: 'pointer', fontWeight: 'bold', transition: 'all 0.2s'
+                                                }}
+                                            >
+                                                Cambiar Precio
+                                            </button>
+                                            <button 
+                                                onClick={() => handleDelete(entry.id)} 
+                                                style={{ 
+                                                    flex: 1, padding: '10px 0', background: '#fff', border: '1px solid #ff4d4d', color: '#ff4d4d', 
+                                                    borderRadius: '6px', cursor: 'pointer', fontWeight: 'bold', transition: 'all 0.2s'
+                                                }}
+                                            >
+                                                Retirar
+                                            </button>
+                                        </div>
+                                    )}
                                 </div>
                             </div>
                         ))}

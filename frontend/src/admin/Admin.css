@@ -128,6 +128,20 @@ body.admin-mode {
   z-index: 1000;
 }
 
+/* Fix text color in admin forms to prevent white-on-white from the global dark theme */
+.admin-content input, 
+.admin-content select, 
+.admin-content textarea {
+    color: #222 !important;
+    background-color: #fff !important;
+    border: 1px solid #ccc;
+    font-family: inherit;
+}
+.admin-content input::placeholder, 
+.admin-content textarea::placeholder {
+    color: #999 !important;
+}
+
 @media (max-width: 768px) {
   .admin-mobile-toggle {
     display: flex;
