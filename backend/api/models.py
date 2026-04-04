@@ -1,3 +1,7 @@
+import os
+from io import BytesIO
+from PIL import Image
+from django.core.files.base import ContentFile
 from django.db import models
 
 class Product(models.Model):
@@ -5,6 +9,24 @@ class Product(models.Model):
     description = models.TextField(blank=True, null=True)
     image = models.ImageField(upload_to='products/', blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
+
+    def save(self, *args, **kwargs):
+        if self.image:
+            name, extension = os.path.splitext(self.image.name)
+            if extension.lower() != '.webp':
+                im = Image.open(self.image)
+                # Preservar transparencias si las hay (como PNGs de stickers)
+                if im.mode in ("RGBA", "P"):
+                    im = im.convert("RGBA")
+                else:
+                    im = im.convert("RGB")
+                
+                output = BytesIO()
+                im.save(output, format='WEBP', quality=85)
+                output.seek(0)
+                
+                self.image = ContentFile(output.read(), name=f"{name}.webp")
+        super().save(*args, **kwargs)
 
     def __str__(self):
         return self.name
