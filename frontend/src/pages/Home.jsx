@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import './App.css';
 
 const MENU_DATA = {
   Burgers: [
@@ -22,7 +21,7 @@ const MENU_DATA = {
   ],
 };
 
-function App() {
+function Home() {
   const [activeCategory, setActiveCategory] = useState('Burgers');
   const [isScrolled, setIsScrolled] = useState(false);
 
@@ -138,4 +137,4 @@ function App() {
   );
 }
 
-export default App;
+export default Home;
