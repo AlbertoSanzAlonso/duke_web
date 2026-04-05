@@ -4,36 +4,34 @@ Este proyecto se divide en dos entornos de despliegue claramente separados para 
 
 ## 1. Frontend (Vercel)
 - **Ruta principal:** `/frontend`
-- **Framework:** React / Vite
-- **Variables de Entorno vitales:** 
-  - `VITE_API_URL`: Debe apuntar al dominio proporcionado por Coolify (ej. `https://api.dukeburger-sj.com`). 
-    **CRÍTICO:** NO debe incluir el sufijo `/api/`, ya que el cliente API lo añade automáticamente.
-- **Configuración de Vercel:** El *Root Directory* configurado en Vercel debe ser la carpeta `frontend`.
+- **Framework:** React + Vite.
+- **Estilo:** Vanilla CSS (App.css / index.css).
+- **Variables de Entorno:**
+  - `VITE_API_URL`: URL base de la API (ej. `https://api.dukeburger-sj.com`). El cliente añade automáticamente `/api/`.
+- **Navegación:** El logo de Duke en el sidebar de administración enlaza siempre a la raíz pública `/`.
 
 ## 2. Backend (Coolify)
 - **Ruta principal:** `/backend`
-- **Framework:** Django + Django REST Framework
-- **Base de Datos:** PostgreSQL alojada en **Supabase (Región Europa)**.
-- **Configuración de Imágenes:**
-  - El sistema convierte automáticamente todas las imágenes subidas al modelo `Product` a formato **WebP** para optimizar el rendimiento.
-  - Las imágenes se almacenan en un **Volumen Persistente de Coolify** mapeado a `/app/media`. Es necesario configurar el Storage en la interfaz de Coolify para evitar la pérdida de fotos entre despliegues.
-- **Configuración de Red:**
-  - `CORS_ALLOW_ALL_ORIGINS = True` permite la comunicación con el frontend.
-  - `SECURE_PROXY_SSL_HEADER` y `USE_X_FORWARDED_HOST` están habilitados para garantizar que las URLs generadas sean siempre HTTPS mediante el proxy de Coolify.
-- **Variables de Entorno necesarias:**
-  - `DATABASE_URL`: Cadena de conexión de Supabase.
-  - `DEBUG`: `False` en producción.
-  - `ALLOWED_HOSTS`: Lista de dominios permitidos (ej. `api.dukeburger-sj.com,dukeburger-sj.com`).
+- **Framework:** Django + DRF (Django REST Framework).
+- **Infraestructura:** Despliegue en Coolify con base de datos PostgreSQL en Supabase.
+- **Media:** Almacenamiento en volumen persistente `/app/media`. Conversión automática a WebP en el modelo `Product`.
 
-## 3. Reglas de Diseño de Panel (Admin)
-- **Visibilidad del Texto:** Es OBLIGATORIO que todos los textos del panel de administración (`.admin-content`) tengan un color oscuro explícito (ej. `#333 !important`). Esto evita que si el usuario tiene activado el "Modo Oscuro" en su sistema/navegador, las letras se pongan blancas sobre fondo claro y sean invisibles.
-- **Formularios:** Los `input`, `select` y `textarea` deben tener fondo blanco y texto oscuro siempre.
+## 3. Guía de Estilo y UX (Crítico)
+- **Moneda:** Todos los precios deben mostrarse en **Pesos Argentinos** utilizando el locale `es-AR` (ej. `$12.900`). Evitar el formato `12900.00`.
+- **Notificaciones:** PROHIBIDO usar `alert()` del navegador. Usar el componente `<Toast />` personalizado.
+- **Loading:** Usar el componente `<LoadingScreen />` que incluye el logo de la marca en lugar de mensajes de texto planos.
+- **Accesibilidad Admin:** Forzar color de texto oscuro (`#333 !important`) en contenedores claros para evitar conflictos con el modo oscuro del navegador.
+- **Responsividad:** 
+  - La sección de Contabilidad e Inventario debe usar layouts verticales apilados en móviles.
+  - El grid de la carta pública debe usar `minmax(min(100%, 320px), 1fr)` para evitar scroll horizontal.
 
-## 3. Skills Installadas
-- `django-rest-best-practices`: Para asegurar la estabilidad, migraciones correctas y consistencia en el backend.
-- `form-design-best-practices`: Para crear formularios premium, responsivos y usables.
-- `supabase-postgres-best-practices`: Para optimizaciones de base de datos.
-- `web-design-guidelines`: Para asegurar que la UI se mantenga moderna, usable y bajo estándares de alta calidad de Vercel (especialmente en el rediseño de fichas y navegación).
+## 4. Skills Instaladas
+- `django-rest-best-practices`: Estabilidad y consistencia del backend.
+- `form-design-best-practices`: Formularios premium y usables.
+- `supabase-postgres-best-practices`: Optimización de BBDD.
+- `web-design-guidelines`: Estándares de calidad visual de Vercel/Next.
+- `seo-audit`: Auditoría de posicionamiento orgánico.
+- `responsive-design`: Asegurar adaptabilidad total.
 
 ---
-*El Agente no debe romper esta separación. Asegurarse de realizar despliegues parciales según carpeta.*
+*Mantener la coherencia visual con la marca Duke Burger (Negros profundos, Rojos vibrantes, Tipografía Bebas Neue).*

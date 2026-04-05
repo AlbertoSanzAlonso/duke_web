@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Menu, X } from 'lucide-react';
+import { Menu, X, ShoppingCart, Minus, Plus, MessageCircle } from 'lucide-react';
 import { fetchMenuEntries } from '../services/api';
 
 function Home() {
@@ -8,6 +8,8 @@ function Home() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [menuData, setMenuData] = useState({});
   const [loading, setLoading] = useState(true);
+  const [cart, setCart] = useState({});
+  const [isCartOpen, setIsCartOpen] = useState(false);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -60,6 +62,46 @@ function Home() {
     } finally {
       setLoading(false);
     }
+  };
+
+  const addToCart = (item) => {
+    setCart(prev => ({
+      ...prev,
+      [item.id]: {
+        ...item,
+        quantity: (prev[item.id]?.quantity || 0) + 1
+      }
+    }));
+  };
+
+  const updateQuantity = (id, delta) => {
+    setCart(prev => {
+      const newQty = (prev[id]?.quantity || 0) + delta;
+      if (newQty <= 0) {
+        const { [id]: removed, ...rest } = prev;
+        return rest;
+      }
+      return {
+        ...prev,
+        [id]: { ...prev[id], quantity: newQty }
+      };
+    });
+  };
+
+  const cartItems = Object.values(cart);
+  const totalItems = cartItems.reduce((acc, item) => acc + item.quantity, 0);
+  const totalPrice = cartItems.reduce((acc, item) => acc + (item.price * item.quantity), 0);
+
+  const sendWhatsAppOrder = () => {
+    const phone = "2645142897";
+    let message = "¡Hola Duke Burger! 🍔 Quiero hacer un pedido:\n\n";
+    cartItems.forEach(item => {
+      message += `• ${item.quantity}x ${item.name} ($${(item.price * item.quantity).toLocaleString('es-AR')})\n`;
+    });
+    message += `\n*TOTAL: $${totalPrice.toLocaleString('es-AR')}*`;
+    
+    const url = `https://wa.me/${phone}?text=${encodeURIComponent(message)}`;
+    window.open(url, '_blank');
   };
 
   const categories = Object.keys(menuData);
@@ -143,12 +185,17 @@ function Home() {
                     </div>
                   )}
                   <div className="card-info">
-                    <h3>{item.name}</h3>
+                    <div className="card-title-row">
+                      <h3>{item.name}</h3>
+                      {cart[item.id] && (
+                        <span className="item-badge">{cart[item.id].quantity}x</span>
+                      )}
+                    </div>
                     <p>{item.description}</p>
                   </div>
                   <div className="card-footer">
                     <span className="price">${parseFloat(item.price).toLocaleString('es-AR')}</span>
-                    <button className="add-btn">+</button>
+                    <button className="add-btn" onClick={() => addToCart(item)}>+</button>
                   </div>
                 </div>
               ))
@@ -179,6 +226,65 @@ function Home() {
           </div>
         </div>
       </footer>
+
+      {/* Floating Cart Button */}
+      {totalItems > 0 && (
+        <button className="cart-fab" onClick={() => setIsCartOpen(true)}>
+          <ShoppingCart size={24} />
+          <span className="cart-fab-count">{totalItems}</span>
+        </button>
+      )}
+
+      {/* Cart Modal */}
+      {isCartOpen && (
+        <div className="modal-overlay" onClick={() => setIsCartOpen(false)}>
+          <div className="cart-modal" onClick={e => e.stopPropagation()}>
+            <div className="modal-header">
+              <h2>TU PEDIDO</h2>
+              <button className="close-modal" onClick={() => setIsCartOpen(false)}>
+                <X size={24} />
+              </button>
+            </div>
+            
+            <div className="modal-body">
+              {cartItems.length === 0 ? (
+                <p className="empty-msg">Tu carrito está vacío</p>
+              ) : (
+                <div className="cart-items-list">
+                  {cartItems.map(item => (
+                    <div key={item.id} className="cart-item-row">
+                      <div className="item-main">
+                        <h4>{item.name}</h4>
+                        <span className="item-price-unit">${parseFloat(item.price).toLocaleString('es-AR')}</span>
+                      </div>
+                      <div className="item-actions">
+                        <button onClick={() => updateQuantity(item.id, -1)}><Minus size={18} /></button>
+                        <span>{item.quantity}</span>
+                        <button onClick={() => updateQuantity(item.id, 1)}><Plus size={18} /></button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            <div className="modal-footer">
+              <div className="modal-total">
+                <span>TOTAL</span>
+                <span>${totalPrice.toLocaleString('es-AR')}</span>
+              </div>
+              <button 
+                className="confirm-order-btn" 
+                disabled={cartItems.length === 0}
+                onClick={sendWhatsAppOrder}
+              >
+                <MessageCircle size={20} />
+                CONFIRMAR POR WHATSAPP
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
