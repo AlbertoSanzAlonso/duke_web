@@ -1,11 +1,13 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { fetchMenuEntries, createMenuEntry, deleteMenuEntry, updateMenuEntry, fetchProducts } from '../../services/api';
+import Toast from '../components/Toast';
 
 function MenuList() {
     const [entries, setEntries] = useState([]);
     const [products, setProducts] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
+    const [toast, setToast] = useState(null); // { message, type }
 
     const [selectedProductId, setSelectedProductId] = useState('');
     const [price, setPrice] = useState('');
@@ -46,9 +48,10 @@ function MenuList() {
             });
             setPrice('');
             setSelectedProductId('');
+            setToast({ message: "Producto añadido a la carta correctamente.", type: 'success' });
             loadData();
         } catch (err) {
-            alert("Probablemente haya un error conectando. Asegúrate de añadir precio y escoger producto.");
+            setToast({ message: "Error conectando. Verifica precio y producto.", type: 'error' });
         }
     };
 
@@ -56,9 +59,10 @@ function MenuList() {
         if (!window.confirm("¿Seguro que quieres retirar este producto de LA CARTA? (Seguirá en catálogo)")) return;
         try {
             await deleteMenuEntry(id);
+            setToast({ message: "Producto retirado de la carta.", type: 'success' });
             loadData();
         } catch (err) {
-            alert(err.message);
+            setToast({ message: err.message, type: 'error' });
         }
     };
 
@@ -69,17 +73,22 @@ function MenuList() {
 
     const handleEditSave = async (id) => {
         try {
-            if (!editPrice || isNaN(editPrice)) return alert("El precio debe ser un número válido");
+            if (!editPrice || isNaN(editPrice)) {
+                setToast({ message: "El precio debe ser un número válido", type: 'error' });
+                return;
+            }
             await updateMenuEntry(id, { price: parseFloat(editPrice) });
             setEditingId(null);
+            setToast({ message: "Precio actualizado correctamente.", type: 'success' });
             loadData();
         } catch (err) {
-            alert(err.message);
+            setToast({ message: err.message, type: 'error' });
         }
     };
 
     return (
         <div className="admin-card">
+            {toast && <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />}
             <h2>Gestión de la Carta Pública</h2>
             <p style={{ color: '#666', fontSize: '0.9rem', marginBottom: '20px' }}>Elíge productos del catálogo y dales un precio de venta al público para hacerlos visibles en tu menú online.</p>
 

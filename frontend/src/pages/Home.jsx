@@ -1,39 +1,54 @@
 import React, { useState, useEffect } from 'react';
 import { Menu, X } from 'lucide-react';
-
-const MENU_DATA = {
-  Burgers: [
-    { id: 1, name: 'Duke', description: 'Nuestra firma. Doble carne, cheddar, cebolla caramelizada.', price: '$12.900' },
-    { id: 2, name: 'Marqués', description: 'Para los que saben. Queso de cabra, miel y nueces.', price: '$13.500' },
-    { id: 3, name: 'Conde', description: 'Elegancia pura. Boletus, aceite de trufa y parmesano.', price: '$14.200' },
-    { id: 4, name: 'Plebeyo', description: 'La de toda la vida. Lechuga, tomate, cebolla y pepinillo.', price: '$10.900' },
-  ],
-  Pachatas: [
-    { id: 5, name: 'Provolone', description: 'Queso provolone fundido y chimichurri.', price: '$9.500' },
-    { id: 6, name: 'BBQ', description: 'Salsa barbacoa casera y cebolla frita.', price: '$9.500' },
-    { id: 7, name: 'Completa', description: 'Jamón, queso, huevo y ensalada.', price: '$11.000' },
-    { id: 8, name: 'Especial', description: 'Nuestra mezcla secreta de la casa.', price: '$11.500' },
-  ],
-  Pizzas: [
-    { id: 9, name: 'Mozzarella', description: 'Tomate, mozzarella y orégano.', price: '$9.000' },
-    { id: 10, name: 'Especial', description: 'Jamón York, champiñones y pimiento.', price: '$11.500' },
-    { id: 11, name: 'Napolitana', description: 'Anchoas, aceitunas negras y alcaparras.', price: '$12.000' },
-    { id: 12, name: '4 Quesos', description: 'Mozzarella, gorgonzola, parmesano y emmental.', price: '$13.000' },
-  ],
-};
+import { fetchMenuEntries } from '../services/api';
 
 function Home() {
   const [activeCategory, setActiveCategory] = useState('Burgers');
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [menuData, setMenuData] = useState({});
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const handleScroll = () => {
       setIsScrolled(window.scrollY > 50);
     };
     window.addEventListener('scroll', handleScroll);
+    loadMenu();
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
+
+  const loadMenu = async () => {
+    try {
+      const entries = await fetchMenuEntries();
+      // Group by category
+      const grouped = entries.reduce((acc, entry) => {
+        const cat = entry.category || 'General';
+        if (!acc[cat]) acc[cat] = [];
+        acc[cat].push({
+          id: entry.id,
+          name: entry.product.name,
+          description: entry.product.description,
+          price: entry.price,
+          image: entry.product.image
+        });
+        return acc;
+      }, {});
+      
+      setMenuData(grouped);
+      // Set first category as active if exists
+      const categories = Object.keys(grouped);
+      if (categories.length > 0 && !categories.includes(activeCategory)) {
+        setActiveCategory(categories[0]);
+      }
+    } catch (error) {
+      console.error("Error loading menu:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const categories = Object.keys(menuData);
 
   return (
     <div className="app">
@@ -87,7 +102,7 @@ function Home() {
           <div className="menu-header">
             <h2 className="section-title">NUESTRA CARTA</h2>
             <div className="menu-tabs">
-              {Object.keys(MENU_DATA).map(cat => (
+              {categories.map(cat => (
                 <button
                   key={cat}
                   className={`tab-item ${activeCategory === cat ? 'active' : ''}`}
@@ -100,18 +115,29 @@ function Home() {
           </div>
 
           <div className="menu-grid">
-            {MENU_DATA[activeCategory].map(item => (
-              <div key={item.id} className="menu-card hover-lift">
-                <div className="card-info">
-                  <h3>{item.name}</h3>
-                  <p>{item.description}</p>
+            {loading ? (
+              <p style={{ gridColumn: '1/-1', textAlign: 'center', padding: '50px' }}>Cargando carta de Duke Burgers...</p>
+            ) : categories.length === 0 ? (
+              <p style={{ gridColumn: '1/-1', textAlign: 'center', padding: '50px' }}>No hay platos disponibles en este momento.</p>
+            ) : (
+              menuData[activeCategory]?.map(item => (
+                <div key={item.id} className="menu-card hover-lift">
+                   {item.image && (
+                    <div className="card-image-container" style={{ width: '100%', height: '150px', overflow: 'hidden' }}>
+                      <img src={item.image} alt={item.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                    </div>
+                  )}
+                  <div className="card-info">
+                    <h3>{item.name}</h3>
+                    <p>{item.description}</p>
+                  </div>
+                  <div className="card-footer">
+                    <span className="price">${parseFloat(item.price).toLocaleString()}</span>
+                    <button className="add-btn">+</button>
+                  </div>
                 </div>
-                <div className="card-footer">
-                  <span className="price">{item.price}</span>
-                  <button className="add-btn">+</button>
-                </div>
-              </div>
-            ))}
+              ))
+            )}
           </div>
         </div>
       </section>

@@ -48,8 +48,9 @@ function Products() {
             setDescription('');
             setImage(null);
             loadProducts();
+            setToast({ message: "Producto creado con éxito", type: 'success' });
         } catch (err) {
-            alert(err.message);
+            setToast({ message: err.message, type: 'error' });
         }
     };
 
@@ -58,8 +59,9 @@ function Products() {
         try {
             await deleteProduct(id);
             loadProducts();
+            setToast({ message: "Producto eliminado del catálogo", type: 'success' });
         } catch (err) {
-            alert(err.message);
+            setToast({ message: err.message, type: 'error' });
         }
     };
 
@@ -80,8 +82,9 @@ function Products() {
             await updateProduct(editingId, formData);
             setEditingId(null);
             loadProducts();
+            setToast({ message: "Producto actualizado", type: 'success' });
         } catch (err) {
-            alert(err.message);
+            setToast({ message: err.message, type: 'error' });
         }
     };
 
