@@ -512,6 +512,41 @@
 }
 
 /* Cart & Modal Styles */
+.customer-info-section {
+  background: #1a1a1a;
+  padding: 1rem;
+  border-radius: 8px;
+  margin-bottom: 2rem;
+}
+
+.customer-info-section label {
+  display: block;
+  font-family: var(--font-heading);
+  font-size: 0.9rem;
+  color: #888;
+  margin-bottom: 0.5rem;
+}
+
+.customer-info-section input {
+  width: 100%;
+  background: transparent;
+  border: none;
+  border-bottom: 2px solid #333;
+  color: white;
+  font-size: 1.2rem;
+  padding: 0.5rem 0;
+  outline: none;
+  transition: var(--transition-smooth);
+}
+
+.customer-info-section input:focus {
+  border-color: var(--color-primary);
+}
+
+.input-highlight {
+  border-bottom-color: rgba(227, 27, 35, 0.5) !important;
+}
+
 .card-title-row {
   display: flex;
   justify-content: space-between;

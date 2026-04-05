@@ -1,15 +1,16 @@
 import React, { useState, useEffect } from 'react';
 import { Menu, X, ShoppingCart, Minus, Plus, MessageCircle } from 'lucide-react';
-import { fetchMenuEntries } from '../services/api';
+import { fetchMenuEntries, createSale } from '../services/api';
 
 function Home() {
   const [activeCategory, setActiveCategory] = useState('Burgers');
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const [menuData, setMenuData] = useState({});
   const [loading, setLoading] = useState(true);
   const [cart, setCart] = useState({});
   const [isCartOpen, setIsCartOpen] = useState(false);
+  const [customerName, setCustomerName] = useState('');
+  const [isSaving, setIsSaving] = useState(false);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -92,16 +93,51 @@ function Home() {
   const totalItems = cartItems.reduce((acc, item) => acc + item.quantity, 0);
   const totalPrice = cartItems.reduce((acc, item) => acc + (item.price * item.quantity), 0);
 
-  const sendWhatsAppOrder = () => {
-    const phone = "2645142897";
-    let message = "¡Hola Duke Burger! 🍔 Quiero hacer un pedido:\n\n";
-    cartItems.forEach(item => {
-      message += `• ${item.quantity}x ${item.name} ($${(item.price * item.quantity).toLocaleString('es-AR')})\n`;
-    });
-    message += `\n*TOTAL: $${totalPrice.toLocaleString('es-AR')}*`;
-    
-    const url = `https://wa.me/${phone}?text=${encodeURIComponent(message)}`;
-    window.open(url, '_blank');
+  const sendWhatsAppOrder = async () => {
+    if (!customerName.trim()) {
+      alert("Por favor, ingresa tu nombre para el pedido.");
+      return;
+    }
+
+    setIsSaving(true);
+    try {
+      // 1. Create PENDING sale in DB
+      const saleData = {
+        total_amount: totalPrice,
+        status: 'PENDING',
+        customer_name: customerName,
+        table_number: "", // Web app doesn't have tables
+        notes: "Pedido desde la Web",
+        items: cartItems.map(item => ({
+          menu_entry: item.id,
+          quantity: item.quantity,
+          price_at_sale: item.price
+        }))
+      };
+
+      await createSale(saleData);
+
+      // 2. Format WhatsApp Message
+      const phone = "2645142897";
+      let message = `¡Hola Duke Burger! 🍔 Soy *${customerName}*.\nQuiero hacer este pedido desde la web:\n\n`;
+      cartItems.forEach(item => {
+        message += `• ${item.quantity}x ${item.name} ($${(item.price * item.quantity).toLocaleString('es-AR')})\n`;
+      });
+      message += `\n*TOTAL: $${totalPrice.toLocaleString('es-AR')}*`;
+      
+      const url = `https://wa.me/${phone}?text=${encodeURIComponent(message)}`;
+      window.open(url, '_blank');
+
+      // 3. Reset Cart
+      setCart({});
+      setCustomerName('');
+      setIsCartOpen(false);
+    } catch (error) {
+      console.error("Error creating sale:", error);
+      alert("Hubo un error al procesar tu pedido. Por favor, intenta de nuevo.");
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   const categories = Object.keys(menuData);
@@ -247,6 +283,17 @@ function Home() {
             </div>
             
             <div className="modal-body">
+              <div className="customer-info-section">
+                <label>TU NOMBRE *</label>
+                <input 
+                  type="text" 
+                  placeholder="Ej: Alberto Sanz"
+                  value={customerName}
+                  onChange={e => setCustomerName(e.target.value)}
+                  className={!customerName && cartItems.length > 0 ? "input-highlight" : ""}
+                />
+              </div>
+
               {cartItems.length === 0 ? (
                 <p className="empty-msg">Tu carrito está vacío</p>
               ) : (
@@ -275,11 +322,17 @@ function Home() {
               </div>
               <button 
                 className="confirm-order-btn" 
-                disabled={cartItems.length === 0}
+                disabled={cartItems.length === 0 || !customerName.trim() || isSaving}
                 onClick={sendWhatsAppOrder}
               >
-                <MessageCircle size={20} />
-                CONFIRMAR POR WHATSAPP
+                {isSaving ? (
+                  "PROCESANDO..."
+                ) : (
+                  <>
+                    <MessageCircle size={20} />
+                    CONFIRMAR POR WHATSAPP
+                  </>
+                )}
               </button>
             </div>
           </div>
