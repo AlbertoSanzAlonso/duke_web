@@ -65,8 +65,8 @@ const Orders = () => {
                                     <td>#{order.id}</td>
                                     <td>
                                         <div className="date-cell">
-                                            <span>{new Date(order.date).toLocaleDateString()}</span>
-                                            <small>{new Date(order.date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</small>
+                                            <span>{new Date(order.date).toLocaleDateString('es-AR', { timeZone: 'America/Argentina/Buenos_Aires' })}</span>
+                                            <small>{new Date(order.date).toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit', timeZone: 'America/Argentina/Buenos_Aires' })}</small>
                                         </div>
                                     </td>
                                     <td>
@@ -105,7 +105,7 @@ const Orders = () => {
                             <div className="details-meta">
                                 <p><strong>Cliente:</strong> {selectedOrder.customer_name || '-'}</p>
                                 <p><strong>Mesa:</strong> {selectedOrder.table_number || '-'}</p>
-                                <p><strong>Hora:</strong> {new Date(selectedOrder.date).toLocaleString()}</p>
+                                <p><strong>Hora:</strong> {new Date(selectedOrder.date).toLocaleString('es-AR', { timeZone: 'America/Argentina/Buenos_Aires' })}</p>
                             </div>
 
                             <div className="items-list">
@@ -142,7 +142,7 @@ const Orders = () => {
                         </div>
                         <div className="ticket-info-print">
                             <p>TICKET #{selectedOrder.id}</p>
-                            <p>FECHA: {new Date(selectedOrder.date).toLocaleString()}</p>
+                            <p>FECHA: {new Date(selectedOrder.date).toLocaleString('es-AR', { timeZone: 'America/Argentina/Buenos_Aires' })}</p>
                             <p>CLIENTE: {selectedOrder.customer_name || 'Particular'}</p>
                             {selectedOrder.table_number && <p>MESA: {selectedOrder.table_number}</p>}
                         </div>

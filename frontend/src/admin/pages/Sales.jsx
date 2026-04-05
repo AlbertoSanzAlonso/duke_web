@@ -293,7 +293,7 @@ const Sales = () => {
                                 <div key={ticket.id} className="pending-ticket-card" onClick={() => loadPendingSale(ticket)}>
                                     <div className="pending-info">
                                         <span className="pending-id">#{ticket.id}</span>
-                                        <span className="pending-date">{new Date(ticket.date).toLocaleTimeString()}</span>
+                                        <span className="pending-date">{new Date(ticket.date).toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit', timeZone: 'America/Argentina/Buenos_Aires' })}</span>
                                     </div>
                                     <div className="pending-customer">
                                         <strong>{ticket.customer_name || 'Sin nombre'}</strong>
