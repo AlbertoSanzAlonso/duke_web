@@ -1,4 +1,5 @@
 from rest_framework import viewsets
+from rest_framework.response import Response
 from .models import Product, MenuEntry, Sale, Expense, InventoryItem, SupplierOrder
 from .serializers import (ProductSerializer, MenuEntrySerializer, SaleSerializer, SaleCreateSerializer, ExpenseSerializer,
                           InventoryItemSerializer, SupplierOrderSerializer, SupplierOrderCreateSerializer)
@@ -10,6 +11,16 @@ from asgiref.sync import sync_to_async
 class ProductViewSet(viewsets.ModelViewSet):
     queryset = Product.objects.all().order_by('-created_at')
     serializer_class = ProductSerializer
+
+    def update(self, request, *args, **kwargs):
+        partial = kwargs.pop('partial', False)
+        instance = self.get_object()
+        serializer = self.get_serializer(instance, data=request.data, partial=partial)
+        if not serializer.is_valid():
+            print(f"DEBUG PRODUCT ERROR: {serializer.errors}")
+            return Response({'detail': serializer.errors}, status=400)
+        self.perform_update(serializer)
+        return Response(serializer.data)
 
 class MenuEntryViewSet(viewsets.ModelViewSet):
     queryset = MenuEntry.objects.all()

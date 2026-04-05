@@ -16,12 +16,20 @@ export const fetchProducts = async () => {
 
 export const createProduct = async (productData) => {
     const isFormData = productData instanceof FormData;
-    const response = await fetch(`${API_URL}/products/`, {
+    const options = {
         method: 'POST',
-        headers: isFormData ? {} : { 'Content-Type': 'application/json' },
         body: isFormData ? productData : JSON.stringify(productData)
-    });
-    if (!response.ok) throw new Error('Error al crear el producto');
+    };
+    
+    if (!isFormData) {
+        options.headers = { 'Content-Type': 'application/json' };
+    }
+
+    const response = await fetch(`${API_URL}/products/`, options);
+    if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.detail || 'Error al crear el producto');
+    }
     return await response.json();
 };
 
@@ -35,12 +43,25 @@ export const deleteProduct = async (id) => {
 
 export const updateProduct = async (id, productData) => {
     const isFormData = productData instanceof FormData;
-    const response = await fetch(`${API_URL}/products/${id}/`, {
+    const options = {
         method: 'PATCH',
-        headers: isFormData ? {} : { 'Content-Type': 'application/json' },
         body: isFormData ? productData : JSON.stringify(productData)
-    });
-    if (!response.ok) throw new Error('Error al actualizar el producto');
+    };
+
+    if (!isFormData) {
+        options.headers = { 'Content-Type': 'application/json' };
+    }
+
+    const response = await fetch(`${API_URL}/products/${id}/`, options);
+
+    if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        let message = errorData.detail || 'Error al actualizar el producto';
+        if (typeof message === 'object') {
+            message = JSON.stringify(message);
+        }
+        throw new Error(message);
+    }
     return await response.json();
 };
 
