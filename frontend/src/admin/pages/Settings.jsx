@@ -10,17 +10,25 @@ const Settings = () => {
     const [isSaving, setIsSaving] = useState(false);
     const [toast, setToast] = useState(null);
 
+    const [error, setError] = useState(null);
+
     useEffect(() => {
         loadSettings();
     }, []);
 
     const loadSettings = async () => {
         setLoading(true);
+        setError(null);
         try {
             const data = await fetchSettings();
+            console.log("Settings data loaded:", data);
+            if (!data || data.length === 0) {
+                setError("La base de datos de configuración está vacía.");
+            }
             setSettings(data);
         } catch (error) {
             console.error("Error loading settings:", error);
+            setError(error.message);
         } finally {
             setLoading(false);
         }
@@ -59,6 +67,13 @@ const Settings = () => {
                     <Truck size={24} color="#f03e3e" />
                     <h3 style={{ margin: 0 }}>Tarifas de Envío (Cadetería)</h3>
                 </div>
+
+                {error && (
+                    <div style={{ padding: '20px', background: '#ffeef0', border: '1px solid #ff9fa6', borderRadius: '8px', color: '#f03e3e', marginBottom: '20px' }}>
+                        Error: {error}
+                        <button onClick={loadSettings} style={{ marginLeft: '10px', cursor: 'pointer', background: 'transparent', border: 'underline', color: '#333' }}>Reintentar</button>
+                    </div>
+                )}
 
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
                     {settings.filter(s => s.key.startsWith('delivery_')).map(setting => (
