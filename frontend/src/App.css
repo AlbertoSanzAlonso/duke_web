@@ -628,6 +628,30 @@
   flex-direction: column;
   box-shadow: 0 25px 50px rgba(0,0,0,0.5);
   overflow: hidden;
+  position: relative;
+}
+
+.close-modal {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  background: rgba(255,255,255,0.1);
+  border: none;
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: var(--transition-smooth);
+  color: white;
+  z-index: 10;
+}
+
+.close-modal:hover {
+  background: rgba(255,255,255,0.2);
+  transform: scale(1.1);
 }
 
 .modal-header {
@@ -636,6 +660,10 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
+}
+
+.modal-header h2 {
+  margin-right: 3rem;
 }
 
 .modal-body {
