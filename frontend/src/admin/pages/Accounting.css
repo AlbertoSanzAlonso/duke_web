@@ -63,8 +63,8 @@
 
 /* Form Styles */
 .accounting-main-layout {
-    display: flex;
-    flex-direction: column;
+    display: grid;
+    grid-template-columns: 350px 1fr;
     gap: 40px;
 }
 

@@ -93,18 +93,18 @@ const Accounting = () => {
             <div className="accounting-summary-grid">
                 <div className="summary-card income">
                     <h3>Ingresos</h3>
-                    <p className="amount">+${totalIncome.toFixed(2)}</p>
+                    <p className="amount">+${Math.round(totalIncome).toLocaleString('es-AR')}</p>
                     <span>Ventas finalizadas</span>
                 </div>
                 <div className="summary-card expenses">
                     <h3>Gastos</h3>
-                    <p className="amount">-${totalExpenses.toFixed(2)}</p>
+                    <p className="amount">-${Math.round(totalExpenses).toLocaleString('es-AR')}</p>
                     <span>Proveedores + Gastos manuales</span>
                 </div>
                 <div className="summary-card balance">
                     <h3>Beneficio Neto</h3>
                     <p className={`amount ${balance >= 0 ? 'positive' : 'negative'}`}>
-                        ${balance.toFixed(2)}
+                        ${Math.round(balance).toLocaleString('es-AR')}
                     </p>
                     <span>Balance total</span>
                 </div>
@@ -128,11 +128,10 @@ const Accounting = () => {
                                 <div className="form-group">
                                     <label>Importe ($)</label>
                                     <input 
-                                        type="number" 
-                                        step="100" 
+                                        step="1" 
                                         value={amount} 
                                         onChange={e => setAmount(e.target.value)} 
-                                        placeholder="0.00"
+                                        placeholder="0"
                                         required/ >
                                 </div>
                                 <div className="form-group">
@@ -176,7 +175,7 @@ const Accounting = () => {
                                             <td><span className="badge badge-manual">Gasto</span></td>
                                             <td>{e.description}</td>
                                             <td>{e.category}</td>
-                                            <td className="txt-right negative">-${parseFloat(e.amount).toFixed(2)}</td>
+                                            <td className="txt-right negative">-${Math.round(parseFloat(e.amount)).toLocaleString('es-AR')}</td>
                                             <td>
                                                 <button onClick={() => handleDeleteExpense(e.id)} className="delete-btn">×</button>
                                             </td>
@@ -188,7 +187,7 @@ const Accounting = () => {
                                             <td><span className="badge badge-order">Proveedor</span></td>
                                             <td>{o.supplier_name} (Pedido #{o.id})</td>
                                             <td>Materia Prima</td>
-                                            <td className="txt-right negative">-${parseFloat(o.total_cost).toFixed(2)}</td>
+                                            <td className="txt-right negative">-${Math.round(parseFloat(o.total_cost)).toLocaleString('es-AR')}</td>
                                             <td>-</td>
                                         </tr>
                                     ))}
@@ -198,7 +197,7 @@ const Accounting = () => {
                                             <td><span className="badge badge-income">Ingreso</span></td>
                                             <td>Venta #{s.id} {s.customer_name ? `(${s.customer_name})` : ''}</td>
                                             <td>Venta TPV</td>
-                                            <td className="txt-right positive">+${parseFloat(s.total_amount).toFixed(2)}</td>
+                                            <td className="txt-right positive">+${Math.round(parseFloat(s.total_amount)).toLocaleString('es-AR')}</td>
                                             <td>-</td>
                                         </tr>
                                     ))}

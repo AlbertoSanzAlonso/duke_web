@@ -117,12 +117,12 @@ function MenuList() {
                 </select>
                 <input 
                     type="number" 
-                    step="100" 
+                    step="1" 
                     placeholder="Precio" 
                     value={price} 
                     onChange={e => setPrice(e.target.value)} 
                     required 
-                    style={{ padding: '8px', width: '100px' }}
+                    style={{ padding: '8px', width: '120px' }}
                 />
                 <button type="submit" className="main-button" style={{ padding: '8px 16px', background: 'var(--admin-primary)', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer' }}>
                     + Añadir a la Carta
@@ -175,12 +175,12 @@ function MenuList() {
                                         <div style={{ position: 'absolute', top: '10px', right: '10px', display: 'flex', gap: '5px', background: 'white', padding: '4px', borderRadius: '8px', boxShadow: '0 4px 15px rgba(0,0,0,0.2)', zIndex: 2 }}>
                                             <input 
                                                 type="number" 
-                                                step="100" 
+                                                step="1" 
                                                 autoFocus
                                                 value={editPrice} 
                                                 onChange={e => setEditPrice(e.target.value)} 
                                                 onKeyDown={e => { if(e.key === 'Enter') handleEditSave(entry.id) }}
-                                                style={{ width: '70px', padding: '4px 8px', border: '1px solid #ccc', borderRadius: '4px', fontSize: '1rem', fontWeight: 'bold', outline: 'none' }} 
+                                                style={{ width: '90px', padding: '4px 8px', border: '1px solid #ccc', borderRadius: '4px', fontSize: '1rem', fontWeight: 'bold', outline: 'none' }} 
                                             />
                                             <button 
                                                 onClick={() => handleEditSave(entry.id)} 
@@ -211,7 +211,7 @@ function MenuList() {
                                             onMouseOver={(e) => { e.target.style.transform = 'scale(1.05)'; }}
                                             onMouseOut={(e) => { e.target.style.transform = 'scale(1)'; }}
                                         >
-                                            ${entry.price} ✎
+                                            ${parseInt(entry.price).toLocaleString('es-AR')} ✎
                                         </div>
                                     )}
 

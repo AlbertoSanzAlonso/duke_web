@@ -12,6 +12,7 @@ import Sales from './admin/pages/Sales';
 import Orders from './admin/pages/Orders';
 import SupplierOrders from './admin/pages/SupplierOrders';
 import Accounting from './admin/pages/Accounting';
+import Promos from './admin/pages/Promos';
 import './App.css'; // Global styles for consumer site
 
 function App() {
@@ -27,6 +28,7 @@ function App() {
           <Route index element={<Dashboard />} />
           <Route path="productos" element={<Products />} />
           <Route path="carta" element={<MenuList />} />
+          <Route path="promos" element={<Promos />} />
           <Route path="inventario" element={<Inventory />} />
           <Route path="pedidos-clientes" element={<Orders />} />
           <Route path="tpv" element={<Sales />} />

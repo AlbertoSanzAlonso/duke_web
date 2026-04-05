@@ -13,6 +13,7 @@ function Home() {
   const [customerName, setCustomerName] = useState('');
   const [isSaving, setIsSaving] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState(null);
+  const [isPromosOpen, setIsPromosOpen] = useState(false);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -157,7 +158,10 @@ function Home() {
           <div className={`nav-links ${isMobileMenuOpen ? 'mobile-open' : ''}`}>
             <a href="#menu" onClick={() => setIsMobileMenuOpen(false)}>CARTA</a>
             <a href="#about" onClick={() => setIsMobileMenuOpen(false)}>NOSOTROS</a>
-            <button className="cta-button" onClick={() => setIsMobileMenuOpen(false)}>¡PEDÍ YA!</button>
+            <button className="cta-button" onClick={() => {
+              setIsPromosOpen(true);
+              setIsMobileMenuOpen(false);
+            }}>PROMOS</button>
           </div>
           <div className="mobile-toggle" onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}>
             {isMobileMenuOpen ? <X size={28} color="white" /> : <Menu size={28} color="white" />}
@@ -175,7 +179,7 @@ function Home() {
             </h1>
             <p className="hero-subtitle">Sabor brutal. Espíritu Duke.</p>
             <div className="hero-actions">
-              <button className="main-button">VER MENÚ</button>
+              <button className="main-button" onClick={() => document.getElementById('menu')?.scrollIntoView({ behavior: 'smooth' })}>VER MENÚ</button>
               <button className="outline-button">LOCAL</button>
               <button className="delivery-button">
                 A DOMICILIO
@@ -352,7 +356,7 @@ function Home() {
         <div className="modal-overlay" onClick={() => setSelectedProduct(null)}>
           <div className="product-detail-modal" onClick={e => e.stopPropagation()}>
             <button className="close-modal-detail" onClick={() => setSelectedProduct(null)}>
-              <X size={24} />
+              <X size={24} color="white" />
             </button>
             <div className="detail-hero">
               {selectedProduct.image ? (
@@ -369,7 +373,7 @@ function Home() {
                 <h2>{selectedProduct.name}</h2>
                 <span className="detail-cat">{activeCategory}</span>
               </div>
-              <p className="detail-desc">{selectedProduct.description || 'Nuestra receta secreta preparada con los mejores ingredientes.'}</p>
+              <p className="detail-desc">{selectedProduct.description || ''}</p>
               
               <div className="detail-footer">
                 <div className="detail-qty-control">
@@ -401,13 +405,57 @@ function Home() {
                   onClick={() => {
                     if (!cart[selectedProduct.id]) {
                       addToCart(selectedProduct);
-                    } else {
-                      updateQuantity(selectedProduct.id, 1);
                     }
+                    setSelectedProduct(null);
                   }}
                 >
-                  {cart[selectedProduct.id] ? `AGREGAR MÁS (${cart[selectedProduct.id].quantity} en pedido)` : 'AGREGAR AL PEDIDO'}
+                  {cart[selectedProduct.id] ? 'CONFIRMAR Y VOLVER' : 'AGREGAR AL PEDIDO'}
                 </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+      {/* Promos Modal */}
+      {isPromosOpen && (
+        <div className="modal-overlay" onClick={() => setIsPromosOpen(false)}>
+          <div className="cart-modal promos-modal" onClick={e => e.stopPropagation()}>
+            <div className="modal-header">
+              <h2>PROMOS DUKE</h2>
+              <button className="close-modal-detail" onClick={() => setIsPromosOpen(false)} style={{ position: 'static' }}>
+                <X size={24} color="white" />
+              </button>
+            </div>
+            
+            <div className="modal-body">
+              <div className="promos-grid-modal">
+                {menuData['Promos']?.length > 0 ? (
+                  menuData['Promos'].map(promo => (
+                    <div key={promo.id} className="promo-item-card">
+                      <div className="promo-image">
+                        {promo.image ? <img src={promo.image} alt={promo.name} /> : <span>🎁</span>}
+                      </div>
+                      <div className="promo-info">
+                        <h3>{promo.name}</h3>
+                        <p>{promo.description}</p>
+                        <div className="promo-footer">
+                          <span className="price">${parseFloat(promo.price).toLocaleString('es-AR')}</span>
+                          <button 
+                            className="add-btn" 
+                            onClick={() => {
+                              addToCart(promo);
+                              setIsPromosOpen(false);
+                            }}
+                          >
+                            + AGREGAR
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  ))
+                ) : (
+                  <p className="empty-msg">No hay promociones activas en este momento. ¡Vuelve pronto!</p>
+                )}
               </div>
             </div>
           </div>

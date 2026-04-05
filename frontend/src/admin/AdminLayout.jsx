@@ -10,7 +10,8 @@ import {
   Truck,
   Menu,
   X,
-  ShoppingCart
+  ShoppingCart,
+  Star
 } from 'lucide-react';
 import './Admin.css';
 
@@ -23,6 +24,7 @@ const AdminLayout = () => {
     { name: 'Pedidos Clientes', path: '/admin/pedidos-clientes', icon: <TrendingUp size={20} /> },
     { name: 'Productos', path: '/admin/productos', icon: <Package size={20} /> },
     { name: 'Carta', path: '/admin/carta', icon: <UtensilsCrossed size={20} /> },
+    { name: 'Promos', path: '/admin/promos', icon: <Star size={20} fill="#fcc419" color="#fcc419" /> },
     { name: 'Inventario', path: '/admin/inventario', icon: <Boxes size={20} /> },
     { name: 'Pedidos Proveedor', path: '/admin/pedidos', icon: <Truck size={20} /> },
     { name: 'Contabilidad', path: '/admin/contabilidad', icon: <TrendingUp size={20} /> },

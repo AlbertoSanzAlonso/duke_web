@@ -126,12 +126,12 @@ function Inventory() {
 
                 <input 
                     type="number" 
-                    step="100" 
+                    step="any" 
                     placeholder="Stock Actual" 
                     value={quantity} 
                     onChange={e => setQuantity(e.target.value)} 
                     required 
-                    style={{ padding: '8px', width: '100px' }}
+                    style={{ padding: '8px', width: '120px' }}
                 />
                 <select value={unit} onChange={e => setUnit(e.target.value)} style={{ padding: '8px' }}>
                     <option value="unidades">Unidades</option>
@@ -142,11 +142,11 @@ function Inventory() {
                 </select>
                 <input 
                     type="number" 
-                    step="100" 
+                    step="any" 
                     placeholder="Stock mínimo" 
                     value={minStock} 
                     onChange={e => setMinStock(e.target.value)} 
-                    style={{ padding: '8px', width: '100px' }}
+                    style={{ padding: '8px', width: '120px' }}
                 />
                 <button type="submit" className="main-button" style={{ padding: '8px 16px', background: 'var(--admin-primary)', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer' }}>
                     Registrar
