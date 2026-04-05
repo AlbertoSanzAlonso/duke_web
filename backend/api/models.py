@@ -41,12 +41,20 @@ class MenuEntry(models.Model):
         return f"{self.product.name} - {self.price}"
 
 class Sale(models.Model):
+    STATUS_CHOICES = [
+        ('PENDING', 'Pendiente'),
+        ('COMPLETED', 'Completado'),
+        ('CANCELLED', 'Cancelado')
+    ]
     total_amount = models.DecimalField(max_digits=10, decimal_places=2)
     date = models.DateTimeField(auto_now_add=True)
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='COMPLETED')
+    customer_name = models.CharField(max_length=100, blank=True, null=True)
+    table_number = models.CharField(max_length=10, blank=True, null=True)
     notes = models.TextField(blank=True, null=True)
     
     def __str__(self):
-        return f"Sale {self.id} - {self.total_amount}"
+        return f"Sale {self.id} ({self.status}) - {self.total_amount}"
 
 class SaleItem(models.Model):
     sale = models.ForeignKey(Sale, related_name='items', on_delete=models.CASCADE)
@@ -77,14 +85,15 @@ class InventoryItem(models.Model):
         return f"{self.name} ({self.quantity} {self.unit})"
 
 class SupplierOrder(models.Model):
-    supplier_name = models.CharField(max_length=200)
-    date = models.DateTimeField(auto_now_add=True)
-    total_cost = models.DecimalField(max_digits=10, decimal_places=2, default=0)
-    status = models.CharField(max_length=50, choices=[
+    STATUS_CHOICES = [
         ('PENDING', 'Pendiente'),
         ('DELIVERED', 'Entregado'),
         ('CANCELLED', 'Cancelado')
-    ], default='PENDING')
+    ]
+    supplier_name = models.CharField(max_length=200)
+    date = models.DateTimeField(auto_now_add=True)
+    total_cost = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+    status = models.CharField(max_length=50, choices=STATUS_CHOICES, default='PENDING')
 
     def __str__(self):
         return f"Order {self.id} - {self.supplier_name}"

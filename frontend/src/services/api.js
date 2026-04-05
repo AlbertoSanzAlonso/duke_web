@@ -114,3 +114,19 @@ export const createSale = async (data) => {
     if (!response.ok) throw new Error('Error al registrar la venta');
     return await response.json();
 };
+
+export const fetchSales = async () => {
+    const response = await fetch(`${API_URL}/sales/`);
+    if (!response.ok) throw new Error('Error al obtener ventas');
+    return await response.json();
+};
+
+export const updateSale = async (id, data) => {
+    const response = await fetch(`${API_URL}/sales/${id}/`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
+    });
+    if (!response.ok) throw new Error('Error al actualizar venta');
+    return await response.json();
+};

@@ -13,6 +13,13 @@ function Inventory() {
     const [unit, setUnit] = useState('unidades');
     const [minStock, setMinStock] = useState('0');
 
+    const [showNewCategoryInput, setShowNewCategoryInput] = useState(false);
+    const [newCategory, setNewCategory] = useState('');
+
+    const defaultCategories = ['Carne', 'Verdura', 'Quesos', 'Pan', 'Bebidas', 'Salsas', 'Desechables'];
+    const existingCategories = [...new Set(items.map(item => item.category).filter(Boolean))];
+    const categories = [...new Set([...defaultCategories, ...existingCategories])];
+
     useEffect(() => {
         loadInventory();
     }, []);
@@ -31,12 +38,13 @@ function Inventory() {
 
     const handleCreate = async (e) => {
         e.preventDefault();
-        if (!name) return;
+        const finalCategory = showNewCategoryInput ? newCategory : category;
+        if (!name || (showNewCategoryInput && !newCategory)) return;
         
         try {
             await createInventoryItem({
                 name,
-                category,
+                category: finalCategory,
                 quantity: parseFloat(quantity) || 0,
                 unit,
                 min_stock: parseFloat(minStock) || 0
@@ -44,6 +52,8 @@ function Inventory() {
             // Clear form
             setName('');
             setCategory('');
+            setNewCategory('');
+            setShowNewCategoryInput(false);
             setQuantity('');
             setMinStock('0');
             // Reload list
@@ -76,13 +86,39 @@ function Inventory() {
                     required 
                     style={{ padding: '8px', flex: 1, minWidth: '150px' }}
                 />
-                <input 
-                    type="text" 
-                    placeholder="Categoría (ej. Carne, Quesos...)" 
-                    value={category} 
-                    onChange={e => setCategory(e.target.value)} 
-                    style={{ padding: '8px', flex: 1, minWidth: '150px' }}
-                />
+                
+                {showNewCategoryInput ? (
+                    <div style={{ display: 'flex', gap: '5px', flex: 1, minWidth: '150px' }}>
+                        <input 
+                            type="text" 
+                            placeholder="Nueva categoría" 
+                            value={newCategory} 
+                            onChange={e => setNewCategory(e.target.value)}
+                            required
+                            style={{ padding: '8px', width: '100%' }}
+                        />
+                        <button type="button" onClick={() => setShowNewCategoryInput(false)} style={{ padding: '0 8px' }}>×</button>
+                    </div>
+                ) : (
+                    <select 
+                        value={category} 
+                        onChange={e => {
+                            if (e.target.value === 'NEW') {
+                                setShowNewCategoryInput(true);
+                            } else {
+                                setCategory(e.target.value);
+                            }
+                        }}
+                        style={{ padding: '8px', flex: 1, minWidth: '150px' }}
+                    >
+                        <option value="">Seleccionar Categoría</option>
+                        {categories.map(cat => (
+                            <option key={cat} value={cat}>{cat}</option>
+                        ))}
+                        <option value="NEW" style={{ fontWeight: 'bold', color: 'var(--admin-primary)' }}>+ Añadir nueva...</option>
+                    </select>
+                )}
+
                 <input 
                     type="number" 
                     step="0.01" 

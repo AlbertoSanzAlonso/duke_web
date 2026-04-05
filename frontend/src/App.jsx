@@ -8,6 +8,7 @@ import MenuList from './admin/pages/MenuList';
 import Inventory from './admin/pages/Inventory';
 import HistoryLog from './admin/pages/HistoryLog';
 import Sales from './admin/pages/Sales';
+import Orders from './admin/pages/Orders';
 import SupplierOrders from './admin/pages/SupplierOrders';
 import './App.css'; // Global styles for consumer site
 
@@ -24,9 +25,10 @@ function App() {
           <Route path="productos" element={<Products />} />
           <Route path="carta" element={<MenuList />} />
           <Route path="inventario" element={<Inventory />} />
-          <Route path="historial" element={<HistoryLog />} />
-          <Route path="ventas" element={<Sales />} />
+          <Route path="pedidos-clientes" element={<Orders />} />
+          <Route path="tpv" element={<Sales />} />
           <Route path="pedidos" element={<SupplierOrders />} />
+          <Route path="historial" element={<HistoryLog />} />
         </Route>
       </Routes>
     </BrowserRouter>

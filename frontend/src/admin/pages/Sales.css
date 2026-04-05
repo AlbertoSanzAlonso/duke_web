@@ -143,6 +143,167 @@
     color: #333 !important;
 }
 
+/* Selector de Modo */
+.pos-view-selector {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 1.5rem;
+    padding: 0 10px;
+}
+
+.pos-view-selector button {
+    flex: 1;
+    padding: 1rem;
+    border: none;
+    border-radius: 8px;
+    background: white;
+    color: #666;
+    font-weight: 700;
+    cursor: pointer;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+    transition: all 0.2s;
+}
+
+.pos-view-selector button.active {
+    background: #444;
+    color: white !important;
+}
+
+/* Metadata del Ticket (Nombre/Mesa) */
+.ticket-meta {
+    padding: 1rem;
+    display: flex;
+    gap: 10px;
+    border-bottom: 1px dashed #eee;
+}
+
+.ticket-meta input {
+    flex: 1;
+    padding: 8px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 0.9rem;
+}
+
+/* Grid de Acciones (Guardar/Cobrar) */
+.pos-actions-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+}
+
+.pending-btn {
+    padding: 1rem;
+    background: #6c757d;
+    color: white !important;
+    border: none;
+    border-radius: 8px;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+/* Listado de Tickets Pendientes */
+.pending-list-container {
+    padding: 0 10px;
+    overflow-y: auto;
+}
+
+.pending-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 1.5rem;
+}
+
+.pending-ticket-card {
+    background: white;
+    border-radius: 12px;
+    padding: 1.5rem;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    cursor: pointer;
+    transition: transform 0.2s;
+}
+
+.pending-ticket-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 16px rgba(0,0,0,0.12);
+}
+
+.pending-info {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.9rem;
+    color: #999;
+}
+
+.pending-id {
+    font-weight: 800;
+    color: #333;
+}
+
+.pending-customer {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.pending-customer strong {
+    font-size: 1.2rem;
+    color: #333;
+}
+
+.table-tag {
+    background: #fff3bf;
+    color: #f08c00 !important;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 0.8rem;
+    font-weight: 800;
+    width: fit-content;
+}
+
+.pending-items-summary {
+    font-size: 0.9rem;
+    color: #666;
+}
+
+.pending-total {
+    font-size: 1.5rem;
+    font-weight: 800;
+    color: #28a745 !important;
+    text-align: right;
+}
+
+.load-btn {
+    width: 100%;
+    padding: 0.8rem;
+    background: #333;
+    color: white !important;
+    border: none;
+    border-radius: 6px;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.no-pending-msg {
+    grid-column: 1 / -1;
+    text-align: center;
+    padding: 3rem;
+    font-size: 1.2rem;
+    color: #999;
+}
+
+.pos-loading {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    font-size: 1.5rem;
+    color: #666 !important;
+}
+
 .clear-btn {
     background: none;
     border: none;
