@@ -68,13 +68,24 @@ const Settings = () => {
                             </label>
                             <div style={{ display: 'flex', gap: '10px' }}>
                                 <div style={{ flex: 1, position: 'relative' }}>
-                                    <span style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: '#999' }}>$</span>
+                                    {/* Only show $ for price settings */}
+                                    {!setting.key.includes('max_km') && (
+                                        <span style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: '#999' }}>$</span>
+                                    )}
                                     <input 
                                         type="number" 
                                         value={setting.value}
                                         onChange={(e) => handleChange(setting.key, e.target.value)}
-                                        style={{ width: '100%', padding: '12px 12px 12px 30px', borderRadius: '8px', border: '1px solid #ddd' }}
+                                        style={{ 
+                                            width: '100%', 
+                                            padding: `12px 12px 12px ${setting.key.includes('max_km') ? '12px' : '30px'}`, 
+                                            borderRadius: '8px', 
+                                            border: '1px solid #ddd' 
+                                        }}
                                     />
+                                    {setting.key.includes('max_km') && (
+                                        <span style={{ position: 'absolute', right: '12px', top: '50%', transform: 'translateY(-50%)', color: '#999' }}>KM</span>
+                                    )}
                                 </div>
                                 <button 
                                     onClick={() => handleUpdate(setting.key, setting.value)}

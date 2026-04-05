@@ -16,6 +16,8 @@ const Sales = () => {
     // Ticket info
     const [customerName, setCustomerName] = useState('');
     const [saleNotes, setSaleNotes] = useState('');
+    const [deliveryCost, setDeliveryCost] = useState(0);
+    const [isDelivery, setIsDelivery] = useState(false);
     const [currentSaleId, setCurrentSaleId] = useState(null); // To track if we're editing a pending sale
 
     // List of pending tickets
@@ -73,7 +75,8 @@ const Sales = () => {
         }));
     };
 
-    const total = cart.reduce((acc, item) => acc + (parseFloat(item.price) * item.quantity), 0);
+    const totalProducts = cart.reduce((acc, item) => acc + (parseFloat(item.price) * item.quantity), 0);
+    const total = totalProducts + (isDelivery ? parseFloat(deliveryCost || 0) : 0);
     const totalItems = cart.reduce((acc, item) => acc + item.quantity, 0);
 
     const [isTicketOpen, setIsTicketOpen] = useState(false);
@@ -83,6 +86,8 @@ const Sales = () => {
         setCart([]);
         setCustomerName('');
         setSaleNotes('');
+        setDeliveryCost(0);
+        setIsDelivery(false);
         setCurrentSaleId(null);
         setIsTicketOpen(false);
     };
@@ -98,7 +103,7 @@ const Sales = () => {
                 total_amount: total,
                 status: status,
                 customer_name: customerName,
-                table_number: "", // Table number is no longer used, keeping as empty string
+                table_number: isDelivery ? `ENVIO: $${deliveryCost}` : "", 
                 notes: saleNotes,
                 items: cart.map(item => ({
                     menu_entry: item.menu_entry,
@@ -235,6 +240,28 @@ const Sales = () => {
                                     value={saleNotes}
                                     onChange={e => setSaleNotes(e.target.value)}
                                 />
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginTop: '5px' }}>
+                                    <label style={{ display: 'flex', alignItems: 'center', gap: '5px', fontSize: '0.9rem', cursor: 'pointer' }}>
+                                        <input 
+                                            type="checkbox" 
+                                            checked={isDelivery} 
+                                            onChange={(e) => setIsDelivery(e.target.checked)} 
+                                        />
+                                        ¿Es para Envío?
+                                    </label>
+                                    {isDelivery && (
+                                        <div style={{ flex: 1, position: 'relative' }}>
+                                            <span style={{ position: 'absolute', left: '8px', top: '50%', transform: 'translateY(-50%)', fontSize: '0.8rem', color: '#666' }}>$</span>
+                                            <input 
+                                                type="number" 
+                                                placeholder="Costo"
+                                                value={deliveryCost}
+                                                onChange={e => setDeliveryCost(e.target.value)}
+                                                style={{ paddingLeft: '20px', height: '35px' }}
+                                            />
+                                        </div>
+                                    )}
+                                </div>
                             </div>
 
                             <div className="ticket-items">
@@ -260,7 +287,17 @@ const Sales = () => {
 
                             <div className="ticket-footer">
                                 <div className="total-row">
-                                    <span>TOTAL:</span>
+                                    <span>SUBTOTAL:</span>
+                                    <span>${totalProducts.toLocaleString('es-AR')}</span>
+                                </div>
+                                {isDelivery && (
+                                    <div className="total-row" style={{ color: '#f03e3e', fontSize: '0.9rem' }}>
+                                        <span>DIRECCIÓN / ENVÍO:</span>
+                                        <span>+ ${parseFloat(deliveryCost || 0).toLocaleString('es-AR')}</span>
+                                    </div>
+                                )}
+                                <div className="total-row" style={{ borderTop: '2px solid #333', paddingTop: '10px', marginTop: '5px' }}>
+                                    <span>TOTAL FINAL:</span>
                                     <span className="total-price">${total.toLocaleString('es-AR')}</span>
                                 </div>
                                 <div className="pos-actions-grid">

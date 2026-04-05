@@ -15,7 +15,7 @@ function Home() {
   const [deliveryMode, setDeliveryMode] = useState('takeaway'); // 'takeaway' or 'delivery'
   const [deliveryAddress, setDeliveryAddress] = useState('');
   const [deliveryCost, setDeliveryCost] = useState(0);
-  const [deliveryRates, setDeliveryRates] = useState({ base: 1000, km: 200 }); // $1000 + $200/km (approx to match $1500 at 2.5km)
+  const [deliveryRates, setDeliveryRates] = useState({ base: 1000, km: 200, max: 15 });
   const [isCalculating, setIsCalculating] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState(null);
@@ -41,8 +41,13 @@ function Home() {
       const settings = await response.json();
       const base = settings.find(s => s.key === 'delivery_base_price')?.value;
       const km = settings.find(s => s.key === 'delivery_km_price')?.value;
+      const max = settings.find(s => s.key === 'delivery_max_km')?.value;
       if (base && km) {
-        setDeliveryRates({ base: parseFloat(base), km: parseFloat(km) });
+        setDeliveryRates({ 
+          base: parseFloat(base), 
+          km: parseFloat(km),
+          max: parseFloat(max || 15)
+        });
       }
     } catch (err) {
       console.error("Error loading delivery settings:", err);
@@ -165,6 +170,14 @@ function Home() {
 
         const basePrice = deliveryRates.base;
         const perKmPrice = deliveryRates.km;
+        const maxKm = deliveryRates.max;
+
+        if (distance > maxKm) {
+          setErrorMessage(`Lo sentimos, la dirección está a ${distance.toFixed(1)} km y nuestro límite de entrega es de ${maxKm} km.`);
+          setDeliveryCost(0);
+          return;
+        }
+
         const calculatedCost = Math.max(basePrice, Math.ceil((basePrice + (distance * perKmPrice)) / 100) * 100);
         
         setDeliveryCost(calculatedCost);
