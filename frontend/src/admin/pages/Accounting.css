@@ -188,3 +188,77 @@
 .delete-btn:hover {
     transform: scale(1.2);
 }
+
+/* RESPONSIVIDAD MÓVIL (CONTABILIDAD) */
+@media (max-width: 768px) {
+    .accounting-form .form-row {
+        grid-template-columns: 1fr !important;
+    }
+
+    .accounting-table, 
+    .accounting-table thead, 
+    .accounting-table tbody, 
+    .accounting-table th, 
+    .accounting-table td, 
+    .accounting-table tr {
+        display: block !important;
+    }
+
+    .accounting-table thead tr {
+        position: absolute;
+        top: -9999px;
+        left: -9999px;
+    }
+
+    .accounting-table tr {
+        margin-bottom: 25px;
+        border: 2px solid #f0f0f0;
+        border-radius: 16px;
+        padding: 15px;
+        background: #fff;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    }
+
+    .accounting-table td {
+        border: none;
+        position: relative;
+        padding-left: 45% !important;
+        text-align: right !important;
+        padding: 12px 0 !important;
+        min-height: 45px;
+        display: flex;
+        align-items: center;
+        justify-content: flex-end;
+        border-bottom: 1px solid #f9f9f9;
+        font-size: 0.95rem;
+    }
+
+    .accounting-table td:last-child {
+        border-bottom: none;
+    }
+
+    .accounting-table td::before {
+        position: absolute;
+        left: 0;
+        width: 40%;
+        padding-right: 10px;
+        white-space: nowrap;
+        text-align: left !important;
+        font-weight: 800;
+        color: #888;
+        content: attr(data-label);
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .accounting-table td .badge {
+        margin-left: auto;
+        font-size: 0.7rem;
+    }
+
+    .accounting-table td.negative, 
+    .accounting-table td.positive {
+        font-size: 1.1rem;
+    }
+}

@@ -171,34 +171,34 @@ const Accounting = () => {
                                 <tbody>
                                     {manualExpenses.map(e => (
                                         <tr key={`me-${e.id}`}>
-                                            <td>{new Date(e.date).toLocaleDateString()}</td>
-                                            <td><span className="badge badge-manual">Gasto</span></td>
-                                            <td>{e.description}</td>
-                                            <td>{e.category}</td>
-                                            <td className="txt-right negative">-${Math.round(parseFloat(e.amount)).toLocaleString('es-AR')}</td>
-                                            <td>
+                                            <td data-label="Fecha">{new Date(e.date).toLocaleDateString()}</td>
+                                            <td data-label="Tipo"><span className="badge badge-manual">Gasto</span></td>
+                                            <td data-label="Descripción">{e.description}</td>
+                                            <td data-label="Categoría">{e.category}</td>
+                                            <td data-label="Importe" className="txt-right negative">-${Math.round(parseFloat(e.amount)).toLocaleString('es-AR')}</td>
+                                            <td data-label="Acción">
                                                 <button onClick={() => handleDeleteExpense(e.id)} className="delete-btn">×</button>
                                             </td>
                                         </tr>
                                     ))}
                                     {supplierOrders.map(o => (
                                         <tr key={`so-${o.id}`}>
-                                            <td>{new Date(o.date).toLocaleDateString()}</td>
-                                            <td><span className="badge badge-order">Proveedor</span></td>
-                                            <td>{o.supplier_name} (Pedido #{o.id})</td>
-                                            <td>Materia Prima</td>
-                                            <td className="txt-right negative">-${Math.round(parseFloat(o.total_cost)).toLocaleString('es-AR')}</td>
-                                            <td>-</td>
+                                            <td data-label="Fecha">{new Date(o.date).toLocaleDateString()}</td>
+                                            <td data-label="Tipo"><span className="badge badge-order">Proveedor</span></td>
+                                            <td data-label="Descripción">{o.supplier_name} (Pedido #{o.id})</td>
+                                            <td data-label="Categoría">Materia Prima</td>
+                                            <td data-label="Importe" className="txt-right negative">-${Math.round(parseFloat(o.total_cost)).toLocaleString('es-AR')}</td>
+                                            <td data-label="Acción">-</td>
                                         </tr>
                                     ))}
                                     {sales.slice(0, 50).map(s => (
                                         <tr key={`s-${s.id}`}>
-                                            <td>{new Date(s.date).toLocaleDateString()}</td>
-                                            <td><span className="badge badge-income">Ingreso</span></td>
-                                            <td>Venta #{s.id} {s.customer_name ? `(${s.customer_name})` : ''}</td>
-                                            <td>Venta TPV</td>
-                                            <td className="txt-right positive">+${Math.round(parseFloat(s.total_amount)).toLocaleString('es-AR')}</td>
-                                            <td>-</td>
+                                            <td data-label="Fecha">{new Date(s.date).toLocaleDateString()}</td>
+                                            <td data-label="Tipo"><span className="badge badge-income">Ingreso</span></td>
+                                            <td data-label="Descripción">Venta #{s.id} {s.customer_name ? `(${s.customer_name})` : ''}</td>
+                                            <td data-label="Categoría">Venta TPV</td>
+                                            <td data-label="Importe" className="txt-right positive">+${Math.round(parseFloat(s.total_amount)).toLocaleString('es-AR')}</td>
+                                            <td data-label="Acción">-</td>
                                         </tr>
                                     ))}
                                 </tbody>
