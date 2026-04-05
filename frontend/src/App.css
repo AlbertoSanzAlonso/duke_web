@@ -9,7 +9,7 @@
   top: 0;
   left: 0;
   width: 100%;
-  z-index: 1000;
+  z-index: 5000; /* Siempre por encima de todo */
   padding: 1.5rem 0;
   transition: var(--transition-smooth);
   background: transparent;
