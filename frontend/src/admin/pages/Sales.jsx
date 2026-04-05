@@ -250,7 +250,7 @@ const Sales = () => {
                                             checked={isDelivery} 
                                             onChange={(e) => setIsDelivery(e.target.checked)} 
                                         />
-                                        ¿Es para Envío?
+                                        Envío
                                     </label>
                                     {isDelivery && (
                                         <div style={{ flex: 1, position: 'relative' }}>
