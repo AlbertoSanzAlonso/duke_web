@@ -1,5 +1,4 @@
 .app {
-  overflow-x: hidden;
   width: 100%;
 }
 
@@ -88,8 +87,11 @@
   justify-content: center;
   position: relative;
   background: radial-gradient(circle at 70% 50%, rgba(227, 27, 35, 0.1) 0%, rgba(0, 0, 0, 1) 50%);
-  overflow-x: hidden;
-  overflow-y: visible;
+  overflow: visible;
+}
+
+.hero-content {
+  pointer-events: auto;
 }
 
 .hero-content {
