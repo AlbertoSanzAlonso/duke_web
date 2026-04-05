@@ -262,13 +262,10 @@ function Home() {
       }
       
       message += `\nVER DETALLE DEL PEDIDO:\n${ticketUrl}\n\n`;
-      message += `_Este mensaje es una confirmación automática del sistema._`;
 
       if (orderNotes.trim()) {
         message += `\nNOTAS: ${orderNotes}\n`;
       }
-      
-      message += `\nTOTAL: $${totalPrice.toLocaleString('es-AR')}`;
       
       const url = `https://wa.me/${phone}?text=${encodeURIComponent(message)}`;
       window.open(url, '_blank');

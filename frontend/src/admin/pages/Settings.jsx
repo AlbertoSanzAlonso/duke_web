@@ -76,7 +76,7 @@ const Settings = () => {
                 )}
 
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-                    {settings.filter(s => s.key.startsWith('delivery_')).map(setting => (
+                    {settings.map(setting => (
                         <div key={setting.id} style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                             <label style={{ fontWeight: 'bold', textTransform: 'uppercase', fontSize: '0.85rem', color: '#666' }}>
                                 {setting.description || setting.key}
