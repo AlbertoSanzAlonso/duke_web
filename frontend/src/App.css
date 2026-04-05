@@ -611,16 +611,10 @@
   backdrop-filter: blur(10px);
   z-index: 3000;
   display: flex;
-  align-items: flex-end;
+  align-items: center;
   justify-content: center;
-  padding: 0;
-}
-
-@media (min-width: 481px) {
-  .modal-overlay {
-    align-items: center;
-    padding: 1rem;
-  }
+  padding: 1rem;
+  overflow: auto;
 }
 
 .cart-modal {
@@ -950,38 +944,16 @@
 
 @media (max-width: 480px) {
   .product-detail-modal {
-    max-width: 100%;
-    border-radius: 16px 16px 0 0;
-    position: fixed;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    max-height: 85vh;
-    animation: modalSlideUpMobile 0.3s ease;
-    display: flex;
-    flex-direction: column;
-  }
-
-  @keyframes modalSlideUpMobile {
-    from {
-      opacity: 0;
-      transform: translateY(100%);
-    }
-    to {
-      opacity: 1;
-      transform: translateY(0);
-    }
+    max-width: calc(100% - 2rem);
+    max-height: 80vh;
   }
 
   .detail-hero {
-    height: 180px;
-    flex-shrink: 0;
+    height: 150px;
   }
 
   .detail-content {
     padding: 1rem;
-    overflow-y: auto;
-    flex: 1;
   }
 
   .detail-header {
@@ -990,27 +962,15 @@
   }
 
   .detail-header h2 {
-    font-size: 1.5rem;
-  }
-
-  .detail-cat {
-    align-self: flex-start;
+    font-size: 1.3rem;
   }
 
   .detail-desc {
     font-size: 0.9rem;
-    margin-bottom: 1rem;
   }
 
   .detail-footer {
-    flex-direction: row;
-    gap: 0.75rem;
-    padding-top: 1rem;
-    border-top: 1px solid #222;
-  }
-
-  .detail-qty-control {
-    padding: 0.25rem;
+    flex-wrap: wrap;
     gap: 0.5rem;
   }
 
@@ -1019,24 +979,17 @@
     height: 36px;
   }
 
-  .detail-qty {
-    font-size: 1.4rem;
-    min-width: 1.5rem;
-  }
-
   .detail-add-button {
+    width: 100%;
     max-width: none;
-    flex: 1;
-    padding: 0.75rem 1rem;
-    font-size: 1rem;
   }
 }
-  .cart-fab {
-    bottom: 1.5rem;
-    right: 1.5rem;
-    width: 3.5rem;
-    height: 3.5rem;
-  }
+
+.cart-fab {
+  bottom: 1.5rem;
+  right: 1.5rem;
+  width: 3.5rem;
+  height: 3.5rem;
 }
 
 @media (max-width: 480px) {
@@ -1337,20 +1290,13 @@
     right: 1rem;
     width: 3.5rem;
     height: 3.5rem;
+    z-index: 1001;
   }
 
   .cart-modal {
-    max-width: 100%;
-    max-height: 95vh;
-    border-radius: 16px 16px 0 0;
-    position: fixed;
-    bottom: 0;
-    left: 0;
-    right: 0;
-  }
-
-  .modal-overlay.cart-modal-overlay {
-    align-items: flex-end;
+    max-width: calc(100% - 2rem);
+    max-height: 85vh;
+    margin: auto;
   }
 
   .modal-header {
@@ -1358,7 +1304,7 @@
   }
 
   .modal-header h2 {
-    font-size: 1.3rem;
+    font-size: 1.2rem;
   }
 
   .modal-body {
@@ -1377,22 +1323,5 @@
   .confirm-order-btn {
     padding: 1rem;
     font-size: 1rem;
-  }
-
-  .customer-info-section input {
-    padding: 0.75rem;
-    font-size: 1rem;
-  }
-
-  .cart-item-row {
-    padding: 0.75rem 0;
-  }
-
-  .item-main h4 {
-    font-size: 1.1rem;
-  }
-
-  .item-price-unit {
-    font-size: 0.9rem;
   }
 }
