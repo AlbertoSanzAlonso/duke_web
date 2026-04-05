@@ -55,6 +55,21 @@ class GlobalSettingViewSet(viewsets.ModelViewSet):
     serializer_class = GlobalSettingSerializer
     lookup_field = 'key'
 
+    from rest_framework.decorators import action
+    @action(detail=False, methods=['post'], url_path='setup-defaults')
+    def setup_defaults(self, request):
+        defaults = [
+            {'key': 'delivery_base_price', 'value': '1000', 'description': 'Precio base del envío'},
+            {'key': 'delivery_km_price', 'value': '200', 'description': 'Precio por cada KM recorrido'},
+            {'key': 'delivery_max_km', 'value': '15', 'description': 'Distancia máxima permitida (KM)'}
+        ]
+        created_count = 0
+        for d in defaults:
+            obj, created = GlobalSetting.objects.get_or_create(key=d['key'], defaults={'value': d['value'], 'description': d['description']})
+            if created: created_count += 1
+        
+        return Response({'message': f'Configuraciones inicializadas. {created_count} nuevas creadas.', 'total': GlobalSetting.objects.count()})
+
 # --- REAL-TIME ASYNC LOGIC ---
 
 async def OrderStreamView(request):

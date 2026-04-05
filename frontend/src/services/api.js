@@ -204,3 +204,11 @@ export const updateSetting = async (key, value) => {
     if (!response.ok) throw new Error('Error al actualizar configuración');
     return await response.json();
 };
+
+export const setupDefaultSettings = async () => {
+    const response = await fetch(`${API_URL}/settings/setup-defaults/`, {
+        method: 'POST'
+    });
+    if (!response.ok) throw new Error('Error al inicializar configuraciones');
+    return await response.json();
+};

@@ -70,8 +70,30 @@ const Settings = () => {
 
                 {error && (
                     <div style={{ padding: '20px', background: '#ffeef0', border: '1px solid #ff9fa6', borderRadius: '8px', color: '#f03e3e', marginBottom: '20px' }}>
-                        Error: {error}
-                        <button onClick={loadSettings} style={{ marginLeft: '10px', cursor: 'pointer', background: 'transparent', border: 'underline', color: '#333' }}>Reintentar</button>
+                        <p style={{ margin: '0 0 10px 0', fontWeight: 'bold' }}>Error: {error}</p>
+                        <div style={{ display: 'flex', gap: '10px' }}>
+                            <button onClick={loadSettings} style={{ cursor: 'pointer', background: '#fff', border: '1px solid #ff9fa6', padding: '5px 15px', borderRadius: '4px' }}>Reintentar</button>
+                            {error.includes('vacía') && (
+                                <button 
+                                    onClick={async () => {
+                                        setIsSaving(true);
+                                        try {
+                                            const { setupDefaultSettings } = await import('../../services/api');
+                                            await setupDefaultSettings();
+                                            setToast({ message: 'Configuraciones inicializadas', type: 'success' });
+                                            loadSettings();
+                                        } catch (err) {
+                                            setToast({ message: err.message, type: 'error' });
+                                        } finally {
+                                            setIsSaving(false);
+                                        }
+                                    }}
+                                    style={{ cursor: 'pointer', background: '#f03e3e', color: 'white', border: 'none', padding: '5px 15px', borderRadius: '4px', fontWeight: 'bold' }}
+                                >
+                                    REPARAR CONFIGURACIÓN
+                                </button>
+                            )}
+                        </div>
                     </div>
                 )}
 
