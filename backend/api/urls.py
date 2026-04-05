@@ -1,6 +1,6 @@
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
-from .views import ProductViewSet, MenuEntryViewSet, SaleViewSet, ExpenseViewSet, InventoryItemViewSet, SupplierOrderViewSet
+from .views import ProductViewSet, MenuEntryViewSet, SaleViewSet, ExpenseViewSet, InventoryItemViewSet, SupplierOrderViewSet, OrderStreamView
 
 router = DefaultRouter()
 router.register(r'products', ProductViewSet)
@@ -12,4 +12,5 @@ router.register(r'supplier-orders', SupplierOrderViewSet)
 
 urlpatterns = [
     path('', include(router.urls)),
+    path('orders-stream/', OrderStreamView, name='order_stream'),
 ]
