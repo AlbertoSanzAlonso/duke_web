@@ -12,7 +12,7 @@ const Sales = () => {
     
     // Ticket info
     const [customerName, setCustomerName] = useState('');
-    const [tableNumber, setTableNumber] = useState('');
+    const [saleNotes, setSaleNotes] = useState('');
     const [currentSaleId, setCurrentSaleId] = useState(null); // To track if we're editing a pending sale
 
     // List of pending tickets
@@ -79,21 +79,24 @@ const Sales = () => {
     const resetCart = () => {
         setCart([]);
         setCustomerName('');
-        setTableNumber('');
+        setSaleNotes('');
         setCurrentSaleId(null);
         setIsTicketOpen(false);
     };
 
     const handleSaveTicket = async (status = 'COMPLETED') => {
-        if (cart.length === 0) return;
+        if (!customerName.trim()) {
+            alert("El nombre del cliente es obligatorio para identificar el ticket.");
+            return;
+        }
         setIsSaving(true);
         try {
             const saleData = {
                 total_amount: total,
                 status: status,
                 customer_name: customerName,
-                table_number: tableNumber,
-                notes: currentSaleId ? "Actualizado desde TPV" : "Venta desde TPV",
+                table_number: "", // Table number is no longer used, keeping as empty string
+                notes: saleNotes,
                 items: cart.map(item => ({
                     menu_entry: item.menu_entry,
                     quantity: item.quantity,
@@ -125,7 +128,7 @@ const Sales = () => {
             quantity: item.quantity
         })));
         setCustomerName(ticket.customer_name || '');
-        setTableNumber(ticket.table_number || '');
+        setSaleNotes(ticket.notes || '');
         setCurrentSaleId(ticket.id);
         setViewMode('tpv');
         setIsTicketOpen(true);
@@ -212,15 +215,16 @@ const Sales = () => {
                             <div className="ticket-meta">
                                 <input 
                                     type="text" 
-                                    placeholder="Cliente / Nombre" 
+                                    placeholder="Cliente / Nombre * (Obligatorio)" 
                                     value={customerName}
                                     onChange={e => setCustomerName(e.target.value)}
+                                    className={!customerName && cart.length > 0 ? "input-required" : ""}
                                 />
                                 <input 
                                     type="text" 
-                                    placeholder="Mesa #" 
-                                    value={tableNumber}
-                                    onChange={e => setTableNumber(e.target.value)}
+                                    placeholder="Anotaciones (Opcional)" 
+                                    value={saleNotes}
+                                    onChange={e => setSaleNotes(e.target.value)}
                                 />
                             </div>
 

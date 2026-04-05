@@ -173,14 +173,25 @@
 .ticket-meta {
     padding: 1rem;
     display: flex;
+    flex-direction: column;
     gap: 10px;
     border-bottom: 1px dashed #eee;
 }
 
+.ticket-meta input {
+    flex: 1;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    font-size: 0.95rem;
+}
+
+.input-required {
+    border-color: #ff4d4d !important;
+    background-color: #fff5f5 !important;
+}
+
 @media (max-width: 992px) {
-    .ticket-meta {
-        flex-direction: column;
-    }
     .ticket-meta input {
         width: 100% !important;
     }
