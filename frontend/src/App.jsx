@@ -1,6 +1,7 @@
 import React from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import Home from './pages/Home';
+import About from './pages/About';
 import AdminLayout from './admin/AdminLayout';
 import Dashboard from './admin/pages/Dashboard';
 import Products from './admin/pages/Products';
@@ -19,6 +20,7 @@ function App() {
       <Routes>
         {/* Consumer Site */}
         <Route path="/" element={<Home />} />
+        <Route path="/nosotros" element={<About />} />
 
         {/* Admin Dashboard */}
         <Route path="/admin" element={<AdminLayout />}>

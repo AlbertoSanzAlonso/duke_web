@@ -165,7 +165,7 @@ function Home() {
           <img src="/brand/duke burger 2 negativo.png" alt="Duke Logo" className="nav-logo" />
           <div className={`nav-links ${isMobileMenuOpen ? 'mobile-open' : ''}`}>
             <a href="#menu" onClick={() => setIsMobileMenuOpen(false)}>CARTA</a>
-            <a href="#about" onClick={() => setIsMobileMenuOpen(false)}>NOSOTROS</a>
+            <a href="/nosotros" onClick={() => setIsMobileMenuOpen(false)}>NOSOTROS</a>
             <button className="cta-button" onClick={() => setIsMobileMenuOpen(false)}>¡PEDÍ YA!</button>
           </div>
           <div className="mobile-toggle" onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}>
@@ -184,8 +184,8 @@ function Home() {
             </h1>
             <p className="hero-subtitle">Sabor brutal. Espíritu Duke.</p>
             <div className="hero-actions">
-              <button className="main-button">VER MENÚ</button>
-              <button className="outline-button">LOCAL</button>
+              <button className="main-button" onClick={() => document.getElementById('menu')?.scrollIntoView({ behavior: 'smooth' })}>VER MENÚ</button>
+              <button className="outline-button" onClick={() => document.getElementById('menu')?.scrollIntoView({ behavior: 'smooth' })}>LOCAL</button>
               <button className="delivery-button">
                 A DOMICILIO
               </button>
