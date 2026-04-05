@@ -162,16 +162,15 @@ function Home() {
       <nav className={`navbar ${isScrolled ? 'scrolled' : ''}`}>
         <div className="nav-container">
           <img src="/brand/duke burger 2 negativo.png" alt="Duke Logo" className="nav-logo" />
-          <div className={`nav-links ${isMobileMenuOpen ? 'mobile-open' : ''}`}>
-            <a href="#menu" onClick={() => setIsMobileMenuOpen(false)}>CARTA</a>
-            <a href="#about" onClick={() => setIsMobileMenuOpen(false)}>NOSOTROS</a>
-            <button className="cta-button" onClick={() => {
-              setIsPromosOpen(true);
-              setIsMobileMenuOpen(false);
-            }}>PROMOS</button>
-          </div>
-          <div className="mobile-toggle" onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}>
-            {isMobileMenuOpen ? <X size={28} color="white" /> : <Menu size={28} color="white" />}
+          
+          <div className="nav-actions">
+            <div className="nav-links-desktop">
+              <a href="#menu">CARTA</a>
+              <a href="#about">NOSOTROS</a>
+            </div>
+            <button className="cta-button" onClick={() => setIsPromosOpen(true)}>
+              PROMOS
+            </button>
           </div>
         </div>
       </nav>

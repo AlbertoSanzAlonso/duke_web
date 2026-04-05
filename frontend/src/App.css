@@ -39,19 +39,24 @@
   filter: drop-shadow(0 0 5px rgba(255, 255, 255, 0.2));
 }
 
-.nav-links {
+.nav-actions {
   display: flex;
-  gap: 3rem;
   align-items: center;
+  gap: 3rem;
 }
 
-.nav-links a {
+.nav-links-desktop {
+  display: flex;
+  gap: 3rem;
+}
+
+.nav-links-desktop a {
   font-family: var(--font-heading);
   font-size: 1.2rem;
   letter-spacing: 2px;
 }
 
-.nav-links a:hover {
+.nav-links-desktop a:hover {
   color: var(--color-primary);
 }
 
@@ -331,18 +336,15 @@
 
 .card-image-container {
   width: 100%;
-  height: 220px; /* Consistently high enough */
-  background: #0a0a0a; /* Dark background to fill gaps */
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  height: 200px; /* Adjusted height for better aspect ratio */
+  background: #111;
   overflow: hidden;
 }
 
 .card-image-container img {
   width: 100%;
   height: 100%;
-  object-fit: contain; /* Shows full image without zoom/cropping */
+  object-fit: cover; /* Fills the space without top/bottom margins */
   transition: transform 0.4s ease;
 }
 
@@ -460,52 +462,18 @@
     left: 5%;
   }
 
-  .mobile-toggle {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin-left: 1rem;
-    padding: 0.5rem;
-    background: var(--color-primary);
-    border-radius: 4px;
+  .nav-links-desktop {
+    display: none; /* No links on mobile */
   }
 
-  .nav-links {
-    display: flex;
-    flex-direction: column;
-    position: absolute;
-    top: 100%;
-    left: 0;
-    width: 100%;
-    background: rgba(0, 0, 0, 0.95);
-    padding: 2rem 0;
-    gap: 2rem;
-    backdrop-filter: blur(10px);
-    transition: all 0.3s ease-in-out;
-    transform: translateY(-150%);
-    opacity: 0;
-    visibility: hidden;
-  }
-
-  .nav-links.mobile-open {
-    transform: translateY(0);
-    opacity: 1;
-    visibility: visible;
-  }
-
-  .nav-links a {
-    display: block;
-    font-size: 1.5rem;
+  .nav-actions {
+    gap: 1rem;
   }
 
   .cta-button {
-    padding: 12px 24px;
-    font-size: 14px;
+    padding: 10px 18px;
+    font-size: 1rem;
     font-weight: 900;
-    transform: skew(-10deg);
-    white-space: nowrap;
-    border-radius: 4px;
-    letter-spacing: 0;
   }
 
   .cta-button:hover {
