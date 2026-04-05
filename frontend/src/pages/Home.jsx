@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Menu, X, ShoppingCart, Minus, Plus, MessageCircle } from 'lucide-react';
 import { fetchMenuEntries, createSale } from '../services/api';
 
@@ -12,27 +12,14 @@ function Home() {
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [customerName, setCustomerName] = useState('');
   const [isSaving, setIsSaving] = useState(false);
-  const [selectedProduct, setSelectedProduct] = useState(null);
-  const [modalQuantity, setModalQuantity] = useState(1);
-  const rafRef = useRef(null);
 
   useEffect(() => {
     const handleScroll = () => {
-      if (rafRef.current) return;
-      
-      rafRef.current = requestAnimationFrame(() => {
-        setIsScrolled(window.scrollY > 50);
-        rafRef.current = null;
-      });
+      setIsScrolled(window.scrollY > 50);
     };
-    
-    window.addEventListener('scroll', handleScroll, { passive: true });
+    window.addEventListener('scroll', handleScroll);
     loadMenu();
-    
-    return () => {
-      window.removeEventListener('scroll', handleScroll);
-      if (rafRef.current) cancelAnimationFrame(rafRef.current);
-    };
+    return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
   const loadMenu = async () => {
@@ -228,14 +215,7 @@ function Home() {
               <p style={{ gridColumn: '1/-1', textAlign: 'center', padding: '50px' }}>No hay platos disponibles en este momento.</p>
             ) : (
               currentItems.map(item => (
-                <div 
-                  key={item.id} 
-                  className="menu-card hover-lift"
-                  onClick={() => {
-                    setModalQuantity(cart[item.id]?.quantity || 1);
-                    setSelectedProduct(item);
-                  }}
-                >
+                <div key={item.id} className="menu-card hover-lift">
                    {item.image && (
                     <div className="card-image-container" style={{ width: '100%', height: '150px', overflow: 'hidden' }}>
                       <img src={item.image} alt={item.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
@@ -248,11 +228,11 @@ function Home() {
                         <span className="item-badge">{cart[item.id].quantity}x</span>
                       )}
                     </div>
-                    <p className="card-desc-short">{item.description}</p>
+                    <p>{item.description}</p>
                   </div>
                   <div className="card-footer">
                     <span className="price">${parseFloat(item.price).toLocaleString('es-AR')}</span>
-                    <button className="add-btn" onClick={(e) => { e.stopPropagation(); addToCart(item); }}>+</button>
+                    <button className="add-btn" onClick={() => addToCart(item)}>+</button>
                   </div>
                 </div>
               ))
@@ -355,62 +335,6 @@ function Home() {
                   </>
                 )}
               </button>
-            </div>
-          </div>
-        </div>
-      )}
-      {/* Product Detail Modal */}
-      {selectedProduct && (
-        <div className="modal-overlay" onClick={() => setSelectedProduct(null)}>
-          <div className="product-detail-modal" onClick={e => e.stopPropagation()}>
-            <button className="close-modal-detail" onClick={() => setSelectedProduct(null)}>
-              <X size={24} />
-            </button>
-            <div className="detail-hero">
-              {selectedProduct.image ? (
-                <img src={selectedProduct.image} alt={selectedProduct.name} />
-              ) : (
-                <div className="detail-no-img">🍔</div>
-              )}
-              <div className="detail-price-badge">
-                ${parseFloat(selectedProduct.price).toLocaleString('es-AR')}
-              </div>
-            </div>
-            <div className="detail-content">
-              <div className="detail-header">
-                <h2>{selectedProduct.name}</h2>
-                <span className="detail-cat">{activeCategory}</span>
-              </div>
-              <p className="detail-desc">{selectedProduct.description || 'Nuestra receta secreta preparada con los mejores ingredientes.'}</p>
-              
-              <div className="detail-footer">
-                <div className="detail-qty-control">
-                  <button 
-                    onClick={() => setModalQuantity(q => Math.max(1, q - 1))}
-                  >
-                    <Minus size={20} />
-                  </button>
-                  <span className="detail-qty">{modalQuantity}</span>
-                  <button onClick={() => setModalQuantity(q => q + 1)}>
-                    <Plus size={20} />
-                  </button>
-                </div>
-                <button 
-                  className={`detail-add-button ${modalQuantity === cart[selectedProduct.id]?.quantity ? 'detail-add-button-disabled' : ''}`}
-                  disabled={modalQuantity === cart[selectedProduct.id]?.quantity}
-                  onClick={() => {
-                    setCart(prev => ({
-                      ...prev,
-                      [selectedProduct.id]: {
-                        ...selectedProduct,
-                        quantity: modalQuantity
-                      }
-                    }));
-                  }}
-                >
-                  AGREGAR
-                </button>
-              </div>
             </div>
           </div>
         </div>
