@@ -6,6 +6,7 @@ function Home() {
   const [activeCategory, setActiveCategory] = useState('Burgers');
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [menuData, setMenuData] = useState({});
   const [loading, setLoading] = useState(true);
   const [cart, setCart] = useState({});
   const [isCartOpen, setIsCartOpen] = useState(false);
