@@ -103,3 +103,14 @@ export const deleteInventoryItem = async (id) => {
     if (!response.ok) throw new Error('Error al eliminar elemento');
     return true;
 };
+
+// SALES (TPV)
+export const createSale = async (data) => {
+    const response = await fetch(`${API_URL}/sales/`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
+    });
+    if (!response.ok) throw new Error('Error al registrar la venta');
+    return await response.json();
+};
