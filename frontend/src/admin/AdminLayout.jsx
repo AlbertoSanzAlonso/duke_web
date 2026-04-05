@@ -21,6 +21,7 @@ const AdminLayout = () => {
 
   const menuItems = [
     { name: 'Dashboard', path: '/admin', icon: <LayoutDashboard size={20} /> },
+    { name: 'Configuración', path: '/admin/config', icon: <SettingsIcon size={20} /> },
     { name: 'TPV', path: '/admin/tpv', icon: <ShoppingCart size={20} /> },
     { name: 'Pedidos Clientes', path: '/admin/pedidos-clientes', icon: <TrendingUp size={20} /> },
     { name: 'Productos', path: '/admin/productos', icon: <Package size={20} /> },
@@ -30,7 +31,6 @@ const AdminLayout = () => {
     { name: 'Pedidos Proveedor', path: '/admin/pedidos', icon: <Truck size={20} /> },
     { name: 'Contabilidad', path: '/admin/contabilidad', icon: <TrendingUp size={20} /> },
     { name: 'Historial', path: '/admin/historial', icon: <History size={20} /> },
-    { name: 'Configuración', path: '/admin/config', icon: <SettingsIcon size={20} /> },
   ];
 
   return (
