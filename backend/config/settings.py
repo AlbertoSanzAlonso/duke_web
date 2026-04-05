@@ -33,10 +33,7 @@ SECRET_KEY = env('SECRET_KEY', default='django-insecure-qqu8(cjjo4a+k^&thpel88lm
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = env('DEBUG', default=True)
 
-ALLOWED_HOSTS = ['*'] # En entornos de desarrollo/producción actuales, permitimos todos para facilitar la resolución de errores 400
-# De todas formas, lo ideal es que venga de env, pero si no, este default (*) previene el 400
-if env.list('ALLOWED_HOSTS', default=[]):
-    ALLOWED_HOSTS = env.list('ALLOWED_HOSTS')
+ALLOWED_HOSTS = ['*'] # Forzado para diagnosticar error 400
 
 # Trust proxy for HTTPS so absolute URLs use https:// instead of http://
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
