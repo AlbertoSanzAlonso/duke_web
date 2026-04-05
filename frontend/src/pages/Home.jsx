@@ -12,6 +12,10 @@ function Home() {
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [customerName, setCustomerName] = useState('');
   const [orderNotes, setOrderNotes] = useState('');
+  const [deliveryMode, setDeliveryMode] = useState('takeaway'); // 'takeaway' or 'delivery'
+  const [deliveryAddress, setDeliveryAddress] = useState('');
+  const [deliveryCost, setDeliveryCost] = useState(0);
+  const [isCalculating, setIsCalculating] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [isPromosOpen, setIsPromosOpen] = useState(false);
@@ -98,7 +102,45 @@ function Home() {
 
   const cartItems = Object.values(cart);
   const totalItems = cartItems.reduce((acc, item) => acc + item.quantity, 0);
-  const totalPrice = cartItems.reduce((acc, item) => acc + (item.price * item.quantity), 0);
+  const totalPriceWithoutDelivery = cartItems.reduce((acc, item) => acc + (item.price * item.quantity), 0);
+  const totalPrice = totalPriceWithoutDelivery + (deliveryMode === 'delivery' ? deliveryCost : 0);
+
+  const calculateDistance = async (address) => {
+    if (!address.trim()) return;
+    setIsCalculating(true);
+    try {
+      const geocodeUrl = `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(address + ', San Juan, Argentina')}&format=json&limit=1`;
+      const response = await fetch(geocodeUrl);
+      const data = await response.json();
+
+      if (data && data[0]) {
+        const destLat = parseFloat(data[0].lat);
+        const destLon = parseFloat(data[0].lon);
+        const originLat = -31.5375; 
+        const originLon = -68.5364;
+
+        const R = 6371;
+        const dLat = (destLat - originLat) * Math.PI / 180;
+        const dLon = (destLon - originLon) * Math.PI / 180;
+        const a = Math.sin(dLat/2) * Math.sin(dLat/2) + Math.cos(originLat * Math.PI / 180) * Math.cos(destLat * Math.PI / 180) * Math.sin(dLon/2) * Math.sin(dLon/2);
+        const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+        const distance = R * c;
+
+        const basePrice = 1200;
+        const perKmPrice = 450;
+        const calculatedCost = Math.max(basePrice, Math.ceil((basePrice + (distance * perKmPrice)) / 100) * 100);
+        
+        setDeliveryCost(calculatedCost);
+        setDeliveryAddress(data[0].display_name.split(',').slice(0, 3).join(','));
+      } else {
+        alert("No encontramos esa dirección. Intenta añadir más detalles.");
+      }
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setIsCalculating(false);
+    }
+  };
 
   const sendWhatsAppOrder = async () => {
     if (!customerName.trim()) {
@@ -113,8 +155,8 @@ function Home() {
         total_amount: totalPrice,
         status: 'PENDING',
         customer_name: customerName,
-        table_number: "", // Web app doesn't have tables
-        notes: orderNotes || "Pedido desde la Web",
+        table_number: deliveryMode === 'delivery' ? `DELIVERY: ${deliveryAddress}` : "RETIRO EN LOCAL",
+        notes: orderNotes ? `${orderNotes}` : "Pedido desde la Web",
         items: cartItems.map(item => ({
           menu_entry: item.id,
           quantity: item.quantity,
@@ -126,11 +168,21 @@ function Home() {
 
       // 2. Format WhatsApp Message
       const phone = "5492645142897";
-      let message = `Hola Duke Burger, soy ${customerName}.\nQuiero hacer este pedido desde la web:\n\n`;
+      let message = `¡Hola Duke Burger! Soy ${customerName}.\nQuiero hacer este pedido desde la web:\n\n`;
+      message += `MÉTODO: ${deliveryMode === 'delivery' ? 'A DOMICILIO' : 'RETIRO EN LOCAL'}\n`;
+      if (deliveryMode === 'delivery') {
+        message += `DIRECCIÓN: ${deliveryAddress}\n`;
+      }
+      message += `\n`;
+      
       cartItems.forEach(item => {
         message += `- ${item.quantity}x ${item.name} ($${(item.price * item.quantity).toLocaleString('es-AR')})\n`;
       });
       
+      if (deliveryMode === 'delivery') {
+        message += `- Envío: $${deliveryCost.toLocaleString('es-AR')}\n`;
+      }
+
       if (orderNotes.trim()) {
         message += `\nNOTAS: ${orderNotes}\n`;
       }
@@ -144,6 +196,8 @@ function Home() {
       setCart({});
       setCustomerName('');
       setOrderNotes('');
+      setDeliveryAddress('');
+      setDeliveryCost(0);
       setIsCartOpen(false);
     } catch (error) {
       console.error("Error creating sale:", error);
@@ -303,10 +357,54 @@ function Home() {
             
             <div className="modal-body">
               <div className="customer-info-section">
+                <label>OPCIONES DE ENTREGA</label>
+                <div style={{ display: 'flex', gap: '5px', marginBottom: '15px' }}>
+                  <button 
+                    onClick={() => setDeliveryMode('takeaway')} 
+                    style={{ flex: 1, padding: '10px', background: deliveryMode === 'takeaway' ? 'var(--color-primary)' : '#222', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer', fontWeight: 'bold' }}
+                  >
+                    Retiro
+                  </button>
+                  <button 
+                    onClick={() => setDeliveryMode('delivery')} 
+                    style={{ flex: 1, padding: '10px', background: deliveryMode === 'delivery' ? 'var(--color-primary)' : '#222', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer', fontWeight: 'bold' }}
+                  >
+                    Envío
+                  </button>
+                </div>
+
+                {deliveryMode === 'delivery' && (
+                  <div style={{ marginTop: '15px' }}>
+                    <div style={{ display: 'flex', gap: '10px' }}>
+                      <input 
+                        type="text" 
+                        placeholder="Ej: Entre Rios 540"
+                        value={deliveryAddress}
+                        onChange={e => setDeliveryAddress(e.target.value)}
+                        style={{ flex: 1, fontSize: '0.9rem' }}
+                      />
+                      <button 
+                        onClick={() => calculateDistance(deliveryAddress)}
+                        disabled={isCalculating}
+                        style={{ padding: '0 10px', background: '#333', color: 'white', border: 'none', borderRadius: '4px', fontSize: '0.8rem', cursor: 'pointer' }}
+                      >
+                        {isCalculating ? 'Calculando...' : 'Calcular'}
+                      </button>
+                    </div>
+                    {deliveryCost > 0 && (
+                      <p style={{ fontSize: '0.8rem', color: 'var(--color-primary)', marginTop: '10px' }}>
+                        Costo de envío estimado: <strong>${deliveryCost.toLocaleString('es-AR')}</strong>
+                      </p>
+                    )}
+                  </div>
+                )}
+              </div>
+
+              <div className="customer-info-section">
                 <label>TU NOMBRE *</label>
                 <input 
                   type="text" 
-                  placeholder="Ej: Alberto Sanz"
+                  placeholder="Tu nombre"
                   value={customerName}
                   onChange={e => setCustomerName(e.target.value)}
                   className={!customerName && cartItems.length > 0 ? "input-highlight" : ""}
@@ -316,7 +414,7 @@ function Home() {
               <div className="customer-info-section">
                 <label>COMENTARIOS (Cambios, aclaraciones...)</label>
                 <textarea 
-                  placeholder="Ej: Sin cebolla la burger, cambiar bebida por Sprite..."
+                  placeholder="Ej: Sin cebolla la burger..."
                   value={orderNotes}
                   onChange={e => setOrderNotes(e.target.value)}
                 />
