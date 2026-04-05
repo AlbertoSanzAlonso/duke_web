@@ -95,11 +95,19 @@ body.admin-mode {
 }
 
 .admin-card {
-  background: #fff;
-  border-radius: 8px;
-  padding: 20px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    background: #fff;
+    border-radius: 8px;
+    padding: 20px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    max-width: 100%;
+    overflow: hidden;
 }
+
+/* Prevent horizontal scroll on mobile */
+body, .admin-container, .admin-main, .admin-content {
+    overflow-x: hidden;
+}
+
 
 .admin-mobile-toggle {
   display: none;

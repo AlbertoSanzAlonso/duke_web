@@ -177,14 +177,20 @@
     border-bottom: 1px dashed #eee;
 }
 
-.ticket-meta input {
-    flex: 1;
-    padding: 8px;
-    border: 1px solid #ddd;
-    border-radius: 4px;
-    font-size: 0.9rem;
+@media (max-width: 992px) {
+    .ticket-meta {
+        flex-direction: column;
+    }
+    .ticket-meta input {
+        width: 100% !important;
+    }
+    .ticket-footer {
+        position: sticky;
+        bottom: 0;
+        background: #fff;
+        padding-bottom: 1rem;
+    }
 }
-
 /* Grid de Acciones (Guardar/Cobrar) */
 .pos-actions-grid {
     display: grid;
