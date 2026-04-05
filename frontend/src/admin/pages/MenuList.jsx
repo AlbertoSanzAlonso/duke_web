@@ -144,7 +144,8 @@ function MenuList() {
                                 boxShadow: hoveredId === entry.id ? '0 12px 30px rgba(0,0,0,0.1)' : '0 4px 15px rgba(0,0,0,0.05)',
                                 display: 'flex',
                                 flexDirection: 'column',
-                                transition: 'all 0.3s ease'
+                                transition: 'all 0.3s ease',
+                                position: 'relative'
                             }}>
                                 <div style={{ width: '100%', height: '220px', backgroundColor: '#f0f0f0', display: 'flex', justifyContent: 'center', alignItems: 'center', position: 'relative' }}>
                                     {entry.product?.image ? (
@@ -153,9 +154,16 @@ function MenuList() {
                                         <span style={{ color: '#999', fontSize: '0.9rem' }}>Sin Fotografía</span>
                                     )}
                                     
+                                    {/* Modal Overlay for Description */}
+                                    {hoveredId === entry.id && (
+                                        <div style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(255,255,255,0.95)', padding: '20px', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1, textAlign: 'center' }}>
+                                            <p style={{ margin: 0, color: '#333', fontSize: '0.95rem', lineHeight: '1.5' }}>{entry.product?.description || 'Sin descripción disponible.'}</p>
+                                        </div>
+                                    )}
+
                                     {/* Inline Price Edit / View */}
                                     {editingId === entry.id ? (
-                                        <div style={{ position: 'absolute', top: '10px', right: '10px', display: 'flex', gap: '5px', background: 'white', padding: '4px', borderRadius: '8px', boxShadow: '0 4px 15px rgba(0,0,0,0.2)' }}>
+                                        <div style={{ position: 'absolute', top: '10px', right: '10px', display: 'flex', gap: '5px', background: 'white', padding: '4px', borderRadius: '8px', boxShadow: '0 4px 15px rgba(0,0,0,0.2)', zIndex: 2 }}>
                                             <input 
                                                 type="number" 
                                                 step="0.01" 
@@ -189,7 +197,7 @@ function MenuList() {
                                                 background: 'var(--admin-primary)', color: 'white', 
                                                 padding: '6px 12px', borderRadius: '20px', 
                                                 fontWeight: 'bold', boxShadow: '0 2px 10px rgba(0,0,0,0.2)',
-                                                cursor: 'pointer', userSelect: 'none', transition: 'transform 0.1s'
+                                                cursor: 'pointer', userSelect: 'none', transition: 'transform 0.1s', zIndex: 2
                                             }}
                                             onMouseOver={(e) => { e.target.style.transform = 'scale(1.05)'; }}
                                             onMouseOut={(e) => { e.target.style.transform = 'scale(1)'; }}
@@ -198,22 +206,12 @@ function MenuList() {
                                         </div>
                                     )}
 
-                                    <div style={{ position: 'absolute', top: '10px', left: '10px', background: 'rgba(0,0,0,0.7)', color: 'white', padding: '4px 10px', borderRadius: '4px', fontSize: '0.8rem' }}>
+                                    <div style={{ position: 'absolute', top: '10px', left: '10px', background: 'rgba(0,0,0,0.7)', color: 'white', padding: '4px 10px', borderRadius: '4px', fontSize: '0.8rem', zIndex: 2 }}>
                                         {entry.category}
                                     </div>
                                 </div>
                                 <div style={{ padding: '20px', flex: '1', display: 'flex', flexDirection: 'column' }}>
                                     <h3 style={{ margin: '0 0 10px 0', fontSize: '1.4rem', color: '#222' }}>{entry.product?.name}</h3>
-                                    
-                                    <div style={{ 
-                                        height: hoveredId === entry.id ? 'auto' : '0', 
-                                        opacity: hoveredId === entry.id ? 1 : 0, 
-                                        overflow: 'hidden', 
-                                        transition: 'opacity 0.2s ease-in-out',
-                                        marginBottom: hoveredId === entry.id ? '20px' : '0' 
-                                    }}>
-                                        <p style={{ margin: '0', color: '#666', fontSize: '0.95rem', lineHeight: '1.4' }}>{entry.product?.description}</p>
-                                    </div>
                                     
                                     <div style={{ display: 'flex', gap: '10px', marginTop: 'auto' }}>
                                         <button 

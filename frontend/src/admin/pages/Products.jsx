@@ -104,15 +104,12 @@ function Products() {
                     onChange={e => setDescription(e.target.value)} 
                     style={{ padding: '8px', flex: 2, minWidth: '200px' }}
                 />
-                <div style={{ flex: '1 1 200px' }}>
-                    <label style={{ fontSize: '12px', color: '#666', display: 'block' }}>Fotografía</label>
-                    <input 
-                        type="file" 
-                        accept="image/*"
-                        onChange={e => setImage(e.target.files[0])} 
-                        style={{ padding: '4px', width: '100%' }}
-                    />
-                </div>
+                <input 
+                    type="file" 
+                    accept="image/*"
+                    onChange={e => setImage(e.target.files[0])} 
+                    style={{ padding: '8px', flex: 1, minWidth: '150px' }}
+                />
                 <button type="submit" className="main-button" style={{ padding: '8px 16px', background: 'var(--admin-primary)', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer' }}>
                     Crear Producto
                 </button>

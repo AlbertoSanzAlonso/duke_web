@@ -488,16 +488,28 @@
         display: flex;
     }
 
+    .pos-products-grid {
+        grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+        gap: 0.8rem;
+        align-items: start; /* Evita que las fichas se estiren verticalmente */
+    }
+
+    .pos-product-card {
+        height: min-content !important;
+    }
+
     .pos-ticket-sidebar {
         position: fixed;
         top: 0;
         right: -100%;
         width: 100%;
         max-width: 100% !important;
-        height: 100vh;
+        height: 100%; /* Mejor que 100vh en móviles */
         z-index: 1001;
         transition: right 0.3s ease;
         border-radius: 0;
+        display: flex;
+        flex-direction: column;
     }
 
     .pos-ticket-sidebar.open {
@@ -513,17 +525,22 @@
         cursor: pointer;
     }
 
+    .ticket-items {
+        flex: 1; /* Esto empuja el footer hacia abajo pero permitiendo scroll */
+        overflow-y: auto;
+    }
+
     .ticket-footer {
-        padding-bottom: 3rem; /* Espacio para el borde inferior del móvil */
+        padding: 1rem;
+        padding-bottom: env(safe-area-inset-bottom, 1rem); /* Manejo de notch/barra de navegación */
+        background: #fff;
+        border-top: 1px solid #eee;
+        position: sticky;
+        bottom: 0;
     }
 
-    .pos-products-grid {
-        grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
-        gap: 0.8rem;
-    }
-
-    .pos-product-card {
-        height: auto;
+    .total-price {
+        font-size: 1.5rem; /* Un poco más pequeño en móvil para que no rompa */
     }
 
     .pos-product-img-container {
