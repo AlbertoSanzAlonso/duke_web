@@ -939,6 +939,8 @@
 
   .detail-add-button {
     max-width: 100%;
+    width: 92%; /* Air on the sides on mobile */
+    margin: 0 auto; /* Centered */
   }
 }
   .cart-fab {
