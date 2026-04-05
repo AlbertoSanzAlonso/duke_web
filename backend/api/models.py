@@ -3,6 +3,9 @@ from io import BytesIO
 from PIL import Image
 from django.core.files.base import ContentFile
 from django.db import models
+from pillow_heif import register_heif_opener
+
+register_heif_opener()
 
 class Product(models.Model):
     name = models.CharField(max_length=200)
@@ -11,8 +14,6 @@ class Product(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
 
     def save(self, *args, **kwargs):
-        # We process image conversion synchronously for now to ensure data integrity
-        # but the user requested asynchrony: we'll optimize concurrency in views.
         if self.image:
             name, extension = os.path.splitext(self.image.name)
             if extension.lower() != '.webp':
@@ -23,13 +24,19 @@ class Product(models.Model):
                     else:
                         im = im.convert("RGB")
                     
+                    # Resize large images
+                    max_size = (1200, 1200)
+                    im.thumbnail(max_size, Image.Resampling.LANCZOS)
+                    
                     output = BytesIO()
-                    im.save(output, format='WEBP', quality=85)
+                    im.save(output, format='WEBP', quality=80) 
                     output.seek(0)
                     
-                    self.image = ContentFile(output.read(), name=f"{name}.webp")
+                    # Sanitize name
+                    safe_name = "".join([c if (c.isalnum() or c in ("_", "-")) else "_" for c in name])
+                    self.image = ContentFile(output.read(), name=f"{safe_name}.webp")
                 except Exception as e:
-                    print(f"Async-friendly log: Error converting image {name}: {e}")
+                    print(f"Error processing image {name}: {e}")
         super().save(*args, **kwargs)
 
     def __str__(self):
