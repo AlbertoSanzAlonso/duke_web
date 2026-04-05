@@ -117,7 +117,7 @@ function MenuList() {
                 </select>
                 <input 
                     type="number" 
-                    step="0.01" 
+                    step="100" 
                     placeholder="Precio" 
                     value={price} 
                     onChange={e => setPrice(e.target.value)} 
@@ -175,7 +175,7 @@ function MenuList() {
                                         <div style={{ position: 'absolute', top: '10px', right: '10px', display: 'flex', gap: '5px', background: 'white', padding: '4px', borderRadius: '8px', boxShadow: '0 4px 15px rgba(0,0,0,0.2)', zIndex: 2 }}>
                                             <input 
                                                 type="number" 
-                                                step="0.01" 
+                                                step="100" 
                                                 autoFocus
                                                 value={editPrice} 
                                                 onChange={e => setEditPrice(e.target.value)} 

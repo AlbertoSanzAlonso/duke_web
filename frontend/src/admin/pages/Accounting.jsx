@@ -129,7 +129,7 @@ const Accounting = () => {
                                     <label>Importe ($)</label>
                                     <input 
                                         type="number" 
-                                        step="0.01" 
+                                        step="100" 
                                         value={amount} 
                                         onChange={e => setAmount(e.target.value)} 
                                         placeholder="0.00"
