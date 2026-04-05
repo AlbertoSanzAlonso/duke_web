@@ -178,7 +178,16 @@ function Home() {
           return;
         }
 
-        const calculatedCost = Math.max(basePrice, Math.ceil((basePrice + (distance * perKmPrice)) / 100) * 100);
+        let calculatedCost = 0;
+        if (distance < 1) {
+          calculatedCost = basePrice;
+        } else {
+          // If 1km or more, use per-km formula
+          calculatedCost = distance * perKmPrice;
+        }
+
+        // Always round to nearest 100 for AR (e.g., 550 -> 600)
+        calculatedCost = Math.max(basePrice, Math.ceil(calculatedCost / 100) * 100);
         
         setDeliveryCost(calculatedCost);
         // Better display name

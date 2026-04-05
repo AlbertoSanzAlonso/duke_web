@@ -31,3 +31,10 @@ Este repositorio utiliza el motor de agentes *Antigravity* y se apoya en las sig
 - Despliegue continuo en Vercel (Front) y Coolify (Back).
 - Persistencia de archivos locales mediante volúmenes en Coolify.
 - Conexión cifrada a base de datos externa (Supabase).
+
+## 5. delivery-pricing-standards (Lógica de Negocio)
+**Descripción:** Control de tarifas dinámicas por distancia.
+- **Model:** `GlobalSetting` (base, km, max).
+- **Logic:** `(dist < 1) ? base : (dist * km)`. Round up to 100.
+- **Límites:** Bloquear pedidos si el GPS detecta una distancia superior a `max_km`.
+- **Admin:** Gestión centralizada en `/admin/config`.

@@ -32,6 +32,16 @@ Este proyecto se divide en dos entornos de despliegue claramente separados para 
 - `web-design-guidelines`: Estándares de calidad visual de Vercel/Next.
 - `seo-audit`: Auditoría de posicionamiento orgánico.
 - `responsive-design`: Asegurar adaptabilidad total.
+- `delivery-pricing-standards`: Lógica de precios por cercanía y validación GPS.
+
+## 5. Logística y Seguridad (Nuevas Reglas)
+- **Cálculo de Envío:** 
+  - Si distancia < 1km: Cobrar `delivery_base_price`.
+  - Si distancia >= 1km: Cobrar `distancia * delivery_km_price`.
+  - Redondeo: Siempre redondear al siguiente múltiple de $100.
+- **Blindaje de Pedidos:** El mensaje de WhatsApp NUNCA debe incluir el total. Debe incluir un link a `/ticket/:id` que es la única fuente de verdad inalterable.
+- **Geolocalización:** El sistema está optimizado para San Juan, Argentina. Usa Nominatim con prefijos locales (O/E/N/S).
+- **Timezone:** Forzar siempre `America/Argentina/Buenos_Aires` para evitar desfases en tickets y reportes.
 
 ---
 *Mantener la coherencia visual con la marca Duke Burger (Negros profundos, Rojos vibrantes, Tipografía Bebas Neue).*
