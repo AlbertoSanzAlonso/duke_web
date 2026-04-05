@@ -8,6 +8,23 @@ if (!base_api_url.endsWith('/api')) {
 }
 const API_URL = base_api_url;
 
+const handleResponseError = async (response) => {
+    const errorData = await response.json().catch(() => ({}));
+    let message = errorData.detail || 'Error en la operación';
+    
+    if (typeof message === 'object') {
+        // DRF field-specific errors
+        message = Object.entries(message)
+            .map(([field, errors]) => {
+                const fieldName = field === 'detail' ? '' : (field.charAt(0).toUpperCase() + field.slice(1).replace(/_/g, ' ') + ': ');
+                const errorText = Array.isArray(errors) ? errors.join(', ') : errors;
+                return `${fieldName}${errorText}`;
+            })
+            .join(' | ');
+    }
+    throw new Error(message);
+};
+
 export const fetchProducts = async () => {
     const response = await fetch(`${API_URL}/products/`);
     if (!response.ok) throw new Error('Error al cargar los productos');
@@ -26,10 +43,7 @@ export const createProduct = async (productData) => {
     }
 
     const response = await fetch(`${API_URL}/products/`, options);
-    if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        throw new Error(errorData.detail || 'Error al crear el producto');
-    }
+    if (!response.ok) return handleResponseError(response);
     return await response.json();
 };
 
@@ -54,14 +68,7 @@ export const updateProduct = async (id, productData) => {
 
     const response = await fetch(`${API_URL}/products/${id}/`, options);
 
-    if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        let message = errorData.detail || 'Error al actualizar el producto';
-        if (typeof message === 'object') {
-            message = JSON.stringify(message);
-        }
-        throw new Error(message);
-    }
+    if (!response.ok) return handleResponseError(response);
     return await response.json();
 };
 
