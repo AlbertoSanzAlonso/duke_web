@@ -98,7 +98,7 @@ function About() {
             </div>
             <div className="map-container">
               <iframe 
-                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3400.123456789!2d-68.54321!3d-31.53777!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zMzHCsDM2JzE2LjAiUyA2OMKwMzInMzAuMCJX!5e0!3m2!1ses!2sar!4v1234567890"
+                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3401.0894!2d-68.5462!3d-31.5187!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x96879f9f7c2c0f57%3A0x5e8f8c0e5c5e0e3a!2sLaprida%20Oeste%20%26%20Jos%C3%A9%20Avel%C3%ADn%2C%20Rivadavia%2C%20San%20Juan!5e0!3m2!1ses!2sar!4v1!5m2!1ses!2sar"
                 width="100%"
                 height="300"
                 style={{ border: 0, borderRadius: '12px' }}
