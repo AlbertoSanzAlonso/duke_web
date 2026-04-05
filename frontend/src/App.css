@@ -754,6 +754,7 @@
   cursor: pointer;
   z-index: 10;
   transition: var(--transition-smooth);
+  color: white;
 }
 
 .close-modal-detail:hover {
