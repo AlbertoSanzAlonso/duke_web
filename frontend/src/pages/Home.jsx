@@ -406,7 +406,6 @@ function Home() {
                         quantity: modalQuantity
                       }
                     }));
-                    setSelectedProduct(null);
                   }}
                 >
                   AGREGAR
