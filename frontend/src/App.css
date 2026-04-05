@@ -85,8 +85,7 @@
   justify-content: center;
   position: relative;
   background: radial-gradient(circle at 70% 50%, rgba(227, 27, 35, 0.1) 0%, rgba(0, 0, 0, 1) 50%);
-  overflow-x: hidden;
-  overflow-y: visible;
+  overflow: visible;
 }
 
 .hero-content {
@@ -185,6 +184,7 @@
   display: flex;
   justify-content: center;
   align-items: center;
+  pointer-events: none;
 }
 
 .hero-burger-img {
@@ -195,6 +195,7 @@
   transform: rotate(-5deg);
   filter: drop-shadow(0 30px 60px rgba(0, 0, 0, 0.9));
   z-index: 1;
+  pointer-events: none;
 }
 
 .sticker {
@@ -202,6 +203,7 @@
   width: 7.5rem;
   height: 7.5rem;
   z-index: 3;
+  pointer-events: none;
 }
 
 .float-1 {
@@ -237,9 +239,10 @@
   overflow: hidden;
   white-space: nowrap;
   transform: rotate(-3deg);
-  z-index: 1000;
-  /* Extremely high to be above everything */
+  z-index: 10;
+  /* Reduced to avoid blocking scroll / fighting with navbar */
   box-shadow: 0 15px 40px rgba(0, 0, 0, 0.6);
+  pointer-events: none;
 }
 
 .marquee-content {
@@ -406,7 +409,7 @@
     margin-top: 2rem;
     justify-content: center;
     width: 100%;
-    overflow: hidden;
+    overflow: visible;
   }
 
   .hero-burger-img {
