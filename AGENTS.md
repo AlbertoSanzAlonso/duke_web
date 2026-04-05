@@ -25,6 +25,10 @@ Este proyecto se divide en dos entornos de despliegue claramente separados para 
   - `DEBUG`: `False` en producción.
   - `ALLOWED_HOSTS`: Lista de dominios permitidos (ej. `api.dukeburger-sj.com,dukeburger-sj.com`).
 
+## 3. Reglas de Diseño de Panel (Admin)
+- **Visibilidad del Texto:** Es OBLIGATORIO que todos los textos del panel de administración (`.admin-content`) tengan un color oscuro explícito (ej. `#333 !important`). Esto evita que si el usuario tiene activado el "Modo Oscuro" en su sistema/navegador, las letras se pongan blancas sobre fondo claro y sean invisibles.
+- **Formularios:** Los `input`, `select` y `textarea` deben tener fondo blanco y texto oscuro siempre.
+
 ## 3. Skills Installadas
 - `supabase-postgres-best-practices`: Para optimizaciones de base de datos.
 - `web-design-guidelines`: Para asegurar que la UI se mantenga moderna, usable y bajo estándares de alta calidad de Vercel (especialmente en el rediseño de fichas y navegación).

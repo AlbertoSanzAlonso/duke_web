@@ -129,6 +129,21 @@ body.admin-mode {
 }
 
 /* Fix text color in admin forms to prevent white-on-white from the global dark theme */
+.admin-content,
+.admin-content h1,
+.admin-content h2,
+.admin-content h3,
+.admin-content h4,
+.admin-content p,
+.admin-content span,
+.admin-content label,
+.admin-content div,
+.admin-content table,
+.admin-content td,
+.admin-content th {
+    color: #333 !important;
+}
+
 .admin-content input, 
 .admin-content select, 
 .admin-content textarea {

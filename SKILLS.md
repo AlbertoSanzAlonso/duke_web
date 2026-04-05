@@ -12,6 +12,7 @@ Este repositorio utiliza el motor de agentes *Antigravity* y se apoya en las sig
 - Usar fuentes legibles (como Inter o Roboto) y paletas de colores armónicas.
 - Respetar espaciados y jerarquías visuales.
 - Evitar placeholders; generar imágenes reales con IA si es necesario.
+- **IMPORTANTE:** Forzar color de texto oscuro (`#333 !important`) en el panel admin para evitar invisibilidad por temas oscuros del sistema del usuario.
 
 ## 2. supabase-postgres-best-practices
 **Uso:** Optimización de la base de datos PostgreSQL hospedada en Supabase.

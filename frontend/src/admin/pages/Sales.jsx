@@ -54,6 +54,12 @@ const Sales = () => {
 
     const total = cart.reduce((acc, item) => acc + (item.price * item.quantity), 0);
 
+    const [isTicketOpen, setIsTicketOpen] = useState(false);
+
+    const totalItems = cart.reduce((acc, item) => acc + item.quantity, 0);
+
+    const toggleTicket = () => setIsTicketOpen(!isTicketOpen);
+
     const handleCheckout = async () => {
         if (cart.length === 0) return;
         setIsSaving(true);
@@ -70,6 +76,7 @@ const Sales = () => {
             await createSale(saleData);
             alert("¡Venta registrada con éxito!");
             setCart([]);
+            setIsTicketOpen(false);
         } catch (error) {
             alert("Error al registrar la venta");
         } finally {
@@ -85,6 +92,13 @@ const Sales = () => {
 
     return (
         <div className="pos-container">
+            {/* FAB para móviles */}
+            <button className="pos-fab" onClick={toggleTicket}>
+                <span className="fab-count">{totalItems}</span>
+                <span className="fab-text">Ver Ticket</span>
+                <span className="fab-total">{total.toFixed(2)}€</span>
+            </button>
+
             {/* Header / Categorías */}
             <div className="pos-header">
                 <div className="category-tabs">
@@ -124,9 +138,10 @@ const Sales = () => {
                     ))}
                 </div>
 
-                {/* Sidebar del Ticket */}
-                <div className="pos-ticket-sidebar">
+                {/* Sidebar del Ticket (con clase condicional para móvil) */}
+                <div className={`pos-ticket-sidebar ${isTicketOpen ? 'open' : ''}`}>
                     <div className="ticket-header">
+                        <button className="close-ticket-btn" onClick={() => setIsTicketOpen(false)}>×</button>
                         <h2>Ticket Actual</h2>
                         <button className="clear-btn" onClick={() => setCart([])}>Limpiar</button>
                     </div>
