@@ -11,7 +11,8 @@ import {
   Menu,
   X,
   ShoppingCart,
-  Star
+  Star,
+  Settings as SettingsIcon
 } from 'lucide-react';
 import './Admin.css';
 
@@ -29,6 +30,7 @@ const AdminLayout = () => {
     { name: 'Pedidos Proveedor', path: '/admin/pedidos', icon: <Truck size={20} /> },
     { name: 'Contabilidad', path: '/admin/contabilidad', icon: <TrendingUp size={20} /> },
     { name: 'Historial', path: '/admin/historial', icon: <History size={20} /> },
+    { name: 'Configuración', path: '/admin/config', icon: <SettingsIcon size={20} /> },
   ];
 
   return (

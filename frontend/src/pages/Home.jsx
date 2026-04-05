@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Menu, X, ShoppingCart, Minus, Plus, MessageCircle } from 'lucide-react';
+import { Menu, X, ShoppingCart, Minus, Plus, MessageCircle, MapPin } from 'lucide-react';
 import { fetchMenuEntries, createSale } from '../services/api';
 
 function Home() {
@@ -15,6 +15,7 @@ function Home() {
   const [deliveryMode, setDeliveryMode] = useState('takeaway'); // 'takeaway' or 'delivery'
   const [deliveryAddress, setDeliveryAddress] = useState('');
   const [deliveryCost, setDeliveryCost] = useState(0);
+  const [deliveryRates, setDeliveryRates] = useState({ base: 1000, km: 200 }); // $1000 + $200/km (approx to match $1500 at 2.5km)
   const [isCalculating, setIsCalculating] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState(null);
@@ -28,9 +29,24 @@ function Home() {
     window.addEventListener('scroll', handleScroll, { passive: true });
     handleScroll();
     loadMenu();
+    loadDeliverySettings();
     
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
+
+  const loadDeliverySettings = async () => {
+    try {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/settings/`);
+      const settings = await response.json();
+      const base = settings.find(s => s.key === 'delivery_base_price')?.value;
+      const km = settings.find(s => s.key === 'delivery_km_price')?.value;
+      if (base && km) {
+        setDeliveryRates({ base: parseFloat(base), km: parseFloat(km) });
+      }
+    } catch (err) {
+      console.error("Error loading delivery settings:", err);
+    }
+  };
 
   const loadMenu = async () => {
     try {
@@ -126,8 +142,8 @@ function Home() {
         const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
         const distance = R * c;
 
-        const basePrice = 1200;
-        const perKmPrice = 450;
+        const basePrice = deliveryRates.base;
+        const perKmPrice = deliveryRates.km;
         const calculatedCost = Math.max(basePrice, Math.ceil((basePrice + (distance * perKmPrice)) / 100) * 100);
         
         setDeliveryCost(calculatedCost);
@@ -140,6 +156,33 @@ function Home() {
     } finally {
       setIsCalculating(false);
     }
+  };
+
+  const handleGeolocation = () => {
+    if (!navigator.geolocation) {
+      alert("Tu navegador no soporta geolocalización.");
+      return;
+    }
+    setIsCalculating(true);
+    navigator.geolocation.getCurrentPosition(async (position) => {
+      try {
+        const { latitude, longitude } = position.coords;
+        const response = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}`);
+        const data = await response.json();
+        if (data && data.display_name) {
+          const cleanAddr = data.display_name.split(',').slice(0, 3).join(',');
+          setDeliveryAddress(cleanAddr);
+          calculateDistance(cleanAddr);
+        }
+      } catch (err) {
+        alert("No pudimos obtener tu dirección exacta.");
+      } finally {
+        setIsCalculating(false);
+      }
+    }, () => {
+      alert("Permiso de ubicación denegado.");
+      setIsCalculating(false);
+    });
   };
 
   const sendWhatsAppOrder = async () => {
@@ -375,7 +418,7 @@ function Home() {
 
                 {deliveryMode === 'delivery' && (
                   <div style={{ marginTop: '15px' }}>
-                    <div style={{ display: 'flex', gap: '10px' }}>
+                    <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
                       <input 
                         type="text" 
                         placeholder="Ej: Entre Rios 540"
@@ -384,11 +427,18 @@ function Home() {
                         style={{ flex: 1, fontSize: '0.9rem' }}
                       />
                       <button 
+                        onClick={handleGeolocation}
+                        title="Usar mi ubicación actual"
+                        style={{ background: '#333', border: 'none', borderRadius: '4px', padding: '10px', cursor: 'pointer', display: 'flex', alignItems: 'center' }}
+                      >
+                        <MapPin size={18} color="white" />
+                      </button>
+                      <button 
                         onClick={() => calculateDistance(deliveryAddress)}
                         disabled={isCalculating}
-                        style={{ padding: '0 10px', background: '#333', color: 'white', border: 'none', borderRadius: '4px', fontSize: '0.8rem', cursor: 'pointer' }}
+                        style={{ padding: '0 10px', height: '40px', background: '#333', color: 'white', border: 'none', borderRadius: '4px', fontSize: '0.8rem', cursor: 'pointer' }}
                       >
-                        {isCalculating ? 'Calculando...' : 'Calcular'}
+                        {isCalculating ? '...' : 'Calcular'}
                       </button>
                     </div>
                     {deliveryCost > 0 && (

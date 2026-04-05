@@ -188,3 +188,19 @@ export const fetchSupplierOrders = async () => {
     if (!response.ok) throw new Error('Error al cargar pedidos de proveedores');
     return await response.json();
 };
+
+export const fetchSettings = async () => {
+    const response = await fetch(`${API_URL}/settings/`);
+    if (!response.ok) throw new Error('Error al cargar configuraciones');
+    return await response.json();
+};
+
+export const updateSetting = async (key, value) => {
+    const response = await fetch(`${API_URL}/settings/${key}/`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ value })
+    });
+    if (!response.ok) throw new Error('Error al actualizar configuración');
+    return await response.json();
+};
