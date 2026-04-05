@@ -319,18 +319,6 @@ function Home() {
                   placeholder="Ej: Sin cebolla la burger, cambiar bebida por Sprite..."
                   value={orderNotes}
                   onChange={e => setOrderNotes(e.target.value)}
-                  style={{ 
-                    width: '100%', 
-                    background: 'transparent', 
-                    border: 'none', 
-                    borderBottom: '2px solid #333', 
-                    color: 'white', 
-                    fontSize: '1rem', 
-                    padding: '0.5rem 0', 
-                    outline: 'none',
-                    resize: 'none',
-                    minHeight: '60px'
-                  }}
                 />
               </div>
 

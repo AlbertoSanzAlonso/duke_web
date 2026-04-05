@@ -9,7 +9,7 @@
   top: 0;
   left: 0;
   width: 100%;
-  z-index: 5000; /* Siempre por encima de todo */
+  z-index: 2500; /* Debajo de los modales (3000) */
   padding: 1.5rem 0;
   transition: var(--transition-smooth);
   background: transparent;
@@ -533,19 +533,32 @@
   margin-bottom: 0.5rem;
 }
 
-.customer-info-section input {
+.customer-info-section input,
+.customer-info-section textarea {
   width: 100%;
   background: transparent;
   border: none;
   border-bottom: 2px solid #333;
   color: white;
-  font-size: 1.2rem;
+  font-size: 1.1rem; /* Adjusted for better balance */
   padding: 0.5rem 0;
   outline: none;
   transition: var(--transition-smooth);
 }
 
-.customer-info-section input:focus {
+.customer-info-section textarea {
+  resize: none;
+  min-height: 50px;
+}
+
+.customer-info-section input::placeholder,
+.customer-info-section textarea::placeholder {
+  font-size: 0.85rem; /* Smaller placeholder */
+  color: #555;
+}
+
+.customer-info-section input:focus,
+.customer-info-section textarea:focus {
   border-color: var(--color-primary);
 }
 
