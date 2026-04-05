@@ -30,6 +30,7 @@ Este proyecto se divide en dos entornos de despliegue claramente separados para 
 - **Formularios:** Los `input`, `select` y `textarea` deben tener fondo blanco y texto oscuro siempre.
 
 ## 3. Skills Installadas
+- `django-rest-best-practices`: Para asegurar la estabilidad, migraciones correctas y consistencia en el backend.
 - `supabase-postgres-best-practices`: Para optimizaciones de base de datos.
 - `web-design-guidelines`: Para asegurar que la UI se mantenga moderna, usable y bajo estándares de alta calidad de Vercel (especialmente en el rediseño de fichas y navegación).
 
