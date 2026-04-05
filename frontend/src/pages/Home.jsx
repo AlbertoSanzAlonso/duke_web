@@ -42,12 +42,16 @@ function Home() {
         return acc;
       }, {});
       
+      const availableCategories = Object.keys(grouped);
+      console.log("Menu loaded successfully. Categories found:", availableCategories);
+      
       setMenuData(grouped);
       
-      const availableCategories = Object.keys(grouped);
       // Ensure we have a valid activeCategory
       if (availableCategories.length > 0) {
-        if (!activeCategory || !availableCategories.includes(activeCategory)) {
+        // If current activeCategory doesn't exist in data, pick the first one
+        const normalActive = activeCategory;
+        if (!activeCategory || !availableCategories.some(c => c.toLowerCase() === normalActive.toLowerCase())) {
           setActiveCategory(availableCategories[0]);
         }
       }
@@ -59,6 +63,7 @@ function Home() {
   };
 
   const categories = Object.keys(menuData);
+  const currentItems = menuData[activeCategory] || (categories.length > 0 ? menuData[categories[0]] : []);
 
   return (
     <div className="app">
@@ -115,7 +120,7 @@ function Home() {
               {categories.map(cat => (
                 <button
                   key={cat}
-                  className={`tab-item ${activeCategory === cat ? 'active' : ''}`}
+                  className={`tab-item ${activeCategory.toLowerCase() === cat.toLowerCase() ? 'active' : ''}`}
                   onClick={() => setActiveCategory(cat)}
                 >
                   {cat}
@@ -130,7 +135,7 @@ function Home() {
             ) : categories.length === 0 ? (
               <p style={{ gridColumn: '1/-1', textAlign: 'center', padding: '50px' }}>No hay platos disponibles en este momento.</p>
             ) : (
-              menuData[activeCategory]?.map(item => (
+              currentItems.map(item => (
                 <div key={item.id} className="menu-card hover-lift">
                    {item.image && (
                     <div className="card-image-container" style={{ width: '100%', height: '150px', overflow: 'hidden' }}>

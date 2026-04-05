@@ -153,7 +153,7 @@ const Sales = () => {
             <button className="pos-fab" onClick={toggleTicket}>
                 <span className="fab-count">{totalItems}</span>
                 <span className="fab-text">Ver Ticket</span>
-                <span className="fab-total">${total.toFixed(2)}</span>
+                <span className="fab-total">${total.toLocaleString('es-AR')}</span>
             </button>
 
             {/* Selector de Modo */}
@@ -206,7 +206,7 @@ const Sales = () => {
                                     </div>
                                     <div className="pos-product-info">
                                         <h3>{entry.product.name}</h3>
-                                        <span className="pos-price">${parseFloat(entry.price).toFixed(2)}</span>
+                                        <span className="pos-price">${parseFloat(entry.price).toLocaleString('es-AR')}</span>
                                     </div>
                                 </div>
                             ))}
@@ -245,7 +245,7 @@ const Sales = () => {
                                         <div key={item.menu_entry} className="ticket-item">
                                             <div className="item-details">
                                                 <span className="item-name">{item.name}</span>
-                                                <span className="item-subtotal">${(parseFloat(item.price) * item.quantity).toFixed(2)}</span>
+                                                <span className="item-subtotal">${(parseFloat(item.price) * item.quantity).toLocaleString('es-AR')}</span>
                                             </div>
                                             <div className="item-controls">
                                                 <button onClick={() => updateQuantity(item.menu_entry, -1)}>−</button>
@@ -261,7 +261,7 @@ const Sales = () => {
                             <div className="ticket-footer">
                                 <div className="total-row">
                                     <span>TOTAL:</span>
-                                    <span className="total-price">${total.toFixed(2)}</span>
+                                    <span className="total-price">${total.toLocaleString('es-AR')}</span>
                                 </div>
                                 <div className="pos-actions-grid">
                                     <button 
@@ -303,7 +303,7 @@ const Sales = () => {
                                         {ticket.items.length} productos
                                     </div>
                                     <div className="pending-total">
-                                        ${parseFloat(ticket.total_amount).toFixed(2)}
+                                        ${parseFloat(ticket.total_amount).toLocaleString('es-AR')}
                                     </div>
                                     <button className="load-btn">REANUDAR</button>
                                 </div>
