@@ -25,6 +25,7 @@ const AdminLayout = () => {
     { name: 'Carta', path: '/admin/carta', icon: <UtensilsCrossed size={20} /> },
     { name: 'Inventario', path: '/admin/inventario', icon: <Boxes size={20} /> },
     { name: 'Pedidos Proveedor', path: '/admin/pedidos', icon: <Truck size={20} /> },
+    { name: 'Contabilidad', path: '/admin/contabilidad', icon: <TrendingUp size={20} /> },
     { name: 'Historial', path: '/admin/historial', icon: <History size={20} /> },
   ];
 

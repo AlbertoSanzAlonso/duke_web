@@ -10,6 +10,7 @@ import HistoryLog from './admin/pages/HistoryLog';
 import Sales from './admin/pages/Sales';
 import Orders from './admin/pages/Orders';
 import SupplierOrders from './admin/pages/SupplierOrders';
+import Accounting from './admin/pages/Accounting';
 import './App.css'; // Global styles for consumer site
 
 function App() {
@@ -28,6 +29,7 @@ function App() {
           <Route path="pedidos-clientes" element={<Orders />} />
           <Route path="tpv" element={<Sales />} />
           <Route path="pedidos" element={<SupplierOrders />} />
+          <Route path="contabilidad" element={<Accounting />} />
           <Route path="historial" element={<HistoryLog />} />
         </Route>
       </Routes>

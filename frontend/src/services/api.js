@@ -130,3 +130,33 @@ export const updateSale = async (id, data) => {
     if (!response.ok) throw new Error('Error al actualizar venta');
     return await response.json();
 };
+// EXPENSES & ACCOUNTING
+export const fetchExpenses = async () => {
+    const response = await fetch(`${API_URL}/expenses/`);
+    if (!response.ok) throw new Error('Error al cargar gastos');
+    return await response.json();
+};
+
+export const createExpense = async (data) => {
+    const response = await fetch(`${API_URL}/expenses/`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
+    });
+    if (!response.ok) throw new Error('Error al registrar gasto');
+    return await response.json();
+};
+
+export const deleteExpense = async (id) => {
+    const response = await fetch(`${API_URL}/expenses/${id}/`, {
+        method: 'DELETE',
+    });
+    if (!response.ok) throw new Error('Error al eliminar gasto');
+    return true;
+};
+
+export const fetchSupplierOrders = async () => {
+    const response = await fetch(`${API_URL}/supplier-orders/`);
+    if (!response.ok) throw new Error('Error al cargar pedidos de proveedores');
+    return await response.json();
+};
