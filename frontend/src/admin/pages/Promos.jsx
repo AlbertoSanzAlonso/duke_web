@@ -142,10 +142,13 @@ function Promos() {
                             <input 
                                 type="number" 
                                 placeholder="0" 
+                                step="100"
+                                min="0"
+                                className="no-arrows-input"
                                 value={price} 
                                 onChange={e => setPrice(e.target.value)}
                                 required
-                                style={{ width: '100%', padding: '12px', borderRadius: '8px', border: '1px solid #ddd', fontSize: '1.2rem', fontWeight: 'bold' }}
+                                style={{ width: '100%', padding: '12px', borderRadius: '8px', border: '1px solid #ddd', fontSize: '1.4rem', fontWeight: 'bold', color: '#000' }}
                             />
                         </div>
                     </div>

@@ -117,12 +117,14 @@ function MenuList() {
                 </select>
                 <input 
                     type="number" 
-                    step="1" 
+                    step="100" 
+                    min="0"
+                    className="no-arrows-input"
                     placeholder="Precio" 
                     value={price} 
                     onChange={e => setPrice(e.target.value)} 
                     required 
-                    style={{ padding: '8px', width: '120px' }}
+                    style={{ padding: '8px', width: '120px', fontSize: '1.1rem', fontWeight: 'bold' }}
                 />
                 <button type="submit" className="main-button" style={{ padding: '8px 16px', background: 'var(--admin-primary)', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer' }}>
                     + Añadir a la Carta
@@ -175,7 +177,9 @@ function MenuList() {
                                         <div style={{ position: 'absolute', top: '10px', right: '10px', display: 'flex', gap: '5px', background: 'white', padding: '4px', borderRadius: '8px', boxShadow: '0 4px 15px rgba(0,0,0,0.2)', zIndex: 2 }}>
                                             <input 
                                                 type="number" 
-                                                step="1" 
+                                                step="100" 
+                                                min="0"
+                                                className="no-arrows-input"
                                                 autoFocus
                                                 value={editPrice} 
                                                 onChange={e => setEditPrice(e.target.value)} 

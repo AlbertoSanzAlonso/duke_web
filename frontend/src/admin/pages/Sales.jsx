@@ -258,9 +258,12 @@ const Sales = () => {
                                             <input 
                                                 type="number" 
                                                 placeholder="Costo"
+                                                step="100"
+                                                min="0"
+                                                className="no-arrows-input"
                                                 value={deliveryCost}
                                                 onChange={e => setDeliveryCost(e.target.value)}
-                                                style={{ paddingLeft: '20px', height: '35px', width: '100%' }}
+                                                style={{ paddingLeft: '20px', height: '35px', width: '100%', fontWeight: 'bold' }}
                                             />
                                         </div>
                                     )}
