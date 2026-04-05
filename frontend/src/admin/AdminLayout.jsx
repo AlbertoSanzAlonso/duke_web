@@ -36,7 +36,7 @@ const AdminLayout = () => {
       
       <aside className={`sidebar ${isMobileOpen ? 'open' : ''}`}>
         <div className="sidebar-header">
-          <img src="/brand/duke burger 1 negativo.png" alt="Duke Admin Logo" style={{ height: '40px', objectFit: 'contain' }} />
+          <img src="/brand/duke burger 1 negativo.png" alt="Duke Admin Logo" style={{ height: '80px', objectFit: 'contain' }} />
           <button className="close-sidebar-btn" onClick={() => setIsMobileOpen(false)}>
             <X size={24} color="#fff" />
           </button>

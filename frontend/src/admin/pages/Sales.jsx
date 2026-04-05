@@ -174,22 +174,23 @@ const Sales = () => {
 
             {viewMode === 'tpv' ? (
                 <>
-                    <div className="pos-header">
-                        <div className="category-tabs">
-                            {categories.map(cat => (
-                                <button 
-                                    key={cat} 
-                                    className={`category-btn ${selectedCategory === cat ? 'active' : ''}`}
-                                    onClick={() => setSelectedCategory(cat)}
-                                >
-                                    {cat}
-                                </button>
-                            ))}
-                        </div>
-                    </div>
-
                     <div className="pos-main">
-                        <div className="pos-products-grid">
+                        <div className="pos-left-content">
+                            <div className="pos-header">
+                                <div className="category-tabs">
+                                    {categories.map(cat => (
+                                        <button 
+                                            key={cat} 
+                                            className={`category-btn ${selectedCategory === cat ? 'active' : ''}`}
+                                            onClick={() => setSelectedCategory(cat)}
+                                        >
+                                            {cat}
+                                        </button>
+                                    ))}
+                                </div>
+                            </div>
+
+                            <div className="pos-products-grid">
                             {filteredMenu.map(entry => (
                                 <div 
                                     key={entry.id} 
@@ -209,6 +210,7 @@ const Sales = () => {
                                     </div>
                                 </div>
                             ))}
+                            </div>
                         </div>
 
                         {/* Sidebar del Ticket */}
