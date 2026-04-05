@@ -1,27 +1,6 @@
 import { useState, useEffect } from 'react';
-import { fetchMenuEntries, createMenuEntry, deleteMenuEntry, updateMenuEntry, fetchProducts, createProduct } from '../../services/api';
+import { fetchMenuEntries, createMenuEntry, deleteMenuEntry, updateMenuEntry, fetchProducts } from '../../services/api';
 import Toast from '../components/Toast';
-
-const DEFAULT_MOCK_DATA = {
-  'Burgers': [
-    { 'name': 'Duke', 'description': 'Nuestra firma. Doble carne, cheddar, cebolla caramelizada.', 'price': 12900 },
-    { 'name': 'Marqués', 'description': 'Para los que saben. Queso de cabra, miel y nueces.', 'price': 13500 },
-    { 'name': 'Conde', 'description': 'Elegancia pura. Boletus, aceite de trufa y parmesano.', 'price': 14200 },
-    { 'name': 'Plebeyo', 'description': 'La de toda la vida. Lechuga, tomate, cebolla y pepinillo.', 'price': 10900 },
-  ],
-  'Pachatas': [
-    { 'name': 'Provolone', 'description': 'Queso provolone fundido y chimichurri.', 'price': 9500 },
-    { 'name': 'BBQ', 'description': 'Salsa barbacoa casera y cebolla frita.', 'price': 9500 },
-    { 'name': 'Completa', 'description': 'Jamón, queso, huevo y ensalada.', 'price': 11000 },
-    { 'name': 'Especial', 'description': 'Nuestra mezcla secreta de la casa.', 'price': 11500 },
-  ],
-  'Pizzas': [
-    { 'name': 'Mozzarella', 'description': 'Tomate, mozzarella y orégano.', 'price': 9000 },
-    { 'name': 'Especial', 'description': 'Jamón York, champiñones y pimiento.', 'price': 11500 },
-    { 'name': 'Napolitana', 'description': 'Anchoas, aceitunas negras y alcaparras.', 'price': 12000 },
-    { 'name': '4 Quesos', 'description': 'Mozzarella, gorgonzola, parmesano y emmental.', 'price': 13000 },
-  ],
-};
 
 function MenuList() {
     const [entries, setEntries] = useState([]);
@@ -107,43 +86,6 @@ function MenuList() {
         }
     };
 
-    const handleSyncDefaults = async () => {
-        if (!window.confirm("Se añadirán los 12 productos básicos de Duke Burgers a la carta. ¿Continuar?")) return;
-        setLoading(true);
-        try {
-            // First, check if products exist or create them
-            const productsList = await fetchProducts();
-            
-            for (const category in DEFAULT_MOCK_DATA) {
-                for (const item of DEFAULT_MOCK_DATA[category]) {
-                    // Find if product already exists by name
-                    let prod = productsList.find(p => p.name === item.name);
-                    
-                    if (!prod) {
-                        prod = await createProduct({
-                            name: item.name,
-                            description: item.description
-                        });
-                    }
-                    
-                    // Add to menu entries
-                    await createMenuEntry({
-                        product_id: prod.id,
-                        price: item.price,
-                        category: category,
-                        is_available: true
-                    });
-                }
-            }
-            setToast({ message: "¡Carta restaurada con éxito!", type: 'success' });
-            loadData();
-        } catch (err) {
-            setToast({ message: "Error sincronizando: " + err.message, type: 'error' });
-        } finally {
-            setLoading(false);
-        }
-    };
-
     return (
         <div className="admin-card">
             {toast && <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />}
@@ -184,13 +126,6 @@ function MenuList() {
                 />
                 <button type="submit" className="main-button" style={{ padding: '8px 16px', background: 'var(--admin-primary)', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer' }}>
                     + Añadir a la Carta
-                </button>
-                <button 
-                  type="button" 
-                  onClick={handleSyncDefaults} 
-                  style={{ marginLeft: 'auto', padding: '8px 16px', borderRadius: '4px', border: '1px solid #444', background: 'transparent', color: '#444', fontWeight: 'bold', cursor: 'pointer' }}
-                >
-                  ⚙️ Restaurar Mock Data
                 </button>
             </form>
 
