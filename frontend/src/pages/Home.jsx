@@ -126,16 +126,16 @@ function Home() {
 
       // 2. Format WhatsApp Message
       const phone = "5492645142897";
-      let message = `¡Hola Duke Burger! 🍔 Soy *${customerName}*.\nQuiero hacer este pedido desde la web:\n\n`;
+      let message = `Hola Duke Burger, soy ${customerName}.\nQuiero hacer este pedido desde la web:\n\n`;
       cartItems.forEach(item => {
-        message += `• ${item.quantity}x ${item.name} ($${(item.price * item.quantity).toLocaleString('es-AR')})\n`;
+        message += `- ${item.quantity}x ${item.name} ($${(item.price * item.quantity).toLocaleString('es-AR')})\n`;
       });
       
       if (orderNotes.trim()) {
-        message += `\n📝 *NOTAS:* ${orderNotes}\n`;
+        message += `\nNOTAS: ${orderNotes}\n`;
       }
       
-      message += `\n*TOTAL: $${totalPrice.toLocaleString('es-AR')}*`;
+      message += `\nTOTAL: $${totalPrice.toLocaleString('es-AR')}`;
       
       const url = `https://wa.me/${phone}?text=${encodeURIComponent(message)}`;
       window.open(url, '_blank');
