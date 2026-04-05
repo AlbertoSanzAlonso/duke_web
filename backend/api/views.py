@@ -51,7 +51,7 @@ class SupplierOrderViewSet(viewsets.ModelViewSet):
         return SupplierOrderSerializer
 
 class GlobalSettingViewSet(viewsets.ModelViewSet):
-    queryset = GlobalSetting.objects.all()
+    queryset = GlobalSetting.objects.all().order_by('key')
     serializer_class = GlobalSettingSerializer
     lookup_field = 'key'
 

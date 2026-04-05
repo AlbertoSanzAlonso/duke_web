@@ -97,54 +97,76 @@ const Settings = () => {
                     </div>
                 )}
 
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '25px' }}>
                     {settings.map(setting => (
                         <div key={setting.id} style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                            <label style={{ fontWeight: 'bold', textTransform: 'uppercase', fontSize: '0.85rem', color: '#666' }}>
+                            <label style={{ fontWeight: 'bold', textTransform: 'uppercase', fontSize: '0.9rem', color: '#333' }}>
                                 {setting.description || setting.key}
                             </label>
-                            <div style={{ display: 'flex', gap: '10px' }}>
-                                <div style={{ flex: 1, position: 'relative' }}>
-                                    {/* Only show $ for price settings */}
-                                    {!setting.key.includes('max_km') && (
-                                        <span style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: '#999' }}>$</span>
-                                    )}
-                                    <input 
-                                        type="number" 
-                                        value={setting.value}
-                                        onChange={(e) => handleChange(setting.key, e.target.value)}
-                                        style={{ 
-                                            width: '100%', 
-                                            padding: `12px 12px 12px ${setting.key.includes('max_km') ? '12px' : '30px'}`, 
-                                            borderRadius: '8px', 
-                                            border: '1px solid #ddd' 
-                                        }}
-                                    />
-                                    {setting.key.includes('max_km') && (
-                                        <span style={{ position: 'absolute', right: '12px', top: '50%', transform: 'translateY(-50%)', color: '#999' }}>KM</span>
-                                    )}
-                                </div>
-                                <button 
-                                    onClick={() => handleUpdate(setting.key, setting.value)}
-                                    disabled={isSaving}
+                            <div style={{ flex: 1, position: 'relative' }}>
+                                {/* Only show $ for price settings */}
+                                {!setting.key.includes('max_km') && (
+                                    <span style={{ position: 'absolute', left: '15px', top: '50%', transform: 'translateY(-50%)', color: '#666', fontSize: '1.4rem', fontWeight: 'bold' }}>$</span>
+                                )}
+                                <input 
+                                    type="number" 
+                                    className="no-arrows-input"
+                                    value={setting.value}
+                                    onChange={(e) => handleChange(setting.key, e.target.value)}
                                     style={{ 
-                                        padding: '0 25px', 
-                                        background: '#333', 
-                                        color: 'white', 
-                                        border: 'none', 
-                                        borderRadius: '8px', 
-                                        cursor: 'pointer',
-                                        display: 'flex',
-                                        alignItems: 'center',
-                                        gap: '8px',
-                                        fontWeight: 'bold'
+                                        width: '100%', 
+                                        padding: `15px 15px 15px ${setting.key.includes('max_km') ? '15px' : '35px'}`, 
+                                        borderRadius: '10px', 
+                                        border: '2px solid #ddd',
+                                        fontSize: '1.6rem',
+                                        fontWeight: 'bold',
+                                        color: '#000',
+                                        backgroundColor: '#fff'
                                     }}
-                                >
-                                    <Save size={18} /> {isSaving ? '...' : 'Guardar'}
-                                </button>
+                                />
+                                {setting.key.includes('max_km') && (
+                                    <span style={{ position: 'absolute', right: '15px', top: '50%', transform: 'translateY(-50%)', color: '#666', fontSize: '1.2rem', fontWeight: 'bold' }}>KM</span>
+                                )}
                             </div>
                         </div>
                     ))}
+                </div>
+
+                <div style={{ marginTop: '40px', display: 'flex', justifyContent: 'center' }}>
+                    <button 
+                        onClick={async () => {
+                            setIsSaving(true);
+                            try {
+                                await Promise.all(settings.map(s => updateSetting(s.key, s.value)));
+                                setToast({ message: 'Todos los cambios se han guardado con éxito', type: 'success' });
+                                loadSettings();
+                            } catch (err) {
+                                setToast({ message: 'Error al actualizar configuraciones', type: 'error' });
+                            } finally {
+                                setIsSaving(false);
+                            }
+                        }}
+                        disabled={isSaving || settings.length === 0}
+                        style={{ 
+                            width: '100%',
+                            padding: '20px', 
+                            background: '#f03e3e', 
+                            color: 'white', 
+                            border: 'none', 
+                            borderRadius: '12px', 
+                            cursor: 'pointer',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            gap: '12px',
+                            fontWeight: '900',
+                            fontSize: '1.2rem',
+                            boxShadow: '0 6px 20px rgba(240, 62, 62, 0.4)',
+                            transition: 'transform 0.2s'
+                        }}
+                    >
+                        <Save size={24} /> {isSaving ? 'GUARDANDO CAMBIOS...' : 'GUARDAR TODAS LAS TARIFAS'}
+                    </button>
                 </div>
                 
                 <div style={{ marginTop: '30px', padding: '15px', background: '#fff9e6', borderRadius: '8px', borderLeft: '4px solid #fcc419', fontSize: '0.9rem' }}>

@@ -203,3 +203,15 @@ body, .admin-container, .admin-main, .admin-content {
   }
 }
 
+/* Quitar flechas de inputs numéricos */
+.no-arrows-input::-webkit-outer-spin-button,
+.no-arrows-input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.no-arrows-input {
+  -webkit-appearance: none;
+  -moz-appearance: textfield;
+  appearance: none;
+}
