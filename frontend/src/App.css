@@ -898,6 +898,16 @@
   box-shadow: 0 6px 20px rgba(227, 24, 55, 0.4);
 }
 
+.detail-add-button-disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.detail-add-button-disabled:hover {
+  transform: none;
+  box-shadow: none;
+}
+
 @media (max-width: 480px) {
   .product-detail-modal {
     max-width: 100%;

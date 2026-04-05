@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Menu, X, ShoppingCart, Minus, Plus, MessageCircle } from 'lucide-react';
 import { fetchMenuEntries, createSale } from '../services/api';
 
@@ -13,17 +13,25 @@ function Home() {
   const [customerName, setCustomerName] = useState('');
   const [isSaving, setIsSaving] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState(null);
+  const rafRef = useRef(null);
 
   useEffect(() => {
     const handleScroll = () => {
-      setIsScrolled(window.scrollY > 50);
+      if (rafRef.current) return;
+      
+      rafRef.current = requestAnimationFrame(() => {
+        setIsScrolled(window.scrollY > 50);
+        rafRef.current = null;
+      });
     };
     
     window.addEventListener('scroll', handleScroll, { passive: true });
-    handleScroll();
     loadMenu();
     
-    return () => window.removeEventListener('scroll', handleScroll);
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+      if (rafRef.current) cancelAnimationFrame(rafRef.current);
+    };
   }, []);
 
   const loadMenu = async () => {
@@ -397,16 +405,11 @@ function Home() {
                   </button>
                 </div>
                 <button 
-                  className="detail-add-button"
-                  onClick={() => {
-                    if (!cart[selectedProduct.id]) {
-                      addToCart(selectedProduct);
-                    } else {
-                      updateQuantity(selectedProduct.id, 1);
-                    }
-                  }}
+                  className={`detail-add-button ${!cart[selectedProduct.id] ? 'detail-add-button-disabled' : ''}`}
+                  disabled={!cart[selectedProduct.id]}
+                  onClick={() => updateQuantity(selectedProduct.id, 1)}
                 >
-                  {cart[selectedProduct.id] ? `AGREGAR MÁS (${cart[selectedProduct.id].quantity} en pedido)` : 'AGREGAR AL PEDIDO'}
+                  AGREGAR
                 </button>
               </div>
             </div>
