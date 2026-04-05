@@ -8,21 +8,26 @@
     justify-content: space-between;
     align-items: center;
     margin-bottom: 2rem;
+    flex-wrap: wrap;
+    gap: 1rem;
 }
 
 .orders-stats {
     display: flex;
     gap: 1rem;
+    flex-wrap: wrap;
 }
 
 .stat-card {
     background: white;
-    padding: 1rem 2rem;
+    padding: 1rem 1.5rem;
     border-radius: 8px;
     box-shadow: 0 2px 8px rgba(0,0,0,0.05);
     display: flex;
     flex-direction: column;
     align-items: center;
+    flex: 1;
+    min-width: 140px;
 }
 
 .stat-card span {
@@ -51,8 +56,35 @@
     }
 }
 
+@media (max-width: 768px) {
+    .orders-header {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    
+    .orders-stats {
+        width: 100%;
+    }
+    
+    .stat-card {
+        padding: 0.8rem;
+    }
+
+    .orders-container {
+        padding: 0.5rem;
+    }
+
+    .orders-table th:nth-child(5), 
+    .orders-table td:nth-child(5) {
+        display: none; /* Hide Status in very small screens or make it compact */
+    }
+}
+
 .orders-list-card {
     overflow-x: auto;
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
 }
 
 .orders-table {
