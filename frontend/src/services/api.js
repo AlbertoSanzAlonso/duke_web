@@ -1,4 +1,12 @@
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000/api';
+let base_api_url = import.meta.env.VITE_API_URL || 'http://localhost:8000/api';
+// Asegurar que termina en /api (sin barra final para que las llamadas concatenen /products/)
+if (base_api_url.endsWith('/')) {
+  base_api_url = base_api_url.slice(0, -1);
+}
+if (!base_api_url.endsWith('/api')) {
+  base_api_url += '/api';
+}
+const API_URL = base_api_url;
 
 export const fetchProducts = async () => {
     const response = await fetch(`${API_URL}/products/`);

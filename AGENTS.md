@@ -6,7 +6,7 @@ Este proyecto se divide en dos entornos de despliegue claramente separados para 
 - **Ruta principal:** `/frontend`
 - **Framework:** React / Vite
 - **Variables de Entorno vitales:** 
-  - `VITE_API_URL`: Debe apuntar al dominio proporcionado por Coolify (ej. `https://api.dukeburgers-sj.com`). 
+  - `VITE_API_URL`: Debe apuntar al dominio proporcionado por Coolify (ej. `https://api.dukeburger-sj.com`). 
     **CRÍTICO:** NO debe incluir el sufijo `/api/`, ya que el cliente API lo añade automáticamente.
 - **Configuración de Vercel:** El *Root Directory* configurado en Vercel debe ser la carpeta `frontend`.
 
@@ -23,7 +23,7 @@ Este proyecto se divide en dos entornos de despliegue claramente separados para 
 - **Variables de Entorno necesarias:**
   - `DATABASE_URL`: Cadena de conexión de Supabase.
   - `DEBUG`: `False` en producción.
-  - `ALLOWED_HOSTS`: Lista de dominios permitidos (ej. `api.dukeburgers-sj.com,dukeburgers-sj.com`).
+  - `ALLOWED_HOSTS`: Lista de dominios permitidos (ej. `api.dukeburger-sj.com,dukeburger-sj.com`).
 
 ## 3. Skills Installadas
 - `supabase-postgres-best-practices`: Para optimizaciones de base de datos.
