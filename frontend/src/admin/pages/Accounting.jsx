@@ -1,12 +1,14 @@
-import React, { useState, useEffect } from 'react';
 import { fetchSales, fetchSupplierOrders, fetchExpenses, createExpense, deleteExpense } from '../../services/api';
 import './Accounting.css';
+import LoadingScreen from '../components/LoadingScreen';
+import Toast from '../components/Toast';
 
 const Accounting = () => {
     const [sales, setSales] = useState([]);
     const [supplierOrders, setSupplierOrders] = useState([]);
     const [manualExpenses, setManualExpenses] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [toast, setToast] = useState(null); // { message, type }
     
     // Manual expense form
     const [desc, setDesc] = useState('');
@@ -51,9 +53,10 @@ const Accounting = () => {
             });
             setDesc('');
             setAmount('');
+            setToast({ message: "Gasto registrado correctamente", type: 'success' });
             loadData();
         } catch (error) {
-            alert("Error al registrar el gasto");
+            setToast({ message: "Error al registrar el gasto", type: 'error' });
         } finally {
             setIsSaving(false);
         }
@@ -63,9 +66,10 @@ const Accounting = () => {
         if (!window.confirm("¿Eliminar este gasto?")) return;
         try {
             await deleteExpense(id);
+            setToast({ message: "Gasto eliminado", type: 'success' });
             loadData();
         } catch (error) {
-            alert("Error al eliminar");
+            setToast({ message: "Error al eliminar", type: 'error' });
         }
     };
 
@@ -75,10 +79,11 @@ const Accounting = () => {
     const totalExpenses = totalSupplierDebt + totalManualExpenses;
     const balance = totalIncome - totalExpenses;
 
-    if (loading) return <div className="admin-content">Cargando contabilidad...</div>;
+    if (loading) return <LoadingScreen />;
 
     return (
         <div className="admin-content accounting-page">
+            {toast && <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />}
             <header className="accounting-header">
                 <h2>Balance General</h2>
                 <p>Resumen financiero de Duke Burgers</p>
@@ -87,18 +92,18 @@ const Accounting = () => {
             <div className="accounting-summary-grid">
                 <div className="summary-card income">
                     <h3>Ingresos</h3>
-                    <p className="amount">+{totalIncome.toFixed(2)}€</p>
+                    <p className="amount">+${totalIncome.toFixed(2)}</p>
                     <span>Ventas finalizadas</span>
                 </div>
                 <div className="summary-card expenses">
                     <h3>Gastos</h3>
-                    <p className="amount">-{totalExpenses.toFixed(2)}€</p>
+                    <p className="amount">-${totalExpenses.toFixed(2)}</p>
                     <span>Proveedores + Gastos manuales</span>
                 </div>
                 <div className="summary-card balance">
                     <h3>Beneficio Neto</h3>
                     <p className={`amount ${balance >= 0 ? 'positive' : 'negative'}`}>
-                        {balance.toFixed(2)}€
+                        ${balance.toFixed(2)}
                     </p>
                     <span>Balance total</span>
                 </div>
@@ -120,7 +125,7 @@ const Accounting = () => {
                             </div>
                             <div className="form-row">
                                 <div className="form-group">
-                                    <label>Importe (€)</label>
+                                    <label>Importe ($)</label>
                                     <input 
                                         type="number" 
                                         step="0.01" 
@@ -170,7 +175,7 @@ const Accounting = () => {
                                             <td><span className="badge badge-manual">Gasto</span></td>
                                             <td>{e.description}</td>
                                             <td>{e.category}</td>
-                                            <td className="txt-right negative">-{parseFloat(e.amount).toFixed(2)}€</td>
+                                            <td className="txt-right negative">-${parseFloat(e.amount).toFixed(2)}</td>
                                             <td>
                                                 <button onClick={() => handleDeleteExpense(e.id)} className="delete-btn">×</button>
                                             </td>
@@ -182,7 +187,7 @@ const Accounting = () => {
                                             <td><span className="badge badge-order">Proveedor</span></td>
                                             <td>{o.supplier_name} (Pedido #{o.id})</td>
                                             <td>Materia Prima</td>
-                                            <td className="txt-right negative">-{parseFloat(o.total_cost).toFixed(2)}€</td>
+                                            <td className="txt-right negative">-${parseFloat(o.total_cost).toFixed(2)}</td>
                                             <td>-</td>
                                         </tr>
                                     ))}
@@ -192,7 +197,7 @@ const Accounting = () => {
                                             <td><span className="badge badge-income">Ingreso</span></td>
                                             <td>Venta #{s.id} {s.customer_name ? `(${s.customer_name})` : ''}</td>
                                             <td>Venta TPV</td>
-                                            <td className="txt-right positive">+{parseFloat(s.total_amount).toFixed(2)}€</td>
+                                            <td className="txt-right positive">+${parseFloat(s.total_amount).toFixed(2)}</td>
                                             <td>-</td>
                                         </tr>
                                     ))}

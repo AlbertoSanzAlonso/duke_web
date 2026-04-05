@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { fetchSales } from '../../services/api';
 import { Printer, Eye, Calendar, User, Hash } from 'lucide-react';
+import LoadingScreen from '../components/LoadingScreen';
 import './Orders.css';
 
 const Orders = () => {
@@ -27,7 +28,7 @@ const Orders = () => {
         window.print();
     };
 
-    if (loading) return <div className="admin-card">Cargando pedidos...</div>;
+    if (loading) return <LoadingScreen />;
 
     return (
         <div className="orders-container">
@@ -40,7 +41,7 @@ const Orders = () => {
                     </div>
                     <div className="stat-card">
                         <span>Ingresos Totales</span>
-                        <strong>{orders.reduce((acc, o) => acc + parseFloat(o.total_amount), 0).toFixed(2)}€</strong>
+                        <strong>${orders.reduce((acc, o) => acc + parseFloat(o.total_amount), 0).toFixed(2)}</strong>
                     </div>
                 </div>
             </div>
@@ -74,7 +75,7 @@ const Orders = () => {
                                             {order.table_number && <span className="table-badge">Mesa {order.table_number}</span>}
                                         </div>
                                     </td>
-                                    <td className="total-cell">{parseFloat(order.total_amount).toFixed(2)}€</td>
+                                    <td className="total-cell">${parseFloat(order.total_amount).toFixed(2)}</td>
                                     <td>
                                         <span className={`status-badge ${order.status.toLowerCase()}`}>
                                             {order.status === 'PENDING' ? 'Pendiente' : order.status === 'COMPLETED' ? 'Completado' : 'Cancelado'}
@@ -112,14 +113,14 @@ const Orders = () => {
                                 {selectedOrder.items.map(item => (
                                     <div key={item.id} className="detail-item">
                                         <span>{item.quantity} x {item.entry_name}</span>
-                                        <span>{(item.quantity * parseFloat(item.price_at_sale)).toFixed(2)}€</span>
+                                        <span>${(item.quantity * parseFloat(item.price_at_sale)).toFixed(2)}</span>
                                     </div>
                                 ))}
                             </div>
 
                             <div className="details-total">
                                 <span>TOTAL</span>
-                                <strong>{parseFloat(selectedOrder.total_amount).toFixed(2)}€</strong>
+                                <strong>${parseFloat(selectedOrder.total_amount).toFixed(2)}</strong>
                             </div>
 
                             <button className="print-full-btn" onClick={() => handlePrint(selectedOrder)}>
@@ -150,14 +151,14 @@ const Orders = () => {
                             {selectedOrder.items.map(item => (
                                 <div key={item.id} className="ticket-row">
                                     <span>{item.quantity} x {item.entry_name}</span>
-                                    <span>{(item.quantity * parseFloat(item.price_at_sale)).toFixed(2)}€</span>
+                                    <span>${(item.quantity * parseFloat(item.price_at_sale)).toFixed(2)}</span>
                                 </div>
                             ))}
                         </div>
                         <div className="ticket-divider"></div>
                         <div className="ticket-total-print">
                             <span>TOTAL:</span>
-                            <strong>{parseFloat(selectedOrder.total_amount).toFixed(2)}€</strong>
+                            <strong>${parseFloat(selectedOrder.total_amount).toFixed(2)}</strong>
                         </div>
                         <div className="ticket-footer-print">
                             <p>¡Gracias por su visita!</p>

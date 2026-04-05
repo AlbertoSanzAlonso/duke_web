@@ -120,14 +120,39 @@
     text-align: right;
 }
 
-/* Badges and Tables */
+.accounting-form .main-button {
+    background: var(--admin-primary) !important;
+    color: white !important;
+    border: none !important;
+    padding: 14px !important;
+    font-weight: 700 !important;
+    border-radius: 8px !important;
+    cursor: pointer !important;
+    transition: all 0.3s ease !important;
+}
+
+.accounting-form .main-button:hover:not(:disabled) {
+    background: var(--admin-primary-hover) !important;
+    box-shadow: 0 4px 12px rgba(240, 62, 62, 0.3);
+    transform: translateY(-2px);
+}
+
+.accounting-form .main-button:disabled {
+    background: #ccc !important;
+    cursor: not-allowed !important;
+}
+
+/* History table fixes for overflow */
 .accounting-table-container {
     overflow-x: auto;
     margin-top: 20px;
+    border-radius: 8px;
+    border: 1px solid #f0f0f0;
 }
 
 .accounting-table {
     width: 100%;
+    min-width: 800px; /* Force minimum width to enable horizontal scroll and prevent content squashing */
     border-collapse: collapse;
 }
 
