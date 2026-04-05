@@ -12,13 +12,17 @@ function Home() {
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [customerName, setCustomerName] = useState('');
   const [isSaving, setIsSaving] = useState(false);
+  const [selectedProduct, setSelectedProduct] = useState(null);
 
   useEffect(() => {
     const handleScroll = () => {
       setIsScrolled(window.scrollY > 50);
     };
-    window.addEventListener('scroll', handleScroll);
+    
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    handleScroll();
     loadMenu();
+    
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
@@ -215,7 +219,11 @@ function Home() {
               <p style={{ gridColumn: '1/-1', textAlign: 'center', padding: '50px' }}>No hay platos disponibles en este momento.</p>
             ) : (
               currentItems.map(item => (
-                <div key={item.id} className="menu-card hover-lift">
+                <div 
+                  key={item.id} 
+                  className="menu-card hover-lift"
+                  onClick={() => setSelectedProduct(item)}
+                >
                    {item.image && (
                     <div className="card-image-container" style={{ width: '100%', height: '150px', overflow: 'hidden' }}>
                       <img src={item.image} alt={item.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
@@ -228,11 +236,11 @@ function Home() {
                         <span className="item-badge">{cart[item.id].quantity}x</span>
                       )}
                     </div>
-                    <p>{item.description}</p>
+                    <p className="card-desc-short">{item.description}</p>
                   </div>
                   <div className="card-footer">
                     <span className="price">${parseFloat(item.price).toLocaleString('es-AR')}</span>
-                    <button className="add-btn" onClick={() => addToCart(item)}>+</button>
+                    <button className="add-btn" onClick={(e) => { e.stopPropagation(); addToCart(item); }}>+</button>
                   </div>
                 </div>
               ))
@@ -335,6 +343,72 @@ function Home() {
                   </>
                 )}
               </button>
+            </div>
+          </div>
+        </div>
+      )}
+      {/* Product Detail Modal */}
+      {selectedProduct && (
+        <div className="modal-overlay" onClick={() => setSelectedProduct(null)}>
+          <div className="product-detail-modal" onClick={e => e.stopPropagation()}>
+            <button className="close-modal-detail" onClick={() => setSelectedProduct(null)}>
+              <X size={24} />
+            </button>
+            <div className="detail-hero">
+              {selectedProduct.image ? (
+                <img src={selectedProduct.image} alt={selectedProduct.name} />
+              ) : (
+                <div className="detail-no-img">🍔</div>
+              )}
+              <div className="detail-price-badge">
+                ${parseFloat(selectedProduct.price).toLocaleString('es-AR')}
+              </div>
+            </div>
+            <div className="detail-content">
+              <div className="detail-header">
+                <h2>{selectedProduct.name}</h2>
+                <span className="detail-cat">{activeCategory}</span>
+              </div>
+              <p className="detail-desc">{selectedProduct.description || 'Nuestra receta secreta preparada con los mejores ingredientes.'}</p>
+              
+              <div className="detail-footer">
+                <div className="detail-qty-control">
+                  <button 
+                    onClick={() => {
+                      if (cart[selectedProduct.id]?.quantity > 1) {
+                        updateQuantity(selectedProduct.id, -1);
+                      } else {
+                        updateQuantity(selectedProduct.id, -1);
+                        setSelectedProduct(null);
+                      }
+                    }}
+                  >
+                    {cart[selectedProduct.id]?.quantity > 1 ? <Minus size={20} /> : <X size={20} />}
+                  </button>
+                  <span className="detail-qty">{cart[selectedProduct.id]?.quantity || 0}</span>
+                  <button onClick={() => {
+                    if (!cart[selectedProduct.id]) {
+                      addToCart(selectedProduct);
+                    } else {
+                      updateQuantity(selectedProduct.id, 1);
+                    }
+                  }}>
+                    <Plus size={20} />
+                  </button>
+                </div>
+                <button 
+                  className="detail-add-button"
+                  onClick={() => {
+                    if (!cart[selectedProduct.id]) {
+                      addToCart(selectedProduct);
+                    } else {
+                      updateQuantity(selectedProduct.id, 1);
+                    }
+                  }}
+                >
+                  {cart[selectedProduct.id] ? `AGREGAR MÁS (${cart[selectedProduct.id].quantity} en pedido)` : 'AGREGAR AL PEDIDO'}
+                </button>
+              </div>
             </div>
           </div>
         </div>
