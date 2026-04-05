@@ -126,7 +126,7 @@ function Inventory() {
 
                 <input 
                     type="number" 
-                    step="0.01" 
+                    step="100" 
                     placeholder="Stock Actual" 
                     value={quantity} 
                     onChange={e => setQuantity(e.target.value)} 
@@ -142,7 +142,7 @@ function Inventory() {
                 </select>
                 <input 
                     type="number" 
-                    step="0.01" 
+                    step="100" 
                     placeholder="Stock mínimo" 
                     value={minStock} 
                     onChange={e => setMinStock(e.target.value)} 
