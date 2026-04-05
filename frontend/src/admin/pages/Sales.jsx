@@ -104,6 +104,7 @@ const Sales = () => {
                 status: status,
                 customer_name: customerName,
                 table_number: isDelivery ? `ENVIO: $${deliveryCost}` : "", 
+                delivery_cost: isDelivery ? deliveryCost : 0,
                 notes: saleNotes,
                 items: cart.map(item => ({
                     menu_entry: item.menu_entry,
@@ -140,6 +141,8 @@ const Sales = () => {
         })));
         setCustomerName(ticket.customer_name || '');
         setSaleNotes(ticket.notes || '');
+        setDeliveryCost(parseFloat(ticket.delivery_cost || 0));
+        setIsDelivery(parseFloat(ticket.delivery_cost || 0) > 0);
         setCurrentSaleId(ticket.id);
         setViewMode('tpv');
         setIsTicketOpen(true);

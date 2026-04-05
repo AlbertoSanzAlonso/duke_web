@@ -236,6 +236,7 @@ function Home() {
         status: 'PENDING',
         customer_name: customerName,
         table_number: deliveryMode === 'delivery' ? `DELIVERY: ${deliveryAddress}` : "RETIRO EN LOCAL",
+        delivery_cost: deliveryMode === 'delivery' ? deliveryCost : 0,
         notes: orderNotes ? `${orderNotes}` : "Pedido desde la Web",
         items: cartItems.map(item => ({
           menu_entry: item.id,

@@ -62,6 +62,7 @@ class Sale(models.Model):
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='COMPLETED')
     customer_name = models.CharField(max_length=100, blank=True, null=True)
     table_number = models.CharField(max_length=255, blank=True, null=True)
+    delivery_cost = models.DecimalField(max_digits=10, decimal_places=2, default=0)
     notes = models.TextField(blank=True, null=True)
     
     def __str__(self):

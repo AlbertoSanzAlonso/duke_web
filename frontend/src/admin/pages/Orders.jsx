@@ -157,8 +157,16 @@ const Orders = () => {
                         </div>
                         <div className="ticket-divider"></div>
                         <div className="ticket-total-print">
-                            <span>TOTAL:</span>
-                            <strong>${parseFloat(selectedOrder.total_amount).toFixed(2)}</strong>
+                            {parseFloat(selectedOrder.delivery_cost) > 0 && (
+                                <div className="ticket-row" style={{ fontSize: '0.8rem', fontWeight: 'normal' }}>
+                                    <span>Envío:</span>
+                                    <span>${parseFloat(selectedOrder.delivery_cost).toLocaleString('es-AR')}</span>
+                                </div>
+                            )}
+                            <div className="ticket-row">
+                                <span>TOTAL:</span>
+                                <strong>${parseFloat(selectedOrder.total_amount).toLocaleString('es-AR')}</strong>
+                            </div>
                         </div>
                         <div className="ticket-footer-print">
                             <p>¡Gracias por su visita!</p>

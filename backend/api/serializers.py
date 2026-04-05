@@ -28,14 +28,14 @@ class SaleSerializer(serializers.ModelSerializer):
     
     class Meta:
         model = Sale
-        fields = ['id', 'total_amount', 'date', 'notes', 'items', 'status', 'customer_name', 'table_number']
+        fields = ['id', 'total_amount', 'date', 'notes', 'items', 'status', 'customer_name', 'table_number', 'delivery_cost']
 
 class SaleCreateSerializer(serializers.ModelSerializer):
     items = SaleItemSerializer(many=True)
 
     class Meta:
         model = Sale
-        fields = ['id', 'total_amount', 'notes', 'items', 'status', 'customer_name', 'table_number']
+        fields = ['id', 'total_amount', 'notes', 'items', 'status', 'customer_name', 'table_number', 'delivery_cost']
 
     def create(self, validated_data):
         items_data = validated_data.pop('items')
