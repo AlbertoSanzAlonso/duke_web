@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { fetchProducts, createProduct, deleteProduct, updateProduct } from '../../services/api';
+import Toast from '../components/Toast';
 
 function Products() {
     const [products, setProducts] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
+    const [toast, setToast] = useState(null);
 
     const [name, setName] = useState('');
     const [description, setDescription] = useState('');
@@ -85,6 +87,7 @@ function Products() {
 
     return (
         <div className="admin-card">
+            {toast && <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />}
             <h2>Gestión de Productos (Catálogo Base)</h2>
             <p style={{ color: '#666', fontSize: '0.9rem', marginBottom: '20px' }}>Aquí das de alta los productos básicos del sistema con su foto. Luego podrás añadirlos a "La Carta" para darles precio de venta.</p>
 

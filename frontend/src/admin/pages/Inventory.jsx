@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { fetchInventory, createInventoryItem, deleteInventoryItem } from '../../services/api';
+import Toast from '../components/Toast';
 
 function Inventory() {
     const [items, setItems] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
+    const [toast, setToast] = useState(null);
 
     // Form inputs state
     const [name, setName] = useState('');
@@ -58,8 +60,9 @@ function Inventory() {
             setMinStock('0');
             // Reload list
             loadInventory();
+            setToast({ message: "Artículo añadido al inventario", type: 'success' });
         } catch (err) {
-            alert(err.message);
+            setToast({ message: err.message, type: 'error' });
         }
     };
 
@@ -68,13 +71,15 @@ function Inventory() {
         try {
             await deleteInventoryItem(id);
             loadInventory();
+            setToast({ message: "Artículo eliminado", type: 'success' });
         } catch (err) {
-            alert(err.message);
+            setToast({ message: err.message, type: 'error' });
         }
     };
 
     return (
         <div className="admin-card">
+            {toast && <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />}
             <h2>Inventario de Almacén</h2>
             
             <form onSubmit={handleCreate} style={{ display: 'flex', gap: '10px', marginBottom: '20px', flexWrap: 'wrap', alignItems: 'center' }}>
