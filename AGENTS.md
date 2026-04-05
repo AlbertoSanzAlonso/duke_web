@@ -1,17 +1,33 @@
 # Reparto de Infraestructura e Instrucciones para Agentes AI
 
-Este proyecto se divide en dos entornos de despliegue claramente separados:
+Este proyecto se divide en dos entornos de despliegue claramente separados para el sistema de gestión de Duke Burgers.
 
-1. **Frontend (Vercel)**
-   - **Ruta principal:** `/frontend`
-   - **Framework:** React / Vite
-   - **Variables de Entorno vitales:** `VITE_API_URL` debe apuntar al dominio proporcionado por Coolify, siempre con protocolo `https://`.
-   - **Configuración de Vercel:** Es crítico que el *Root Directory* configurado en Vercel sea la carpeta `frontend`.
+## 1. Frontend (Vercel)
+- **Ruta principal:** `/frontend`
+- **Framework:** React / Vite
+- **Variables de Entorno vitales:** 
+  - `VITE_API_URL`: Debe apuntar al dominio proporcionado por Coolify (ej. `https://api.dukeburgers-sj.com`). 
+    **CRÍTICO:** NO debe incluir el sufijo `/api/`, ya que el cliente API lo añade automáticamente.
+- **Configuración de Vercel:** El *Root Directory* configurado en Vercel debe ser la carpeta `frontend`.
 
-2. **Backend (Coolify)**
-   - **Ruta principal:** `/backend`
-   - **Framework:** Django + Django REST Framework
-   - **Base de Datos:** PostgreSQL en Supabase.
-   - **Configuración Básica:** `CORS_ALLOW_ALL_ORIGINS = True` en `settings.py` permite que el dominio de Vercel se comunique sin bloqueos de seguridad del navegador. Necesita variables de entorno como `DATABASE_URL` instanciadas correctamente en Coolify.
+## 2. Backend (Coolify)
+- **Ruta principal:** `/backend`
+- **Framework:** Django + Django REST Framework
+- **Base de Datos:** PostgreSQL alojada en **Supabase (Región Europa)**.
+- **Configuración de Imágenes:**
+  - El sistema convierte automáticamente todas las imágenes subidas al modelo `Product` a formato **WebP** para optimizar el rendimiento.
+  - Las imágenes se almacenan en un **Volumen Persistente de Coolify** mapeado a `/app/media`. Es necesario configurar el Storage en la interfaz de Coolify para evitar la pérdida de fotos entre despliegues.
+- **Configuración de Red:**
+  - `CORS_ALLOW_ALL_ORIGINS = True` permite la comunicación con el frontend.
+  - `SECURE_PROXY_SSL_HEADER` y `USE_X_FORWARDED_HOST` están habilitados para garantizar que las URLs generadas sean siempre HTTPS mediante el proxy de Coolify.
+- **Variables de Entorno necesarias:**
+  - `DATABASE_URL`: Cadena de conexión de Supabase.
+  - `DEBUG`: `False` en producción.
+  - `ALLOWED_HOSTS`: Lista de dominios permitidos (ej. `api.dukeburgers-sj.com,dukeburgers-sj.com`).
 
+## 3. Skills Installadas
+- `supabase-postgres-best-practices`: Para optimizaciones de base de datos.
+- `web-design-guidelines`: Para asegurar que la UI se mantenga moderna, usable y bajo estándares de alta calidad de Vercel (especialmente en el rediseño de fichas y navegación).
+
+---
 *El Agente no debe romper esta separación. Asegurarse de realizar despliegues parciales según carpeta.*
