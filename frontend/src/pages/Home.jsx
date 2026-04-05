@@ -185,7 +185,7 @@ function Home() {
         </div>
         <div className="marquee">
           <div className="marquee-content">
-            BURGER - PACHATA - LOMO - PIZZA - SAN JUAN - BURGER - PACHATA - LOMO - PIZZA - SAN JUAN - BURGER - PACHATA - LOMO - PIZZA - SAN JUAN - BURGER - PACHATA - LOMO - PIZZA - SAN JUAN
+            BURGER - PACHATA - LOMO - PIZZA - BEBIDA - SAN JUAN - BURGER - PACHATA - LOMO - PIZZA - BEBIDA - SAN JUAN - BURGER - PACHATA - LOMO - PIZZA - BEBIDA - SAN JUAN
           </div>
         </div>
       </header>
