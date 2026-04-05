@@ -13,6 +13,7 @@ function Home() {
   const [customerName, setCustomerName] = useState('');
   const [isSaving, setIsSaving] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState(null);
+  const [modalQuantity, setModalQuantity] = useState(1);
   const rafRef = useRef(null);
 
   useEffect(() => {
@@ -230,7 +231,10 @@ function Home() {
                 <div 
                   key={item.id} 
                   className="menu-card hover-lift"
-                  onClick={() => setSelectedProduct(item)}
+                  onClick={() => {
+                    setModalQuantity(cart[item.id]?.quantity || 1);
+                    setSelectedProduct(item);
+                  }}
                 >
                    {item.image && (
                     <div className="card-image-container" style={{ width: '100%', height: '150px', overflow: 'hidden' }}>
@@ -382,32 +386,27 @@ function Home() {
               <div className="detail-footer">
                 <div className="detail-qty-control">
                   <button 
-                    onClick={() => {
-                      if (cart[selectedProduct.id]?.quantity > 1) {
-                        updateQuantity(selectedProduct.id, -1);
-                      } else {
-                        updateQuantity(selectedProduct.id, -1);
-                        setSelectedProduct(null);
-                      }
-                    }}
+                    onClick={() => setModalQuantity(q => Math.max(1, q - 1))}
                   >
-                    {cart[selectedProduct.id]?.quantity > 1 ? <Minus size={20} /> : <X size={20} />}
+                    <Minus size={20} />
                   </button>
-                  <span className="detail-qty">{cart[selectedProduct.id]?.quantity || 0}</span>
-                  <button onClick={() => {
-                    if (!cart[selectedProduct.id]) {
-                      addToCart(selectedProduct);
-                    } else {
-                      updateQuantity(selectedProduct.id, 1);
-                    }
-                  }}>
+                  <span className="detail-qty">{modalQuantity}</span>
+                  <button onClick={() => setModalQuantity(q => q + 1)}>
                     <Plus size={20} />
                   </button>
                 </div>
                 <button 
-                  className={`detail-add-button ${!cart[selectedProduct.id] ? 'detail-add-button-disabled' : ''}`}
-                  disabled={!cart[selectedProduct.id]}
-                  onClick={() => updateQuantity(selectedProduct.id, 1)}
+                  className={`detail-add-button ${modalQuantity === cart[selectedProduct.id]?.quantity ? 'detail-add-button-disabled' : ''}`}
+                  disabled={modalQuantity === cart[selectedProduct.id]?.quantity}
+                  onClick={() => {
+                    setCart(prev => ({
+                      ...prev,
+                      [selectedProduct.id]: {
+                        ...selectedProduct,
+                        quantity: modalQuantity
+                      }
+                    }));
+                  }}
                 >
                   AGREGAR
                 </button>
