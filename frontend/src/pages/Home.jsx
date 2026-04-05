@@ -11,6 +11,7 @@ function Home() {
   const [cart, setCart] = useState({});
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [customerName, setCustomerName] = useState('');
+  const [orderNotes, setOrderNotes] = useState('');
   const [isSaving, setIsSaving] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [isPromosOpen, setIsPromosOpen] = useState(false);
@@ -113,7 +114,7 @@ function Home() {
         status: 'PENDING',
         customer_name: customerName,
         table_number: "", // Web app doesn't have tables
-        notes: "Pedido desde la Web",
+        notes: orderNotes || "Pedido desde la Web",
         items: cartItems.map(item => ({
           menu_entry: item.id,
           quantity: item.quantity,
@@ -129,6 +130,11 @@ function Home() {
       cartItems.forEach(item => {
         message += `• ${item.quantity}x ${item.name} ($${(item.price * item.quantity).toLocaleString('es-AR')})\n`;
       });
+      
+      if (orderNotes.trim()) {
+        message += `\n📝 *NOTAS:* ${orderNotes}\n`;
+      }
+      
       message += `\n*TOTAL: $${totalPrice.toLocaleString('es-AR')}*`;
       
       const url = `https://wa.me/${phone}?text=${encodeURIComponent(message)}`;
@@ -137,6 +143,7 @@ function Home() {
       // 3. Reset Cart
       setCart({});
       setCustomerName('');
+      setOrderNotes('');
       setIsCartOpen(false);
     } catch (error) {
       console.error("Error creating sale:", error);
@@ -228,9 +235,9 @@ function Home() {
                   className="menu-card hover-lift"
                   onClick={() => setSelectedProduct(item)}
                 >
-                   {item.image && (
-                    <div className="card-image-container" style={{ width: '100%', height: '150px', overflow: 'hidden' }}>
-                      <img src={item.image} alt={item.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                  {item.image && (
+                    <div className="card-image-container">
+                      <img src={item.image} alt={item.name} />
                     </div>
                   )}
                   <div className="card-info">
@@ -304,6 +311,27 @@ function Home() {
                   value={customerName}
                   onChange={e => setCustomerName(e.target.value)}
                   className={!customerName && cartItems.length > 0 ? "input-highlight" : ""}
+                />
+              </div>
+
+              <div className="customer-info-section">
+                <label>COMENTARIOS (Cambios, aclaraciones...)</label>
+                <textarea 
+                  placeholder="Ej: Sin cebolla la burger, cambiar bebida por Sprite..."
+                  value={orderNotes}
+                  onChange={e => setOrderNotes(e.target.value)}
+                  style={{ 
+                    width: '100%', 
+                    background: 'transparent', 
+                    border: 'none', 
+                    borderBottom: '2px solid #333', 
+                    color: 'white', 
+                    fontSize: '1rem', 
+                    padding: '0.5rem 0', 
+                    outline: 'none',
+                    resize: 'none',
+                    minHeight: '60px'
+                  }}
                 />
               </div>
 
@@ -409,7 +437,7 @@ function Home() {
                     setSelectedProduct(null);
                   }}
                 >
-                  {cart[selectedProduct.id] ? 'CONFIRMAR Y VOLVER' : 'AGREGAR AL PEDIDO'}
+                  {cart[selectedProduct.id] ? 'CONFIRMAR' : 'AGREGAR AL PEDIDO'}
                 </button>
               </div>
             </div>

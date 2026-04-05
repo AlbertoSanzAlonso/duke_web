@@ -301,12 +301,15 @@
 
 .menu-card {
   background: var(--color-accent);
-  padding: 2.5rem;
+  padding: 0; /* Removing padding from parent for full-width image */
   display: flex;
   flex-direction: column;
   justify-content: space-between;
   border: 1px solid #222;
+  border-radius: 15px; /* Rounded corners */
+  overflow: hidden; /* Ensure image follows rounded corners */
   transition: var(--transition-smooth);
+  cursor: pointer;
 }
 
 .menu-card:hover {
@@ -316,17 +319,32 @@
 
 .menu-card h3 {
   font-size: 2rem;
-  margin-bottom: 1rem;
+  margin: 1.5rem 0 0.5rem 0; /* More spacing on top from the image */
+}
+
+.card-info {
+  padding: 1.5rem 2rem;
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.card-image-container {
+  width: 100%;
+  height: 220px; /* Matching admin panel style */
+  background: #111;
+  overflow: hidden;
 }
 
 .menu-card p {
   color: #888;
-  font-size: 0.9rem;
-  line-height: 1.4;
+  font-size: 0.95rem;
+  line-height: 1.5;
 }
 
 .card-footer {
-  margin-top: 2rem;
+  margin-top: auto;
+  padding: 0 2rem 2rem 2rem;
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -880,7 +898,7 @@
 
 .detail-add-button {
   flex: 1;
-  max-width: 200px;
+  max-width: 180px;
   background: #E31837;
   color: white;
   border: none;
@@ -890,6 +908,7 @@
   font-size: 1.1rem;
   font-weight: 700;
   cursor: pointer;
+  margin-right: 0.5rem; /* Margen solicitado */
   transition: var(--transition-smooth);
 }
 
