@@ -2,6 +2,7 @@ import React from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import Home from './pages/Home';
 import About from './pages/About';
+import PublicTicket from './pages/PublicTicket';
 import AdminLayout from './admin/AdminLayout';
 import Dashboard from './admin/pages/Dashboard';
 import Products from './admin/pages/Products';
@@ -23,6 +24,7 @@ function App() {
         {/* Consumer Site */}
         <Route path="/" element={<Home />} />
         <Route path="/nosotros" element={<About />} />
+        <Route path="/ticket/:id" element={<PublicTicket />} />
 
         {/* Admin Dashboard */}
         <Route path="/admin" element={<AdminLayout />}>

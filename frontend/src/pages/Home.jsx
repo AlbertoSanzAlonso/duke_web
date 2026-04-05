@@ -245,25 +245,24 @@ function Home() {
         }))
       };
 
-      await createSale(saleData);
+      const createdSale = await createSale(saleData);
 
       // 2. Format WhatsApp Message
       const phone = "5492645142897";
-      let message = `¡Hola Duke Burger! Soy ${customerName}.\nQuiero hacer este pedido desde la web:\n\n`;
-      message += `MÉTODO: ${deliveryMode === 'delivery' ? 'A DOMICILIO' : 'RETIRO EN LOCAL'}\n`;
-      if (deliveryMode === 'delivery') {
-        message += `DIRECCIÓN: ${deliveryAddress}\n`;
-        message += `MAPA: https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(deliveryAddress + ", San Juan, Argentina")}\n`;
-      }
-      message += `\n`;
+      const ticketUrl = `${window.location.origin}/ticket/${createdSale.id}`;
       
-      cartItems.forEach(item => {
-        message += `- ${item.quantity}x ${item.name} ($${(item.price * item.quantity).toLocaleString('es-AR')})\n`;
-      });
+      let message = `¡Hola Duke Burger! Soy *${customerName}*.\n`;
+      message += `He realizado un nuevo Pedido Web:\n\n`;
+      message += `🆔 *TICKET #${createdSale.id}*\n`;
+      message += `📍 *ENTREGA:* ${deliveryMode === 'delivery' ? 'A DOMICILIO' : 'RETIRO EN LOCAL'}\n`;
       
       if (deliveryMode === 'delivery') {
-        message += `- Envío: $${deliveryCost.toLocaleString('es-AR')}\n`;
+        message += `🏠 *DIRECCIÓN:* ${deliveryAddress}\n`;
+        message += `🗺️ *MAPA:* https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(deliveryAddress + ", San Juan, Argentina")}\n`;
       }
+      
+      message += `\n🔗 *VER DETALLE DEL PEDIDO (Inalterable):*\n${ticketUrl}\n\n`;
+      message += `_Este mensaje es una confirmación automática del sistema._`;
 
       if (orderNotes.trim()) {
         message += `\nNOTAS: ${orderNotes}\n`;
