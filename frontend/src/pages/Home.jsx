@@ -21,8 +21,15 @@ function Home() {
   const loadMenu = async () => {
     try {
       const entries = await fetchMenuEntries();
-      // Group by category
+      if (!entries || entries.length === 0) {
+        setMenuData({});
+        return;
+      }
+
+      // Group by category, prioritizing availability
       const grouped = entries.reduce((acc, entry) => {
+        if (!entry.is_available) return acc;
+        
         const cat = entry.category || 'General';
         if (!acc[cat]) acc[cat] = [];
         acc[cat].push({
@@ -36,10 +43,13 @@ function Home() {
       }, {});
       
       setMenuData(grouped);
-      // Set first category as active if exists
-      const categories = Object.keys(grouped);
-      if (categories.length > 0 && !categories.includes(activeCategory)) {
-        setActiveCategory(categories[0]);
+      
+      const availableCategories = Object.keys(grouped);
+      // Ensure we have a valid activeCategory
+      if (availableCategories.length > 0) {
+        if (!activeCategory || !availableCategories.includes(activeCategory)) {
+          setActiveCategory(availableCategories[0]);
+        }
       }
     } catch (error) {
       console.error("Error loading menu:", error);
@@ -132,7 +142,7 @@ function Home() {
                     <p>{item.description}</p>
                   </div>
                   <div className="card-footer">
-                    <span className="price">${parseFloat(item.price).toLocaleString()}</span>
+                    <span className="price">${parseFloat(item.price).toLocaleString('es-AR')}</span>
                     <button className="add-btn">+</button>
                   </div>
                 </div>
