@@ -20,6 +20,7 @@ function Home() {
   const [isSaving, setIsSaving] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [isPromosOpen, setIsPromosOpen] = useState(false);
+  const [errorMessage, setErrorMessage] = useState(null);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -124,10 +125,30 @@ function Home() {
   const calculateDistance = async (address) => {
     if (!address.trim()) return;
     setIsCalculating(true);
+    setErrorMessage(null);
     try {
-      const geocodeUrl = `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(address + ', San Juan, Argentina')}&format=json&limit=1`;
-      const response = await fetch(geocodeUrl);
-      const data = await response.json();
+      // Pre-process San Juan specific address formats (O) -> Oeste, etc.
+      let cleanedAddr = address
+        .replace(/\(O\)/gi, 'Oeste')
+        .replace(/\(E\)/gi, 'Este')
+        .replace(/\(N\)/gi, 'Norte')
+        .replace(/\(S\)/gi, 'Sur');
+
+      const searchQueries = [
+        `${cleanedAddr}, San Juan, Argentina`,
+        `${cleanedAddr}, Argentina`,
+        cleanedAddr // Global fallback
+      ];
+
+      let data = [];
+      for (const query of searchQueries) {
+        const geocodeUrl = `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(query)}&format=json&limit=1`;
+        const response = await fetch(geocodeUrl, {
+          headers: { 'Accept-Language': 'es' }
+        });
+        data = await response.json();
+        if (data && data[0]) break;
+      }
 
       if (data && data[0]) {
         const destLat = parseFloat(data[0].lat);
@@ -147,12 +168,15 @@ function Home() {
         const calculatedCost = Math.max(basePrice, Math.ceil((basePrice + (distance * perKmPrice)) / 100) * 100);
         
         setDeliveryCost(calculatedCost);
-        setDeliveryAddress(data[0].display_name.split(',').slice(0, 3).join(','));
+        // Better display name
+        const displayName = data[0].display_name.split(',').slice(0, 2).join(',');
+        setDeliveryAddress(displayName);
       } else {
-        alert("No encontramos esa dirección. Intenta añadir más detalles.");
+        setErrorMessage("No encontramos la dirección. Prueba escribiendo Calle y Número (Ej: Entre Rios 540).");
       }
     } catch (err) {
       console.error(err);
+      setErrorMessage("Error de conexión al buscar la dirección.");
     } finally {
       setIsCalculating(false);
     }
@@ -167,20 +191,20 @@ function Home() {
     navigator.geolocation.getCurrentPosition(async (position) => {
       try {
         const { latitude, longitude } = position.coords;
-        const response = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}`);
+        const response = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}&accept-language=es`);
         const data = await response.json();
         if (data && data.display_name) {
-          const cleanAddr = data.display_name.split(',').slice(0, 3).join(',');
+          const cleanAddr = data.display_name.split(',').slice(0, 2).join(',');
           setDeliveryAddress(cleanAddr);
           calculateDistance(cleanAddr);
         }
       } catch (err) {
-        alert("No pudimos obtener tu dirección exacta.");
+        setErrorMessage("No pudimos obtener tu ubicación GPS.");
       } finally {
         setIsCalculating(false);
       }
     }, () => {
-      alert("Permiso de ubicación denegado.");
+      setErrorMessage("Permiso de ubicación denegado por el navegador.");
       setIsCalculating(false);
     });
   };
@@ -441,9 +465,14 @@ function Home() {
                         {isCalculating ? '...' : 'Calcular'}
                       </button>
                     </div>
-                    {deliveryCost > 0 && (
-                      <p style={{ fontSize: '0.8rem', color: 'var(--color-primary)', marginTop: '10px' }}>
-                        Costo de envío estimado: <strong>${deliveryCost.toLocaleString('es-AR')}</strong>
+                    {errorMessage && (
+                      <p style={{ color: '#ff4d4d', fontSize: '0.8rem', marginTop: '10px', background: 'rgba(255, 77, 77, 0.1)', padding: '8px', borderRadius: '4px' }}>
+                        {errorMessage}
+                      </p>
+                    )}
+                    {deliveryCost > 0 && !errorMessage && (
+                      <p style={{ fontSize: '0.9rem', color: 'var(--color-primary)', marginTop: '10px', fontWeight: 'bold' }}>
+                        Costo de envío: ${deliveryCost.toLocaleString('es-AR')}
                       </p>
                     )}
                   </div>
