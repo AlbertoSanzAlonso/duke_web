@@ -1,3 +1,4 @@
+import React, { useState, useEffect } from 'react';
 import { fetchSales, fetchSupplierOrders, fetchExpenses, createExpense, deleteExpense } from '../../services/api';
 import './Accounting.css';
 import LoadingScreen from '../components/LoadingScreen';

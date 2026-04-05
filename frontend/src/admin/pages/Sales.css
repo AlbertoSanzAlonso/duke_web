@@ -22,11 +22,12 @@
 }
 
 .category-btn {
-    padding: 0.75rem 1.5rem;
+    padding: 1rem 2rem;
     background: #fff;
     border: 1px solid #ddd;
     border-radius: 8px;
-    font-weight: 600;
+    font-weight: 700;
+    font-size: 1.1rem;
     cursor: pointer;
     white-space: nowrap;
     transition: all 0.2s;
@@ -158,7 +159,8 @@
     border-radius: 8px;
     background: white;
     color: #666;
-    font-weight: 700;
+    font-weight: 800;
+    font-size: 1.2rem;
     cursor: pointer;
     box-shadow: 0 4px 6px rgba(0,0,0,0.05);
     transition: all 0.2s;
@@ -210,12 +212,13 @@
 }
 
 .pending-btn {
-    padding: 1rem;
+    padding: 1.2rem;
     background: #6c757d;
     color: white !important;
     border: none;
     border-radius: 8px;
-    font-weight: 700;
+    font-weight: 800;
+    font-size: 1.1rem;
     cursor: pointer;
 }
 
@@ -430,13 +433,13 @@
 
 .checkout-btn {
     width: 100%;
-    padding: 1rem;
+    padding: 1.2rem;
     background: #28a745;
     color: white !important;
     border: none;
     border-radius: 8px;
-    font-size: 1.2rem;
-    font-weight: 700;
+    font-size: 1.4rem;
+    font-weight: 800;
     cursor: pointer;
     transition: background 0.3s;
 }

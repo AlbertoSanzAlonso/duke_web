@@ -25,7 +25,6 @@ const LoadingScreen = () => {
                     animation: 'spin 2s linear infinite'
                 }} 
             />
-            <p style={{ marginTop: '20px', fontWeight: 'bold', color: '#333' }}>Cargando Duke Burgers...</p>
             <style>{`
                 @keyframes spin {
                     from { transform: rotate(0deg); }

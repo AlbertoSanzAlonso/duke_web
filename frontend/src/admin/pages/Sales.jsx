@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { fetchMenuEntries, createSale, fetchSales, updateSale } from '../../services/api';
 import LoadingScreen from '../components/LoadingScreen';
+import Toast from '../components/Toast';
 import './Sales.css';
 
 const Sales = () => {
@@ -10,6 +11,7 @@ const Sales = () => {
     const [cart, setCart] = useState([]);
     const [loading, setLoading] = useState(true);
     const [isSaving, setIsSaving] = useState(false);
+    const [toast, setToast] = useState(null); // { message, type }
     
     // Ticket info
     const [customerName, setCustomerName] = useState('');
@@ -87,7 +89,7 @@ const Sales = () => {
 
     const handleSaveTicket = async (status = 'COMPLETED') => {
         if (!customerName.trim()) {
-            alert("El nombre del cliente es obligatorio para identificar el ticket.");
+            setToast({ message: "El nombre del cliente es obligatorio para identificar el ticket.", type: 'error' });
             return;
         }
         setIsSaving(true);
@@ -110,12 +112,15 @@ const Sales = () => {
             } else {
                 await createSale(saleData);
             }
-
-            alert(status === 'PENDING' ? "¡Ticket guardado como pendiente!" : "¡Venta cobrada con éxito!");
+            
+            setToast({ 
+                message: status === 'PENDING' ? "¡Ticket guardado como pendiente!" : "¡Venta cobrada con éxito!", 
+                type: 'success' 
+            });
             resetCart();
             loadData(); // Refresh pending tickets
         } catch (error) {
-            alert("Error al procesar la operación");
+            setToast({ message: "Error al procesar la operación", type: 'error' });
         } finally {
             setIsSaving(false);
         }
@@ -143,6 +148,7 @@ const Sales = () => {
 
     return (
         <div className="pos-container">
+            {toast && <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />}
             {/* FAB para móviles */}
             <button className="pos-fab" onClick={toggleTicket}>
                 <span className="fab-count">{totalItems}</span>
