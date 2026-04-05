@@ -239,6 +239,7 @@ function Home() {
       message += `MÉTODO: ${deliveryMode === 'delivery' ? 'A DOMICILIO' : 'RETIRO EN LOCAL'}\n`;
       if (deliveryMode === 'delivery') {
         message += `DIRECCIÓN: ${deliveryAddress}\n`;
+        message += `MAPA: https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(deliveryAddress + ", San Juan, Argentina")}\n`;
       }
       message += `\n`;
       
