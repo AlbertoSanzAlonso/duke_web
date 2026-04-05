@@ -215,3 +215,15 @@ body, .admin-container, .admin-main, .admin-content {
   -moz-appearance: textfield;
   appearance: none;
 }
+
+/* Grids Responsivos */
+.promo-form-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+}
+
+@media (max-width: 768px) {
+    .promo-form-grid {
+        grid-template-columns: 1fr !important;
+    }
+}

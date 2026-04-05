@@ -115,7 +115,7 @@ function Promos() {
                 marginBottom: '40px',
                 boxShadow: '0 4px 20px rgba(0,0,0,0.05)'
             }}>
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
+                <div className="promo-form-grid" style={{ display: 'grid', gap: '20px' }}>
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
                         <div>
                             <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 'bold', marginBottom: '8px', color: '#444' }}>NOMBRE DE LA PROMO *</label>
