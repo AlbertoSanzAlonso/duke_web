@@ -260,7 +260,7 @@ const Sales = () => {
                                                 placeholder="Costo"
                                                 value={deliveryCost}
                                                 onChange={e => setDeliveryCost(e.target.value)}
-                                                style={{ paddingLeft: '20px', height: '35px' }}
+                                                style={{ paddingLeft: '20px', height: '35px', width: '100%' }}
                                             />
                                         </div>
                                     )}
