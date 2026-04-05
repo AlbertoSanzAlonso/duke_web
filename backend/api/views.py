@@ -1,8 +1,8 @@
 from rest_framework import viewsets
 from rest_framework.response import Response
-from .models import Product, MenuEntry, Sale, Expense, InventoryItem, SupplierOrder
+from .models import Product, MenuEntry, Sale, Expense, InventoryItem, SupplierOrder, GlobalSetting
 from .serializers import (ProductSerializer, MenuEntrySerializer, SaleSerializer, SaleCreateSerializer, ExpenseSerializer,
-                          InventoryItemSerializer, SupplierOrderSerializer, SupplierOrderCreateSerializer)
+                          InventoryItemSerializer, SupplierOrderSerializer, SupplierOrderCreateSerializer, GlobalSettingSerializer)
 from django.http import StreamingHttpResponse
 import asyncio
 import json
@@ -49,6 +49,11 @@ class SupplierOrderViewSet(viewsets.ModelViewSet):
         if self.action == 'create':
             return SupplierOrderCreateSerializer
         return SupplierOrderSerializer
+
+class GlobalSettingViewSet(viewsets.ModelViewSet):
+    queryset = GlobalSetting.objects.all()
+    serializer_class = GlobalSettingSerializer
+    lookup_field = 'key'
 
 # --- REAL-TIME ASYNC LOGIC ---
 

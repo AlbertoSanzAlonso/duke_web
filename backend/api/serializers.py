@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Product, MenuEntry, Sale, SaleItem, Expense, InventoryItem, SupplierOrder, SupplierOrderItem
+from .models import Product, MenuEntry, Sale, SaleItem, Expense, InventoryItem, SupplierOrder, SupplierOrderItem, GlobalSetting
 
 class ProductSerializer(serializers.ModelSerializer):
     class Meta:
@@ -81,3 +81,7 @@ class SupplierOrderCreateSerializer(serializers.ModelSerializer):
         for item_data in items_data:
             SupplierOrderItem.objects.create(order=order, **item_data)
         return order
+class GlobalSettingSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = GlobalSetting
+        fields = '__all__'

@@ -78,7 +78,7 @@
     transition: transform 0.2s, box-shadow 0.2s;
     display: flex;
     flex-direction: column;
-    height: fit-content;
+    height: 100%; /* Better for grid alignment */
 }
 
 .pos-product-card:hover {
