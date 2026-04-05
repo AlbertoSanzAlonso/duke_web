@@ -1,6 +1,6 @@
 import React from 'react';
-import { Menu, X } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import InstagramFeed from '../components/InstagramFeed.tsx';
 
 function About() {
   return (
@@ -71,6 +71,22 @@ function About() {
               </div>
             </div>
           </div>
+        </div>
+      </section>
+
+      <section className="instagram-section">
+        <div className="container">
+          <h2 className="section-title">SEGUINOS EN INSTAGRAM</h2>
+          <p className="instagram-handle">@dukeburger.sj</p>
+          <InstagramFeed />
+          <a 
+            href="https://www.instagram.com/dukeburger.sj/" 
+            target="_blank" 
+            rel="noopener noreferrer" 
+            className="instagram-follow-btn"
+          >
+            SEGUIR EN INSTAGRAM
+          </a>
         </div>
       </section>
 
