@@ -8,7 +8,7 @@ import {
 import './Accounting.css';
 import LoadingScreen from '../components/LoadingScreen';
 import Toast from '../components/Toast';
-import { Save, X, Trash2, Edit2, Search, Filter, Calendar as CalendarIcon, ChevronDown, ChevronUp } from 'lucide-react';
+import { Save, X, Trash2, Edit2, Search, Filter, Calendar as CalendarIcon, ChevronDown, ChevronUp, FileText } from 'lucide-react';
 
 const Accounting = () => {
     const [sales, setSales] = useState([]);
@@ -161,6 +161,16 @@ const Accounting = () => {
         }
         return (
             <div style={{ display: 'flex', gap: '8px', justifyContent: 'flex-end' }}>
+                {type === 'sal' && (
+                    <button 
+                        onClick={() => window.open(`/ticket/${item.id}`, '_blank')} 
+                        className="edit-btn" 
+                        title="Ver Ticket"
+                        style={{ color: '#7950f2' }}
+                    >
+                        <FileText size={18} />
+                    </button>
+                )}
                 <button onClick={() => startEditing(type, item)} className="edit-btn" title="Editar"><Edit2 size={18} /></button>
                 <button onClick={() => {
                     if (type === 'exp') handleDeleteExpense(item.id);
