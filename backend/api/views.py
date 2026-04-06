@@ -252,9 +252,35 @@ class GalleryImageViewSet(viewsets.ModelViewSet):
 
 async def OrderStreamView(request):
     async def event_stream():
+        # Get the current max ID at start
+        @sync_to_async
+        def get_max_id():
+            return Sale.objects.order_by('-id').first()
+        
+        last_seen_sale = await get_max_id()
+        last_seen_id = last_seen_sale.id if last_seen_sale else 0
+
         while True:
+            # Check for new sales
+            @sync_to_async
+            def get_new_sales(since_id):
+                return list(Sale.objects.filter(id__gt=since_id).order_by('id'))
+
+            new_sales = await get_new_sales(last_seen_id)
+            
+            for sale in new_sales:
+                data = {
+                    'type': 'new_order',
+                    'id': sale.id,
+                    'customer': sale.customer_name or 'Cliente Anonimo',
+                    'total': str(sale.total_amount)
+                }
+                yield f"data: {json.dumps(data)}\n\n"
+                last_seen_id = sale.id
+
+            # Heartbeat & Sleep
             yield f"data: {json.dumps({'type': 'heartbeat'})}\n\n"
-            await asyncio.sleep(15)
+            await asyncio.sleep(5)
 
     response = StreamingHttpResponse(event_stream(), content_type='text/event-stream')
     response['Cache-Control'] = 'no-cache'

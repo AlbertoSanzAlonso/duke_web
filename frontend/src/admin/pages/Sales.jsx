@@ -26,6 +26,15 @@ const Sales = () => {
 
     useEffect(() => {
         loadData();
+
+        // Real-time support
+        const handleNewOrder = () => {
+            console.log("Real-time: New order detected, refreshing pending tickets...");
+            loadData();
+        };
+
+        window.addEventListener('new-order-received', handleNewOrder);
+        return () => window.removeEventListener('new-order-received', handleNewOrder);
     }, []);
 
     const loadData = async () => {

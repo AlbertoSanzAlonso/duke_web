@@ -24,6 +24,15 @@ function Inventory() {
 
     useEffect(() => {
         loadInventory();
+
+        // Refresh on data updates (like supplier orders)
+        const handleRefresh = () => {
+            console.log("Real-time: Data update detected, refreshing inventory...");
+            loadInventory();
+        };
+
+        window.addEventListener('new-order-received', handleRefresh);
+        return () => window.removeEventListener('new-order-received', handleRefresh);
     }, []);
 
     const loadInventory = async () => {

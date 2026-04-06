@@ -1,29 +1,39 @@
 import React, { useState, useEffect } from 'react';
-import { fetchSupplierOrders, createSupplierOrder } from '../../services/api';
+import { fetchSupplierOrders, createSupplierOrder, fetchInventory } from '../../services/api';
 import LoadingScreen from '../components/LoadingScreen';
 import Toast from '../components/Toast';
-import { Truck, Plus, History } from 'lucide-react';
+import { Truck, Plus, History, Trash2, ShoppingCart } from 'lucide-react';
 import './Accounting.css';
 
 const SupplierOrders = () => {
     const [orders, setOrders] = useState([]);
+    const [inventoryItems, setInventoryItems] = useState([]);
     const [loading, setLoading] = useState(true);
     const [isSaving, setIsSaving] = useState(false);
     const [toast, setToast] = useState(null);
 
-    // Form state
+    // Order draft state
     const [supplierName, setSupplierName] = useState('');
-    const [totalCost, setTotalCost] = useState('');
+    const [orderItems, setOrderItems] = useState([]); // Array of { item_id, quantity, cost, name }
+
+    // Manual item add state
+    const [selectedItemId, setSelectedItemId] = useState('');
+    const [itemQty, setItemQty] = useState('');
+    const [itemCost, setItemCost] = useState('');
 
     useEffect(() => {
-        loadOrders();
+        loadData();
     }, []);
 
-    const loadOrders = async () => {
+    const loadData = async () => {
         setLoading(true);
         try {
-            const data = await fetchSupplierOrders();
-            setOrders(data);
+            const [ordersData, inventoryData] = await Promise.all([
+                fetchSupplierOrders(),
+                fetchInventory()
+            ]);
+            setOrders(ordersData);
+            setInventoryItems(inventoryData);
         } catch (error) {
             console.error("Error loading orders:", error);
         } finally {
@@ -31,22 +41,56 @@ const SupplierOrders = () => {
         }
     };
 
+    const addItemToOrder = () => {
+        if (!selectedItemId || !itemQty || !itemCost) return;
+        
+        const invItem = inventoryItems.find(i => i.id === parseInt(selectedItemId));
+        if (!invItem) return;
+
+        setOrderItems([...orderItems, {
+            item: invItem.id,
+            name: invItem.name,
+            quantity: parseFloat(itemQty),
+            cost: parseFloat(itemCost)
+        }]);
+
+        // Reset item add form
+        setSelectedItemId('');
+        setItemQty('');
+        setItemCost('');
+    };
+
+    const removeItemFromOrder = (index) => {
+        setOrderItems(orderItems.filter((_, i) => i !== index));
+    };
+
+    const totalCalculatedCost = orderItems.reduce((acc, current) => acc + current.cost, 0);
+
     const handleSubmit = async (e) => {
         e.preventDefault();
-        if (!supplierName || !totalCost) return;
+        if (!supplierName || orderItems.length === 0) {
+            setToast({ message: "Debes añadir al menos un artículo", type: 'error' });
+            return;
+        }
         
         setIsSaving(true);
         try {
             await createSupplierOrder({
                 supplier_name: supplierName,
-                total_cost: parseFloat(totalCost),
+                total_cost: totalCalculatedCost,
                 status: 'DELIVERED',
-                items: [] // Simplified for now
+                items: orderItems
             });
+            
+            // Success
             setSupplierName('');
-            setTotalCost('');
-            setToast({ message: "Pedido registrado con éxito", type: 'success' });
-            loadOrders();
+            setOrderItems([]);
+            setToast({ message: "Pedido registrado y stock actualizado", type: 'success' });
+            
+            // DISPATCH GLOBAL REFRESH EVENT
+            window.dispatchEvent(new CustomEvent('new-order-received'));
+            
+            loadData();
         } catch (error) {
             setToast({ message: "Error al registrar pedido", type: 'error' });
         } finally {
@@ -62,50 +106,113 @@ const SupplierOrders = () => {
             
             <header style={{ marginBottom: '30px' }}>
                 <h2 style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                    <Truck size={32} color="#f03e3e" /> Pedidos al Proveedor
+                    <Truck size={32} color="#f03e3e" /> Compras al Proveedor
                 </h2>
-                <p style={{ color: '#666' }}>Gestiona las compras de materia prima y suministros.</p>
+                <p style={{ color: '#666' }}>Suministros que incrementan automáticamente el stock del inventario.</p>
             </header>
 
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 2fr', gap: '30px', alignItems: 'start' }} className="promo-form-grid">
+            <div style={{ display: 'grid', gridTemplateColumns: 'minmax(400px, 1fr) 1.5fr', gap: '30px', alignItems: 'start' }} className="promo-form-grid">
                 {/* Formulario */}
                 <div className="admin-card">
                     <h3 style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '20px' }}>
-                        <Plus size={20} color="#f03e3e" /> Nuevo Pedido
+                        <Plus size={20} color="#f03e3e" /> Registrar Nueva Compra
                     </h3>
-                    <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
+                    <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
                         <div className="form-group">
-                            <label style={{ fontWeight: 'bold', display: 'block', marginBottom: '5px' }}>Proveedor / Concepto</label>
+                            <label style={{ fontWeight: 'bold' }}>Nombre del Proveedor</label>
                             <input 
                                 type="text" 
                                 value={supplierName} 
                                 onChange={e => setSupplierName(e.target.value)} 
-                                placeholder="Ej: Panadería El Sol, Mercado Central..."
+                                placeholder="Ej: Distribuidora de Carne, Coca Cola..."
                                 required 
-                                style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid #ddd' }}
+                                style={{ width: '100%', padding: '12px', borderRadius: '8px', border: '1px solid #ddd' }}
                             />
                         </div>
-                        <div className="form-group">
-                            <label style={{ fontWeight: 'bold', display: 'block', marginBottom: '5px' }}>Costo Total ($)</label>
-                            <input 
-                                type="number" 
-                                step="100" 
-                                value={totalCost} 
-                                onChange={e => setTotalCost(e.target.value)} 
-                                placeholder="0"
-                                required 
-                                style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid #ddd', fontSize: '1.2rem', fontWeight: 'bold' }}
-                            />
+
+                        {/* Selector de Artículos */}
+                        <div style={{ background: '#f8f9fa', padding: '15px', borderRadius: '12px', border: '1px solid #eee' }}>
+                            <h4 style={{ margin: '0 0 15px 0', fontSize: '0.9rem', color: '#555' }}>Añadir Artículos al Ticket</h4>
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                                <select 
+                                    value={selectedItemId} 
+                                    onChange={e => setSelectedItemId(e.target.value)}
+                                    style={{ width: '100%', padding: '10px', borderRadius: '8px' }}
+                                >
+                                    <option value="">Seleccionar del Inventario...</option>
+                                    {inventoryItems.map(i => (
+                                        <option key={i.id} value={i.id}>{i.name} ({i.category})</option>
+                                    ))}
+                                </select>
+                                <div style={{ display: 'flex', gap: '10px' }}>
+                                    <input 
+                                        type="number" 
+                                        placeholder="Cant." 
+                                        value={itemQty} 
+                                        onChange={e => setItemQty(e.target.value)} 
+                                        style={{ flex: 1, padding: '10px', borderRadius: '8px' }}
+                                    />
+                                    <input 
+                                        type="number" 
+                                        placeholder="Costo total ($)" 
+                                        value={itemCost} 
+                                        onChange={e => setItemCost(e.target.value)} 
+                                        style={{ flex: 2, padding: '10px', borderRadius: '8px' }}
+                                    />
+                                </div>
+                                <button 
+                                    type="button" 
+                                    onClick={addItemToOrder}
+                                    style={{ background: '#333', color: 'white', border: 'none', padding: '10px', borderRadius: '8px', cursor: 'pointer', fontWeight: 'bold' }}
+                                >
+                                    Añadir al Listado
+                                </button>
+                            </div>
                         </div>
+
+                        {/* Listado de items en el ticket */}
+                        {orderItems.length > 0 && (
+                            <div style={{ border: '1px solid #eee', borderRadius: '8px', overflow: 'hidden' }}>
+                                <table style={{ width: '100%', fontSize: '0.85rem' }}>
+                                    <thead style={{ background: '#eee' }}>
+                                        <tr>
+                                            <th style={{ padding: '8px' }}>Item</th>
+                                            <th style={{ padding: '8px' }}>Cantidad</th>
+                                            <th style={{ padding: '8px' }}>Costo</th>
+                                            <th style={{ padding: '8px' }}></th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {orderItems.map((oi, index) => (
+                                            <tr key={index} style={{ borderBottom: '1px solid #f0f0f0' }}>
+                                                <td style={{ padding: '8px' }}>{oi.name}</td>
+                                                <td style={{ padding: '8px' }}>{oi.quantity}</td>
+                                                <td style={{ padding: '8px' }}>${oi.cost.toLocaleString('es-AR')}</td>
+                                                <td style={{ padding: '8px', textAlign: 'center' }}>
+                                                    <button type="button" onClick={() => removeItemFromOrder(index)} style={{ border: 'none', background: 'none', color: 'red', cursor: 'pointer' }}><Trash2 size={16} /></button>
+                                                </td>
+                                            </tr>
+                                        ))}
+                                    </tbody>
+                                </table>
+                                <div style={{ padding: '15px', background: '#fff5f5', textAlign: 'right', fontWeight: 'bold', fontSize: '1.2rem', color: '#f03e3e' }}>
+                                    Total: ${totalCalculatedCost.toLocaleString('es-AR')}
+                                </div>
+                            </div>
+                        )}
+
                         <button 
                             type="submit" 
-                            disabled={isSaving}
+                            disabled={isSaving || orderItems.length === 0}
+                            className="main-button"
                             style={{ 
-                                background: '#f03e3e', color: 'white', border: 'none', padding: '15px', 
+                                background: orderItems.length > 0 ? '#f03e3e' : '#ccc', 
+                                color: 'white', border: 'none', padding: '15px', 
                                 borderRadius: '8px', fontWeight: 'bold', cursor: 'pointer', marginTop: '10px'
                             }}
                         >
-                            {isSaving ? "GUARDANDO..." : "REGISTRAR COMPRA"}
+                            <ShoppingCart size={20} style={{ marginRight: '8px' }} />
+                            {isSaving ? "PROCESANDO COMPRA..." : "REGISTRAR EN ALMACÉN"}
                         </button>
                     </form>
                 </div>
@@ -113,7 +220,7 @@ const SupplierOrders = () => {
                 {/* Historial */}
                 <div className="admin-card">
                     <h3 style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '20px' }}>
-                        <History size={20} color="#f03e3e" /> Historial Reciente
+                        <History size={20} color="#f03e3e" /> Historial de Compras
                     </h3>
                     <div className="accounting-table-container">
                         <table className="accounting-table">
@@ -122,7 +229,7 @@ const SupplierOrders = () => {
                                     <th>Fecha</th>
                                     <th>Proveedor</th>
                                     <th className="txt-right">Importe</th>
-                                    <th>Estado</th>
+                                    <th>Detalles</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -134,7 +241,9 @@ const SupplierOrders = () => {
                                             <td>{new Date(order.date).toLocaleDateString()}</td>
                                             <td>{order.supplier_name}</td>
                                             <td className="txt-right negative">-${parseInt(order.total_cost).toLocaleString('es-AR')}</td>
-                                            <td><span className="badge badge-order" style={{ background: '#e7f5ff', color: '#1c7ed6' }}>Entregado</span></td>
+                                            <td style={{ fontSize: '0.75rem', color: '#888' }}>
+                                                {order.items?.length || 0} productos
+                                            </td>
                                         </tr>
                                     ))
                                 )}

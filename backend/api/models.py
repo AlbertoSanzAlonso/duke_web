@@ -116,6 +116,20 @@ class SupplierOrderItem(models.Model):
     quantity = models.DecimalField(max_digits=10, decimal_places=2)
     cost = models.DecimalField(max_digits=10, decimal_places=2)
 
+    def save(self, *args, **kwargs):
+        is_new = self.pk is None
+        old_quantity = 0
+        if not is_new:
+            old_obj = SupplierOrderItem.objects.get(pk=self.pk)
+            old_quantity = old_obj.quantity
+        
+        super().save(*args, **kwargs)
+        
+        # Update Inventory stock
+        diff = self.quantity - old_quantity
+        self.item.quantity = models.F('quantity') + diff
+        self.item.save()
+
     def __str__(self):
         return f"{self.quantity} x {self.item.name}"
 

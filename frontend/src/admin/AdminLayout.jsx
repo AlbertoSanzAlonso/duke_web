@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Outlet, NavLink, Link, useNavigate } from 'react-router-dom';
 import { logout } from '../services/api';
+import Toast from './components/Toast';
 import {
   LayoutDashboard,
   Package,
@@ -23,7 +24,39 @@ import UserDropdown from './components/UserDropdown';
 
 const AdminLayout = () => {
   const [isMobileOpen, setIsMobileOpen] = useState(false);
+  const [notification, setNotification] = useState(null);
+  const esRef = useRef(null);
   const navigate = useNavigate();
+
+  useEffect(() => {
+    const connectSSE = () => {
+      const apiUrl = import.meta.env.VITE_API_URL?.replace(/\/$/, '') || 'https://api.dukeburger-sj.com';
+      const es = new EventSource(`${apiUrl}/api/orders-stream/`);
+      esRef.current = es;
+
+      es.onmessage = (event) => {
+        try {
+          const data = JSON.parse(event.data);
+          if (data.type === 'new_order') {
+            setNotification({
+              message: `🍔 ¡NUEVO PEDIDO! de ${data.customer} ($${data.total})`,
+              type: 'success'
+            });
+            // Dispatch event for sub-pages (Dashboard, TPV) to refresh
+            window.dispatchEvent(new CustomEvent('new-order-received', { detail: data }));
+          }
+        } catch (e) { console.error("SSE parse error", e); }
+      };
+
+      es.onerror = () => {
+        es.close();
+        setTimeout(connectSSE, 10000); // Retry after 10s
+      };
+    };
+
+    connectSSE();
+    return () => { if (esRef.current) esRef.current.close(); };
+  }, []);
 
   const menuItems = [
     { name: 'Dashboard', path: '/admin', icon: <LayoutDashboard size={20} /> },
@@ -85,6 +118,14 @@ const AdminLayout = () => {
           <Outlet />
         </div>
       </main>
+
+      {notification && (
+        <Toast 
+          message={notification.message} 
+          type={notification.type} 
+          onClose={() => setNotification(null)} 
+        />
+      )}
     </div>
   );
 };
