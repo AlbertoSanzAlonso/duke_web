@@ -153,7 +153,7 @@ if USE_S3:
     AWS_S3_ENDPOINT_URL = env('AWS_S3_ENDPOINT_URL', default=None)
     AWS_S3_REGION_NAME = env('AWS_S3_REGION_NAME', default='sa-east-1')
     AWS_DEFAULT_ACL = None  
-    AWS_S3_ADDRESSING_STYLE = 'virtual'
+    AWS_S3_ADDRESSING_STYLE = 'path'
     AWS_S3_SIGNATURE_VERSION = 's3v4'
     AWS_S3_FILE_OVERWRITE = False
     AWS_QUERYSTRING_AUTH = False 
