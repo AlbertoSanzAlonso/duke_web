@@ -153,11 +153,11 @@
 
 .nosotros-btn-hero {
   display: none;
-  border: 1px solid white;
+  background: var(--color-primary);
   color: white;
   padding: 1.2rem 3rem;
   font-size: 1.2rem;
-  background: transparent;
+  border-radius: 2px;
   cursor: pointer;
   transition: var(--transition-smooth);
 }
@@ -506,7 +506,19 @@
   }
 
   .nosotros-btn-hero {
-    display: block !important;
+    display: flex !important;
+    background: var(--color-primary);
+    color: white;
+    border: none;
+    border-radius: 8px; /* Match others */
+    font-weight: 800;
+    font-family: 'Bebas Neue', sans-serif;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    transition: all 0.2s ease;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
   }
 
   .hero-image-container {

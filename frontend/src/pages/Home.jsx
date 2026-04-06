@@ -401,7 +401,6 @@ function Home() {
               <Link
                 to="/nosotros"
                 className="nosotros-btn-hero"
-                style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
               >
                 NOSOTROS
               </Link>
