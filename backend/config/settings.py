@@ -151,13 +151,15 @@ if USE_S3:
     AWS_SECRET_ACCESS_KEY = env('AWS_SECRET_ACCESS_KEY', default=None)
     AWS_STORAGE_BUCKET_NAME = env('AWS_STORAGE_BUCKET_NAME', default='media')
     AWS_S3_ENDPOINT_URL = env('AWS_S3_ENDPOINT_URL', default=None)
-    AWS_S3_REGION_NAME = env('AWS_S3_REGION_NAME', default='sa-east-1')
+    AWS_S3_REGION_NAME = env('AWS_S3_REGION_NAME', default='us-east-1')
     AWS_DEFAULT_ACL = None  
     AWS_S3_ADDRESSING_STYLE = 'path'
     AWS_S3_SIGNATURE_VERSION = 's3v4'
     AWS_S3_FILE_OVERWRITE = False
-    AWS_QUERYSTRING_AUTH = False 
-    AWS_S3_CUSTOM_DOMAIN = f'{env("SUPABASE_REF", default="")}.supabase.co/storage/v1/object/public/{AWS_STORAGE_BUCKET_NAME}'
+    AWS_QUERYSTRING_AUTH = True # URLs firmadas para evitar errores 403
+    
+    # Si usamos firmado de URLs, mejor no forzar un dominio custom que oculte los parámetros de firma
+    AWS_S3_CUSTOM_DOMAIN = None
     
     STORAGES = {
         "default": {
