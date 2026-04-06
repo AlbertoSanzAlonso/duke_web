@@ -126,7 +126,7 @@ const Settings = () => {
     if (loading) return <LoadingScreen />;
 
     return (
-        <div style={{ maxWidth: '1000px', margin: '0 auto', padding: '20px' }}>
+        <div style={{ width: '100%', padding: '20px' }}>
             {toast && <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />}
             
             <div style={{ display: 'flex', alignItems: 'center', gap: '15px', marginBottom: '30px' }}>
@@ -134,11 +134,11 @@ const Settings = () => {
                 <h2 style={{ margin: 0, fontSize: '2rem' }}>Configuración Duke</h2>
             </div>
 
-            <div className="settings-tabs-container" style={{ marginBottom: '30px', width: '100%', overflow: 'hidden' }}>
+            <div className="settings-tabs-container" style={{ marginBottom: '30px', width: '100%' }}>
                 <div className="settings-tabs" style={{ 
                     display: 'grid', 
-                    gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 180px), 1fr))', 
-                    gap: '10px', 
+                    gridTemplateColumns: 'repeat(4, 1fr)', 
+                    gap: '12px', 
                     width: '100%' 
                 }}>
                     <button onClick={() => setActiveTab('delivery')} className={`tab-btn ${activeTab === 'delivery' ? 'active' : ''}`} style={{ ...tabBtnStyle(activeTab === 'delivery'), flex: 1 }}>
