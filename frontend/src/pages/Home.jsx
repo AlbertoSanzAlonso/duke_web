@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Menu, X, ShoppingCart, Minus, Plus, MessageCircle, MapPin } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import { fetchMenuEntries, createSale } from '../services/api';
 
 function Home() {
@@ -307,7 +308,7 @@ function Home() {
           <div className="nav-actions">
             <div className="nav-links-desktop">
               <a href="#menu">CARTA</a>
-              <a href="#about">NOSOTROS</a>
+              <Link to="/nosotros">NOSOTROS</Link>
             </div>
             <button className="cta-button" onClick={() => setIsPromosOpen(true)}>
               PROMOS

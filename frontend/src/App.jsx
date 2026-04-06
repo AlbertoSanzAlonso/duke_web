@@ -15,6 +15,7 @@ import SupplierOrders from './admin/pages/SupplierOrders';
 import Accounting from './admin/pages/Accounting';
 import Promos from './admin/pages/Promos';
 import Settings from './admin/pages/Settings';
+import Gallery from './admin/pages/Gallery';
 import './App.css'; // Global styles for consumer site
 
 function App() {
@@ -37,6 +38,7 @@ function App() {
           <Route path="tpv" element={<Sales />} />
           <Route path="pedidos" element={<SupplierOrders />} />
           <Route path="contabilidad" element={<Accounting />} />
+          <Route path="galeria" element={<Gallery />} />
           <Route path="historial" element={<HistoryLog />} />
           <Route path="config" element={<Settings />} />
         </Route>

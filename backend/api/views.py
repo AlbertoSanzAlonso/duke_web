@@ -1,8 +1,8 @@
 from rest_framework import viewsets
 from rest_framework.response import Response
-from .models import Product, MenuEntry, Sale, Expense, InventoryItem, SupplierOrder, GlobalSetting
+from .models import Product, MenuEntry, Sale, Expense, InventoryItem, SupplierOrder, GlobalSetting, GalleryImage
 from .serializers import (ProductSerializer, MenuEntrySerializer, SaleSerializer, SaleCreateSerializer, ExpenseSerializer,
-                          InventoryItemSerializer, SupplierOrderSerializer, SupplierOrderCreateSerializer, GlobalSettingSerializer)
+                          InventoryItemSerializer, SupplierOrderSerializer, SupplierOrderCreateSerializer, GlobalSettingSerializer, GalleryImageSerializer)
 from django.http import StreamingHttpResponse
 import asyncio
 import json
@@ -69,6 +69,10 @@ class GlobalSettingViewSet(viewsets.ModelViewSet):
             if created: created_count += 1
         
         return Response({'message': f'Configuraciones inicializadas. {created_count} nuevas creadas.', 'total': GlobalSetting.objects.count()})
+
+class GalleryImageViewSet(viewsets.ModelViewSet):
+    queryset = GalleryImage.objects.filter(is_active=True)
+    serializer_class = GalleryImageSerializer
 
 # --- REAL-TIME ASYNC LOGIC ---
 

@@ -212,3 +212,41 @@ export const setupDefaultSettings = async () => {
     if (!response.ok) throw new Error('Error al inicializar configuraciones');
     return await response.json();
 };
+
+// GALLERY
+export const fetchGalleryImages = async () => {
+    const response = await fetch(`${API_URL}/gallery/`);
+    if (!response.ok) throw new Error('Error al cargar la galería');
+    return await response.json();
+};
+
+export const createGalleryImage = async (formData) => {
+    const response = await fetch(`${API_URL}/gallery/`, {
+        method: 'POST',
+        body: formData
+    });
+    if (!response.ok) return handleResponseError(response);
+    return await response.json();
+};
+
+export const deleteGalleryImage = async (id) => {
+    const response = await fetch(`${API_URL}/gallery/${id}/`, {
+        method: 'DELETE',
+    });
+    if (!response.ok) throw new Error('Error al eliminar imagen');
+    return true;
+};
+
+export const updateGalleryImage = async (id, data) => {
+    const isFormData = data instanceof FormData;
+    const options = {
+        method: 'PATCH',
+        body: isFormData ? data : JSON.stringify(data)
+    };
+    if (!isFormData) {
+        options.headers = { 'Content-Type': 'application/json' };
+    }
+    const response = await fetch(`${API_URL}/gallery/${id}/`, options);
+    if (!response.ok) return handleResponseError(response);
+    return await response.json();
+};

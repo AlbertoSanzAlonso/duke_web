@@ -1,8 +1,27 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
+import { Menu, X } from 'lucide-react';
 import InstagramFeed from '../components/InstagramFeed.tsx';
+import { fetchGalleryImages } from '../services/api';
 
 function About() {
+  const [gallery, setGallery] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const loadGallery = async () => {
+      try {
+        const data = await fetchGalleryImages();
+        setGallery(data);
+      } catch (error) {
+        console.error("Error loading gallery:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    loadGallery();
+  }, []);
+
   return (
     <div className="about-page">
       <nav className="navbar scrolled">
@@ -49,28 +68,40 @@ function About() {
       <section className="gallery-section">
         <div className="container">
           <h2 className="section-title">NUESTRO LOCAL</h2>
-          <div className="gallery-grid">
-            <div className="gallery-item gallery-item-1">
-              <div className="gallery-placeholder">
-                <span>Interior</span>
+          {loading ? (
+            <p style={{ textAlign: 'center', opacity: 0.7 }}>Cargando imágenes...</p>
+          ) : gallery.length > 0 ? (
+            <div className="gallery-grid">
+              {gallery.map((img, idx) => (
+                <div key={img.id} className={`gallery-item gallery-item-${(idx % 4) + 1}`}>
+                   <img src={img.image} alt={img.title || 'Duke Burger'} className="gallery-img-full" />
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="gallery-grid">
+              <div className="gallery-item gallery-item-1">
+                <div className="gallery-placeholder">
+                  <span>Interior</span>
+                </div>
+              </div>
+              <div className="gallery-item gallery-item-2">
+                <div className="gallery-placeholder">
+                  <span>Barra</span>
+                </div>
+              </div>
+              <div className="gallery-item gallery-item-3">
+                <div className="gallery-placeholder">
+                  <span>Área Exterior</span>
+                </div>
+              </div>
+              <div className="gallery-item gallery-item-4">
+                <div className="gallery-placeholder">
+                  <span>Cocina</span>
+                </div>
               </div>
             </div>
-            <div className="gallery-item gallery-item-2">
-              <div className="gallery-placeholder">
-                <span>Barra</span>
-              </div>
-            </div>
-            <div className="gallery-item gallery-item-3">
-              <div className="gallery-placeholder">
-                <span>Área Exterior</span>
-              </div>
-            </div>
-            <div className="gallery-item gallery-item-4">
-              <div className="gallery-placeholder">
-                <span>Cocina</span>
-              </div>
-            </div>
-          </div>
+          )}
         </div>
       </section>
 

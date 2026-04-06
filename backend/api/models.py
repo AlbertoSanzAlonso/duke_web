@@ -126,3 +126,42 @@ class GlobalSetting(models.Model):
 
     def __str__(self):
         return f"{self.key}: {self.value}"
+
+class GalleryImage(models.Model):
+    title = models.CharField(max_length=100, blank=True, null=True)
+    image = models.FileField(upload_to='gallery/')
+    is_active = models.BooleanField(default=True)
+    order = models.PositiveIntegerField(default=0)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['order', '-created_at']
+
+    def save(self, *args, **kwargs):
+        if self.image:
+            name, extension = os.path.splitext(self.image.name)
+            if extension.lower() != '.webp':
+                try:
+                    im = Image.open(self.image)
+                    if im.mode in ("RGBA", "P"):
+                        im = im.convert("RGBA")
+                    else:
+                        im = im.convert("RGB")
+                    
+                    # Resize large images
+                    max_size = (1600, 1600)
+                    im.thumbnail(max_size, Image.Resampling.LANCZOS)
+                    
+                    output = BytesIO()
+                    im.save(output, format='WEBP', quality=85) 
+                    output.seek(0)
+                    
+                    # Sanitize name
+                    safe_name = "".join([c if (c.isalnum() or c in ("_", "-")) else "_" for c in name])
+                    self.image = ContentFile(output.read(), name=f"{safe_name}.webp")
+                except Exception as e:
+                    print(f"Error processing gallery image {name}: {e}")
+        super().save(*args, **kwargs)
+
+    def __str__(self):
+        return self.title or f"Gallery Image {self.id}"
