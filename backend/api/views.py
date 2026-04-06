@@ -13,8 +13,11 @@ from .serializers import (ProductSerializer, MenuEntrySerializer, SaleSerializer
                           DeliverySettingSerializer, UserSerializer)
 from .models import UserProfile
 
+from rest_framework import permissions, parsers
+
 @api_view(['GET', 'PATCH'])
 @permission_classes([permissions.IsAuthenticated])
+@parser_classes([parsers.MultiPartParser, parsers.FormParser, parsers.JSONParser])
 def MeView(request):
     user = request.user
     if request.method == 'GET':
@@ -26,14 +29,15 @@ def MeView(request):
     if request.method == 'PATCH':
         serializer = UserSerializer(user, data=request.data, partial=True)
         if serializer.is_valid():
-            serializer.save()
+            serializer.save() # This updates name, email, and password if provided
             
-            # Handle avatar if provided
+            # Update Profile fields (avatar)
+            profile, _ = UserProfile.objects.get_or_create(user=user)
             if 'avatar' in request.FILES:
-                profile, _ = UserProfile.objects.get_or_create(user=user)
                 profile.avatar = request.FILES['avatar']
                 profile.save()
             
+            # Need to re-serialize after changes
             return Response(UserSerializer(user).data)
         return Response(serializer.errors, status=400)
 from django.http import StreamingHttpResponse
