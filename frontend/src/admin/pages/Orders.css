@@ -45,14 +45,24 @@
 /* Tabla */
 .orders-grid {
     display: grid;
-    grid-template-columns: 2fr 1fr;
+    grid-template-columns: 3fr 1fr;
     gap: 1.5rem;
     align-items: start;
+}
+
+@media (max-width: 1200px) {
+    .orders-grid {
+        grid-template-columns: 2fr 1fr;
+    }
 }
 
 @media (max-width: 1024px) {
     .orders-grid {
         grid-template-columns: 1fr;
+    }
+    
+    .orders-table {
+        min-width: 800px; /* Force scroll on mobile to avoid squishing */
     }
 }
 
@@ -64,19 +74,17 @@
     
     .orders-stats {
         width: 100%;
+        display: grid;
+        grid-template-columns: 1fr 1fr;
     }
     
     .stat-card {
         padding: 0.8rem;
+        min-width: 0;
     }
 
     .orders-container {
         padding: 0.5rem;
-    }
-
-    .orders-table th:nth-child(5), 
-    .orders-table td:nth-child(5) {
-        display: none; /* Hide Status in very small screens or make it compact */
     }
 }
 

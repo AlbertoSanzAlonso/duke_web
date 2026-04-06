@@ -179,6 +179,16 @@ export const fetchSales = async () => {
     return await response.json();
 };
 
+export const bulkActionSales = async (ids, action) => {
+    const response = await fetch(`${API_URL}/sales/bulk-actions/`, {
+        method: 'POST',
+        headers: getHeaders('application/json'),
+        body: JSON.stringify({ ids, action })
+    });
+    if (!response.ok) throw new Error('Error al procesar acción masiva');
+    return await response.json();
+};
+
 export const updateSale = async (id, data) => {
     const response = await fetch(`${API_URL}/sales/${id}/`, {
         method: 'PATCH',

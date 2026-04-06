@@ -182,9 +182,29 @@ class SaleViewSet(viewsets.ModelViewSet):
         return SaleSerializer
 
     def get_permissions(self):
-        if self.action == 'create':
+        if self.action in ['create', 'retrieve']:
             return [permissions.AllowAny()]
         return [permissions.IsAuthenticated()]
+
+    from rest_framework.decorators import action
+    @action(detail=False, methods=['post'], url_path='bulk-actions')
+    def bulk_actions(self, request):
+        ids = request.data.get('ids', [])
+        action_type = request.data.get('action')
+        
+        if not ids:
+            return Response({'error': 'No se seleccionaron tickets'}, status=400)
+            
+        sales = Sale.objects.filter(id__in=ids, status='PENDING')
+        
+        if action_type == 'COMPLETE':
+            count = sales.update(status='COMPLETED')
+            return Response({'message': f'{count} tickets cobrados con éxito.'})
+        elif action_type == 'DELETE':
+            count, _ = sales.delete()
+            return Response({'message': f'{count} tickets eliminados.'})
+            
+        return Response({'error': 'Operación no válida'}, status=400)
 
 class ExpenseViewSet(viewsets.ModelViewSet):
     queryset = Expense.objects.all().order_by('-date')
@@ -249,9 +269,17 @@ class DeliverySettingViewSet(viewsets.ModelViewSet):
         return Response(serializer.data)
 
 class GalleryImageViewSet(viewsets.ModelViewSet):
-    queryset = GalleryImage.objects.filter(is_active=True).order_by('-id')
     serializer_class = GalleryImageSerializer
     permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+
+    def get_queryset(self):
+        # Si el usuario está autenticado (Administrador), queremos que vea TODO
+        # para que pueda activar/desactivar o borrar.
+        if self.request.user.is_authenticated:
+            return GalleryImage.objects.all().order_by('order', '-id')
+        
+        # Para el público, solo las activas
+        return GalleryImage.objects.filter(is_active=True).order_by('order', '-id')
 
 import time
 import json

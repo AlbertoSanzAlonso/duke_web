@@ -602,3 +602,13 @@
 .ticket-items::-webkit-scrollbar-thumb:hover {
     background: #aaa;
 }
+@keyframes slideIn {
+    from { transform: translateY(-20px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+}
+
+.pending-ticket-card.selected {
+    border: 2px solid #5c7cfa !important;
+    background-color: #edf2ff !important;
+    transform: scale(0.98);
+}

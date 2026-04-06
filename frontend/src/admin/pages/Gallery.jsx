@@ -80,6 +80,16 @@ const Gallery = () => {
         }
     };
 
+    const handleToggleActive = async (id, currentStatus) => {
+        try {
+            await updateGalleryImage(id, { is_active: !currentStatus });
+            setGallery(gallery.map(i => i.id === id ? {...i, is_active: !currentStatus} : i));
+            setToast({ message: !currentStatus ? 'Imagen visible en la web' : 'Imagen oculta al público', type: 'success' });
+        } catch (error) {
+            setToast({ message: 'Error al cambiar visibilidad', type: 'error' });
+        }
+    };
+
     if (loading) return <LoadingScreen />;
 
     return (
@@ -130,17 +140,51 @@ const Gallery = () => {
                             borderRadius: '15px', 
                             overflow: 'hidden', 
                             boxShadow: '0 4px 12px rgba(0,0,0,0.05)',
-                            border: '1px solid #eee'
+                            border: '1px solid #eee',
+                            opacity: img.is_active ? 1 : 0.6,
+                            transition: 'opacity 0.2s'
                         }}>
-                            <div style={{ height: '200px', background: '#eee', position: 'relative' }}>
+                            <div style={{ height: '220px', background: '#eee', position: 'relative' }}>
                                 <img src={img.image} alt={img.title} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                                 <div style={{ 
                                     position: 'absolute', top: '10px', left: '10px', 
                                     background: 'rgba(0,0,0,0.6)', color: 'white', 
-                                    padding: '4px 10px', borderRadius: '6px', fontSize: '0.75rem' 
+                                    padding: '4px 10px', borderRadius: '6px', fontSize: '0.75rem',
+                                    zIndex: 2
                                 }}>
                                     Orden: {img.order}
                                 </div>
+                                <div style={{ position: 'absolute', top: '10px', right: '10px', zIndex: 10, display: 'flex', gap: '8px' }}>
+                                    <button 
+                                        onClick={() => handleToggleActive(img.id, img.is_active)}
+                                        style={{
+                                            background: img.is_active ? '#40c057' : '#adb5bd',
+                                            color: 'white',
+                                            border: 'none',
+                                            width: '36px',
+                                            height: '36px',
+                                            borderRadius: '50%',
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            justifyContent: 'center',
+                                            cursor: 'pointer',
+                                            boxShadow: '0 2px 8px rgba(0,0,0,0.2)'
+                                        }}
+                                        title={img.is_active ? "Ocultar de la Web" : "Hacer Visible"}
+                                    >
+                                        {img.is_active ? <ImageIcon size={18} /> : <X size={18} />}
+                                    </button>
+                                </div>
+                                {!img.is_active && (
+                                    <div style={{ 
+                                        position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, 
+                                        background: 'rgba(0,0,0,0.4)', color: 'white', 
+                                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                        fontSize: '0.9rem', fontWeight: 'bold' 
+                                    }}>
+                                        PAUSADA (OCULTA)
+                                    </div>
+                                )}
                             </div>
                             <div style={{ padding: '20px' }}>
                                 <div style={{ marginBottom: '15px' }}>
@@ -155,7 +199,7 @@ const Gallery = () => {
                                 </div>
                                 <div style={{ display: 'flex', gap: '10px' }}>
                                     <div style={{ flex: 1 }}>
-                                        <label style={{ fontSize: '0.7rem', fontWeight: '800', color: '#888', textTransform: 'uppercase', display: 'block', marginBottom: '5px' }}>Orden</label>
+                                        <label style={{ fontSize: '0.7rem', fontWeight: '800', color: '#888', textTransform: 'uppercase', display: 'block', marginBottom: '5px' }}>Posición</label>
                                         <input 
                                             type="number" 
                                             value={img.order} 

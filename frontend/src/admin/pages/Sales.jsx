@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { fetchMenuEntries, createSale, fetchSales, updateSale, deleteSale } from '../../services/api';
+import { fetchMenuEntries, createSale, fetchSales, updateSale, deleteSale, bulkActionSales } from '../../services/api';
 import LoadingScreen from '../components/LoadingScreen';
 import Toast from '../components/Toast';
 import './Sales.css';
@@ -23,6 +23,7 @@ const Sales = () => {
     // List of pending tickets
     const [pendingTickets, setPendingTickets] = useState([]);
     const [deletingTicketId, setDeletingTicketId] = useState(null);
+    const [selectedTickets, setSelectedTickets] = useState([]);
 
     useEffect(() => {
         loadData();
@@ -168,12 +169,41 @@ const Sales = () => {
             await deleteSale(id);
             setToast({ message: "Ticket eliminado correctamente.", type: 'success' });
             setDeletingTicketId(null);
+            setSelectedTickets(prev => prev.filter(tid => tid !== id));
             loadData();
         } catch (error) {
             setToast({ message: "Error al eliminar ticket.", type: 'error' });
         } finally {
             setIsSaving(false);
         }
+    };
+
+    const handleBulkAction = async (action) => {
+        if (selectedTickets.length === 0) return;
+        const confirmMsg = action === 'COMPLETE' 
+            ? `¿Deseas cobrar los ${selectedTickets.length} tickets seleccionados por caja?`
+            : `¿Deseas ELIMINAR los ${selectedTickets.length} tickets seleccionados PERMANENTEMENTE?`;
+            
+        if (!window.confirm(confirmMsg)) return;
+
+        setIsSaving(true);
+        try {
+            const res = await bulkActionSales(selectedTickets, action);
+            setToast({ message: res.message, type: 'success' });
+            setSelectedTickets([]);
+            loadData();
+        } catch (error) {
+            setToast({ message: "Error en acción masiva: " + error.message, type: 'error' });
+        } finally {
+            setIsSaving(false);
+        }
+    };
+
+    const toggleTicketSelection = (id, e) => {
+        e.stopPropagation();
+        setSelectedTickets(prev => 
+            prev.includes(id) ? prev.filter(tid => tid !== id) : [...prev, id]
+        );
     };
 
     if (loading) return <LoadingScreen />;
@@ -352,24 +382,82 @@ const Sales = () => {
                 </>
             ) : (
                 <div className="pending-list-container">
+                    {selectedTickets.length > 0 && (
+                        <div style={{ 
+                            position: 'sticky', top: 0, zIndex: 100, 
+                            background: '#333', color: 'white', 
+                            padding: '15px 20px', borderRadius: '12px', 
+                            marginBottom: '20px', display: 'flex', 
+                            justifyContent: 'space-between', alignItems: 'center',
+                            boxShadow: '0 4px 20px rgba(0,0,0,0.3)',
+                            animation: 'slideIn 0.3s ease'
+                        }}>
+                            <div style={{ fontWeight: 'bold' }}>{selectedTickets.length} Seleccionados</div>
+                            <div style={{ display: 'flex', gap: '10px' }}>
+                                <button 
+                                    onClick={() => handleBulkAction('DELETE')}
+                                    style={{ background: '#f03e3e', color: 'white', border: 'none', padding: '10px 15px', borderRadius: '8px', fontWeight: 'bold', cursor: 'pointer' }}
+                                >
+                                    ELIMINAR
+                                </button>
+                                <button 
+                                    onClick={() => handleBulkAction('COMPLETE')}
+                                    style={{ background: '#40c057', color: 'white', border: 'none', padding: '10px 15px', borderRadius: '8px', fontWeight: 'bold', cursor: 'pointer' }}
+                                >
+                                    COBRAR TODO
+                                </button>
+                                <button 
+                                    onClick={() => setSelectedTickets([])}
+                                    style={{ background: '#666', color: 'white', border: 'none', padding: '10px 15px', borderRadius: '8px', fontWeight: 'bold', cursor: 'pointer' }}
+                                >
+                                    CANCELAR
+                                </button>
+                            </div>
+                        </div>
+                    )}
+
                     <div className="pending-grid">
                         {pendingTickets.length === 0 ? (
                             <div className="no-pending-msg">No hay tickets pendientes</div>
                         ) : (
                             pendingTickets.map(ticket => (
-                                <div key={ticket.id} className="pending-ticket-card" onClick={() => loadPendingSale(ticket)}>
-                                    <div className="pending-info">
+                                <div 
+                                    key={ticket.id} 
+                                    className={`pending-ticket-card ${selectedTickets.includes(ticket.id) ? 'selected' : ''}`} 
+                                    onClick={() => loadPendingSale(ticket)}
+                                    style={{ 
+                                        position: 'relative', 
+                                        border: selectedTickets.includes(ticket.id) ? '2px solid #5c7cfa' : '1px solid #eee',
+                                        background: selectedTickets.includes(ticket.id) ? '#edf2ff' : '#fff'
+                                    }}
+                                >
+                                    <div 
+                                        onClick={(e) => toggleTicketSelection(ticket.id, e)}
+                                        style={{ 
+                                            position: 'absolute', top: '15px', left: '15px', 
+                                            width: '24px', height: '24px', 
+                                            borderRadius: '6px', border: '2px solid #ddd',
+                                            background: selectedTickets.includes(ticket.id) ? '#5c7cfa' : 'white',
+                                            display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                            cursor: 'pointer', zIndex: 5,
+                                            boxShadow: '0 2px 5px rgba(0,0,0,0.1)'
+                                        }}
+                                    >
+                                        {selectedTickets.includes(ticket.id) && <span style={{ color: 'white', fontSize: '14px', fontWeight: '900' }}>✓</span>}
+                                    </div>
+
+                                    <div className="pending-info" style={{ paddingLeft: '35px' }}>
                                         <span className="pending-id">#{ticket.id}</span>
                                         <span className="pending-date">{new Date(ticket.date).toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit', timeZone: 'America/Argentina/Buenos_Aires' })}</span>
                                     </div>
-                                    <div className="pending-customer">
+                                    <div className="pending-customer" style={{ paddingLeft: '35px' }}>
                                         <strong>{ticket.customer_name || 'Sin nombre'}</strong>
                                         {ticket.table_number && <span className="table-tag">{ticket.table_number}</span>}
                                     </div>
-                                    <div className="pending-items-summary">
+                                    <div className="pending-items-summary" style={{ paddingLeft: '35px' }}>
                                         {ticket.items.length} productos
                                     </div>
-                                    <div className="pending-total">
+                                    <div className="pending-total" style={{ paddingLeft: '35px' }}>
                                         ${parseFloat(ticket.total_amount).toLocaleString('es-AR')}
                                     </div>
                                     <div className="pending-actions" style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginTop: '10px' }}>
