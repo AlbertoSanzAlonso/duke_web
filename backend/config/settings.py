@@ -168,8 +168,8 @@ if USE_S3:
         },
     }
 
-DEBUG = env.bool('DEBUG', default=True)
-ALLOWED_HOSTS = env.list('ALLOWED_HOSTS', default=['*'])
+DEBUG = True
+ALLOWED_HOSTS = ['*']
 CORS_ALLOW_ALL_ORIGINS = True
 CORS_ALLOW_CREDENTIALS = True
 CORS_ALLOW_HEADERS = ["*"]
