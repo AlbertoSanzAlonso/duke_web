@@ -412,21 +412,21 @@ const saveButtonStyle = {
 };
 
 const addImgBtnStyle = { 
-    background: '#222', 
-    color: '#fff', 
-    border: 'none', 
-    padding: '0 20px', 
-    height: '45px',
-    borderRadius: '12px', 
-    cursor: 'pointer', 
-    display: 'flex', 
-    alignItems: 'center', 
-    justifyContent: 'center', 
-    gap: '10px', 
-    fontSize: '0.95rem',
-    fontWeight: '800',
-    transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
-    boxShadow: '0 4px 10px rgba(0,0,0,0.1)'
+    background: '#f03e3e',
+    color: '#fff',
+    border: 'none',
+    padding: '12px 20px',
+    borderRadius: '10px',
+    cursor: 'pointer',
+    display: 'inline-flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: '8px',
+    fontSize: '0.9rem',
+    fontWeight: '700',
+    transition: 'all 0.3s ease',
+    boxShadow: '0 4px 15px rgba(240, 62, 62, 0.2)',
+    fontFamily: 'inherit'
 };
 
 const galleryGridStyle = { display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '20px' };

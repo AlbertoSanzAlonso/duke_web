@@ -14,6 +14,12 @@ from django.http import StreamingHttpResponse
 import asyncio
 import json
 from asgiref.sync import sync_to_async
+from django.contrib.auth.tokens import default_token_generator
+from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
+from django.utils.encoding import force_bytes, force_str
+from django.core.mail import send_mail
+from django.template.loader import render_to_string
+from django.conf import settings
 
 @api_view(['GET'])
 @permission_classes([permissions.AllowAny])
@@ -37,13 +43,13 @@ def AdminSetupView(request):
 
     # 2. Setup Default Opening Hours
     hours_created = 0
-    if not OpeningHour.objects.exists():
-        for i in range(1, 8):
-            OpeningHour.objects.get_or_create(day=i, defaults={
-                'opening_time': '20:00',
-                'closing_time': '00:00',
-                'is_open': True
-            })
+    for i in range(1, 8):
+        obj, created = OpeningHour.objects.get_or_create(day=i, defaults={
+            'opening_time': '20:00',
+            'closing_time': '00:00',
+            'is_open': True
+        })
+        if created:
             hours_created += 1
 
     # 3. Setup Default Delivery Rates
@@ -61,6 +67,57 @@ def AdminSetupView(request):
         },
         'message': 'Admin accounts and initial configuration are ready on Supabase. Refresh /admin/config'
     })
+
+@api_view(['POST'])
+@permission_classes([permissions.AllowAny])
+def PasswordResetRequestView(request):
+    email = request.data.get('email')
+    if not email:
+        return Response({'error': 'Email is required'}, status=400)
+    
+    user = User.objects.filter(email=email).first()
+    if user:
+        token = default_token_generator.make_token(user)
+        uid = urlsafe_base64_encode(force_bytes(user.pk))
+        
+        # In a real app, this would be a link to your FRONTEND reset page
+        reset_url = f"{settings.ALLOWED_HOSTS[0]}/reset-password/{uid}/{token}" # Or the frontend URL
+        
+        message = f"Hola {user.username},\n\nPara restablcer tu contraseña en Duke Burgers, haz clic en el siguiente enlace:\n{reset_url}\n\nSi no solicitaste esto, ignora este correo."
+        
+        send_mail(
+            'Restablecer Contraseña - Duke Burger',
+            message,
+            settings.DEFAULT_FROM_EMAIL,
+            [email],
+            fail_silently=False,
+        )
+        
+    # Always return success to avoid email enum attacks
+    return Response({'message': 'Si el email está registrado, recibirás un enlace de recuperación pronto.'})
+
+@api_view(['POST'])
+@permission_classes([permissions.AllowAny])
+def PasswordResetConfirmView(request):
+    uidb64 = request.data.get('uid')
+    token = request.data.get('token')
+    new_password = request.data.get('new_password')
+    
+    if not all([uidb64, token, new_password]):
+        return Response({'error': 'UID, Token and New Password are required'}, status=400)
+    
+    try:
+        uid = force_str(urlsafe_base64_decode(uidb64))
+        user = User.objects.get(pk=uid)
+    except (TypeError, ValueError, OverflowError, User.DoesNotExist):
+        return Response({'error': 'Enlace inválido o expirado'}, status=400)
+    
+    if default_token_generator.check_token(user, token):
+        user.set_password(new_password)
+        user.save()
+        return Response({'message': 'Contraseña actualizada con éxito. Ya puedes iniciar sesión.'})
+    else:
+        return Response({'error': 'Token inválido o expirado'}, status=400)
 
 class ProductViewSet(viewsets.ModelViewSet):
     queryset = Product.objects.all().order_by('-created_at')

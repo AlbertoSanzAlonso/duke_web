@@ -305,6 +305,34 @@ export const createGalleryImage = async (formData) => {
     return await response.json();
 };
 
+export const requestPasswordReset = async (email) => {
+    try {
+        const response = await fetch(`${API_URL}/password-reset/`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email })
+        });
+        return await response.json();
+    } catch (e) {
+        throw new Error("Error al solicitar recuperación");
+    }
+};
+
+export const resetPasswordConfirm = async (uid, token, newPassword) => {
+    try {
+        const response = await fetch(`${API_URL}/password-reset-confirm/`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ uid, token, new_password: newPassword })
+        });
+        const data = await response.json();
+        if (!response.ok) throw new Error(data.error || "Error al cambiar contraseña");
+        return data;
+    } catch (e) {
+        throw e;
+    }
+};
+
 export const deleteGalleryImage = async (id) => {
     const response = await fetch(`${API_URL}/gallery/${id}/`, {
         method: 'DELETE',

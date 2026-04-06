@@ -152,6 +152,14 @@ body, .admin-container, .admin-main, .admin-content {
     color: #333 !important;
 }
 
+/* Allow white text on dark backgrounds like badges */
+.admin-content [style*="color: rgb(255, 255, 255)"],
+.admin-content [style*="color: #ffffff"],
+.admin-content [style*="color: white"],
+.admin-content .badge-text-white {
+    color: #ffffff !important;
+}
+
 .admin-content input, 
 .admin-content select, 
 .admin-content textarea {

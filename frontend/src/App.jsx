@@ -16,6 +16,7 @@ import Accounting from './admin/pages/Accounting';
 import Promos from './admin/pages/Promos';
 import Settings from './admin/pages/Settings';
 import Login from './admin/pages/Login';
+import ResetPassword from './admin/pages/ResetPassword';
 import { isAuthenticated } from './services/api';
 import { Navigate, Outlet } from 'react-router-dom';
 import './App.css'; // Global styles for consumer site
@@ -36,6 +37,7 @@ function App() {
         <Route path="/nosotros" element={<About />} />
         <Route path="/ticket/:id" element={<PublicTicket />} />
         <Route path="/login" element={<Login />} />
+        <Route path="/reset-password/:uid/:token" element={<ResetPassword />} />
 
         {/* Admin Dashboard */}
         <Route element={<ProtectedRoute />}>

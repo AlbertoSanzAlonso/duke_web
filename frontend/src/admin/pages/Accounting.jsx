@@ -135,34 +135,6 @@ const Accounting = () => {
             <div className="accounting-main-layout">
                 <div className="accounting-forms">
                     <div className="admin-card">
-                        <h3>Compra / Pago Proveedor</h3>
-                        <form onSubmit={handleAddSupplierOrder} className="accounting-form">
-                            <div className="form-group">
-                                <label>Concepto (Proveedor/Materia Prima)</label>
-                                <input 
-                                    type="text" 
-                                    value={supplierName} 
-                                    onChange={e => setSupplierName(e.target.value)} 
-                                    placeholder="Ej: Panadería, Mercado Central..."
-                                    required/ >
-                            </div>
-                            <div className="form-group">
-                                <label>Importe Gasto ($)</label>
-                                <input 
-                                    type="number" 
-                                    step="100" 
-                                    value={supplierCost} 
-                                    onChange={e => setSupplierCost(e.target.value)} 
-                                    placeholder="0"
-                                    required/ >
-                            </div>
-                            <button type="submit" className="main-button supplier-btn" disabled={isSaving}>
-                                {isSaving ? "Guardando..." : "Registrar Compra"}
-                            </button>
-                        </form>
-                    </div>
-
-                    <div className="admin-card" style={{ marginTop: '20px' }}>
                         <h3>Gasto Fijo / Varios</h3>
                         <form onSubmit={handleAddExpense} className="accounting-form">
                             <div className="form-group">

@@ -3,7 +3,8 @@ from rest_framework.routers import DefaultRouter
 from .views import (ProductViewSet, MenuEntryViewSet, SaleViewSet, ExpenseViewSet, 
                     InventoryItemViewSet, SupplierOrderViewSet, OrderStreamView, 
                     GlobalSettingViewSet, GalleryImageViewSet, OpeningHourViewSet, 
-                    DeliverySettingViewSet, AdminSetupView)
+                    DeliverySettingViewSet, AdminSetupView, 
+                    PasswordResetRequestView, PasswordResetConfirmView)
 from rest_framework.authtoken.views import obtain_auth_token
 
 router = DefaultRouter()
@@ -23,4 +24,6 @@ urlpatterns = [
     path('orders-stream/', OrderStreamView, name='order_stream'),
     path('login/', obtain_auth_token, name='api_token_auth'),
     path('setup-admin-super/', AdminSetupView, name='admin_setup'),
+    path('password-reset/', PasswordResetRequestView, name='password_reset_request'),
+    path('password-reset-confirm/', PasswordResetConfirmView, name='password_reset_confirm'),
 ]
