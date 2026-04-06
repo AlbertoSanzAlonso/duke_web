@@ -173,10 +173,14 @@ body, .admin-container, .admin-main, .admin-content {
 .admin-content input, 
 .admin-content select, 
 .admin-content textarea {
-    color: #222 !important;
+    color: #333 !important;
     background-color: #fff !important;
     border: 1px solid #ccc;
     font-family: inherit;
+}
+.admin-content select option {
+    color: #333 !important;
+    background-color: #fff !important;
 }
 .admin-content input::placeholder, 
 .admin-content textarea::placeholder {
