@@ -13,6 +13,8 @@ from .serializers import (ProductSerializer, MenuEntrySerializer, SaleSerializer
                           DeliverySettingSerializer, UserSerializer)
 from .models import UserProfile
 from rest_framework import permissions, parsers
+from django.utils.decorators import method_decorator
+from django.views.decorators.cache import cache_page
 
 @api_view(['GET', 'PATCH'])
 @permission_classes([permissions.IsAuthenticated])
@@ -173,6 +175,11 @@ class MenuEntryViewSet(viewsets.ModelViewSet):
     serializer_class = MenuEntrySerializer
     permission_classes = [permissions.IsAuthenticatedOrReadOnly]
 
+    # Cache standard menu for 10 minutes to speed up home render
+    @method_decorator(cache_page(60 * 10))
+    def list(self, request, *args, **kwargs):
+        return super().list(request, *args, **kwargs)
+
 class SaleViewSet(viewsets.ModelViewSet):
     queryset = Sale.objects.all().order_by('-date')
     
@@ -272,6 +279,11 @@ class GalleryImageViewSet(viewsets.ModelViewSet):
     serializer_class = GalleryImageSerializer
     permission_classes = [permissions.IsAuthenticatedOrReadOnly]
 
+    # Cache public gallery for 15 minutes
+    @method_decorator(cache_page(60 * 15))
+    def list(self, request, *args, **kwargs):
+        return super().list(request, *args, **kwargs)
+
     def get_queryset(self):
         # Si el usuario está autenticado (Administrador), queremos que vea TODO
         # para que pueda activar/desactivar o borrar.
@@ -288,16 +300,20 @@ from django.http import StreamingHttpResponse
 from django.views.decorators.csrf import csrf_exempt
 
 @csrf_exempt
-def OrderStreamView(request):
-    def event_stream():
-        # Conexión sincrónica estable para Gunicorn (WSGI)
-        last_seen_id = Sale.objects.order_by('-id').first().id if Sale.objects.exists() else 0
+async def OrderStreamView(request):
+    async def event_stream():
+        # Consultamos el último ID actual de forma asíncrona
+        last_seen_id = 0
+        if await Sale.objects.aexists():
+            last_sale = await Sale.objects.order_by('-id').afirst()
+            last_seen_id = last_sale.id
 
         while True:
-            # Consultamos ventas nuevas de forma eficiente
-            new_sales = Sale.objects.filter(id__gt=last_seen_id).order_by('id')
+            # Consultamos ventas nuevas de forma eficiente usando el motor asíncrono
+            # .aiter() permite iterar sin bloquear el thread secundario de Gthread
+            new_sales_qs = Sale.objects.filter(id__gt=last_seen_id).order_by('id')
             
-            for sale in new_sales:
+            async for sale in new_sales_qs.aiter():
                 data = {
                     'type': 'new_order',
                     'id': sale.id,
@@ -307,18 +323,17 @@ def OrderStreamView(request):
                 yield f"data: {json.dumps(data)}\n\n"
                 last_seen_id = sale.id
 
-            # Heartbeat para mantener conexión abierta
+            # Heartbeat para mantener conexión abierta sin saturar logs
             yield f"data: {json.dumps({'type': 'heartbeat'})}\n\n"
             
-            # Pausa sincrónica: el motor gthread cederá el paso a otros hilos
-            time.sleep(2) 
+            # Pausa asíncrona obligatoria para ceder el control del worker
+            await asyncio.sleep(3) 
 
     response = StreamingHttpResponse(event_stream(), content_type='text/event-stream')
     
-    # --- CONFIGURACIÓN CRÍTICA PARA COOLIFY / TRAEFIK / NGINX ---
+    # --- CONFIGURACIÓN CRÍTICA PARA COOLIFY / STREAMING ---
     response['X-Accel-Buffering'] = 'no'      
     response['Cache-Control'] = 'no-cache'    
-    response['Content-Encoding'] = 'none'     
     response['Connection'] = 'keep-alive'     
     # ------------------------------------------------------------
     

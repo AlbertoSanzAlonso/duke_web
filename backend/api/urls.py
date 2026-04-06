@@ -17,7 +17,7 @@ router.register(r'supplier-orders', SupplierOrderViewSet)
 router.register(r'settings', GlobalSettingViewSet)
 router.register(r'opening-hours', OpeningHourViewSet)
 router.register(r'delivery-rates', DeliverySettingViewSet)
-router.register(r'gallery', GalleryImageViewSet)
+router.register(r'gallery', GalleryImageViewSet, basename='gallery')
 
 urlpatterns = [
     path('', include(router.urls)),

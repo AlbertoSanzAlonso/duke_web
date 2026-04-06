@@ -1,27 +1,29 @@
-import React from 'react';
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
-import Home from './pages/Home';
-import About from './pages/About';
-import PublicTicket from './pages/PublicTicket';
-import AdminLayout from './admin/AdminLayout';
-import Dashboard from './admin/pages/Dashboard';
-import Products from './admin/pages/Products';
-import MenuList from './admin/pages/MenuList';
-import Inventory from './admin/pages/Inventory';
-import HistoryLog from './admin/pages/HistoryLog';
-import Sales from './admin/pages/Sales';
-import Orders from './admin/pages/Orders';
-import SupplierOrders from './admin/pages/SupplierOrders';
-import Accounting from './admin/pages/Accounting';
-import Promos from './admin/pages/Promos';
-import Settings from './admin/pages/Settings';
-import Gallery from './admin/pages/Gallery';
-import Login from './admin/pages/Login';
-import ResetPassword from './admin/pages/ResetPassword';
-import Profile from './admin/pages/Profile';
+import React, { lazy, Suspense } from 'react';
+import { BrowserRouter, Routes, Route, Navigate, Outlet } from 'react-router-dom';
+import LoadingScreen from './admin/components/LoadingScreen';
 import { isAuthenticated } from './services/api';
-import { Navigate, Outlet } from 'react-router-dom';
-import './App.css'; // Global styles for consumer site
+import './App.css'; 
+
+// Lazy Loading for all pages
+const Home = lazy(() => import('./pages/Home'));
+const About = lazy(() => import('./pages/About'));
+const PublicTicket = lazy(() => import('./pages/PublicTicket'));
+const AdminLayout = lazy(() => import('./admin/AdminLayout'));
+const Dashboard = lazy(() => import('./admin/pages/Dashboard'));
+const Products = lazy(() => import('./admin/pages/Products'));
+const MenuList = lazy(() => import('./admin/pages/MenuList'));
+const Inventory = lazy(() => import('./admin/pages/Inventory'));
+const HistoryLog = lazy(() => import('./admin/pages/HistoryLog'));
+const Sales = lazy(() => import('./admin/pages/Sales'));
+const Orders = lazy(() => import('./admin/pages/Orders'));
+const SupplierOrders = lazy(() => import('./admin/pages/SupplierOrders'));
+const Accounting = lazy(() => import('./admin/pages/Accounting'));
+const Promos = lazy(() => import('./admin/pages/Promos'));
+const Settings = lazy(() => import('./admin/pages/Settings'));
+const Gallery = lazy(() => import('./admin/pages/Gallery'));
+const Login = lazy(() => import('./admin/pages/Login'));
+const ResetPassword = lazy(() => import('./admin/pages/ResetPassword'));
+const Profile = lazy(() => import('./admin/pages/Profile'));
 
 const ProtectedRoute = () => {
   if (!isAuthenticated()) {
@@ -32,35 +34,37 @@ const ProtectedRoute = () => {
 
 function App() {
   return (
-    <BrowserRouter>
-      <Routes>
-        {/* Consumer Site */}
-        <Route path="/" element={<Home />} />
-        <Route path="/nosotros" element={<About />} />
-        <Route path="/ticket/:id" element={<PublicTicket />} />
-        <Route path="/login" element={<Login />} />
-        <Route path="/reset-password/:uid/:token" element={<ResetPassword />} />
+    <Suspense fallback={<LoadingScreen />}>
+      <BrowserRouter>
+        <Routes>
+          {/* Consumer Site */}
+          <Route path="/" element={<Home />} />
+          <Route path="/nosotros" element={<About />} />
+          <Route path="/ticket/:id" element={<PublicTicket />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/reset-password/:uid/:token" element={<ResetPassword />} />
 
-        {/* Admin Dashboard */}
-        <Route element={<ProtectedRoute />}>
-          <Route path="/admin" element={<AdminLayout />}>
-            <Route index element={<Dashboard />} />
-            <Route path="productos" element={<Products />} />
-            <Route path="carta" element={<MenuList />} />
-            <Route path="promos" element={<Promos />} />
-            <Route path="inventario" element={<Inventory />} />
-            <Route path="pedidos-clientes" element={<Orders />} />
-            <Route path="tpv" element={<Sales />} />
-            <Route path="pedidos" element={<SupplierOrders />} />
-            <Route path="contabilidad" element={<Accounting />} />
-            <Route path="galeria" element={<Gallery />} />
-            <Route path="historial" element={<HistoryLog />} />
-            <Route path="config" element={<Settings />} />
-            <Route path="perfil" element={<Profile />} />
+          {/* Admin Dashboard */}
+          <Route element={<ProtectedRoute />}>
+            <Route path="/admin" element={<AdminLayout />}>
+              <Route index element={<Dashboard />} />
+              <Route path="productos" element={<Products />} />
+              <Route path="carta" element={<MenuList />} />
+              <Route path="promos" element={<Promos />} />
+              <Route path="inventario" element={<Inventory />} />
+              <Route path="pedidos-clientes" element={<Orders />} />
+              <Route path="tpv" element={<Sales />} />
+              <Route path="pedidos" element={<SupplierOrders />} />
+              <Route path="contabilidad" element={<Accounting />} />
+              <Route path="galeria" element={<Gallery />} />
+              <Route path="historial" element={<HistoryLog />} />
+              <Route path="config" element={<Settings />} />
+              <Route path="perfil" element={<Profile />} />
+            </Route>
           </Route>
-        </Route>
-      </Routes>
-    </BrowserRouter>
+        </Routes>
+      </BrowserRouter>
+    </Suspense>
   );
 }
 
