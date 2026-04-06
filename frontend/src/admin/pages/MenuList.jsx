@@ -7,7 +7,7 @@ function MenuList() {
     const [products, setProducts] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
-    const [toast, setToast] = useState(null); // { message, type }
+    const [toast, setToast] = useState(null);
 
     const [selectedProductId, setSelectedProductId] = useState('');
     const [price, setPrice] = useState('');
@@ -16,6 +16,7 @@ function MenuList() {
     const [editingId, setEditingId] = useState(null);
     const [editPrice, setEditPrice] = useState('');
     const [hoveredId, setHoveredId] = useState(null);
+    const [confirmDelete, setConfirmDelete] = useState(null); // entry id
 
     useEffect(() => {
         loadData();
@@ -56,13 +57,19 @@ function MenuList() {
     };
 
     const handleDelete = async (id) => {
-        if (!window.confirm("¿Seguro que quieres retirar este producto de LA CARTA? (Seguirá en catálogo)")) return;
+        setConfirmDelete(id);
+    };
+
+    const executeDelete = async () => {
+        if (!confirmDelete) return;
         try {
-            await deleteMenuEntry(id);
+            await deleteMenuEntry(confirmDelete);
             setToast({ message: "Producto retirado de la carta.", type: 'success' });
             loadData();
         } catch (err) {
             setToast({ message: err.message, type: 'error' });
+        } finally {
+            setConfirmDelete(null);
         }
     };
 
@@ -89,6 +96,27 @@ function MenuList() {
     return (
         <div className="admin-card">
             {toast && <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />}
+            
+            {/* Modal de Confirmación Premium */}
+            {confirmDelete && (
+                <div style={modalOverlayStyle}>
+                    <div style={modalStyle}>
+                        <div style={{ padding: '30px', textAlign: 'center' }}>
+                            <div style={{ color: '#f03e3e', fontSize: '3rem', marginBottom: '15px' }}>⚠️</div>
+                            <h3 style={{ margin: '0 0 10px 0', fontSize: '1.5rem', fontWeight: '800' }}>¿RETIRAR DE LA CARTA?</h3>
+                            <p style={{ color: '#666', lineHeight: '1.5', marginBottom: '25px', fontSize: '0.95rem' }}>
+                                El producto dejará de ser visible para los clientes en la web, 
+                                pero <strong style={{ color: '#333' }}>seguirá existiendo en tu catálogo</strong> de productos para usarlo después.
+                            </p>
+                            <div style={{ display: 'flex', gap: '15px' }}>
+                                <button onClick={() => setConfirmDelete(null)} style={cancelBtnStyle}>CANCELAR</button>
+                                <button onClick={executeDelete} style={confirmBtnStyle}>SÍ, RETIRAR</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
+
             <h2>Gestión de la Carta Pública</h2>
             <p style={{ color: '#666', fontSize: '0.9rem', marginBottom: '20px' }}>Elíge productos del catálogo y dales un precio de venta al público para hacerlos visibles en tu menú online.</p>
 
@@ -246,5 +274,58 @@ function MenuList() {
         </div>
     );
 }
+
+// Styles Locales
+const modalOverlayStyle = {
+    position: 'fixed',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    background: 'rgba(0,0,0,0.85)',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    zIndex: 5000,
+    padding: '20px',
+    backdropFilter: 'blur(5px)'
+};
+
+const modalStyle = {
+    background: '#fff',
+    width: '100%',
+    maxWidth: '450px',
+    borderRadius: '24px',
+    overflow: 'hidden',
+    boxShadow: '0 25px 70px rgba(0,0,0,0.4)',
+    animation: 'modalFadeUp 0.3s ease-out'
+};
+
+const cancelBtnStyle = {
+    flex: 1,
+    padding: '14px',
+    background: '#f1f3f5',
+    border: 'none',
+    borderRadius: '12px',
+    fontWeight: '800',
+    fontSize: '0.9rem',
+    cursor: 'pointer',
+    color: '#495057',
+    fontFamily: "'Montserrat', sans-serif"
+};
+
+const confirmBtnStyle = {
+    flex: 1,
+    padding: '14px',
+    background: '#f03e3e',
+    color: '#fff',
+    border: 'none',
+    borderRadius: '12px',
+    fontWeight: '800',
+    fontSize: '0.9rem',
+    cursor: 'pointer',
+    boxShadow: '0 4px 15px rgba(240, 62, 62, 0.3)',
+    fontFamily: "'Montserrat', sans-serif"
+};
 
 export default MenuList;

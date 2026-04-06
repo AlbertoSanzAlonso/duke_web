@@ -104,24 +104,41 @@ function Products() {
             <h2>Gestión de Productos (Catálogo Base)</h2>
             <p style={{ color: '#666', fontSize: '0.9rem', marginBottom: '20px' }}>Aquí das de alta los productos básicos del sistema con su foto. Luego podrás añadirlos a "La Carta" para darles precio de venta.</p>
 
-            <form onSubmit={handleCreate} style={{ display: 'flex', gap: '10px', marginBottom: '20px', flexWrap: 'wrap', alignItems: 'center', background: '#fff', padding: '20px', borderRadius: '12px', border: '1px solid #eee' }}>
-                <input 
-                    type="text" 
-                    placeholder="Nombre del producto" 
-                    value={name} 
-                    onChange={e => setName(e.target.value)} 
-                    required 
-                    style={{ padding: '10px', flex: 1, minWidth: '150px', borderRadius: '8px', border: '1px solid #ddd' }}
-                />
-                <input 
-                    type="text" 
-                    placeholder="Descripción" 
-                    value={description} 
-                    onChange={e => setDescription(e.target.value)} 
-                    style={{ padding: '10px', flex: 2, minWidth: '200px', borderRadius: '8px', border: '1px solid #ddd' }}
-                />
-                <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flex: 1, minWidth: '200px' }}>
-                    <label style={{ fontSize: '0.75rem', fontWeight: '800', color: '#888', textTransform: 'uppercase' }}>Foto:</label>
+            <form onSubmit={handleCreate} style={{ 
+                display: 'grid', 
+                gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 200px), 1fr))', 
+                gap: '15px', 
+                marginBottom: '30px', 
+                background: '#fff', 
+                padding: '25px', 
+                borderRadius: '16px', 
+                border: '1px solid #eee',
+                boxShadow: '0 2px 10px rgba(0,0,0,0.02)',
+                alignItems: 'end'
+            }}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                    <label style={{ fontSize: '0.75rem', fontWeight: '800', color: '#888', textTransform: 'uppercase' }}>Nombre del Producto *</label>
+                    <input 
+                        type="text" 
+                        placeholder="Ej: Hamburguesa Duke" 
+                        value={name} 
+                        onChange={e => setName(e.target.value)} 
+                        required 
+                        style={{ padding: '12px', width: '100%', borderRadius: '10px', border: '1px solid #ddd', fontSize: '1rem' }}
+                    />
+                </div>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                    <label style={{ fontSize: '0.75rem', fontWeight: '800', color: '#888', textTransform: 'uppercase' }}>Descripción Corta</label>
+                    <input 
+                        type="text" 
+                        placeholder="Ej: 200g carne, cheddar..." 
+                        value={description} 
+                        onChange={e => setDescription(e.target.value)} 
+                        style={{ padding: '12px', width: '100%', borderRadius: '10px', border: '1px solid #ddd', fontSize: '1rem' }}
+                    />
+                </div>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                    <label style={{ fontSize: '0.75rem', fontWeight: '800', color: '#888', textTransform: 'uppercase' }}>Fotografía Principal</label>
                     <input 
                         type="file" 
                         accept="image/*"
@@ -129,10 +146,10 @@ function Products() {
                         style={{ 
                             padding: '10px', 
                             fontSize: '0.85rem', 
-                            borderRadius: '8px', 
+                            width: '100%',
+                            borderRadius: '10px', 
                             border: '1px solid #ddd', 
                             background: '#f8f9fa',
-                            flex: 1,
                             cursor: 'pointer'
                         }}
                     />
@@ -142,15 +159,17 @@ function Products() {
                     background: 'var(--admin-primary)', 
                     color: 'white', 
                     border: 'none', 
-                    borderRadius: '8px', 
+                    borderRadius: '10px', 
                     cursor: 'pointer', 
                     fontWeight: '800',
                     fontSize: '0.9rem',
-                    height: '45px',
+                    height: '48px',
+                    width: '100%',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
-                    boxShadow: '0 4px 12px rgba(240, 62, 62, 0.2)'
+                    boxShadow: '0 4px 12px rgba(240, 62, 62, 0.2)',
+                    transition: 'all 0.2s'
                 }}>
                     + CREAR PRODUCTO
                 </button>
