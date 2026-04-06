@@ -172,23 +172,23 @@ const SupplierOrders = () => {
 
                         {/* Listado de items en el ticket */}
                         {orderItems.length > 0 && (
-                            <div style={{ border: '1px solid #eee', borderRadius: '8px', overflow: 'hidden' }}>
-                                <table style={{ width: '100%', fontSize: '0.85rem' }}>
-                                    <thead style={{ background: '#eee' }}>
+                            <div className="accounting-table-container" style={{ border: '1px solid #eee', borderRadius: '12px', overflow: 'hidden' }}>
+                                <table className="accounting-table" style={{ width: '100%', fontSize: '0.85rem' }}>
+                                    <thead>
                                         <tr>
-                                            <th style={{ padding: '8px' }}>Item</th>
-                                            <th style={{ padding: '8px' }}>Cantidad</th>
-                                            <th style={{ padding: '8px' }}>Costo</th>
-                                            <th style={{ padding: '8px' }}></th>
+                                            <th>Item</th>
+                                            <th>Cant.</th>
+                                            <th className="txt-right">Costo</th>
+                                            <th></th>
                                         </tr>
                                     </thead>
                                     <tbody>
                                         {orderItems.map((oi, index) => (
-                                            <tr key={index} style={{ borderBottom: '1px solid #f0f0f0' }}>
-                                                <td style={{ padding: '8px' }}>{oi.name}</td>
-                                                <td style={{ padding: '8px' }}>{oi.quantity}</td>
-                                                <td style={{ padding: '8px' }}>${oi.cost.toLocaleString('es-AR')}</td>
-                                                <td style={{ padding: '8px', textAlign: 'center' }}>
+                                            <tr key={index}>
+                                                <td data-label="Item">{oi.name}</td>
+                                                <td data-label="Cant.">{oi.quantity}</td>
+                                                <td data-label="Costo" className="txt-right">${oi.cost.toLocaleString('es-AR')}</td>
+                                                <td data-label="Acción" style={{ textAlign: 'center' }}>
                                                     <button type="button" onClick={() => removeItemFromOrder(index)} style={{ border: 'none', background: 'none', color: 'red', cursor: 'pointer' }}><Trash2 size={16} /></button>
                                                 </td>
                                             </tr>
@@ -238,10 +238,10 @@ const SupplierOrders = () => {
                                 ) : (
                                     orders.map(order => (
                                         <tr key={order.id}>
-                                            <td>{new Date(order.date).toLocaleDateString()}</td>
-                                            <td>{order.supplier_name}</td>
-                                            <td className="txt-right negative">-${parseInt(order.total_cost).toLocaleString('es-AR')}</td>
-                                            <td style={{ fontSize: '0.75rem', color: '#888' }}>
+                                            <td data-label="Fecha">{new Date(order.date).toLocaleDateString()}</td>
+                                            <td data-label="Proveedor">{order.supplier_name}</td>
+                                            <td data-label="Importe" className="txt-right negative">-${parseInt(order.total_cost).toLocaleString('es-AR')}</td>
+                                            <td data-label="Detalles" style={{ fontSize: '0.75rem', color: '#888' }}>
                                                 {order.items?.length || 0} productos
                                             </td>
                                         </tr>
