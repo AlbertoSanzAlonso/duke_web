@@ -166,19 +166,19 @@ class ProductViewSet(viewsets.ModelViewSet):
     permission_classes = [permissions.IsAuthenticatedOrReadOnly]
 
     def perform_create(self, serializer):
+        serializer.save()
         from django.core.cache import cache
         cache.delete("menu_list_public")
-        serializer.save()
 
     def perform_update(self, serializer):
+        serializer.save()
         from django.core.cache import cache
         cache.delete("menu_list_public")
-        serializer.save()
 
     def perform_destroy(self, instance):
+        instance.delete()
         from django.core.cache import cache
         cache.delete("menu_list_public")
-        instance.delete()
 
 class MenuEntryViewSet(viewsets.ModelViewSet):
     queryset = MenuEntry.objects.all().order_by('product__name')
@@ -200,19 +200,19 @@ class MenuEntryViewSet(viewsets.ModelViewSet):
         return response
 
     def perform_create(self, serializer):
+        serializer.save()
         from django.core.cache import cache
         cache.delete("menu_list_public")
-        serializer.save()
 
     def perform_update(self, serializer):
+        serializer.save()
         from django.core.cache import cache
         cache.delete("menu_list_public")
-        serializer.save()
 
     def perform_destroy(self, instance):
+        instance.delete()
         from django.core.cache import cache
         cache.delete("menu_list_public")
-        instance.delete()
 
 class SaleViewSet(viewsets.ModelViewSet):
     queryset = Sale.objects.all().order_by('-date')
@@ -333,19 +333,19 @@ class GalleryImageViewSet(viewsets.ModelViewSet):
 
     # Al realizar cambios, invalidamos el caché público
     def perform_create(self, serializer):
+        serializer.save()
         from django.core.cache import cache
         cache.delete("gallery_list_public")
-        serializer.save()
 
     def perform_update(self, serializer):
+        serializer.save()
         from django.core.cache import cache
         cache.delete("gallery_list_public")
-        serializer.save()
 
     def perform_destroy(self, instance):
+        instance.delete()
         from django.core.cache import cache
         cache.delete("gallery_list_public")
-        instance.delete()
 
 @csrf_exempt
 async def OrderStreamView(request):

@@ -172,9 +172,32 @@ const Accounting = () => {
         );
     };
 
-    const totalIncome = sales.reduce((acc, s) => acc + parseFloat(s.total_amount), 0);
-    const totalSupplierDebt = supplierOrders.reduce((acc, o) => acc + parseFloat(o.total_cost), 0);
-    const totalManualExpenses = manualExpenses.reduce((acc, e) => acc + parseFloat(e.amount), 0);
+    const [viewMode, setViewMode] = useState('daily'); // 'daily', 'weekly', 'monthly'
+
+    const filterByPeriod = (items) => {
+        const now = new Date();
+        return items.filter(item => {
+            const itemDate = new Date(item.date);
+            if (viewMode === 'daily') {
+                return itemDate.toDateString() === now.toDateString();
+            } else if (viewMode === 'weekly') {
+                const diffTime = Math.abs(now - itemDate);
+                const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+                return diffDays <= 7;
+            } else if (viewMode === 'monthly') {
+                return itemDate.getMonth() === now.getMonth() && itemDate.getFullYear() === now.getFullYear();
+            }
+            return true;
+        });
+    };
+
+    const filteredSales = filterByPeriod(sales);
+    const filteredSupplierOrders = filterByPeriod(supplierOrders);
+    const filteredExpenses = filterByPeriod(manualExpenses);
+
+    const totalIncome = filteredSales.reduce((acc, s) => acc + parseFloat(s.total_amount), 0);
+    const totalSupplierDebt = filteredSupplierOrders.reduce((acc, o) => acc + parseFloat(o.total_cost), 0);
+    const totalManualExpenses = filteredExpenses.reduce((acc, e) => acc + parseFloat(e.amount), 0);
     const totalExpenses = totalSupplierDebt + totalManualExpenses;
     const balance = totalIncome - totalExpenses;
 
@@ -184,27 +207,36 @@ const Accounting = () => {
         <div className="admin-content accounting-page">
             {toast && <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />}
             <header className="accounting-header">
-                <h2>Balance General</h2>
-                <p>Resumen financiero de Duke Burger</p>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '20px' }}>
+                    <div>
+                        <h2>Contabilidad Duke</h2>
+                        <p>Análisis financiero detallado</p>
+                    </div>
+                    <div className="period-toggle">
+                        <button className={viewMode === 'daily' ? 'active' : ''} onClick={() => setViewMode('daily')}>DIARIO</button>
+                        <button className={viewMode === 'weekly' ? 'active' : ''} onClick={() => setViewMode('weekly')}>SEMANAL</button>
+                        <button className={viewMode === 'monthly' ? 'active' : ''} onClick={() => setViewMode('monthly')}>MENSUAL</button>
+                    </div>
+                </div>
             </header>
 
             <div className="accounting-summary-grid">
                 <div className="summary-card income">
                     <h3>Ingresos</h3>
                     <p className="amount">+${Math.round(totalIncome).toLocaleString('es-AR')}</p>
-                    <span>Ventas finalizadas</span>
+                    <span>{filteredSales.length} ventas {viewMode === 'daily' ? 'de hoy' : viewMode === 'weekly' ? 'esta semana' : 'del mes'}</span>
                 </div>
                 <div className="summary-card expenses">
                     <h3>Gastos</h3>
                     <p className="amount">-${Math.round(totalExpenses).toLocaleString('es-AR')}</p>
-                    <span>Proveedores + Gastos manuales</span>
+                    <span>{filteredSupplierOrders.length + filteredExpenses.length} movimientos de salida</span>
                 </div>
                 <div className="summary-card balance">
                     <h3>Beneficio Neto</h3>
                     <p className={`amount ${balance >= 0 ? 'positive' : 'negative'}`}>
                         ${Math.round(balance).toLocaleString('es-AR')}
                     </p>
-                    <span>Balance total</span>
+                    <span>Cuentas de {viewMode === 'daily' ? 'hoy' : viewMode === 'weekly' ? 'los últimos 7 días' : 'este periodo mensual'}</span>
                 </div>
             </div>
 
@@ -266,7 +298,7 @@ const Accounting = () => {
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    {manualExpenses.map(e => {
+                                    {filteredExpenses.map(e => {
                                         const isEditing = editingId === `exp-${e.id}`;
                                         return (
                                             <tr key={`me-${e.id}`}>
@@ -313,7 +345,7 @@ const Accounting = () => {
                                             </tr>
                                         );
                                     })}
-                                    {supplierOrders.map(o => {
+                                    {filteredSupplierOrders.map(o => {
                                         const isEditing = editingId === `ord-${o.id}`;
                                         return (
                                             <tr key={`so-${o.id}`}>
@@ -347,7 +379,7 @@ const Accounting = () => {
                                             </tr>
                                         );
                                     })}
-                                    {sales.slice(0, 50).map(s => {
+                                    {filteredSales.slice(0, 50).map(s => {
                                         const isEditing = editingId === `sal-${s.id}`;
                                         return (
                                             <tr key={`s-${s.id}`}>

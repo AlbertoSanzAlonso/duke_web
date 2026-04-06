@@ -90,8 +90,8 @@ function About() {
             <p style={{ textAlign: 'center', opacity: 0.7 }}>Cargando imágenes...</p>
           ) : gallery.length > 0 ? (
             <div className="gallery-grid">
-              {gallery.map((img, idx) => (
-                <div key={img.id} className={`gallery-item gallery-item-${(idx % 4) + 1}`}>
+              {gallery.map((img) => (
+                <div key={img.id} className="gallery-item">
                    <img src={img.image} alt={img.title || 'Duke Burger'} className="gallery-img-full" />
                 </div>
               ))}

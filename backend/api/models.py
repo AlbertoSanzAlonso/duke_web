@@ -195,8 +195,17 @@ class GalleryImage(models.Model):
                     else:
                         im = im.convert("RGB")
                     
-                    # Resize large images
-                    max_size = (1600, 1600)
+                    # CROP TO SQUARE (Center Crop)
+                    width, height = im.size
+                    min_dim = min(width, height)
+                    left = (width - min_dim) / 2
+                    top = (height - min_dim) / 2
+                    right = (width + min_dim) / 2
+                    bottom = (height + min_dim) / 2
+                    im = im.crop((left, top, right, bottom))
+                    
+                    # Resize to a standard high-quality resolution
+                    max_size = (1200, 1200)
                     im.thumbnail(max_size, Image.Resampling.LANCZOS)
                     
                     output = BytesIO()

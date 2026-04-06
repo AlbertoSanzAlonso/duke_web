@@ -290,7 +290,7 @@ const Settings = () => {
                                 <ImageIcon size={32} color="#f03e3e" />
                                 <h2 style={{ margin: 0, fontSize: '1.5rem' }}>Galería del Local</h2>
                             </div>
-                            <button className="add-btn" onClick={() => setIsAddingImg(true)} style={addImgBtnStyle}>
+                            <button onClick={() => setIsAddingImg(true)} style={addImgBtnStyle}>
                                 <Plus size={20} /> Añadir Foto
                             </button>
                         </div>
@@ -453,7 +453,10 @@ const addImgBtnStyle = {
     boxShadow: '0 4px 15px rgba(240, 62, 62, 0.2)',
     fontFamily: 'inherit',
     whiteSpace: 'nowrap',
-    flexShrink: 0
+    flexShrink: 0,
+    width: 'auto',
+    height: 'auto',
+    minWidth: 'max-content'
 };
 
 const galleryGridStyle = { display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '20px' };

@@ -17,6 +17,39 @@
     font-size: 1.1rem;
 }
 
+.period-toggle {
+    display: flex;
+    background: #f1f3f5;
+    padding: 5px;
+    border-radius: 12px;
+    gap: 5px;
+    border: 1px solid #e9ecef;
+}
+
+.period-toggle button {
+    border: none;
+    background: none;
+    padding: 10px 20px;
+    border-radius: 8px;
+    font-size: 0.85rem;
+    font-weight: 800;
+    cursor: pointer;
+    color: #495057;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    letter-spacing: 0.5px;
+}
+
+.period-toggle button:hover {
+    background: rgba(0,0,0,0.03);
+    color: #222;
+}
+
+.period-toggle button.active {
+    background: #fff;
+    color: var(--admin-primary);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+}
+
 .accounting-summary-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
