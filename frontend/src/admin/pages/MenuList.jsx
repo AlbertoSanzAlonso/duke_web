@@ -120,12 +120,22 @@ function MenuList() {
             <h2>Gestión de la Carta Pública</h2>
             <p style={{ color: '#666', fontSize: '0.9rem', marginBottom: '20px' }}>Elíge productos del catálogo y dales un precio de venta al público para hacerlos visibles en tu menú online.</p>
 
-            <form onSubmit={handleCreate} style={{ display: 'flex', gap: '10px', marginBottom: '20px', flexWrap: 'wrap', alignItems: 'center' }}>
+            <form onSubmit={handleCreate} style={{ 
+                display: 'flex', 
+                gap: '12px', 
+                marginBottom: '30px', 
+                flexWrap: 'wrap', 
+                alignItems: 'center',
+                background: '#f8f9fa',
+                padding: '20px',
+                borderRadius: '16px',
+                border: '1px solid #eee'
+            }}>
                 <select
                     value={selectedProductId}
                     onChange={e => setSelectedProductId(e.target.value)}
                     required
-                    style={{ padding: '8px', flex: 2, minWidth: '200px' }}
+                    style={{ ...formFieldStyle, flex: 2, minWidth: '220px' }}
                 >
                     <option value="">-- Seleccionar producto del catálogo --</option>
                     {products.map(p => (
@@ -136,26 +146,41 @@ function MenuList() {
                     value={category}
                     onChange={e => setCategory(e.target.value)}
                     required
-                    style={{ padding: '8px', flex: 1, minWidth: '120px' }}
+                    style={{ ...formFieldStyle, flex: 1, minWidth: '130px' }}
                 >
                     <option value="Burgers">Burgers</option>
                     <option value="Pachatas">Pachatas</option>
                     <option value="Pizzas">Pizzas</option>
                     <option value="Bebidas">Bebidas</option>
                 </select>
-                <input
-                    type="number"
-                    step="100"
-                    min="0"
-                    className="no-arrows-input"
-                    placeholder="Precio"
-                    value={price}
-                    onChange={e => setPrice(e.target.value)}
-                    required
-                    style={{ padding: '8px', width: '120px', fontSize: '1.1rem', fontWeight: 'bold' }}
-                />
-                <button type="submit" className="main-button" style={{ padding: '8px 16px', background: 'var(--admin-primary)', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer' }}>
-                    + Añadir a la Carta
+                <div style={{ position: 'relative', width: '130px' }}>
+                    <span style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', fontWeight: 'bold', color: '#333' }}>$</span>
+                    <input
+                        type="number"
+                        step="100"
+                        min="0"
+                        className="no-arrows-input"
+                        placeholder="Precio"
+                        value={price}
+                        onChange={e => setPrice(e.target.value)}
+                        required
+                        style={{ ...formFieldStyle, width: '100%', paddingLeft: '25px', fontWeight: 'bold' }}
+                    />
+                </div>
+                <button type="submit" className="main-button" style={{ 
+                    ...formFieldStyle,
+                    padding: '0 25px', 
+                    background: 'var(--admin-primary)', 
+                    color: 'white', 
+                    border: 'none', 
+                    cursor: 'pointer',
+                    fontWeight: '800',
+                    fontSize: '0.9rem',
+                    width: 'auto',
+                    minWidth: '180px',
+                    boxShadow: '0 4px 12px rgba(240, 62, 62, 0.2)'
+                }}>
+                    + AÑADIR A LA CARTA
                 </button>
             </form>
 
@@ -299,6 +324,20 @@ const modalStyle = {
     overflow: 'hidden',
     boxShadow: '0 25px 70px rgba(0,0,0,0.4)',
     animation: 'modalFadeUp 0.3s ease-out'
+};
+
+const formFieldStyle = {
+    height: '48px',
+    padding: '0 15px',
+    borderRadius: '12px',
+    border: '1px solid #ddd',
+    fontSize: '0.95rem',
+    outline: 'none',
+    boxSizing: 'border-box',
+    fontFamily: 'inherit',
+    backgroundColor: '#fff',
+    display: 'flex',
+    alignItems: 'center'
 };
 
 const cancelBtnStyle = {
