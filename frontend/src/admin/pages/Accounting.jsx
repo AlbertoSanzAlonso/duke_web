@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { fetchSales, fetchSupplierOrders, createSupplierOrder, fetchExpenses, createExpense, deleteExpense } from '../../services/api';
+import { fetchSales, fetchSupplierOrders, createSupplierOrder, fetchExpenses, createExpense, deleteExpense, deleteSale, deleteSupplierOrder } from '../../services/api';
 import './Accounting.css';
 import LoadingScreen from '../components/LoadingScreen';
 import Toast from '../components/Toast';
+import { Trash2 } from 'lucide-react';
 
 const Accounting = () => {
     const [sales, setSales] = useState([]);
@@ -168,7 +169,7 @@ const Accounting = () => {
                                     </select>
                                 </div>
                             </div>
-                            <button type="submit" className="outline-button" disabled={isSaving}>
+                            <button type="submit" className="main-button" disabled={isSaving}>
                                 {isSaving ? "Guardando..." : "Registrar Gasto"}
                             </button>
                         </form>
@@ -199,7 +200,9 @@ const Accounting = () => {
                                             <td data-label="Categoría">{e.category}</td>
                                             <td data-label="Importe" className="txt-right negative">-${Math.round(parseFloat(e.amount)).toLocaleString('es-AR')}</td>
                                             <td data-label="Acción">
-                                                <button onClick={() => handleDeleteExpense(e.id)} className="delete-btn">×</button>
+                                                <div style={{ display: 'flex', gap: '8px', justifyContent: 'flex-end' }}>
+                                                    <button onClick={() => handleDeleteExpense(e.id)} className="delete-btn" title="Eliminar"><Trash2 size={18} /></button>
+                                                </div>
                                             </td>
                                         </tr>
                                     ))}
@@ -210,7 +213,25 @@ const Accounting = () => {
                                             <td data-label="Descripción">{o.supplier_name} (Pedido #{o.id})</td>
                                             <td data-label="Categoría">Materia Prima</td>
                                             <td data-label="Importe" className="txt-right negative">-${Math.round(parseFloat(o.total_cost)).toLocaleString('es-AR')}</td>
-                                            <td data-label="Acción">-</td>
+                                            <td data-label="Acción">
+                                                <div style={{ display: 'flex', gap: '8px', justifyContent: 'flex-end' }}>
+                                                    <button 
+                                                        onClick={async () => {
+                                                            if(window.confirm(`¿Eliminar pedido de ${o.supplier_name}?`)) {
+                                                                try {
+                                                                    await deleteSupplierOrder(o.id);
+                                                                    setToast({ message: "Pedido eliminado", type: 'success' });
+                                                                    loadData();
+                                                                } catch(e) { setToast({ message: "Error", type: 'error' }); }
+                                                            }
+                                                        }} 
+                                                        className="delete-btn" 
+                                                        title="Eliminar"
+                                                    >
+                                                        <Trash2 size={18} />
+                                                    </button>
+                                                </div>
+                                            </td>
                                         </tr>
                                     ))}
                                     {sales.slice(0, 50).map(s => (
@@ -220,7 +241,25 @@ const Accounting = () => {
                                             <td data-label="Descripción">Venta #{s.id} {s.customer_name ? `(${s.customer_name})` : ''}</td>
                                             <td data-label="Categoría">Venta TPV</td>
                                             <td data-label="Importe" className="txt-right positive">+${Math.round(parseFloat(s.total_amount)).toLocaleString('es-AR')}</td>
-                                            <td data-label="Acción">-</td>
+                                            <td data-label="Acción">
+                                                <div style={{ display: 'flex', gap: '8px', justifyContent: 'flex-end' }}>
+                                                    <button 
+                                                        onClick={async () => {
+                                                            if(window.confirm(`¿Eliminar registro de venta #${s.id}?`)) {
+                                                                try {
+                                                                    await deleteSale(s.id);
+                                                                    setToast({ message: "Venta eliminada del registro", type: 'success' });
+                                                                    loadData();
+                                                                } catch(e) { setToast({ message: "Error", type: 'error' }); }
+                                                            }
+                                                        }} 
+                                                        className="delete-btn" 
+                                                        title="Eliminar"
+                                                    >
+                                                        <Trash2 size={18} />
+                                                    </button>
+                                                </div>
+                                            </td>
                                         </tr>
                                     ))}
                                 </tbody>

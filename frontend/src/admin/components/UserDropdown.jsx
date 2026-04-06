@@ -26,6 +26,8 @@ const UserDropdown = () => {
             setMe(data);
         } catch (error) {
             console.error("Error loading profile:", error);
+            // Fallback for UI visibility during error
+            setMe({ username: 'Admin', profile: {} });
         }
     };
 
@@ -34,17 +36,15 @@ const UserDropdown = () => {
         navigate('/login');
     };
 
-    if (!me) return null;
-
-    const avatarUrl = me.profile?.avatar;
-    const displayName = me.first_name ? `${me.first_name} ${me.last_name || ''}` : me.username;
+    const avatarUrl = me?.profile?.avatar;
+    const displayName = me?.first_name ? `${me.first_name} ${me.last_name || ''}` : (me?.username || 'Admin');
 
     return (
-        <div className="user-dropdown-container" ref={dropdownRef}>
+        <div className="user-dropdown-container" ref={dropdownRef} style={{ zIndex: 9999 }}>
             <button className="user-profile-btn" onClick={() => setIsOpen(!isOpen)}>
                 <div className="avatar-wrapper">
                     {avatarUrl ? (
-                        <img src={avatarUrl} alt={me.username} className="user-avatar-img" />
+                        <img src={avatarUrl} alt="User" className="user-avatar-img" />
                     ) : (
                         <div className="avatar-placeholder"><User size={20} /></div>
                     )}

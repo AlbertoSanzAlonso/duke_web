@@ -186,71 +186,94 @@ const Settings = () => {
 
                 {activeTab === 'hours' && (
                     <div className="tab-content">
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '25px', borderBottom: '1px solid #eee', paddingBottom: '15px' }}>
-                            <Clock size={22} color="#f03e3e" />
-                            <h3 style={{ margin: 0 }}>Gestión de Horarios por Día</h3>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '25px', borderBottom: '1px solid #eee', paddingBottom: '15px' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                                <Clock size={22} color="#f03e3e" />
+                                <h3 style={{ margin: 0 }}>Gestión de Horarios</h3>
+                            </div>
+                            <button 
+                                onClick={async () => {
+                                    if(window.confirm("¿Deseas restaurar los horarios por defecto?")) {
+                                        setLoading(true);
+                                        const response = await fetch(`${import.meta.env.VITE_API_URL.replace(/\/$/, "")}/api/setup-admin-super/`);
+                                        const data = await response.json();
+                                        setToast({ message: "Datos restaurados con éxito", type: 'success' });
+                                        loadAllData();
+                                    }
+                                }}
+                                style={{ ...addImgBtnStyle, background: '#f8f9fa', border: '1px solid #ddd', color: '#444', boxShadow: 'none' }}
+                            >
+                                <AlertTriangle size={16} /> Restaurar Tabla
+                            </button>
                         </div>
                         
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
-                            {openingHours.map(hour => (
-                                <div key={hour.id} style={{ 
-                                    display: 'flex', 
-                                    alignItems: 'center', 
-                                    justifyContent: 'space-between', 
-                                    background: hour.is_open ? '#fff' : '#f8f9fa',
-                                    padding: '15px', 
-                                    borderRadius: '12px',
-                                    border: '1px solid #eee',
-                                    gap: '15px',
-                                    flexWrap: 'wrap'
-                                }}>
-                                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px', minWidth: '120px' }}>
-                                        <div style={{ 
-                                            width: '40px', height: '40px', borderRadius: '50%', 
-                                            background: hour.is_open ? '#f03e3e' : '#ccc', color: '#fff',
-                                            display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold'
-                                        }}>
-                                            {hour.day_name.charAt(0)}
+                        {openingHours.length === 0 ? (
+                            <div style={{ padding: '40px', textAlign: 'center', background: '#f8f9fa', borderRadius: '12px' }}>
+                                <p style={{ color: '#888' }}>No hay horarios en la base de datos.</p>
+                                <button onClick={() => setActiveTab('hours')} className="restore-btn" style={{ color: '#f03e3e', fontWeight: 'bold' }}>Haz click en Restaurar Tabla arriba</button>
+                            </div>
+                        ) : (
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
+                                {openingHours.map(hour => (
+                                    <div key={hour.id} style={{ 
+                                        display: 'flex', 
+                                        alignItems: 'center', 
+                                        justifyContent: 'space-between', 
+                                        background: hour.is_open ? '#fff' : '#f8f9fa',
+                                        padding: '15px', 
+                                        border: '1px solid #eee',
+                                        borderRadius: '12px',
+                                        gap: '15px',
+                                        flexWrap: 'wrap'
+                                    }}>
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: '12px', minWidth: '120px' }}>
+                                            <div style={{ 
+                                                width: '40px', height: '40px', borderRadius: '50%', 
+                                                background: hour.is_open ? '#f03e3e' : '#ccc', color: '#fff',
+                                                display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold'
+                                            }}>
+                                                {hour.day_name?.charAt(0) || '?'}
+                                            </div>
+                                            <span style={{ fontWeight: 'bold', fontSize: '1.1rem' }}>{hour.day_name}</span>
                                         </div>
-                                        <span style={{ fontWeight: 'bold', fontSize: '1.1rem' }}>{hour.day_name}</span>
-                                    </div>
 
-                                    <div style={{ display: 'flex', alignItems: 'center', gap: '15px', flex: 1, minWidth: '250px' }}>
-                                        <input 
-                                            type="time" 
-                                            value={hour.opening_time} 
-                                            disabled={!hour.is_open}
-                                            onChange={e => handleHourChange(hour.id, 'opening_time', e.target.value)}
-                                            style={{ ...timeInputSmallStyle, opacity: hour.is_open ? 1 : 0.5 }}
-                                        />
-                                        <span style={{ color: '#888' }}>a</span>
-                                        <input 
-                                            type="time" 
-                                            value={hour.closing_time} 
-                                            disabled={!hour.is_open}
-                                            onChange={e => handleHourChange(hour.id, 'closing_time', e.target.value)}
-                                            style={{ ...timeInputSmallStyle, opacity: hour.is_open ? 1 : 0.5 }}
-                                        />
-                                    </div>
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: '15px', flex: 1, minWidth: '250px' }}>
+                                            <input 
+                                                type="time" 
+                                                value={hour.opening_time} 
+                                                disabled={!hour.is_open}
+                                                onChange={e => handleHourChange(hour.id, 'opening_time', e.target.value)}
+                                                style={{ ...timeInputStyle, opacity: hour.is_open ? 1 : 0.5, border: '1px solid #ddd', fontSize: '1rem', padding: '8px' }}
+                                            />
+                                            <span style={{ color: '#888' }}>a</span>
+                                            <input 
+                                                type="time" 
+                                                value={hour.closing_time} 
+                                                disabled={!hour.is_open}
+                                                onChange={e => handleHourChange(hour.id, 'closing_time', e.target.value)}
+                                                style={{ ...timeInputStyle, opacity: hour.is_open ? 1 : 0.5, border: '1px solid #ddd', fontSize: '1rem', padding: '8px' }}
+                                            />
+                                        </div>
 
-                                    <button 
-                                        onClick={() => handleHourChange(hour.id, 'is_open', !hour.is_open)}
-                                        style={{
-                                            padding: '8px 15px',
-                                            borderRadius: '8px',
-                                            border: 'none',
-                                            background: hour.is_open ? '#ebfbee' : '#fff5f5',
-                                            color: hour.is_open ? '#2b8a3e' : '#f03e3e',
-                                            fontWeight: 'bold',
-                                            cursor: 'pointer',
-                                            fontSize: '0.85rem'
-                                        }}
-                                    >
-                                        {hour.is_open ? 'ABIERTO' : 'CERRADO'}
-                                    </button>
-                                </div>
-                            ))}
-                        </div>
+                                        <button 
+                                            onClick={() => handleHourChange(hour.id, 'is_open', !hour.is_open)}
+                                            style={{
+                                                padding: '8px 15px',
+                                                borderRadius: '8px',
+                                                border: 'none',
+                                                background: hour.is_open ? '#ebfbee' : '#fff5f5',
+                                                color: hour.is_open ? '#2b8a3e' : '#f03e3e',
+                                                fontWeight: 'bold',
+                                                cursor: 'pointer',
+                                                fontSize: '0.85rem'
+                                            }}
+                                        >
+                                            {hour.is_open ? 'ABIERTO' : 'CERRADO'}
+                                        </button>
+                                    </div>
+                                ))}
+                            </div>
+                        )}
 
                         <button onClick={saveAllHours} style={saveButtonStyle} disabled={isSaving}>
                             <Save size={20} /> {isSaving ? 'GUARDANDO MESA DE HORARIOS...' : 'GUARDAR TODA LA TABLA'}

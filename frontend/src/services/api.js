@@ -230,6 +230,35 @@ export const createSupplierOrder = async (data) => {
     return await response.json();
 };
 
+export const updateSupplierOrder = async (id, data) => {
+    const response = await fetch(`${API_URL}/supplier-orders/${id}/`, {
+        method: 'PATCH',
+        headers: getHeaders('application/json'),
+        body: JSON.stringify(data)
+    });
+    if (!response.ok) throw new Error('Error al actualizar pedido');
+    return await response.json();
+};
+
+export const deleteSupplierOrder = async (id) => {
+    const response = await fetch(`${API_URL}/supplier-orders/${id}/`, {
+        method: 'DELETE',
+        headers: getHeaders()
+    });
+    if (!response.ok) throw new Error('Error al eliminar pedido');
+    return true;
+};
+
+export const updateExpense = async (id, data) => {
+    const response = await fetch(`${API_URL}/expenses/${id}/`, {
+        method: 'PATCH',
+        headers: getHeaders('application/json'),
+        body: JSON.stringify(data)
+    });
+    if (!response.ok) throw new Error('Error al actualizar gasto');
+    return await response.json();
+};
+
 // SETTINGS
 export const fetchSettings = async () => {
     const response = await fetch(`${API_URL}/settings/`, { headers: getHeaders() });
