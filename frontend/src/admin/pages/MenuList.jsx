@@ -154,7 +154,15 @@ function MenuList() {
                     <option value="Bebidas">Bebidas</option>
                 </select>
                 <div style={{ position: 'relative', width: '130px' }}>
-                    <span style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', fontWeight: 'bold', color: '#333' }}>$</span>
+                    <span style={{ 
+                        position: 'absolute', 
+                        left: '14px', 
+                        top: '50%', 
+                        transform: 'translateY(-50%)', 
+                        fontWeight: 'bold', 
+                        color: '#333',
+                        pointerEvents: 'none' 
+                    }}>$</span>
                     <input
                         type="number"
                         step="100"
@@ -164,7 +172,7 @@ function MenuList() {
                         value={price}
                         onChange={e => setPrice(e.target.value)}
                         required
-                        style={{ ...formFieldStyle, width: '100%', paddingLeft: '25px', fontWeight: 'bold' }}
+                        style={{ ...formFieldStyle, width: '100%', paddingLeft: '35px', fontWeight: 'bold' }}
                     />
                 </div>
                 <button type="submit" className="main-button" style={{ 
@@ -336,6 +344,7 @@ const formFieldStyle = {
     boxSizing: 'border-box',
     fontFamily: 'inherit',
     backgroundColor: '#fff',
+    color: '#333',
     display: 'flex',
     alignItems: 'center'
 };
