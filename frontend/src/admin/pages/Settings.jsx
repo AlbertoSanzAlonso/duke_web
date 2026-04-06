@@ -151,9 +151,11 @@ const Settings = () => {
             <div className="admin-card">
                 {activeTab === 'delivery' && (
                     <div className="tab-content">
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '25px', borderBottom: '1px solid #eee', paddingBottom: '15px' }}>
-                            <Truck size={22} color="#f03e3e" />
-                            <h3 style={{ margin: 0 }}>Parámetros de Envío</h3>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '20px', marginBottom: '25px', borderBottom: '1px solid #eee', paddingBottom: '15px' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
+                                <Truck size={32} color="#f03e3e" />
+                                <h2 style={{ margin: 0, fontSize: '1.5rem' }}>Parámetros de Envío</h2>
+                            </div>
                         </div>
                         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '25px' }}>
                             <div className="setting-field">
@@ -186,10 +188,10 @@ const Settings = () => {
 
                 {activeTab === 'hours' && (
                     <div className="tab-content">
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '25px', borderBottom: '1px solid #eee', paddingBottom: '15px' }}>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                                <Clock size={22} color="#f03e3e" />
-                                <h3 style={{ margin: 0 }}>Gestión de Horarios</h3>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '20px', marginBottom: '25px', borderBottom: '1px solid #eee', paddingBottom: '15px' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
+                                <Clock size={32} color="#f03e3e" />
+                                <h2 style={{ margin: 0, fontSize: '1.5rem' }}>Gestión de Horarios</h2>
                             </div>
                             <button 
                                 onClick={async () => {
@@ -203,7 +205,7 @@ const Settings = () => {
                                 }}
                                 style={{ ...addImgBtnStyle, background: '#f8f9fa', border: '1px solid #ddd', color: '#444', boxShadow: 'none' }}
                             >
-                                <AlertTriangle size={16} /> Restaurar Tabla
+                                <AlertTriangle size={20} /> Restaurar Tabla
                             </button>
                         </div>
                         
@@ -283,13 +285,13 @@ const Settings = () => {
 
                 {activeTab === 'gallery' && (
                     <div className="tab-content">
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '15px', marginBottom: '25px', borderBottom: '1px solid #eee', paddingBottom: '15px' }}>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                                <ImageIcon size={22} color="#f03e3e" />
-                                <h3 style={{ margin: 0 }}>Galería del Local</h3>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '20px', marginBottom: '25px', borderBottom: '1px solid #eee', paddingBottom: '15px' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
+                                <ImageIcon size={32} color="#f03e3e" />
+                                <h2 style={{ margin: 0, fontSize: '1.5rem' }}>Galería del Local</h2>
                             </div>
                             <button className="add-btn" onClick={() => setIsAddingImg(true)} style={addImgBtnStyle}>
-                                <Plus size={18} /> Añadir Foto
+                                <Plus size={20} /> Añadir Foto
                             </button>
                         </div>
 
@@ -438,14 +440,14 @@ const addImgBtnStyle = {
     background: '#f03e3e',
     color: '#fff',
     border: 'none',
-    padding: '12px 20px',
+    padding: '12px 24px',
     borderRadius: '10px',
     cursor: 'pointer',
     display: 'inline-flex',
     alignItems: 'center',
     justifyContent: 'center',
     gap: '8px',
-    fontSize: '0.9rem',
+    fontSize: '0.95rem',
     fontWeight: '700',
     transition: 'all 0.3s ease',
     boxShadow: '0 4px 15px rgba(240, 62, 62, 0.2)',
