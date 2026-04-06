@@ -159,8 +159,25 @@ if USE_S3:
 
 ALLOWED_HOSTS = ['api.dukeburger-sj.com', 'dukeburger-sj.com', 'localhost', '127.0.0.1', '*']
 
+CSRF_TRUSTED_ORIGINS = [
+    "https://dukeburger-sj.com",
+    "https://api.dukeburger-sj.com",
+]
+
 CORS_ALLOW_ALL_ORIGINS = True
+CORS_ORIGIN_ALLOW_ALL = True # Backward compatibility
 CORS_ALLOW_CREDENTIALS = True
+CORS_PREFLIGHT_MAX_AGE = 86400
+
+CORS_ALLOW_METHODS = [
+    "DELETE",
+    "GET",
+    "OPTIONS",
+    "PATCH",
+    "POST",
+    "PUT",
+]
+
 CORS_ALLOW_HEADERS = [
     "accept",
     "accept-encoding",
