@@ -6,7 +6,6 @@ if (!base_api_url.toLowerCase().endsWith('/api')) {
   base_api_url += '/api';
 }
 const API_URL = base_api_url;
-console.log('Final API URL:', API_URL);
 
 const getHeaders = (contentType = null) => {
     const headers = {};

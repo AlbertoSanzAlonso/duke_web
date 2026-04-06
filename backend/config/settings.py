@@ -157,13 +157,31 @@ if USE_S3:
     
     DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
 
-ALLOWED_HOSTS = ['*']
+ALLOWED_HOSTS = ['api.dukeburger-sj.com', 'dukeburger-sj.com', 'localhost', '127.0.0.1']
 
-CORS_ALLOW_ALL_ORIGINS = True
-CORS_ORIGIN_ALLOW_ALL = True
-CORS_ALLOW_CREDENTIALS = False
-CORS_ALLOW_HEADERS = ["*"]
-CORS_ALLOW_METHODS = ["*"]
+CSRF_TRUSTED_ORIGINS = [
+    "https://dukeburger-sj.com",
+    "https://api.dukeburger-sj.com",
+]
+
+CORS_ALLOWED_ORIGINS = [
+    "https://dukeburger-sj.com",
+    "https://www.dukeburger-sj.com",
+    "http://localhost:5173",
+]
+CORS_ALLOW_ALL_ORIGINS = False
+CORS_ALLOW_CREDENTIALS = True
+CORS_ALLOW_HEADERS = [
+    "accept",
+    "accept-encoding",
+    "authorization",
+    "content-type",
+    "dnt",
+    "origin",
+    "user-agent",
+    "x-csrftoken",
+    "x-requested-with",
+]
 
 # Email Configuration
 EMAIL_BACKEND = env('EMAIL_BACKEND', default='django.core.mail.backends.console.EmailBackend')
