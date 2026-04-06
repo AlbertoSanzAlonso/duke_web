@@ -383,33 +383,16 @@ const Sales = () => {
             ) : (
                 <div className="pending-list-container">
                     {selectedTickets.length > 0 && (
-                        <div style={{ 
-                            position: 'sticky', top: 0, zIndex: 100, 
-                            background: '#333', color: 'white', 
-                            padding: '15px 20px', borderRadius: '12px', 
-                            marginBottom: '20px', display: 'flex', 
-                            justifyContent: 'space-between', alignItems: 'center',
-                            boxShadow: '0 4px 20px rgba(0,0,0,0.3)',
-                            animation: 'slideIn 0.3s ease'
-                        }}>
+                        <div className="bulk-actions-bar">
                             <div style={{ fontWeight: 'bold' }}>{selectedTickets.length} Seleccionados</div>
-                            <div style={{ display: 'flex', gap: '10px' }}>
-                                <button 
-                                    onClick={() => handleBulkAction('DELETE')}
-                                    style={{ background: '#f03e3e', color: 'white', border: 'none', padding: '10px 15px', borderRadius: '8px', fontWeight: 'bold', cursor: 'pointer' }}
-                                >
+                            <div className="bulk-buttons-group">
+                                <button className="bulk-btn-del" onClick={() => handleBulkAction('DELETE')}>
                                     ELIMINAR
                                 </button>
-                                <button 
-                                    onClick={() => handleBulkAction('COMPLETE')}
-                                    style={{ background: '#40c057', color: 'white', border: 'none', padding: '10px 15px', borderRadius: '8px', fontWeight: 'bold', cursor: 'pointer' }}
-                                >
+                                <button className="bulk-btn-pay" onClick={() => handleBulkAction('COMPLETE')}>
                                     COBRAR TODO
                                 </button>
-                                <button 
-                                    onClick={() => setSelectedTickets([])}
-                                    style={{ background: '#666', color: 'white', border: 'none', padding: '10px 15px', borderRadius: '8px', fontWeight: 'bold', cursor: 'pointer' }}
-                                >
+                                <button className="bulk-btn-cancel" onClick={() => setSelectedTickets([])}>
                                     CANCELAR
                                 </button>
                             </div>

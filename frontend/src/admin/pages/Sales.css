@@ -582,25 +582,87 @@
 }
 
 /* Custom Scrollbar to avoid 'black bars' on some systems */
-.pos-products-grid::-webkit-scrollbar,
-.ticket-items::-webkit-scrollbar {
-    width: 6px;
-}
-
-.pos-products-grid::-webkit-scrollbar-track,
-.ticket-items::-webkit-scrollbar-track {
-    background: #f1f1f1;
-}
-
 .pos-products-grid::-webkit-scrollbar-thumb,
-.ticket-items::-webkit-scrollbar-thumb {
+.ticket-items::-webkit-scrollbar-thumb,
+.pending-list-container::-webkit-scrollbar-thumb {
     background: #ccc;
     border-radius: 10px;
 }
 
 .pos-products-grid::-webkit-scrollbar-thumb:hover,
-.ticket-items::-webkit-scrollbar-thumb:hover {
+.ticket-items::-webkit-scrollbar-thumb:hover,
+.pending-list-container::-webkit-scrollbar-thumb:hover {
     background: #aaa;
+}
+
+/* Bulk Actions Bar Styles */
+.bulk-actions-bar {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background: #333;
+    color: white;
+    padding: 15px 20px;
+    border-radius: 12px;
+    margin-bottom: 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+    animation: slideIn 0.3s ease;
+}
+
+.bulk-buttons-group {
+    display: flex;
+    gap: 10px;
+}
+
+.bulk-btn-del {
+    background: #f03e3e;
+    color: white;
+    border: none;
+    padding: 10px 15px;
+    border-radius: 8px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.bulk-btn-pay {
+    background: #40c057;
+    color: white;
+    border: none;
+    padding: 10px 15px;
+    border-radius: 8px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.bulk-btn-cancel {
+    background: #666;
+    color: white;
+    border: none;
+    padding: 10px 15px;
+    border-radius: 8px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+@media (max-width: 768px) {
+    .bulk-actions-bar {
+        flex-direction: column;
+        gap: 12px;
+        padding: 15px;
+    }
+    .bulk-buttons-group {
+        width: 100%;
+        justify-content: center;
+        flex-wrap: wrap;
+    }
+    .bulk-buttons-group button {
+        flex: 1;
+        min-width: 100px;
+        font-size: 0.8rem;
+    }
 }
 @keyframes slideIn {
     from { transform: translateY(-20px); opacity: 0; }
