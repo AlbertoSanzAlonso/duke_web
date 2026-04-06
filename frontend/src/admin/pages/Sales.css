@@ -484,6 +484,16 @@
         border-radius: 50px;
         bottom: 1.5rem;
         right: 1.5rem;
+        z-index: 1500;
+        background: #28a745;
+        color: white !important;
+        border: none;
+        align-items: center;
+        justify-content: center;
+        gap: 12px;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+        cursor: pointer;
+        transition: all 0.3s ease;
     }
 
     .fab-text,
