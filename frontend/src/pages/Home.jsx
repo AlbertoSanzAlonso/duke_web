@@ -24,6 +24,8 @@ function Home() {
   const [errorMessage, setErrorMessage] = useState(null);
   const [addressSuggestions, setAddressSuggestions] = useState([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
+  const [deliverySettings, setDeliverySettings] = useState({});
+  const [isHoursModalOpen, setIsHoursModalOpen] = useState(false);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -53,9 +55,10 @@ function Home() {
 
     const timer = setTimeout(async () => {
       try {
-        // Search localized in San Juan, Argentina
+        // Search localized in San Juan, Argentina with proper User-Agent as required by Nominatim
         const response = await fetch(
-          `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(deliveryAddress)},+San+Juan,+Argentina&format=json&limit=5&addressdetails=1`
+          `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(deliveryAddress)},+San+Juan,+Argentina&format=json&limit=5&addressdetails=1`,
+          { headers: { 'User-Agent': 'DukeBurgerApp/1.0' } }
         );
         const data = await response.json();
         setAddressSuggestions(data);
@@ -81,6 +84,10 @@ function Home() {
           max: parseFloat(max || 15)
         });
       }
+      
+      // Store all settings in deliverySettings for easy access
+      const settingsMap = settings.reduce((acc, s) => ({ ...acc, [s.key]: s.value }), {});
+      setDeliverySettings(settingsMap);
     } catch (err) {
       console.error("Error loading delivery settings:", err);
     }
@@ -389,10 +396,15 @@ function Home() {
             <p className="hero-subtitle">Sabor brutal. Espíritu Duke.</p>
             <div className="hero-actions">
               <button className="main-button" onClick={() => document.getElementById('menu')?.scrollIntoView({ behavior: 'smooth' })}>VER MENÚ</button>
-              <button className="outline-button">LOCAL</button>
-              <button className="delivery-button">
-                A DOMICILIO
-              </button>
+              <button className="outline-button" onClick={() => setIsHoursModalOpen(true)}>HORARIOS</button>
+              {/* This button will only show on mobile via CSS */}
+              <Link
+                to="/nosotros"
+                className="nosotros-btn-hero"
+                style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+              >
+                NOSOTROS
+              </Link>
             </div>
           </div>
           <div className="hero-image-container">
@@ -524,7 +536,7 @@ function Home() {
 
                 {deliveryMode === 'delivery' && (
                   <div style={{ marginTop: '15px' }}>
-                    <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
+                    <div style={{ display: 'flex', gap: '10px', alignItems: 'center', position: 'relative' }}>
                       <input 
                         type="text" 
                         placeholder="Ej: Entre Rios 540"
@@ -758,6 +770,47 @@ function Home() {
                   <p className="empty-msg">No hay promociones activas en este momento. ¡Vuelve pronto!</p>
                 )}
               </div>
+            </div>
+          </div>
+        </div>
+      )}
+      {/* Modal Horarios */}
+      {isHoursModalOpen && (
+        <div className="modal-overlay" style={{ zIndex: 4000 }}>
+          <div className="cart-modal" style={{ maxWidth: '400px' }}>
+            <div className="modal-header">
+              <h2 style={{ fontSize: '1.8rem' }}>HORARIOS</h2>
+              <button className="close-btn" onClick={() => setIsHoursModalOpen(false)} style={{ background: 'none', border: 'none', color: 'white', fontSize: '2rem', cursor: 'pointer' }}>×</button>
+            </div>
+            <div className="modal-body" style={{ textAlign: 'center', padding: '40px 20px' }}>
+              <div style={{ marginBottom: '30px' }}>
+                <MessageCircle size={48} color="var(--color-primary)" style={{ marginBottom: '15px' }} />
+                <h3 style={{ fontSize: '1.5rem', marginBottom: '10px' }}>Estamos para servirte</h3>
+                <p style={{ color: '#888', fontSize: '1.1rem' }}>Nuestro local y delivery operan en:</p>
+              </div>
+              
+              <div style={{ background: '#1a1a1a', padding: '20px', borderRadius: '12px', border: '1px solid #333' }}>
+                <div style={{ fontSize: '1.2rem', fontWeight: 'bold', color: 'white', marginBottom: '10px' }}>
+                  {deliverySettings.opening_time || '20:00'} hs — {deliverySettings.closing_time || '00:00'} hs
+                </div>
+                <div style={{ color: 'var(--color-primary)', fontWeight: 'bold', letterSpacing: '1px' }}>
+                  {(!deliverySettings.opening_days || deliverySettings.opening_days === '1,2,3,4,5,6,7') 
+                    ? 'TODOS LOS DÍAS' 
+                    : ` ${deliverySettings.opening_days.split(',').map(d => {
+                        const days = ["", "Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado", "Domingo"];
+                        return days[parseInt(d)];
+                      }).join(', ')}`
+                  }
+                </div>
+              </div>
+              
+              <button 
+                className="confirm-order-btn" 
+                style={{ marginTop: '30px' }}
+                onClick={() => setIsHoursModalOpen(false)}
+              >
+                ENTENDIDO
+              </button>
             </div>
           </div>
         </div>

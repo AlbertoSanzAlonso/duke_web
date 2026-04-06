@@ -146,14 +146,23 @@
   color: white;
   padding: 1.2rem 3rem;
   font-size: 1.2rem;
+  cursor: pointer;
+  background: transparent;
+  transition: var(--transition-smooth);
 }
 
-.main-button:hover {
-  background: var(--color-primary);
+.nosotros-btn-hero {
+  display: none;
+  border: 1px solid white;
   color: white;
+  padding: 1.2rem 3rem;
+  font-size: 1.2rem;
+  background: transparent;
+  cursor: pointer;
+  transition: var(--transition-smooth);
 }
 
-.outline-button:hover {
+.main-button:hover, .outline-button:hover, .nosotros-btn-hero:hover {
   background: white;
   color: black;
 }
@@ -481,6 +490,23 @@
 
   .hero-actions {
     justify-content: center;
+    flex-direction: column;
+    gap: 0.8rem;
+    width: 100%;
+    max-width: 320px;
+    margin: 0 auto;
+  }
+
+  .hero-actions .main-button, 
+  .hero-actions .outline-button,
+  .hero-actions .nosotros-btn-hero {
+    width: 100%;
+    padding: 1rem;
+    font-size: 1.1rem;
+  }
+
+  .nosotros-btn-hero {
+    display: block !important;
   }
 
   .hero-image-container {

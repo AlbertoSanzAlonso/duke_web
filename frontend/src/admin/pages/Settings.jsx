@@ -111,20 +111,22 @@ const Settings = () => {
     };
 
     const toggleDay = (dayId) => {
-        setSettings(currentSettings => {
-            return currentSettings.map(s => {
+        const dId = dayId.toString();
+        setSettings(prev => {
+            const newSettings = prev.map(s => {
                 if (s.key === 'opening_days') {
-                    const currentDays = s.value ? s.value.split(',').filter(d => d !== '') : [];
+                    const currentDays = s.value ? s.value.split(',').filter(d => d.trim() !== '') : [];
                     let newDays;
-                    if (currentDays.includes(dayId.toString())) {
-                        newDays = currentDays.filter(d => d !== dayId.toString());
+                    if (currentDays.includes(dId)) {
+                        newDays = currentDays.filter(d => d !== dId);
                     } else {
-                        newDays = [...currentDays, dayId.toString()];
+                        newDays = [...currentDays, dId];
                     }
-                    return { ...s, value: newDays.sort().join(',') };
+                    return { ...s, value: newDays.sort((a, b) => parseInt(a) - parseInt(b)).join(',') };
                 }
                 return s;
             });
+            return newSettings;
         });
     };
 
@@ -143,28 +145,30 @@ const Settings = () => {
                 <h2 style={{ margin: 0, fontSize: '2rem' }}>Configuración</h2>
             </div>
 
-            <div className="settings-tabs" style={{ display: 'flex', gap: '10px', marginBottom: '20px' }}>
-                <button 
-                    onClick={() => setActiveTab('delivery')}
-                    className={`tab-btn ${activeTab === 'delivery' ? 'active' : ''}`}
-                    style={tabBtnStyle(activeTab === 'delivery')}
-                >
-                    <Truck size={18} /> Tarifas de Envío
-                </button>
-                <button 
-                    onClick={() => setActiveTab('hours')}
-                    className={`tab-btn ${activeTab === 'hours' ? 'active' : ''}`}
-                    style={tabBtnStyle(activeTab === 'hours')}
-                >
-                    <Clock size={18} /> Horarios
-                </button>
-                <button 
-                    onClick={() => setActiveTab('gallery')}
-                    className={`tab-btn ${activeTab === 'gallery' ? 'active' : ''}`}
-                    style={tabBtnStyle(activeTab === 'gallery')}
-                >
-                    <ImageIcon size={18} /> Galería Locales
-                </button>
+            <div className="settings-tabs-container" style={{ overflowX: 'auto', paddingBottom: '10px', marginBottom: '20px' }}>
+                <div className="settings-tabs" style={{ display: 'flex', gap: '10px', minWidth: 'max-content' }}>
+                    <button 
+                        onClick={() => setActiveTab('delivery')}
+                        className={`tab-btn ${activeTab === 'delivery' ? 'active' : ''}`}
+                        style={tabBtnStyle(activeTab === 'delivery')}
+                    >
+                        <Truck size={18} /> Tarifas de Envío
+                    </button>
+                    <button 
+                        onClick={() => setActiveTab('hours')}
+                        className={`tab-btn ${activeTab === 'hours' ? 'active' : ''}`}
+                        style={tabBtnStyle(activeTab === 'hours')}
+                    >
+                        <Clock size={18} /> Horarios
+                    </button>
+                    <button 
+                        onClick={() => setActiveTab('gallery')}
+                        className={`tab-btn ${activeTab === 'gallery' ? 'active' : ''}`}
+                        style={tabBtnStyle(activeTab === 'gallery')}
+                    >
+                        <ImageIcon size={18} /> Galería Locales
+                    </button>
+                </div>
             </div>
 
             <div className="admin-card">
@@ -206,11 +210,16 @@ const Settings = () => {
                         
                         <div style={{ marginBottom: '30px' }}>
                             <label style={labelStyle}>Días de Atención</label>
-                            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px', marginTop: '10px' }}>
+                            <div style={{ 
+                                display: 'grid', 
+                                gridTemplateColumns: 'repeat(auto-fill, minmax(140px, 1fr))', 
+                                gap: '10px', 
+                                marginTop: '10px' 
+                            }}>
                                 {DAYS.map(day => {
                                     const openingDaysVal = settings.find(s => s.key === 'opening_days')?.value || '';
-                                    const daysArray = openingDaysVal.split(',').filter(d => d !== '');
-                                    const isActive = daysArray.includes(day.id.toString());
+                                    const daysArray = openingDaysVal.split(',').filter(d => d.trim() !== '');
+                                    const isActive = daysArray.includes(day.id);
                                     
                                     return (
                                         <button 
@@ -220,9 +229,8 @@ const Settings = () => {
                                                 e.preventDefault();
                                                 toggleDay(day.id);
                                             }}
-                                            className={`day-selector-btn ${isActive ? 'active' : ''}`}
                                             style={{
-                                                padding: '10px 18px',
+                                                padding: '12px',
                                                 borderRadius: '10px',
                                                 border: isActive ? '2px solid #f03e3e' : '2px solid #eee',
                                                 background: isActive ? '#f03e3e' : '#fff',
@@ -231,6 +239,7 @@ const Settings = () => {
                                                 cursor: 'pointer',
                                                 display: 'flex',
                                                 alignItems: 'center',
+                                                justifyContent: 'center',
                                                 gap: '8px',
                                                 transition: 'all 0.2s ease',
                                                 fontSize: '0.9rem'
@@ -243,7 +252,12 @@ const Settings = () => {
                             </div>
                         </div>
 
-                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px', marginBottom: '30px' }}>
+                        <div style={{ 
+                            display: 'grid', 
+                            gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', 
+                            gap: '20px', 
+                            marginBottom: '30px' 
+                        }}>
                             <div className="setting-field">
                                 <label style={labelStyle}>Hora de Apertura</label>
                                 <input 
@@ -258,7 +272,7 @@ const Settings = () => {
                                 <input 
                                     type="time"
                                     value={settings.find(s => s.key === 'closing_time')?.value || '00:00'}
-                                    onChange={e => handleSettingChange('closing_time', e.target.value)}
+                                    onChange={handleSettingChange ? (e) => handleSettingChange('closing_time', e.target.value) : undefined}
                                     style={timeInputStyle}
                                 />
                             </div>
