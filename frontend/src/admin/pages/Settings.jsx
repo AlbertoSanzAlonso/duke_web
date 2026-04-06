@@ -111,14 +111,21 @@ const Settings = () => {
     };
 
     const toggleDay = (dayId) => {
-        const openingDays = settings.find(s => s.key === 'opening_days')?.value || '';
-        let daysArray = openingDays ? openingDays.split(',') : [];
-        if (daysArray.includes(dayId)) {
-            daysArray = daysArray.filter(d => d !== dayId);
-        } else {
-            daysArray.push(dayId);
-        }
-        handleSettingChange('opening_days', daysArray.sort().join(','));
+        setSettings(prev => {
+            return prev.map(s => {
+                if (s.key === 'opening_days') {
+                    const currentDays = s.value ? s.value.split(',') : [];
+                    let newDays;
+                    if (currentDays.includes(dayId)) {
+                        newDays = currentDays.filter(d => d !== dayId);
+                    } else {
+                        newDays = [...currentDays, dayId];
+                    }
+                    return { ...s, value: newDays.sort().join(',') };
+                }
+                return s;
+            });
+        });
     };
 
     if (loading) return <LoadingScreen />;
@@ -406,7 +413,21 @@ const saveButtonStyle = {
     boxShadow: '0 6px 15px rgba(240, 62, 62, 0.3)'
 };
 
-const addImgBtnStyle = { background: '#333', color: '#fff', border: 'none', padding: '8px 15px', borderRadius: '8px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.85rem' };
+const addImgBtnStyle = { 
+    background: '#333', 
+    color: '#fff', 
+    border: 'none', 
+    padding: '12px 20px', 
+    borderRadius: '10px', 
+    cursor: 'pointer', 
+    display: 'flex', 
+    alignItems: 'center', 
+    justifyContent: 'center', 
+    gap: '10px', 
+    fontSize: '0.9rem',
+    fontWeight: 'bold',
+    transition: 'all 0.2s ease'
+};
 
 const galleryGridStyle = { display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '20px' };
 
