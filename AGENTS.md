@@ -19,11 +19,20 @@ Este proyecto se divide en dos entornos de despliegue claramente separados para 
 - **Infraestructura:** Despliegue en Coolify con base de datos PostgreSQL en Supabase.
 - **Media:** Almacenamiento en Supabase S3 (preferido) o volumen persistente local. Las imágenes se procesan automáticamente a WebP.
 
-## 3. Streaming de Pedidos (Crítico)
-- **Arquitectura:** El endpoint `/api/orders-stream/` DEBE ser asíncrono (`async def`) y utilizar el iterador `.aiter()` de Django para evitar el bloqueo de workers del servidor.
-- **Concurrencia:** Es vital mantener el servidor con al menos 10 threads para que las pantallas de administración no "secuestren" la disponibilidad de la API del resto de usuarios.
+## 3. Streaming, Concurrencia y Caché (Crítico)
+- **Async Views**: Todos los views de streaming (SSE) como `OrderStreamView` **DEBEN** ser `async def`.
+- **Iteradores Asíncronos**: Usar `async for obj in queryset` directamente (Django 4.2+) o `.aiter()` en versiones anteriores para evitar bloqueos.
+- **Redis Caching**: Decorar vistas de lectura intensas (ej. Carta, Galería) con `@method_decorator(cache_page(...))`.
+- **Resiliencia**: La configuración de caché **SIEMPRE** debe llevar `IGNORE_EXCEPTIONS: True` para que el sistema no falle si Redis cae (Error 111).
+- **Workers**: Desplegar con `gthread` workers en Gunicorn (`--threads 12`) para permitir conexiones concurrentes de streaming.
+- **Buffering**: Establecer el header `X-Accel-Buffering: no` en respuestas de streaming.
+- **Frontend Lazy Loading**: Toda la navegación del frontend DEBE implementarse con `React.lazy` y `Suspense` utilizando el componente `<LoadingScreen />` de la marca como fallback.
 
-## 4. Guía de Estilo y UX (Crítico)
+## 4. Acciones Masivas y TPV
+- **Bulk Actions**: Las operaciones repetitivas (cobrar tickets, eliminar múltiples registros) deben implementarse mediante endpoints de tipo `@action(detail=False, methods=['post'], url_path='bulk-actions')` para optimizar el tráfico de red.
+- **Selección Múltiple**: Los listados administrativos deben permitir selección múltiple con barras de herramientas contextuales y animaciones de entrada (`slideIn`).
+
+## 5. Guía de Estilo y UX (Crítico)
 ... (rest of the content remains)
 - **Git Mandatory:** Para cualquier cambio en producción (Coolify), DEBES realizar un `push` a la rama `main` de GitHub. Coolify ignora los archivos locales que no se han empujado al repositorio.
 - **S3 Management:** Si se activa `USE_S3=True`, deben configurarse las variables `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY` y `AWS_S3_ENDPOINT_URL` en el panel de Coolify para evitar caídas del servidor.

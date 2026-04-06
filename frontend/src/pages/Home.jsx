@@ -534,15 +534,39 @@ function Home() {
                 <div style={{ display: 'flex', gap: '5px', marginBottom: '15px' }}>
                   <button 
                     onClick={() => setDeliveryMode('takeaway')} 
-                    style={{ flex: 1, padding: '10px', background: deliveryMode === 'takeaway' ? 'var(--color-primary)' : '#222', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer', fontWeight: 'bold' }}
+                    style={{ 
+                      flex: 1, 
+                      padding: '12px', 
+                      background: deliveryMode === 'takeaway' ? 'var(--color-primary)' : '#222', 
+                      color: 'white', 
+                      border: 'none', 
+                      borderRadius: '6px', 
+                      cursor: 'pointer', 
+                      fontWeight: 'bold',
+                      fontSize: '1rem',
+                      fontFamily: 'var(--font-heading)',
+                      letterSpacing: '1px'
+                    }}
                   >
-                    Retiro
+                    RETIRO
                   </button>
                   <button 
                     onClick={() => setDeliveryMode('delivery')} 
-                    style={{ flex: 1, padding: '10px', background: deliveryMode === 'delivery' ? 'var(--color-primary)' : '#222', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer', fontWeight: 'bold' }}
+                    style={{ 
+                      flex: 1, 
+                      padding: '12px', 
+                      background: deliveryMode === 'delivery' ? 'var(--color-primary)' : '#222', 
+                      color: 'white', 
+                      border: 'none', 
+                      borderRadius: '6px', 
+                      cursor: 'pointer', 
+                      fontWeight: 'bold',
+                      fontSize: '1rem',
+                      fontFamily: 'var(--font-heading)',
+                      letterSpacing: '1px'
+                    }}
                   >
-                    Envío
+                    ENVÍO
                   </button>
                 </div>
 

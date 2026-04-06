@@ -165,24 +165,54 @@ class ProductViewSet(viewsets.ModelViewSet):
     serializer_class = ProductSerializer
     permission_classes = [permissions.IsAuthenticatedOrReadOnly]
 
-    def update(self, request, *args, **kwargs):
-        partial = kwargs.pop('partial', False)
-        instance = self.get_object()
-        serializer = self.get_serializer(instance, data=request.data, partial=partial)
-        if not serializer.is_valid():
-            return Response({'detail': serializer.errors}, status=400)
-        self.perform_update(serializer)
-        return Response(serializer.data)
+    def perform_create(self, serializer):
+        from django.core.cache import cache
+        cache.delete("menu_list_public")
+        serializer.save()
+
+    def perform_update(self, serializer):
+        from django.core.cache import cache
+        cache.delete("menu_list_public")
+        serializer.save()
+
+    def perform_destroy(self, instance):
+        from django.core.cache import cache
+        cache.delete("menu_list_public")
+        instance.delete()
 
 class MenuEntryViewSet(viewsets.ModelViewSet):
-    queryset = MenuEntry.objects.all()
+    queryset = MenuEntry.objects.all().order_by('product__name')
     serializer_class = MenuEntrySerializer
     permission_classes = [permissions.IsAuthenticatedOrReadOnly]
 
-    # Cache standard menu for 10 minutes to speed up home render
-    @method_decorator(cache_page(60 * 10))
     def list(self, request, *args, **kwargs):
-        return super().list(request, *args, **kwargs)
+        from django.core.cache import cache
+        if request.user.is_authenticated:
+            return super().list(request, *args, **kwargs)
+        
+        cache_key = "menu_list_public"
+        cached_data = cache.get(cache_key)
+        if cached_data:
+            return Response(cached_data)
+        
+        response = super().list(request, *args, **kwargs)
+        cache.set(cache_key, response.data, 60 * 10) # 10 min
+        return response
+
+    def perform_create(self, serializer):
+        from django.core.cache import cache
+        cache.delete("menu_list_public")
+        serializer.save()
+
+    def perform_update(self, serializer):
+        from django.core.cache import cache
+        cache.delete("menu_list_public")
+        serializer.save()
+
+    def perform_destroy(self, instance):
+        from django.core.cache import cache
+        cache.delete("menu_list_public")
+        instance.delete()
 
 class SaleViewSet(viewsets.ModelViewSet):
     queryset = Sale.objects.all().order_by('-date')
@@ -281,19 +311,41 @@ class GalleryImageViewSet(viewsets.ModelViewSet):
     serializer_class = GalleryImageSerializer
     permission_classes = [permissions.IsAuthenticatedOrReadOnly]
 
-    # Cache public gallery for 15 minutes
-    @method_decorator(cache_page(60 * 15))
+    # Solo cacheamos la lista para el público. Los administradores ven tiempo real.
     def list(self, request, *args, **kwargs):
-        return super().list(request, *args, **kwargs)
+        from django.core.cache import cache
+        if request.user.is_authenticated:
+            return super().list(request, *args, **kwargs)
+        
+        cache_key = "gallery_list_public"
+        cached_data = cache.get(cache_key)
+        if cached_data:
+            return Response(cached_data)
+        
+        response = super().list(request, *args, **kwargs)
+        cache.set(cache_key, response.data, 60 * 15) # 15 min
+        return response
 
     def get_queryset(self):
-        # Si el usuario está autenticado (Administrador), queremos que vea TODO
-        # para que pueda activar/desactivar o borrar.
         if self.request.user.is_authenticated:
             return GalleryImage.objects.all().order_by('order', '-id')
-        
-        # Para el público, solo las activas
         return GalleryImage.objects.filter(is_active=True).order_by('order', '-id')
+
+    # Al realizar cambios, invalidamos el caché público
+    def perform_create(self, serializer):
+        from django.core.cache import cache
+        cache.delete("gallery_list_public")
+        serializer.save()
+
+    def perform_update(self, serializer):
+        from django.core.cache import cache
+        cache.delete("gallery_list_public")
+        serializer.save()
+
+    def perform_destroy(self, instance):
+        from django.core.cache import cache
+        cache.delete("gallery_list_public")
+        instance.delete()
 
 @csrf_exempt
 async def OrderStreamView(request):
