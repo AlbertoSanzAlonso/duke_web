@@ -67,9 +67,9 @@ REST_FRAMEWORK = {
 }
 
 MIDDLEWARE = [
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
-    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
@@ -157,13 +157,10 @@ if USE_S3:
     
     DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
 
+ALLOWED_HOSTS = ['api.dukeburger-sj.com', 'dukeburger-sj.com', 'localhost', '127.0.0.1', '*']
+
 CORS_ALLOW_ALL_ORIGINS = True
 CORS_ALLOW_CREDENTIALS = True
-CORS_ALLOWED_ORIGINS = [
-    "https://dukeburger-sj.com",
-    "https://www.dukeburger-sj.com",
-    "http://localhost:5173",
-]
 CORS_ALLOW_HEADERS = [
     "accept",
     "accept-encoding",
