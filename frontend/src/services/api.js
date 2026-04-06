@@ -1,11 +1,12 @@
 let base_api_url = import.meta.env.VITE_API_URL || 'http://localhost:8000/api';
-if (base_api_url.endsWith('/')) {
-  base_api_url = base_api_url.slice(0, -1);
-}
-if (!base_api_url.endsWith('/api')) {
+// Remove trailing slash
+base_api_url = base_api_url.replace(/\/$/, "");
+// Add /api if not present
+if (!base_api_url.toLowerCase().endsWith('/api')) {
   base_api_url += '/api';
 }
 const API_URL = base_api_url;
+console.log('Final API URL:', API_URL);
 
 const getHeaders = (contentType = null) => {
     const headers = {};
