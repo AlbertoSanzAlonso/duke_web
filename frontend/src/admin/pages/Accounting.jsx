@@ -263,10 +263,10 @@ const Accounting = () => {
                             </div>
                             <button 
                                 onClick={() => setShowAdvancedFilters(!showAdvancedFilters)}
-                                style={{ padding: '10px', borderRadius: '10px', border: '1px solid #ddd', background: showAdvancedFilters ? '#333' : '#fff', color: showAdvancedFilters ? '#fff' : '#333', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '5px' }}
+                                style={{ padding: '10px', borderRadius: '10px', border: '1px solid #ddd', background: showAdvancedFilters ? '#333' : '#fff', color: showAdvancedFilters ? '#ffffff' : '#333', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '5px' }}
                             >
-                                <Filter size={18} />
-                                <span className="hide-mobile">Filtros</span>
+                                <Filter size={18} style={{ color: showAdvancedFilters ? '#ffffff' : '#333' }} />
+                                <span className="hide-mobile" style={{ color: showAdvancedFilters ? '#ffffff' : '#333' }}>Filtros</span>
                             </button>
                         </div>
                         <div className="period-toggle">

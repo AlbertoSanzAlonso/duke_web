@@ -36,12 +36,12 @@ body.admin-mode {
 }
 
 .sidebar-header img {
-  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  transition: all 0.3s ease;
 }
 
 .sidebar-header img:hover {
-  transform: scale(1.08) translateY(-3px);
-  filter: brightness(1.2) drop-shadow(0 0 15px rgba(240, 62, 62, 0.4));
+  transform: translateY(-2px);
+  filter: brightness(1.1);
   cursor: pointer;
 }
 
