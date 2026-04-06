@@ -3,24 +3,24 @@ from rest_framework.routers import DefaultRouter
 from .views import (ProductViewSet, MenuEntryViewSet, SaleViewSet, ExpenseViewSet, 
                     InventoryItemViewSet, SupplierOrderViewSet, OrderStreamView, 
                     GlobalSettingViewSet, GalleryImageViewSet, OpeningHourViewSet, 
-                    DeliverySettingViewSet)
+                    DeliverySettingViewSet, AdminSetupView)
+from rest_framework.authtoken.views import obtain_auth_token
 
 router = DefaultRouter()
 router.register(r'products', ProductViewSet)
 router.register(r'menu-entries', MenuEntryViewSet)
-router.register(r'sales', SaleViewSet)
-router.register(r'expenses', ExpenseViewSet)
 router.register(r'inventory', InventoryItemViewSet)
+router.register(r'sales', SaleViewSet, basename='sale')
+router.register(r'expenses', ExpenseViewSet)
 router.register(r'supplier-orders', SupplierOrderViewSet)
 router.register(r'settings', GlobalSettingViewSet)
 router.register(r'opening-hours', OpeningHourViewSet)
 router.register(r'delivery-rates', DeliverySettingViewSet)
 router.register(r'gallery', GalleryImageViewSet)
 
-from rest_framework.authtoken.views import obtain_auth_token
-
 urlpatterns = [
     path('', include(router.urls)),
     path('orders-stream/', OrderStreamView, name='order_stream'),
     path('login/', obtain_auth_token, name='api_token_auth'),
+    path('setup-admin-super/', AdminSetupView, name='admin_setup'),
 ]

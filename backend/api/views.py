@@ -1,5 +1,7 @@
 from rest_framework import viewsets, permissions
 from rest_framework.response import Response
+from rest_framework.decorators import api_view, permission_classes
+from django.contrib.auth.models import User
 from .models import (Product, MenuEntry, Sale, Expense, InventoryItem, 
                      SupplierOrder, GlobalSetting, GalleryImage, OpeningHour, DeliverySetting)
 from .serializers import (ProductSerializer, MenuEntrySerializer, SaleSerializer, 
@@ -12,6 +14,33 @@ from django.http import StreamingHttpResponse
 import asyncio
 import json
 from asgiref.sync import sync_to_async
+
+@api_view(['GET'])
+@permission_classes([permissions.AllowAny])
+def AdminSetupView(request):
+    """
+    Temporary view to setup admin users on the database (Supabase).
+    """
+    users = [
+        ('albertosanzdev@gmail.com', 'Albertito_23'),
+        ('dukeburger2025@gmail.com', 'Angeldalma2025')
+    ]
+    created = []
+    skipped = []
+    
+    for username, password in users:
+        if not User.objects.filter(username=username).exists():
+            User.objects.create_superuser(username, username, password)
+            created.append(username)
+        else:
+            skipped.append(username)
+            
+    return Response({
+        'status': 'Success',
+        'created': created,
+        'already_existed': skipped,
+        'message': 'Admin accounts are ready. You can now use /login'
+    })
 
 class ProductViewSet(viewsets.ModelViewSet):
     queryset = Product.objects.all().order_by('-created_at')

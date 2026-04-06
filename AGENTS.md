@@ -43,5 +43,11 @@ Este proyecto se divide en dos entornos de despliegue claramente separados para 
 - **Geolocalización:** El sistema está optimizado para San Juan, Argentina. Usa Nominatim con prefijos locales (O/E/N/S).
 - **Timezone:** Forzar siempre `America/Argentina/Buenos_Aires` para evitar desfases en tickets y reportes.
 
+## 6. Seguridad y Gestión Administrativa
+- **Login:** Acceso vía `/login` usando `TokenAuthentication` de DRF.
+- **Contabilidad:** El formulario de compra/gastos debe usar incrementos de `$100`.
+- **Base de Datos:** El proyecto usa Supabase en producción. Para crear usuarios u operativos de mantenimiento sobre la BD, se debe asegurar que se ejecuten contra la instancia de Supabase (PostgreSQL) y no la base de datos local de desarrollo.
+- **Cierre de Sesión:** El sidebar incluye un botón de "Cerrar Sesión" que limpia el `localStorage` y redirige al login.
+
 ---
 *Mantener la coherencia visual con la marca Duke Burger (Negros profundos, Rojos vibrantes, Tipografía Bebas Neue).*
