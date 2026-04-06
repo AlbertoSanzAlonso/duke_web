@@ -283,7 +283,7 @@ const Settings = () => {
 
                 {activeTab === 'gallery' && (
                     <div className="tab-content">
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '25px', borderBottom: '1px solid #eee', paddingBottom: '15px' }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '15px', marginBottom: '25px', borderBottom: '1px solid #eee', paddingBottom: '15px' }}>
                             <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                                 <ImageIcon size={22} color="#f03e3e" />
                                 <h3 style={{ margin: 0 }}>Galería del Local</h3>
