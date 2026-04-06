@@ -134,8 +134,8 @@ const Settings = () => {
                 <h2 style={{ margin: 0, fontSize: '2rem' }}>Configuración Duke</h2>
             </div>
 
-            <div className="settings-tabs-container" style={{ overflowX: 'auto', paddingBottom: '10px', marginBottom: '20px' }}>
-                <div className="settings-tabs" style={{ display: 'flex', gap: '10px', minWidth: 'max-content' }}>
+            <div className="settings-tabs-container" style={{ overflowX: 'auto', paddingBottom: '10px', marginBottom: '20px', width: '100%' }}>
+                <div className="settings-tabs" style={{ display: 'flex', gap: '12px', width: 'max-content', padding: '4px' }}>
                     <button onClick={() => setActiveTab('delivery')} className={`tab-btn ${activeTab === 'delivery' ? 'active' : ''}`} style={tabBtnStyle(activeTab === 'delivery')}>
                         <Truck size={18} /> Tarifas Envío
                     </button>
