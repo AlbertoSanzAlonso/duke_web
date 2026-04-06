@@ -350,15 +350,22 @@ const Settings = () => {
 
 // Internal styles
 const tabBtnStyle = (active) => ({
-    color: active ? '#fff' : '#666',
-    fontWeight: active ? '700' : '500',
+    padding: '12px 20px',
+    borderRadius: '10px',
+    border: 'none',
+    backgroundColor: active ? '#f03e3e' : '#f1f3f5',
+    color: active ? '#fff' : '#495057',
+    fontWeight: '700',
     cursor: 'pointer',
     display: 'flex',
     alignItems: 'center',
     gap: '8px',
-    boxShadow: active ? '0 4px 12px rgba(240, 62, 62, 0.3)' : '0 2px 5px rgba(0,0,0,0.05)',
+    boxShadow: active ? '0 4px 10px rgba(0, 0, 0, 0.15)' : 'none',
     transition: 'all 0.2s ease',
-    fontFamily: 'inherit'
+    fontFamily: 'inherit',
+    textTransform: 'uppercase',
+    letterSpacing: '0.5px',
+    fontSize: '0.85rem'
 });
 
 const labelStyle = { fontWeight: 'bold', fontSize: '0.85rem', color: '#666', textTransform: 'uppercase', marginBottom: '8px', display: 'block' };
