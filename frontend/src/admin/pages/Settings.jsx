@@ -478,8 +478,10 @@ const priceSymbolStyle = { position: 'absolute', left: '15px', top: '50%', trans
 const kmTextStyle = { position: 'absolute', right: '15px', top: '50%', transform: 'translateY(-50%)', color: '#888', fontSize: '1rem', fontWeight: 'bold' };
 
 const saveButtonStyle = {
-    width: '100%',
-    padding: '18px',
+    width: 'max-content',
+    minWidth: '200px',
+    margin: '30px auto 0 auto',
+    padding: '12px 40px',
     background: '#f03e3e',
     color: 'white',
     border: 'none',

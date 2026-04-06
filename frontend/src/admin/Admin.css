@@ -267,3 +267,27 @@ body, .admin-container, .admin-main, .admin-content {
 .logout-nav-btn span, .logout-nav-btn svg {
     color: inherit !important;
 }
+
+/* Custom Scrollbar for Admin Textareas */
+.admin-content textarea::-webkit-scrollbar {
+  width: 8px;
+}
+.admin-content textarea::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 10px;
+}
+.admin-content textarea::-webkit-scrollbar-thumb {
+  background: #ccc;
+  border-radius: 10px;
+}
+.admin-content textarea::-webkit-scrollbar-thumb:hover {
+  background: #bbb;
+}
+
+/* Placeholder refinement */
+.admin-content textarea::placeholder, 
+.admin-content input::placeholder {
+  font-size: 0.9rem !important;
+  font-weight: normal !important;
+  opacity: 0.6;
+}
