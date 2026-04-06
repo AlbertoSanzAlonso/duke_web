@@ -22,6 +22,8 @@ function Home() {
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [isPromosOpen, setIsPromosOpen] = useState(false);
   const [errorMessage, setErrorMessage] = useState(null);
+  const [addressSuggestions, setAddressSuggestions] = useState([]);
+  const [showSuggestions, setShowSuggestions] = useState(false);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -32,9 +34,38 @@ function Home() {
     handleScroll();
     loadMenu();
     loadDeliverySettings();
+
+    const handleClickOutside = () => setShowSuggestions(false);
+    document.addEventListener('mousedown', handleClickOutside);
     
-    return () => window.removeEventListener('scroll', handleScroll);
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
   }, []);
+
+  // Autocomplete debounced search
+  useEffect(() => {
+    if (!deliveryAddress || deliveryAddress.length < 4 || !showSuggestions) {
+      setAddressSuggestions([]);
+      return;
+    }
+
+    const timer = setTimeout(async () => {
+      try {
+        // Search localized in San Juan, Argentina
+        const response = await fetch(
+          `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(deliveryAddress)},+San+Juan,+Argentina&format=json&limit=5&addressdetails=1`
+        );
+        const data = await response.json();
+        setAddressSuggestions(data);
+      } catch (err) {
+        console.error("Autocomplete error:", err);
+      }
+    }, 500);
+
+    return () => clearTimeout(timer);
+  }, [deliveryAddress, showSuggestions]);
 
   const loadDeliverySettings = async () => {
     try {
@@ -53,6 +84,31 @@ function Home() {
     } catch (err) {
       console.error("Error loading delivery settings:", err);
     }
+  };
+
+  const isStoreOpen = () => {
+    if (!deliverySettings.opening_days) return true; 
+
+    const now = new Date().toLocaleString("en-US", {timeZone: "America/Argentina/Buenos_Aires"});
+    const fechaArg = new Date(now);
+    
+    let dayArg = fechaArg.getDay(); 
+    if (dayArg === 0) dayArg = 7; 
+    
+    const openingDays = deliverySettings.opening_days.split(',');
+    if (!openingDays.includes(dayArg.toString())) return false;
+    
+    const currentHourMin = fechaArg.getHours() * 60 + fechaArg.getMinutes();
+    const [openH, openM] = (deliverySettings.opening_time || "20:00").split(':').map(Number);
+    const [closeH, closeM] = (deliverySettings.closing_time || "00:00").split(':').map(Number);
+    
+    const openTimeMin = openH * 60 + openM;
+    let closeTimeMin = closeH * 60 + closeM;
+    
+    if (closeTimeMin <= openTimeMin) {
+       return currentHourMin >= openTimeMin || currentHourMin <= closeTimeMin;
+    }
+    return currentHourMin >= openTimeMin && currentHourMin <= closeTimeMin;
   };
 
   const loadMenu = async () => {
@@ -235,6 +291,11 @@ function Home() {
   const sendWhatsAppOrder = async () => {
     if (!customerName.trim()) {
       alert("Por favor, ingresa tu nombre para el pedido.");
+      return;
+    }
+
+    if (!isStoreOpen()) {
+      setErrorMessage(`Actualmente estamos CERRADOS. Nuestro horario es de ${deliverySettings.opening_time} a ${deliverySettings.closing_time}. El pedido se mantendrá en tu carrito si deseas guardarlo.`);
       return;
     }
 
@@ -468,9 +529,33 @@ function Home() {
                         type="text" 
                         placeholder="Ej: Entre Rios 540"
                         value={deliveryAddress}
-                        onChange={e => setDeliveryAddress(e.target.value)}
+                        onChange={e => {
+                          setDeliveryAddress(e.target.value);
+                          setShowSuggestions(true);
+                        }}
+                        onFocus={() => setShowSuggestions(true)}
                         style={{ flex: 1, fontSize: '0.9rem' }}
                       />
+                      {showSuggestions && addressSuggestions.length > 0 && (
+                        <div className="address-suggestions-dropdown">
+                          {addressSuggestions.map((s, idx) => (
+                            <div 
+                              key={idx} 
+                              className="suggestion-item"
+                              onClick={() => {
+                                const cleanName = s.display_name.split(',').slice(0, 3).join(',');
+                                setDeliveryAddress(cleanName);
+                                setAddressSuggestions([]);
+                                setShowSuggestions(false);
+                                calculateDistance(cleanName);
+                              }}
+                            >
+                              <MapPin size={14} style={{ marginRight: '8px', flexShrink: 0 }} />
+                              <span>{s.display_name.split(',').slice(0, 4).join(',')}</span>
+                            </div>
+                          ))}
+                        </div>
+                      )}
                       <button 
                         onClick={handleGeolocation}
                         title="Usar mi ubicación actual"
@@ -479,7 +564,10 @@ function Home() {
                         <MapPin size={18} color="white" />
                       </button>
                       <button 
-                        onClick={() => calculateDistance(deliveryAddress)}
+                        onClick={() => {
+                          setShowSuggestions(false);
+                          calculateDistance(deliveryAddress);
+                        }}
                         disabled={isCalculating}
                         style={{ padding: '0 10px', height: '40px', background: '#333', color: 'white', border: 'none', borderRadius: '4px', fontSize: '0.8rem', cursor: 'pointer' }}
                       >

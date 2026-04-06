@@ -340,7 +340,7 @@ const Sales = () => {
                                     </div>
                                     <div className="pending-customer">
                                         <strong>{ticket.customer_name || 'Sin nombre'}</strong>
-                                        {ticket.table_number && <span className="table-tag">Mesa {ticket.table_number}</span>}
+                                        {ticket.table_number && <span className="table-tag">{ticket.table_number}</span>}
                                     </div>
                                     <div className="pending-items-summary">
                                         {ticket.items.length} productos

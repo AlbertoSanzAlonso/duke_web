@@ -29,11 +29,17 @@ function About() {
           <Link to="/">
             <img src="/brand/duke burger 2 negativo.png" alt="Duke Logo" className="nav-logo" />
           </Link>
-          <div className="nav-links">
-            <Link to="/">CARTA</Link>
-            <Link to="/nosotros" style={{ color: 'var(--color-primary)' }}>NOSOTROS</Link>
-            <Link to="/" className="cta-button" style={{ textDecoration: 'none' }}>¡PEDÍ YA!</Link>
+          
+          <div className="nav-actions">
+            <div className="nav-links-desktop">
+              <Link to="/">CARTA</Link>
+              <Link to="/nosotros" style={{ color: 'var(--color-primary)' }}>NOSOTROS</Link>
+            </div>
+            <Link to="/" className="cta-button" style={{ textDecoration: 'none' }}>
+              ¡PEDÍ YA!
+            </Link>
           </div>
+
           <div className="mobile-toggle">
             <Link to="/"><Menu size={28} color="white" /></Link>
           </div>
@@ -105,21 +111,6 @@ function About() {
         </div>
       </section>
 
-      <section className="instagram-section">
-        <div className="container">
-          <h2 className="section-title">SEGUINOS EN INSTAGRAM</h2>
-          <p className="instagram-handle">@dukeburger.sj</p>
-          <InstagramFeed />
-          <a 
-            href="https://www.instagram.com/dukeburger.sj/" 
-            target="_blank" 
-            rel="noopener noreferrer" 
-            className="instagram-follow-btn"
-          >
-            SEGUIR EN INSTAGRAM
-          </a>
-        </div>
-      </section>
 
       <section className="location-section">
         <div className="container">

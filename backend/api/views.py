@@ -61,7 +61,10 @@ class GlobalSettingViewSet(viewsets.ModelViewSet):
         defaults = [
             {'key': 'delivery_base_price', 'value': '1000', 'description': 'Precio base del envío'},
             {'key': 'delivery_km_price', 'value': '200', 'description': 'Precio por cada KM recorrido'},
-            {'key': 'delivery_max_km', 'value': '15', 'description': 'Distancia máxima permitida (KM)'}
+            {'key': 'delivery_max_km', 'value': '15', 'description': 'Distancia máxima permitida (KM)'},
+            {'key': 'opening_days', 'value': '1,2,3,4,5,6,7', 'description': 'Días de apertura (1=Lunes, 7=Domingo)'},
+            {'key': 'opening_time', 'value': '20:00', 'description': 'Horario de apertura (HH:MM)'},
+            {'key': 'closing_time', 'value': '00:00', 'description': 'Horario de cierre (HH:MM)'}
         ]
         created_count = 0
         for d in defaults:

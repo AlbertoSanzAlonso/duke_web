@@ -53,7 +53,7 @@ const Orders = () => {
                             <tr>
                                 <th><Hash size={14} /> ID</th>
                                 <th><Calendar size={14} /> Fecha</th>
-                                <th><User size={14} /> Cliente / Mesa</th>
+                                <th><User size={14} /> Cliente / Entrega</th>
                                 <th>Total</th>
                                 <th>Estado</th>
                                 <th>Acciones</th>
@@ -72,7 +72,7 @@ const Orders = () => {
                                     <td>
                                         <div className="client-cell">
                                             <strong>{order.customer_name || 'Sin nombre'}</strong>
-                                            {order.table_number && <span className="table-badge">Mesa {order.table_number}</span>}
+                                            {order.table_number && <span className="table-badge">{order.table_number}</span>}
                                         </div>
                                     </td>
                                     <td className="total-cell">${parseFloat(order.total_amount).toFixed(2)}</td>
@@ -104,7 +104,7 @@ const Orders = () => {
                         <div className="details-content">
                             <div className="details-meta">
                                 <p><strong>Cliente:</strong> {selectedOrder.customer_name || '-'}</p>
-                                <p><strong>Mesa:</strong> {selectedOrder.table_number || '-'}</p>
+                                <p><strong>Entrega:</strong> {selectedOrder.table_number || '-'}</p>
                                 <p><strong>Hora:</strong> {new Date(selectedOrder.date).toLocaleString('es-AR', { timeZone: 'America/Argentina/Buenos_Aires' })}</p>
                             </div>
 
@@ -144,7 +144,7 @@ const Orders = () => {
                             <p>TICKET #{selectedOrder.id}</p>
                             <p>FECHA: {new Date(selectedOrder.date).toLocaleString('es-AR', { timeZone: 'America/Argentina/Buenos_Aires' })}</p>
                             <p>CLIENTE: {selectedOrder.customer_name || 'Particular'}</p>
-                            {selectedOrder.table_number && <p>MESA: {selectedOrder.table_number}</p>}
+                            {selectedOrder.table_number && <p>ENTREGA: {selectedOrder.table_number}</p>}
                         </div>
                         <div className="ticket-divider"></div>
                         <div className="ticket-items-print">

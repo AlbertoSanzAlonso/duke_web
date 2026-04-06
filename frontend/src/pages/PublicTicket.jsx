@@ -126,7 +126,7 @@ const PublicTicket = () => {
 
                     {order.table_number && (
                         <div style={{ marginTop: '20px', padding: '15px', background: '#25262b', borderRadius: '8px', fontSize: '0.85rem', color: '#adb5bd' }}>
-                            <strong>Envío a:</strong> {order.table_number.replace('DELIVERY: ', '')}
+                            <strong>{order.table_number.includes('DELIVERY') ? 'Dirección de Envío:' : 'Tipo de Entrega:'}</strong> {order.table_number.replace('DELIVERY: ', '')}
                         </div>
                     )}
 

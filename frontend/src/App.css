@@ -421,6 +421,50 @@
   color: white;
 }
 
+.customer-info-section div {
+  position: relative;
+}
+
+.address-suggestions-dropdown {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background: #252525;
+  border: 1px solid #333;
+  border-radius: 0 0 8px 8px;
+  z-index: 4000; /* Over everything in modal */
+  max-height: 200px;
+  overflow-y: auto;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+}
+
+.suggestion-item {
+  padding: 12px 15px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  font-size: 0.9rem;
+  color: #eee;
+  border-bottom: 1px solid #333;
+  transition: background 0.2s;
+}
+
+.suggestion-item:last-child {
+  border-bottom: none;
+}
+
+.suggestion-item:hover {
+  background: #333;
+  color: var(--color-primary);
+}
+
+.suggestion-item span {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
 /* Response Design */
 @media (max-width: 1024px) {
   .hero-title {
@@ -1093,10 +1137,12 @@
 
 .about-hero {
   height: 50vh;
+  padding-top: 100px; /* Extra space for the fixed navbar */
   background: linear-gradient(rgba(0,0,0,0.7), rgba(0,0,0,0.7)), url('https://images.unsplash.com/photo-1550966842-1e96a40c6c1b?q=80&w=2071&auto=format&fit=crop');
   background-size: cover;
   background-position: center;
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
   text-align: center;
