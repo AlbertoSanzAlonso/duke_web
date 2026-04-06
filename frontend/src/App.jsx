@@ -17,6 +17,7 @@ import Promos from './admin/pages/Promos';
 import Settings from './admin/pages/Settings';
 import Login from './admin/pages/Login';
 import ResetPassword from './admin/pages/ResetPassword';
+import Profile from './admin/pages/Profile';
 import { isAuthenticated } from './services/api';
 import { Navigate, Outlet } from 'react-router-dom';
 import './App.css'; // Global styles for consumer site
