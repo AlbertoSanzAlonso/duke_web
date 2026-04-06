@@ -117,10 +117,11 @@ const Gallery = () => {
                         fontSize: '0.95rem',
                         cursor: 'pointer',
                         boxShadow: '0 4px 15px rgba(240, 62, 62, 0.2)',
-                        minWidth: '160px',
-                        transition: 'all 0.2s ease'
+                        whiteSpace: 'nowrap',
+                        flexShrink: 0,
+                        transition: 'all 0.3s ease'
                     }}
-                    className="gallery-add-btn"
+                    className="gallery-add-btn main-button"
                 >
                     <Plus size={20} strokeWidth={3} /> <span style={{ marginTop: '1px' }}>Añadir Foto</span>
                 </button>

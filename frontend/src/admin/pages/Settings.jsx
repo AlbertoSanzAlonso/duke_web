@@ -449,7 +449,9 @@ const addImgBtnStyle = {
     fontWeight: '700',
     transition: 'all 0.3s ease',
     boxShadow: '0 4px 15px rgba(240, 62, 62, 0.2)',
-    fontFamily: 'inherit'
+    fontFamily: 'inherit',
+    whiteSpace: 'nowrap',
+    flexShrink: 0
 };
 
 const galleryGridStyle = { display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '20px' };
