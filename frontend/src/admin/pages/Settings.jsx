@@ -454,7 +454,8 @@ const tabBtnStyle = (active) => ({
     letterSpacing: '0.5px',
     fontSize: '0.85rem',
     whiteSpace: 'nowrap',
-    flexShrink: 0
+    flex: 1,
+    justifyContent: 'center'
 });
 
 const labelStyle = { fontWeight: 'bold', fontSize: '0.85rem', color: '#666', textTransform: 'uppercase', marginBottom: '8px', display: 'block' };
