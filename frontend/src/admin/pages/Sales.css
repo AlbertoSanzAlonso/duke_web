@@ -469,24 +469,43 @@
     bottom: 2rem;
     right: 2rem;
     z-index: 1500;
+    width: 60px;
+    height: 60px;
     background: #28a745;
     color: white !important;
     border: none;
-    border-radius: 50px;
-    padding: 1rem 1.5rem;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+    border-radius: 50%;
+    display: flex;
     align-items: center;
-    gap: 10px;
+    justify-content: center;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.3);
     cursor: pointer;
     transition: all 0.3s ease;
+    padding: 0;
 }
 
 .pos-fab:hover {
-    transform: scale(1.05);
+    transform: scale(1.1);
     background: #218838;
 }
 
-.fab-count {
+.fab-text, .fab-total {
+    display: none; /* Hide text in desktop to keep it a small circle */
+}
+
+@media (max-width: 992px) {
+    .pos-fab {
+        width: auto;
+        height: auto;
+        padding: 1rem 1.5rem;
+        border-radius: 50px;
+        bottom: 1.5rem;
+        right: 1.5rem;
+    }
+    .fab-text, .fab-total {
+        display: block;
+    }
+}
     background: white;
     color: #28a745;
     width: 24px;

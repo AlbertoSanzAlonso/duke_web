@@ -33,15 +33,20 @@
   align-items: center;
 }
 
-.nav-logo, .sidebar-header img {
+.nav-logo, 
+img.nav-logo, 
+.sidebar-header img, 
+.navbar .nav-logo img {
   height: 3.5rem !important;
   width: auto !important;
-  max-width: 200px !important;
+  max-width: 250px !important;
   object-fit: contain !important;
-  transition: all 0.3s ease;
+  display: block;
 }
 
-.nav-logo:hover, .sidebar-header img:hover {
+.nav-logo:hover, 
+img.nav-logo:hover, 
+.sidebar-header img:hover {
   transform: translateY(-2px);
   filter: brightness(1.1);
   cursor: pointer;
