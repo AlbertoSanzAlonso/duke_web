@@ -184,23 +184,19 @@ if USE_S3:
     }
 
 DEBUG = True
-ALLOWED_HOSTS = ['*']
+ALLOWED_HOSTS = ['api.dukeburger-sj.com', 'dukeburger-sj.com', '*']
 
-# Explicitly allow production origins for CORS (Crucial when using Credentials)
-CORS_ALLOWED_ORIGINS = [
-    "https://dukeburger-sj.com",
-    "https://www.dukeburger-sj.com",
-    "http://localhost:5173", # Dev
-]
+# CORS simplified for production (Token auth doesn't require credentials)
+CORS_ALLOW_ALL_ORIGINS = True
+CORS_ALLOW_CREDENTIALS = False
+CORS_ALLOW_HEADERS = ["*"]
+CORS_ALLOW_METHODS = ["*"]
 
 CSRF_TRUSTED_ORIGINS = [
     "https://dukeburger-sj.com",
     "https://api.dukeburger-sj.com",
 ]
 
-CORS_ALLOW_CREDENTIALS = True
-CORS_ALLOW_HEADERS = ["*"]
-CORS_ALLOW_METHODS = ["*"]
 CORS_PREFLIGHT_MAX_AGE = 86400
 
 # Email Configuration
