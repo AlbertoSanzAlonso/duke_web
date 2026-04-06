@@ -52,78 +52,66 @@ const PublicTicket = () => {
                 <h1 style={{ margin: 0, fontSize: '1.5rem', letterSpacing: '2px', color: '#f03e3e' }}>TICKET DE PEDIDO</h1>
             </header>
 
-            <main style={{ maxWidth: '500px', margin: '0 auto', background: '#1a1a1a', borderRadius: '15px', overflow: 'hidden', boxShadow: '0 10px 30px rgba(0,0,0,0.5)', border: '1px solid #333' }}>
+            <main style={{ maxWidth: '400px', margin: '0 auto', background: '#1a1a1a', borderRadius: '15px', overflow: 'hidden', boxShadow: '0 10px 40px rgba(0,0,0,0.6)', border: '1px solid #333' }}>
                 {/* ID and Status */}
                 <div style={{ padding: '25px', borderBottom: '1px dashed #444', textAlign: 'center' }}>
                     <div style={{ fontSize: '0.8rem', color: '#888', textTransform: 'uppercase', marginBottom: '5px' }}>Comprobante Oficial</div>
-                    <div style={{ fontSize: '2rem', fontWeight: 'bold' }}>#{order.id}</div>
+                    <div style={{ fontSize: '2.2rem', fontWeight: 'bold' }}>#{order.id}</div>
                     <div style={{ 
                         marginTop: '10px', 
-                        display: 'inline-block', 
-                        padding: '5px 15px', 
-                        borderRadius: '20px', 
-                        fontSize: '0.8rem', 
+                        display: 'inline-block',
+                        padding: '4px 12px',
+                        background: order.status === 'DELIVERED' ? '#2b8a3e' : '#f03e3e',
+                        borderRadius: '20px',
+                        fontSize: '0.75rem',
                         fontWeight: 'bold',
-                        background: order.status === 'COMPLETED' ? '#2b8a3e' : '#e67700',
-                        color: '#fff'
+                        textTransform: 'uppercase'
                     }}>
-                        {order.status === 'COMPLETED' ? 'CONFIRMADO' : 'PENDIENTE DE COBRO'}
+                        {order.status === 'DELIVERED' ? 'Pagado y Entregado' : (order.status === 'PENDING' ? 'En Preparación' : order.status)}
                     </div>
                 </div>
 
-                {/* Details */}
+                {/* Details Section */}
                 <div style={{ padding: '25px' }}>
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px', marginBottom: '30px' }}>
-                        <div>
-                            <div style={{ color: '#888', fontSize: '0.75rem', textTransform: 'uppercase', marginBottom: '5px' }}>Cliente</div>
-                            <div style={{ fontWeight: '600' }}>{order.customer_name || 'Particular'}</div>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '20px', fontSize: '0.9rem' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#aaa' }}>
+                            <Calendar size={16} /> {formattedDate}
                         </div>
-                        <div>
-                            <div style={{ color: '#888', fontSize: '0.75rem', textTransform: 'uppercase', marginBottom: '5px' }}>Fecha y Hora</div>
-                            <div style={{ fontWeight: '600' }}>{formattedDate} - {formattedTime}</div>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#aaa' }}>
+                            <Clock size={16} /> {formattedTime}
                         </div>
                     </div>
 
-                    <div style={{ marginBottom: '30px' }}>
-                        <div style={{ color: '#888', fontSize: '0.75rem', textTransform: 'uppercase', marginBottom: '10px' }}>Productos</div>
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                            {order.items.map(item => (
-                                <div key={item.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                                    <div>
-                                        <span style={{ color: '#f03e3e', fontWeight: 'bold', marginRight: '10px' }}>{item.quantity}x</span>
-                                        <span>{item.entry_name}</span>
-                                    </div>
-                                    <div style={{ fontWeight: '600' }}>${(item.quantity * parseFloat(item.price_at_sale)).toLocaleString('es-AR')}</div>
+                    {/* Products List */}
+                    <div style={{ marginBottom: '25px' }}>
+                        <div style={{ fontSize: '0.7rem', textTransform: 'uppercase', color: '#888', marginBottom: '15px', fontWeight: '800' }}>Resumen del Pedido</div>
+                        {order.items && order.items.map((item, idx) => (
+                            <div key={idx} style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '12px', fontSize: '1rem' }}>
+                                <div style={{ display: 'flex', gap: '10px' }}>
+                                    <span style={{ color: '#f03e3e', fontWeight: 'bold' }}>{item.quantity}x</span>
+                                    <span>{item.entry_name}</span>
                                 </div>
-                            ))}
-                        </div>
+                                <span style={{ color: '#fff', fontWeight: 'bold' }}>${Math.round(item.quantity * parseFloat(item.price_at_sale)).toLocaleString('es-AR')}</span>
+                            </div>
+                        ))}
                     </div>
 
-                    {parseFloat(order.delivery_cost) > 0 && (
-                        <div style={{ padding: '15px 0', borderTop: '1px solid #333', display: 'flex', justifyContent: 'space-between' }}>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#adb5bd' }}>
-                                <MapPin size={16} /> Envío a Domicilio
-                            </div>
-                            <div style={{ fontWeight: '600' }}>+ ${parseFloat(order.delivery_cost).toLocaleString('es-AR')}</div>
-                        </div>
-                    )}
-
+                    {/* Total */}
                     <div style={{ 
                         marginTop: '20px', 
-                        padding: '20px', 
-                        background: 'rgba(240, 62, 62, 0.1)', 
-                        borderRadius: '10px', 
-                        display: 'flex', 
-                        justifyContent: 'space-between', 
-                        alignItems: 'center',
-                        border: '1px solid rgba(240, 62, 62, 0.3)'
+                        paddingTop: '20px', 
+                        borderTop: '1px solid #333',
+                        display: 'flex',
+                        justifyContent: 'space-between',
+                        alignItems: 'center'
                     }}>
-                        <div style={{ fontSize: '1.2rem', fontWeight: 'bold', color: '#f03e3e' }}>TOTAL</div>
-                        <div style={{ fontSize: '1.8rem', fontWeight: '900', color: '#fff' }}>
-                            ${parseFloat(order.total_amount).toLocaleString('es-AR')}
-                        </div>
+                        <span style={{ fontSize: '1.1rem', fontWeight: 'bold', color: '#888' }}>TOTAL</span>
+                        <span style={{ fontSize: '1.8rem', fontWeight: '900', color: '#f03e3e' }}>
+                            ${Math.round(order.total_amount).toLocaleString('es-AR')}
+                        </span>
                     </div>
 
+                    {/* Delivery / Address */}
                     {order.table_number && (
                         <div style={{ 
                             marginTop: '25px', 
@@ -173,27 +161,26 @@ const PublicTicket = () => {
                         </div>
                     )}
 
-                    <div className="no-print" style={{ marginTop: '25px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                    <div className="no-print" style={{ marginTop: '25px', paddingBottom: '30px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
                         <button 
                             onClick={() => window.print()}
                             style={{
                                 width: '100%', 
-                                padding: '15px', 
+                                padding: '12px', 
                                 background: 'white', 
                                 color: 'black', 
                                 border: 'none', 
-                                borderRadius: '10px', 
+                                borderRadius: '8px', 
                                 fontWeight: 'bold', 
-                                fontSize: '1rem',
+                                fontSize: '0.9rem',
                                 display: 'flex', 
                                 alignItems: 'center', 
                                 justifyContent: 'center', 
-                                gap: '10px', 
-                                cursor: 'pointer',
-                                boxShadow: '0 4px 15px rgba(255,255,255,0.1)'
+                                gap: '8px', 
+                                cursor: 'pointer'
                             }}
                         >
-                            <Download size={20} /> DESCARGAR TICKET (PDF)
+                            <Download size={18} /> DESCARGAR TICKET (PDF)
                         </button>
                     </div>
                 </div>
