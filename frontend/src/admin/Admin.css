@@ -227,3 +227,25 @@ body, .admin-container, .admin-main, .admin-content {
         grid-template-columns: 1fr !important;
     }
 }
+
+.logout-nav-btn {
+    background: none;
+    border: none;
+    width: 100%;
+    cursor: pointer;
+    font-size: inherit;
+    font-family: inherit;
+    margin-top: auto;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    padding-top: 20px;
+}
+
+.logout-nav-btn:hover {
+    color: #ff4d4d !important;
+    background-color: rgba(255, 77, 77, 0.05) !important;
+    border-left: 3px solid #ff4d4d !important;
+}
+
+.logout-nav-btn span, .logout-nav-btn svg {
+    color: inherit !important;
+}

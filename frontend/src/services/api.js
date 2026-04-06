@@ -1,5 +1,4 @@
 let base_api_url = import.meta.env.VITE_API_URL || 'http://localhost:8000/api';
-// Asegurar que termina en /api (sin barra final para que las llamadas concatenen /products/)
 if (base_api_url.endsWith('/')) {
   base_api_url = base_api_url.slice(0, -1);
 }
@@ -8,12 +7,19 @@ if (!base_api_url.endsWith('/api')) {
 }
 const API_URL = base_api_url;
 
+const getHeaders = (contentType = 'application/json') => {
+    const headers = {};
+    if (contentType) headers['Content-Type'] = contentType;
+    const token = localStorage.getItem('duke_admin_token');
+    if (token) headers['Authorization'] = `Token ${token}`;
+    return headers;
+};
+
 const handleResponseError = async (response) => {
     const errorData = await response.json().catch(() => ({}));
     let message = errorData.detail || 'Error en la operación';
     
     if (typeof message === 'object') {
-        // DRF field-specific errors
         message = Object.entries(message)
             .map(([field, errors]) => {
                 const fieldName = field === 'detail' ? '' : (field.charAt(0).toUpperCase() + field.slice(1).replace(/_/g, ' ') + ': ');
@@ -25,24 +31,41 @@ const handleResponseError = async (response) => {
     throw new Error(message);
 };
 
+// AUTH
+export const login = async (username, password) => {
+    const response = await fetch(`${API_URL}/login/`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username, password })
+    });
+    if (!response.ok) throw new Error('Credenciales inválidas');
+    const data = await response.json();
+    localStorage.setItem('duke_admin_token', data.token);
+    return data;
+};
+
+export const logout = () => {
+    localStorage.removeItem('duke_admin_token');
+};
+
+export const isAuthenticated = () => {
+    return !!localStorage.getItem('duke_admin_token');
+};
+
+// PRODUCTS
 export const fetchProducts = async () => {
-    const response = await fetch(`${API_URL}/products/`);
+    const response = await fetch(`${API_URL}/products/`, { headers: getHeaders() });
     if (!response.ok) throw new Error('Error al cargar los productos');
     return await response.json();
 };
 
 export const createProduct = async (productData) => {
     const isFormData = productData instanceof FormData;
-    const options = {
+    const response = await fetch(`${API_URL}/products/`, {
         method: 'POST',
+        headers: getHeaders(isFormData ? null : 'application/json'),
         body: isFormData ? productData : JSON.stringify(productData)
-    };
-    
-    if (!isFormData) {
-        options.headers = { 'Content-Type': 'application/json' };
-    }
-
-    const response = await fetch(`${API_URL}/products/`, options);
+    });
     if (!response.ok) return handleResponseError(response);
     return await response.json();
 };
@@ -50,6 +73,7 @@ export const createProduct = async (productData) => {
 export const deleteProduct = async (id) => {
     const response = await fetch(`${API_URL}/products/${id}/`, {
         method: 'DELETE',
+        headers: getHeaders()
     });
     if (!response.ok) throw new Error('Error al eliminar el producto');
     return true;
@@ -57,24 +81,18 @@ export const deleteProduct = async (id) => {
 
 export const updateProduct = async (id, productData) => {
     const isFormData = productData instanceof FormData;
-    const options = {
+    const response = await fetch(`${API_URL}/products/${id}/`, {
         method: 'PATCH',
+        headers: getHeaders(isFormData ? null : 'application/json'),
         body: isFormData ? productData : JSON.stringify(productData)
-    };
-
-    if (!isFormData) {
-        options.headers = { 'Content-Type': 'application/json' };
-    }
-
-    const response = await fetch(`${API_URL}/products/${id}/`, options);
-
+    });
     if (!response.ok) return handleResponseError(response);
     return await response.json();
 };
 
 // CARTA (MENU ENTRIES)
 export const fetchMenuEntries = async () => {
-    const response = await fetch(`${API_URL}/menu-entries/`);
+    const response = await fetch(`${API_URL}/menu-entries/`, { headers: getHeaders() });
     if (!response.ok) throw new Error('Error al cargar elementos de la carta');
     return await response.json();
 };
@@ -82,7 +100,7 @@ export const fetchMenuEntries = async () => {
 export const createMenuEntry = async (data) => {
     const response = await fetch(`${API_URL}/menu-entries/`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: getHeaders(),
         body: JSON.stringify(data)
     });
     if (!response.ok) throw new Error('Error al añadir producto a la carta');
@@ -92,6 +110,7 @@ export const createMenuEntry = async (data) => {
 export const deleteMenuEntry = async (id) => {
     const response = await fetch(`${API_URL}/menu-entries/${id}/`, {
         method: 'DELETE',
+        headers: getHeaders()
     });
     if (!response.ok) throw new Error('Error al retirarlo de la carta');
     return true;
@@ -100,7 +119,7 @@ export const deleteMenuEntry = async (id) => {
 export const updateMenuEntry = async (id, data) => {
     const response = await fetch(`${API_URL}/menu-entries/${id}/`, {
         method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
+        headers: getHeaders(),
         body: JSON.stringify(data)
     });
     if (!response.ok) throw new Error('Error al modificar precio de la carta');
@@ -109,7 +128,7 @@ export const updateMenuEntry = async (id, data) => {
 
 // INVENTORY
 export const fetchInventory = async () => {
-    const response = await fetch(`${API_URL}/inventory/`);
+    const response = await fetch(`${API_URL}/inventory/`, { headers: getHeaders() });
     if (!response.ok) throw new Error('Error al cargar inventario');
     return await response.json();
 };
@@ -117,7 +136,7 @@ export const fetchInventory = async () => {
 export const createInventoryItem = async (data) => {
     const response = await fetch(`${API_URL}/inventory/`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: getHeaders(),
         body: JSON.stringify(data)
     });
     if (!response.ok) throw new Error('Error al crear elemento de inventario');
@@ -127,6 +146,7 @@ export const createInventoryItem = async (data) => {
 export const deleteInventoryItem = async (id) => {
     const response = await fetch(`${API_URL}/inventory/${id}/`, {
         method: 'DELETE',
+        headers: getHeaders()
     });
     if (!response.ok) throw new Error('Error al eliminar elemento');
     return true;
@@ -136,7 +156,7 @@ export const deleteInventoryItem = async (id) => {
 export const createSale = async (data) => {
     const response = await fetch(`${API_URL}/sales/`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: getHeaders(),
         body: JSON.stringify(data)
     });
     if (!response.ok) throw new Error('Error al registrar la venta');
@@ -144,7 +164,7 @@ export const createSale = async (data) => {
 };
 
 export const fetchSales = async () => {
-    const response = await fetch(`${API_URL}/sales/`);
+    const response = await fetch(`${API_URL}/sales/`, { headers: getHeaders() });
     if (!response.ok) throw new Error('Error al obtener ventas');
     return await response.json();
 };
@@ -152,7 +172,7 @@ export const fetchSales = async () => {
 export const updateSale = async (id, data) => {
     const response = await fetch(`${API_URL}/sales/${id}/`, {
         method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
+        headers: getHeaders(),
         body: JSON.stringify(data)
     });
     if (!response.ok) throw new Error('Error al actualizar venta');
@@ -162,13 +182,15 @@ export const updateSale = async (id, data) => {
 export const deleteSale = async (id) => {
     const response = await fetch(`${API_URL}/sales/${id}/`, {
         method: 'DELETE',
+        headers: getHeaders()
     });
     if (!response.ok) throw new Error('Error al eliminar la venta');
     return true;
 };
+
 // EXPENSES & ACCOUNTING
 export const fetchExpenses = async () => {
-    const response = await fetch(`${API_URL}/expenses/`);
+    const response = await fetch(`${API_URL}/expenses/`, { headers: getHeaders() });
     if (!response.ok) throw new Error('Error al cargar gastos');
     return await response.json();
 };
@@ -176,7 +198,7 @@ export const fetchExpenses = async () => {
 export const createExpense = async (data) => {
     const response = await fetch(`${API_URL}/expenses/`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: getHeaders(),
         body: JSON.stringify(data)
     });
     if (!response.ok) throw new Error('Error al registrar gasto');
@@ -186,13 +208,14 @@ export const createExpense = async (data) => {
 export const deleteExpense = async (id) => {
     const response = await fetch(`${API_URL}/expenses/${id}/`, {
         method: 'DELETE',
+        headers: getHeaders()
     });
     if (!response.ok) throw new Error('Error al eliminar gasto');
     return true;
 };
 
 export const fetchSupplierOrders = async () => {
-    const response = await fetch(`${API_URL}/supplier-orders/`);
+    const response = await fetch(`${API_URL}/supplier-orders/`, { headers: getHeaders() });
     if (!response.ok) throw new Error('Error al cargar pedidos de proveedores');
     return await response.json();
 };
@@ -200,15 +223,16 @@ export const fetchSupplierOrders = async () => {
 export const createSupplierOrder = async (data) => {
     const response = await fetch(`${API_URL}/supplier-orders/`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: getHeaders(),
         body: JSON.stringify(data)
     });
     if (!response.ok) throw new Error('Error al registrar pedido a proveedor');
     return await response.json();
 };
 
+// SETTINGS
 export const fetchSettings = async () => {
-    const response = await fetch(`${API_URL}/settings/`);
+    const response = await fetch(`${API_URL}/settings/`, { headers: getHeaders() });
     if (!response.ok) throw new Error('Error al cargar configuraciones');
     return await response.json();
 };
@@ -216,16 +240,15 @@ export const fetchSettings = async () => {
 export const updateSetting = async (key, value) => {
     const response = await fetch(`${API_URL}/settings/${key}/`, {
         method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
+        headers: getHeaders(),
         body: JSON.stringify({ value })
     });
     if (!response.ok) throw new Error('Error al actualizar configuración');
     return await response.json();
 };
 
-// Opening Hours
 export const fetchOpeningHours = async () => {
-    const response = await fetch(`${API_URL}/opening-hours/`);
+    const response = await fetch(`${API_URL}/opening-hours/`, { headers: getHeaders() });
     if (!response.ok) throw new Error('Error al cargar horarios');
     return await response.json();
 };
@@ -233,25 +256,23 @@ export const fetchOpeningHours = async () => {
 export const updateOpeningHour = async (id, data) => {
     const response = await fetch(`${API_URL}/opening-hours/${id}/`, {
         method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
+        headers: getHeaders(),
         body: JSON.stringify(data)
     });
     if (!response.ok) throw new Error('Error al actualizar horario');
     return await response.json();
 };
 
-// Delivery Rates
 export const fetchDeliveryRates = async () => {
-    const response = await fetch(`${API_URL}/delivery-rates/`);
+    const response = await fetch(`${API_URL}/delivery-rates/`, { headers: getHeaders() });
     if (!response.ok) throw new Error('Error al cargar tarifas de envío');
     return await response.json();
 };
 
 export const updateDeliveryRates = async (data) => {
-    // Only one delivery rate record (id=1)
     const response = await fetch(`${API_URL}/delivery-rates/1/`, {
         method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
+        headers: getHeaders(),
         body: JSON.stringify(data)
     });
     if (!response.ok) throw new Error('Error al actualizar tarifas de envío');
@@ -260,7 +281,8 @@ export const updateDeliveryRates = async (data) => {
 
 export const setupDefaultSettings = async () => {
     const response = await fetch(`${API_URL}/settings/setup-defaults/`, {
-        method: 'POST'
+        method: 'POST',
+        headers: getHeaders()
     });
     if (!response.ok) throw new Error('Error al inicializar configuraciones');
     return await response.json();
@@ -268,7 +290,7 @@ export const setupDefaultSettings = async () => {
 
 // GALLERY
 export const fetchGalleryImages = async () => {
-    const response = await fetch(`${API_URL}/gallery/`);
+    const response = await fetch(`${API_URL}/gallery/`, { headers: getHeaders() });
     if (!response.ok) throw new Error('Error al cargar la galería');
     return await response.json();
 };
@@ -276,6 +298,7 @@ export const fetchGalleryImages = async () => {
 export const createGalleryImage = async (formData) => {
     const response = await fetch(`${API_URL}/gallery/`, {
         method: 'POST',
+        headers: getHeaders(null),
         body: formData
     });
     if (!response.ok) return handleResponseError(response);
@@ -285,6 +308,7 @@ export const createGalleryImage = async (formData) => {
 export const deleteGalleryImage = async (id) => {
     const response = await fetch(`${API_URL}/gallery/${id}/`, {
         method: 'DELETE',
+        headers: getHeaders()
     });
     if (!response.ok) throw new Error('Error al eliminar imagen');
     return true;
@@ -292,14 +316,11 @@ export const deleteGalleryImage = async (id) => {
 
 export const updateGalleryImage = async (id, data) => {
     const isFormData = data instanceof FormData;
-    const options = {
+    const response = await fetch(`${API_URL}/gallery/${id}/`, {
         method: 'PATCH',
+        headers: getHeaders(isFormData ? null : 'application/json'),
         body: isFormData ? data : JSON.stringify(data)
-    };
-    if (!isFormData) {
-        options.headers = { 'Content-Type': 'application/json' };
-    }
-    const response = await fetch(`${API_URL}/gallery/${id}/`, options);
+    });
     if (!response.ok) return handleResponseError(response);
     return await response.json();
 };

@@ -17,7 +17,10 @@ router.register(r'opening-hours', OpeningHourViewSet)
 router.register(r'delivery-rates', DeliverySettingViewSet)
 router.register(r'gallery', GalleryImageViewSet)
 
+from rest_framework.authtoken.views import obtain_auth_token
+
 urlpatterns = [
     path('', include(router.urls)),
     path('orders-stream/', OrderStreamView, name='order_stream'),
+    path('login/', obtain_auth_token, name='api_token_auth'),
 ]

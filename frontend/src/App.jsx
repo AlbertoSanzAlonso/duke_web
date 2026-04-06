@@ -15,7 +15,17 @@ import SupplierOrders from './admin/pages/SupplierOrders';
 import Accounting from './admin/pages/Accounting';
 import Promos from './admin/pages/Promos';
 import Settings from './admin/pages/Settings';
+import Login from './admin/pages/Login';
+import { isAuthenticated } from './services/api';
+import { Navigate, Outlet } from 'react-router-dom';
 import './App.css'; // Global styles for consumer site
+
+const ProtectedRoute = () => {
+  if (!isAuthenticated()) {
+    return <Navigate to="/login" replace />;
+  }
+  return <Outlet />;
+};
 
 function App() {
   return (
@@ -25,20 +35,23 @@ function App() {
         <Route path="/" element={<Home />} />
         <Route path="/nosotros" element={<About />} />
         <Route path="/ticket/:id" element={<PublicTicket />} />
+        <Route path="/login" element={<Login />} />
 
         {/* Admin Dashboard */}
-        <Route path="/admin" element={<AdminLayout />}>
-          <Route index element={<Dashboard />} />
-          <Route path="productos" element={<Products />} />
-          <Route path="carta" element={<MenuList />} />
-          <Route path="promos" element={<Promos />} />
-          <Route path="inventario" element={<Inventory />} />
-          <Route path="pedidos-clientes" element={<Orders />} />
-          <Route path="tpv" element={<Sales />} />
-          <Route path="pedidos" element={<SupplierOrders />} />
-          <Route path="contabilidad" element={<Accounting />} />
-          <Route path="historial" element={<HistoryLog />} />
-          <Route path="config" element={<Settings />} />
+        <Route element={<ProtectedRoute />}>
+          <Route path="/admin" element={<AdminLayout />}>
+            <Route index element={<Dashboard />} />
+            <Route path="productos" element={<Products />} />
+            <Route path="carta" element={<MenuList />} />
+            <Route path="promos" element={<Promos />} />
+            <Route path="inventario" element={<Inventory />} />
+            <Route path="pedidos-clientes" element={<Orders />} />
+            <Route path="tpv" element={<Sales />} />
+            <Route path="pedidos" element={<SupplierOrders />} />
+            <Route path="contabilidad" element={<Accounting />} />
+            <Route path="historial" element={<HistoryLog />} />
+            <Route path="config" element={<Settings />} />
+          </Route>
         </Route>
       </Routes>
     </BrowserRouter>

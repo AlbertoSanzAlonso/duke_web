@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { Outlet, NavLink, Link } from 'react-router-dom';
+import { Outlet, NavLink, Link, useNavigate } from 'react-router-dom';
+import { logout } from '../services/api';
 import {
   LayoutDashboard,
   Package,
@@ -13,12 +14,19 @@ import {
   ShoppingCart,
   Star,
   Image as ImageIcon,
-  Settings as SettingsIcon
+  Settings as SettingsIcon,
+  LogOut
 } from 'lucide-react';
 import './Admin.css';
 
 const AdminLayout = () => {
   const [isMobileOpen, setIsMobileOpen] = useState(false);
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    logout();
+    navigate('/login');
+  };
 
   const menuItems = [
     { name: 'Dashboard', path: '/admin', icon: <LayoutDashboard size={20} /> },
@@ -62,6 +70,10 @@ const AdminLayout = () => {
               <span>{item.name}</span>
             </NavLink>
           ))}
+          <button onClick={handleLogout} className="nav-item logout-nav-btn">
+            <LogOut size={20} />
+            <span>Cerrar Sesión</span>
+          </button>
         </nav>
       </aside>
       

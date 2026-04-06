@@ -88,6 +88,17 @@ class GlobalSettingSerializer(serializers.ModelSerializer):
         model = GlobalSetting
         fields = '__all__'
 
+class OpeningHourSerializer(serializers.ModelSerializer):
+    day_name = serializers.CharField(source='get_day_display', read_only=True)
+    class Meta:
+        model = OpeningHour
+        fields = ['id', 'day', 'day_name', 'opening_time', 'closing_time', 'is_open']
+
+class DeliverySettingSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = DeliverySetting
+        fields = ['id', 'base_price', 'km_price', 'max_km']
+
 class GalleryImageSerializer(serializers.ModelSerializer):
     class Meta:
         model = GalleryImage
