@@ -125,8 +125,45 @@ const PublicTicket = () => {
                     </div>
 
                     {order.table_number && (
-                        <div style={{ marginTop: '20px', padding: '15px', background: '#25262b', borderRadius: '8px', fontSize: '0.85rem', color: '#adb5bd' }}>
-                            <strong>{order.table_number.includes('DELIVERY') ? 'Dirección de Envío:' : 'Tipo de Entrega:'}</strong> {order.table_number.replace('DELIVERY: ', '')}
+                        <div style={{ 
+                            marginTop: '25px', 
+                            padding: '20px', 
+                            background: '#000', 
+                            borderRadius: '12px', 
+                            border: '1px solid #333'
+                        }}>
+                            <div style={{ color: '#888', fontSize: '0.7rem', textTransform: 'uppercase', marginBottom: '10px', fontWeight: '800' }}>
+                                {order.table_number.includes('DELIVERY') ? '📍 Dirección de Envío' : '🏪 Tipo de Entrega'}
+                            </div>
+                            <div style={{ fontSize: '1rem', marginBottom: order.table_number.includes('DELIVERY') ? '15px' : '0' }}>
+                                {order.table_number.replace('DELIVERY: ', '')}
+                            </div>
+                            
+                            {order.table_number.includes('DELIVERY') && (
+                                <a 
+                                    href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(order.table_number.replace('DELIVERY: ', '') + ", San Juan, Argentina")}`}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    style={{
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        justifyContent: 'center',
+                                        gap: '10px',
+                                        background: '#333',
+                                        color: '#fff',
+                                        padding: '12px',
+                                        borderRadius: '8px',
+                                        textDecoration: 'none',
+                                        fontWeight: 'bold',
+                                        fontSize: '0.9rem',
+                                        transition: 'background 0.3s'
+                                    }}
+                                    onMouseOver={e => e.currentTarget.style.background = '#444'}
+                                    onMouseOut={e => e.currentTarget.style.background = '#333'}
+                                >
+                                    <MapPin size={18} color="#f03e3e" /> ABRIR EN GOOGLE MAPS
+                                </a>
+                            )}
                         </div>
                     )}
 

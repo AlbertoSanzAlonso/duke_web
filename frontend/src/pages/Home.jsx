@@ -345,14 +345,13 @@ function Home() {
       let message = `¡Hola Duke Burger! Soy *${customerName}*.\n`;
       message += `He realizado un nuevo Pedido Web:\n\n`;
       message += `TICKET #${createdSale.id}\n`;
-      message += `ENTREGA: ${deliveryMode === 'delivery' ? 'A DOMICILIO' : 'RETIRO EN LOCAL'}\n`;
+      message += `ENTREGA: ${deliveryMode === 'delivery' ? '📍 A DOMICILIO' : '🏪 RETIRO EN LOCAL'}\n`;
       
       if (deliveryMode === 'delivery') {
-        message += `DIRECCIÓN: ${deliveryAddress}\n`;
-        message += `MAPA: https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(deliveryAddress + ", San Juan, Argentina")}\n`;
+        message += `\n*La ubicación de entrega se detalla en el ticket digital adjunto.*\n`;
       }
       
-      message += `\nVER DETALLE DEL PEDIDO:\n${ticketUrl}\n\n`;
+      message += `\n👇 VER DETALLE DEL PEDIDO:\n${ticketUrl}\n\n`;
 
       if (orderNotes.trim()) {
         message += `\nNOTAS: ${orderNotes}\n`;
