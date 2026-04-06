@@ -33,12 +33,11 @@
   align-items: center;
 }
 
-.nav-logo {
-  height: 3.5rem;
-  transition: all 0.3s ease;
-}
-
-.sidebar-header img {
+.nav-logo, .sidebar-header img {
+  height: 3.5rem !important;
+  width: auto !important;
+  max-width: 200px !important;
+  object-fit: contain !important;
   transition: all 0.3s ease;
 }
 
