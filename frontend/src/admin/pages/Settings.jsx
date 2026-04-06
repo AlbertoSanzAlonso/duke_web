@@ -111,15 +111,15 @@ const Settings = () => {
     };
 
     const toggleDay = (dayId) => {
-        setSettings(prev => {
-            return prev.map(s => {
+        setSettings(currentSettings => {
+            return currentSettings.map(s => {
                 if (s.key === 'opening_days') {
-                    const currentDays = s.value ? s.value.split(',') : [];
+                    const currentDays = s.value ? s.value.split(',').filter(d => d !== '') : [];
                     let newDays;
-                    if (currentDays.includes(dayId)) {
-                        newDays = currentDays.filter(d => d !== dayId);
+                    if (currentDays.includes(dayId.toString())) {
+                        newDays = currentDays.filter(d => d !== dayId.toString());
                     } else {
-                        newDays = [...currentDays, dayId];
+                        newDays = [...currentDays, dayId.toString()];
                     }
                     return { ...s, value: newDays.sort().join(',') };
                 }
@@ -208,22 +208,32 @@ const Settings = () => {
                             <label style={labelStyle}>Días de Atención</label>
                             <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px', marginTop: '10px' }}>
                                 {DAYS.map(day => {
-                                    const isActive = (settings.find(s => s.key === 'opening_days')?.value || '').split(',').includes(day.id);
+                                    const openingDaysVal = settings.find(s => s.key === 'opening_days')?.value || '';
+                                    const daysArray = openingDaysVal.split(',').filter(d => d !== '');
+                                    const isActive = daysArray.includes(day.id.toString());
+                                    
                                     return (
                                         <button 
                                             key={day.id}
-                                            onClick={() => toggleDay(day.id)}
+                                            type="button"
+                                            onClick={(e) => {
+                                                e.preventDefault();
+                                                toggleDay(day.id);
+                                            }}
+                                            className={`day-selector-btn ${isActive ? 'active' : ''}`}
                                             style={{
-                                                padding: '10px 15px',
-                                                borderRadius: '8px',
-                                                border: isActive ? '2px solid #f03e3e' : '2px solid #ddd',
-                                                background: isActive ? '#fff5f5' : '#fff',
-                                                color: isActive ? '#f03e3e' : '#666',
-                                                fontWeight: isActive ? '900' : '500',
+                                                padding: '10px 18px',
+                                                borderRadius: '10px',
+                                                border: isActive ? '2px solid #f03e3e' : '2px solid #eee',
+                                                background: isActive ? '#f03e3e' : '#fff',
+                                                color: isActive ? '#fff' : '#444',
+                                                fontWeight: 'bold',
                                                 cursor: 'pointer',
                                                 display: 'flex',
                                                 alignItems: 'center',
-                                                gap: '8px'
+                                                gap: '8px',
+                                                transition: 'all 0.2s ease',
+                                                fontSize: '0.9rem'
                                             }}
                                         >
                                             <Calendar size={16} /> {day.name}
@@ -414,19 +424,21 @@ const saveButtonStyle = {
 };
 
 const addImgBtnStyle = { 
-    background: '#333', 
+    background: '#222', 
     color: '#fff', 
     border: 'none', 
-    padding: '12px 20px', 
-    borderRadius: '10px', 
+    padding: '0 20px', 
+    height: '45px',
+    borderRadius: '12px', 
     cursor: 'pointer', 
     display: 'flex', 
     alignItems: 'center', 
     justifyContent: 'center', 
     gap: '10px', 
-    fontSize: '0.9rem',
-    fontWeight: 'bold',
-    transition: 'all 0.2s ease'
+    fontSize: '0.95rem',
+    fontWeight: '800',
+    transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
+    boxShadow: '0 4px 10px rgba(0,0,0,0.1)'
 };
 
 const galleryGridStyle = { display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '20px' };

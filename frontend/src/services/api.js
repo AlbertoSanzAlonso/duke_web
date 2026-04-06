@@ -158,6 +158,14 @@ export const updateSale = async (id, data) => {
     if (!response.ok) throw new Error('Error al actualizar venta');
     return await response.json();
 };
+
+export const deleteSale = async (id) => {
+    const response = await fetch(`${API_URL}/sales/${id}/`, {
+        method: 'DELETE',
+    });
+    if (!response.ok) throw new Error('Error al eliminar la venta');
+    return true;
+};
 // EXPENSES & ACCOUNTING
 export const fetchExpenses = async () => {
     const response = await fetch(`${API_URL}/expenses/`);

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { fetchMenuEntries, createSale, fetchSales, updateSale } from '../../services/api';
+import { fetchMenuEntries, createSale, fetchSales, updateSale, deleteSale } from '../../services/api';
 import LoadingScreen from '../components/LoadingScreen';
 import Toast from '../components/Toast';
 import './Sales.css';
@@ -151,6 +151,18 @@ const Sales = () => {
     const filteredMenu = selectedCategory === "Todas" 
         ? menuEntries 
         : menuEntries.filter(e => e.category === selectedCategory);
+
+    const handleDeleteTicket = async (e, id) => {
+        e.stopPropagation();
+        if (!window.confirm("¿Estás seguro de eliminar este ticket pendiente definitivamente?")) return;
+        try {
+            await deleteSale(id);
+            setToast({ message: "Ticket eliminado correctamente.", type: 'success' });
+            loadData();
+        } catch (error) {
+            setToast({ message: "Error al eliminar ticket.", type: 'error' });
+        }
+    };
 
     if (loading) return <LoadingScreen />;
 
@@ -348,7 +360,16 @@ const Sales = () => {
                                     <div className="pending-total">
                                         ${parseFloat(ticket.total_amount).toLocaleString('es-AR')}
                                     </div>
-                                    <button className="load-btn">REANUDAR</button>
+                                    <div className="pending-actions" style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginTop: '10px' }}>
+                                        <button className="load-btn" onClick={() => loadPendingSale(ticket)}>ABRIR</button>
+                                        <button 
+                                            className="delete-pending-btn" 
+                                            onClick={(e) => handleDeleteTicket(e, ticket.id)}
+                                            style={{ width: '100%', padding: '0.8rem', background: '#f03e3e', color: 'white', border: 'none', borderRadius: '6px', fontWeight: '700', cursor: 'pointer' }}
+                                        >
+                                            ELIMINAR
+                                        </button>
+                                    </div>
                                 </div>
                             ))
                         )}
