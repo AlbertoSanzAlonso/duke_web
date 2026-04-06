@@ -279,7 +279,8 @@ class GlobalSettingViewSet(viewsets.ModelViewSet):
             {'key': 'delivery_max_km', 'value': '15', 'description': 'Distancia máxima permitida (KM)'},
             {'key': 'opening_days', 'value': '1,2,3,4,5,6,7', 'description': 'Días de apertura (1=Lunes, 7=Domingo)'},
             {'key': 'opening_time', 'value': '20:00', 'description': 'Horario de apertura (HH:MM)'},
-            {'key': 'closing_time', 'value': '00:00', 'description': 'Horario de cierre (HH:MM)'}
+            {'key': 'closing_time', 'value': '00:00', 'description': 'Horario de cierre (HH:MM)'},
+            {'key': 'marquee_text', 'value': 'BURGER - PACHATA - LOMO - PIZZA - BEBIDA - SAN JUAN - ', 'description': 'Texto en movimiento del banner principal'}
         ]
         created_count = 0
         for d in defaults:

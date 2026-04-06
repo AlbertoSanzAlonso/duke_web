@@ -8,13 +8,18 @@ import {
 import './Accounting.css';
 import LoadingScreen from '../components/LoadingScreen';
 import Toast from '../components/Toast';
-import { Save, X, Trash2, Edit2, Search } from 'lucide-react';
+import { Save, X, Trash2, Edit2, Search, Filter, Calendar as CalendarIcon, ChevronDown, ChevronUp } from 'lucide-react';
 
 const Accounting = () => {
     const [sales, setSales] = useState([]);
     const [supplierOrders, setSupplierOrders] = useState([]);
     const [manualExpenses, setManualExpenses] = useState([]);
     const [searchTerm, setSearchTerm] = useState('');
+    const [startDate, setStartDate] = useState('');
+    const [endDate, setEndDate] = useState('');
+    const [selectedCategory, setSelectedCategory] = useState('ALL');
+    const [selectedType, setSelectedType] = useState('ALL');
+    const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
     const [loading, setLoading] = useState(true);
     const [toast, setToast] = useState(null); 
     
@@ -175,42 +180,57 @@ const Accounting = () => {
 
     const [viewMode, setViewMode] = useState('daily'); // 'daily', 'weekly', 'monthly'
 
-    const filterItems = (items, typeName) => {
+    const filterItems = (items) => {
         const now = new Date();
         return items.filter(item => {
-            // Period Filter
             const itemDate = new Date(item.date);
+            
+            // 1. DATE RANGE / PERIOD FILTER
             let dateMatch = true;
-            if (viewMode === 'daily') {
-                dateMatch = itemDate.toDateString() === now.toDateString();
-            } else if (viewMode === 'weekly') {
-                const diffTime = Math.abs(now - itemDate);
-                const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-                dateMatch = diffDays <= 7;
-            } else if (viewMode === 'monthly') {
-                dateMatch = itemDate.getMonth() === now.getMonth() && itemDate.getFullYear() === now.getFullYear();
+            if (startDate || endDate) {
+                if (startDate) {
+                    const sDate = new Date(startDate);
+                    sDate.setHours(0,0,0,0);
+                    if (itemDate < sDate) dateMatch = false;
+                }
+                if (endDate) {
+                    const eDate = new Date(endDate);
+                    eDate.setHours(23,59,59,999);
+                    if (itemDate > eDate) dateMatch = false;
+                }
+            } else {
+                // Default Period Filter
+                if (viewMode === 'daily') {
+                    dateMatch = itemDate.toDateString() === now.toDateString();
+                } else if (viewMode === 'weekly') {
+                    const diffTime = Math.abs(now - itemDate);
+                    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+                    dateMatch = diffDays <= 7;
+                } else if (viewMode === 'monthly') {
+                    dateMatch = itemDate.getMonth() === now.getMonth() && itemDate.getFullYear() === now.getFullYear();
+                }
             }
-
             if (!dateMatch) return false;
 
-            // Search Filter
+            // 2. CATEGORY FILTER
+            if (selectedCategory !== 'ALL') {
+                if (item.category !== selectedCategory) return false;
+            }
+
+            // 3. SEARCH FILTER (Keyword)
             if (!searchTerm) return true;
-            
             const term = searchTerm.toLowerCase();
             const description = (item.description || item.customer_name || item.supplier_name || "").toLowerCase();
             const amount = item.amount || item.total_amount || item.total_cost || "";
-            const matchesSearch = description.includes(term) || 
-                                 amount.toString().includes(term) ||
-                                 item.date.split('T')[0].includes(term) ||
-                                 typeName.toLowerCase().includes(term);
+            const matchesSearch = description.includes(term) || amount.toString().includes(term);
             
             return matchesSearch;
         });
     };
 
-    const filteredSales = filterItems(sales, 'Ingreso');
-    const filteredSupplierOrders = filterItems(supplierOrders, 'Pedido');
-    const filteredExpenses = filterItems(manualExpenses, 'Gasto');
+    const filteredSales = (selectedType === 'ALL' || selectedType === 'INCOME') ? filterItems(sales) : [];
+    const filteredSupplierOrders = (selectedType === 'ALL' || selectedType === 'EXPENSE') ? filterItems(supplierOrders) : [];
+    const filteredExpenses = (selectedType === 'ALL' || selectedType === 'EXPENSE') ? filterItems(manualExpenses) : [];
 
     const totalIncome = filteredSales.reduce((acc, s) => acc + parseFloat(s.total_amount), 0);
     const totalSupplierDebt = filteredSupplierOrders.reduce((acc, o) => acc + parseFloat(o.total_cost), 0);
@@ -230,30 +250,81 @@ const Accounting = () => {
                         <p>Análisis financiero detallado</p>
                     </div>
                     <div style={{ display: 'flex', gap: '15px', flexWrap: 'wrap', alignItems: 'center' }}>
-                        <div className="search-bar" style={{ position: 'relative' }}>
-                            <Search size={18} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: '#888' }} />
-                            <input 
-                                type="text" 
-                                placeholder="Buscar movimientos..." 
-                                value={searchTerm}
-                                onChange={(e) => setSearchTerm(e.target.value)}
-                                style={{ padding: '10px 15px 10px 40px', borderRadius: '10px', border: '1px solid #ddd', minWidth: '250px', fontSize: '0.9rem', width: '100%' }}
-                            />
+                        <div style={{ display: 'flex', gap: '10px' }}>
+                            <div className="search-bar" style={{ position: 'relative', flex: 1 }}>
+                                <Search size={18} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: '#888' }} />
+                                <input 
+                                    type="text" 
+                                    placeholder="Buscar..." 
+                                    value={searchTerm}
+                                    onChange={(e) => setSearchTerm(e.target.value)}
+                                    style={{ padding: '10px 15px 10px 40px', borderRadius: '10px', border: '1px solid #ddd', minWidth: '180px', fontSize: '0.9rem', width: '100%' }}
+                                />
+                            </div>
+                            <button 
+                                onClick={() => setShowAdvancedFilters(!showAdvancedFilters)}
+                                style={{ padding: '10px', borderRadius: '10px', border: '1px solid #ddd', background: showAdvancedFilters ? '#333' : '#fff', color: showAdvancedFilters ? '#fff' : '#333', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '5px' }}
+                            >
+                                <Filter size={18} />
+                                <span className="hide-mobile">Filtros</span>
+                            </button>
                         </div>
                         <div className="period-toggle">
-                            <button className={viewMode === 'daily' ? 'active' : ''} onClick={() => setViewMode('daily')}>DIARIO</button>
-                            <button className={viewMode === 'weekly' ? 'active' : ''} onClick={() => setViewMode('weekly')}>SEMANAL</button>
-                            <button className={viewMode === 'monthly' ? 'active' : ''} onClick={() => setViewMode('monthly')}>MENSUAL</button>
+                            <button className={viewMode === 'daily' && !startDate && !endDate ? 'active' : ''} onClick={() => { setViewMode('daily'); setStartDate(''); setEndDate(''); }}>DIARIO</button>
+                            <button className={viewMode === 'weekly' && !startDate && !endDate ? 'active' : ''} onClick={() => { setViewMode('weekly'); setStartDate(''); setEndDate(''); }}>SEMANAL</button>
+                            <button className={viewMode === 'monthly' && !startDate && !endDate ? 'active' : ''} onClick={() => { setViewMode('monthly'); setStartDate(''); setEndDate(''); }}>MENSUAL</button>
                         </div>
                     </div>
                 </div>
+
+                {showAdvancedFilters && (
+                    <div className="advanced-filters-panel" style={{ marginTop: '20px', padding: '20px', background: '#f8f9fa', borderRadius: '12px', border: '1px solid #eee', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '15px', animation: 'slideDown 0.3s ease' }}>
+                        <div className="filter-group">
+                            <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: '800', color: '#888', marginBottom: '5px', textTransform: 'uppercase' }}>Desde</label>
+                            <input type="date" value={startDate} onChange={e => setStartDate(e.target.value)} style={{ width: '100%', padding: '8px', border: '1px solid #ddd', borderRadius: '6px' }} />
+                        </div>
+                        <div className="filter-group">
+                            <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: '800', color: '#888', marginBottom: '5px', textTransform: 'uppercase' }}>Hasta</label>
+                            <input type="date" value={endDate} onChange={e => setEndDate(e.target.value)} style={{ width: '100%', padding: '8px', border: '1px solid #ddd', borderRadius: '6px' }} />
+                        </div>
+                        <div className="filter-group">
+                            <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: '800', color: '#888', marginBottom: '5px', textTransform: 'uppercase' }}>Categoría</label>
+                            <select value={selectedCategory} onChange={e => setSelectedCategory(e.target.value)} style={{ width: '100%', padding: '8px', border: '1px solid #ddd', borderRadius: '6px' }}>
+                                <option value="ALL">Todas las categorías</option>
+                                <option value="Venta TPV">Ventas (TPV)</option>
+                                <option value="Materia Prima">Materia Prima (Proveedores)</option>
+                                <option value="Local">Local / Suministros</option>
+                                <option value="Sueldos">Sueldos / Personal</option>
+                                <option value="Mercadería">Mercadería</option>
+                                <option value="Publicidad">Publicidad</option>
+                                <option value="Otros">Otros</option>
+                            </select>
+                        </div>
+                        <div className="filter-group">
+                            <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: '800', color: '#888', marginBottom: '5px', textTransform: 'uppercase' }}>Tipo</label>
+                            <select value={selectedType} onChange={e => setSelectedType(e.target.value)} style={{ width: '100%', padding: '8px', border: '1px solid #ddd', borderRadius: '6px' }}>
+                                <option value="ALL">Ingresos y Gastos</option>
+                                <option value="INCOME">Solo Ingresos</option>
+                                <option value="EXPENSE">Solo Gastos</option>
+                            </select>
+                        </div>
+                        <div className="filter-group" style={{ display: 'flex', alignItems: 'flex-end' }}>
+                            <button 
+                                onClick={() => { setStartDate(''); setEndDate(''); setSelectedCategory('ALL'); setSelectedType('ALL'); setSearchTerm(''); }}
+                                style={{ width: '100%', padding: '8px', border: '1px solid #ddd', borderRadius: '6px', background: '#fff', cursor: 'pointer', fontSize: '0.8rem', fontWeight: 'bold' }}
+                            >
+                                Limpiar Filtros
+                            </button>
+                        </div>
+                    </div>
+                )}
             </header>
 
             <div className="accounting-summary-grid">
                 <div className="summary-card income">
                     <h3>Ingresos</h3>
                     <p className="amount">+${Math.round(totalIncome).toLocaleString('es-AR')}</p>
-                    <span>{filteredSales.length} ventas {viewMode === 'daily' ? 'de hoy' : viewMode === 'weekly' ? 'esta semana' : 'del mes'}</span>
+                    <span>{filteredSales.length} movimientos {startDate || endDate ? 'en el rango seleccionado' : viewMode === 'daily' ? 'de hoy' : viewMode === 'weekly' ? 'esta semana' : 'del mes'}</span>
                 </div>
                 <div className="summary-card expenses">
                     <h3>Gastos</h3>
@@ -265,7 +336,7 @@ const Accounting = () => {
                     <p className={`amount ${balance >= 0 ? 'positive' : 'negative'}`}>
                         ${Math.round(balance).toLocaleString('es-AR')}
                     </p>
-                    <span>Cuentas de {viewMode === 'daily' ? 'hoy' : viewMode === 'weekly' ? 'los últimos 7 días' : 'este periodo mensual'}</span>
+                    <span>Cuentas del periodo actual filtrado</span>
                 </div>
             </div>
 
@@ -297,9 +368,10 @@ const Accounting = () => {
                                 <div className="form-group">
                                     <label>Categoría</label>
                                     <select value={category} onChange={e => setCategory(e.target.value)}>
-                                        <option value="Suministros">Suministros</option>
-                                        <option value="Alquiler">Alquiler</option>
-                                        <option value="Personal">Personal</option>
+                                        <option value="Local">Local / Suministros</option>
+                                        <option value="Sueldos">Sueldos / Personal</option>
+                                        <option value="Mercadería">Mercadería</option>
+                                        <option value="Publicidad">Publicidad</option>
                                         <option value="Otros">Otros</option>
                                     </select>
                                 </div>
@@ -350,9 +422,10 @@ const Accounting = () => {
                                                             onChange={val => setEditForm({...editForm, category: val.target.value})}
                                                             className="inline-edit-input"
                                                         >
-                                                            <option value="Suministros">Suministros</option>
-                                                            <option value="Alquiler">Alquiler</option>
-                                                            <option value="Personal">Personal</option>
+                                                            <option value="Local">Local / Suministros</option>
+                                                            <option value="Sueldos">Sueldos / Personal</option>
+                                                            <option value="Mercadería">Mercadería</option>
+                                                            <option value="Publicidad">Publicidad</option>
                                                             <option value="Otros">Otros</option>
                                                         </select>
                                                     ) : e.category}

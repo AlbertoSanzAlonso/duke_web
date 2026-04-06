@@ -107,25 +107,24 @@ const Gallery = () => {
                         background: 'var(--admin-primary)',
                         color: 'white',
                         border: 'none',
-                        padding: '12px 24px',
+                        padding: '0 25px',
                         borderRadius: '10px',
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'center',
                         gap: '8px',
-                        fontWeight: '700',
-                        fontSize: '0.95rem',
+                        fontWeight: '800',
+                        fontSize: '0.9rem',
                         cursor: 'pointer',
-                        boxShadow: '0 4px 15px rgba(240, 62, 62, 0.2)',
+                        height: '45px',
+                        boxShadow: '0 4px 12px rgba(240, 62, 62, 0.2)',
                         whiteSpace: 'nowrap',
                         flexShrink: 0,
                         transition: 'all 0.3s ease',
-                        width: 'auto',
-                        height: 'auto',
                         minWidth: 'max-content'
                     }}
                 >
-                    <Plus size={20} strokeWidth={3} /> <span style={{ marginTop: '1px' }}>Añadir Foto</span>
+                    <Plus size={20} strokeWidth={3} /> AÑADIR FOTO
                 </button>
             </div>
 
@@ -238,8 +237,22 @@ const Gallery = () => {
                                 <input type="text" value={newImage.title} placeholder="Ej: Salón Principal" onChange={e => setNewImage({...newImage, title: e.target.value})} style={{ width: '100%', padding: '12px', border: '1px solid #ddd', borderRadius: '8px', fontSize: '1rem' }} />
                             </div>
                             <div>
-                                <label style={{ display: 'block', fontWeight: 'bold', marginBottom: '8px', fontSize: '0.9rem' }}>Archivo de Imagen *</label>
-                                <input type="file" accept="image/*" onChange={e => setNewImage({...newImage, image: e.target.files[0]})} style={{ width: '100%', padding: '12px', border: '1px solid #ddd', borderRadius: '8px', fontSize: '1rem' }} required />
+                                <label style={{ display: 'block', fontWeight: '800', marginBottom: '8px', fontSize: '0.75rem', color: '#888', textTransform: 'uppercase' }}>Archivo de Imagen *</label>
+                                <input 
+                                    type="file" 
+                                    accept="image/*" 
+                                    onChange={e => setNewImage({...newImage, image: e.target.files[0]})} 
+                                    style={{ 
+                                        width: '100%', 
+                                        padding: '10px', 
+                                        border: '1px solid #ddd', 
+                                        borderRadius: '8px', 
+                                        fontSize: '0.9rem',
+                                        background: '#f8f9fa',
+                                        cursor: 'pointer' 
+                                    }} 
+                                    required 
+                                />
                             </div>
                             <div style={{ display: 'flex', gap: '15px', marginTop: '10px' }}>
                                 <button type="button" onClick={() => setIsAddingImg(false)} style={{ flex: 1, padding: '12px', background: '#f8f9fa', border: 'none', borderRadius: '8px', fontWeight: 'bold', cursor: 'pointer' }}>Cancelar</button>

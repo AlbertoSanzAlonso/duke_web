@@ -66,6 +66,10 @@ function About() {
         </div>
       </section>
 
+      <div className="about-logo-wrapper">
+        <img src="/brand/duke burger 1 negativo.png" alt="Duke Logo" className="duke-about-logo" />
+      </div>
+
       <section className="about-section">
         <div className="container">
           <h2 className="section-title">NUESTRA HISTORIA</h2>

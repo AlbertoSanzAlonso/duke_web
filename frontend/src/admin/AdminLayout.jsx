@@ -108,7 +108,7 @@ const AdminLayout = () => {
             <button className="admin-mobile-toggle" onClick={() => setIsMobileOpen(!isMobileOpen)}>
               <Menu size={24} />
             </button>
-            <h3 style={{ margin: 0 }}>Panel de Control</h3>
+            <h3 style={{ margin: 0, fontSize: '1.4rem', fontWeight: '800', letterSpacing: '1px' }}>DUKE BURGER PANEL</h3>
           </div>
           
           <UserDropdown />

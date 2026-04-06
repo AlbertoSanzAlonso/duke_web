@@ -120,17 +120,39 @@ function Products() {
                     onChange={e => setDescription(e.target.value)} 
                     style={{ padding: '10px', flex: 2, minWidth: '200px', borderRadius: '8px', border: '1px solid #ddd' }}
                 />
-                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                    <label style={{ fontSize: '0.8rem', color: '#666' }}>Foto:</label>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flex: 1, minWidth: '200px' }}>
+                    <label style={{ fontSize: '0.75rem', fontWeight: '800', color: '#888', textTransform: 'uppercase' }}>Foto:</label>
                     <input 
                         type="file" 
                         accept="image/*"
                         onChange={e => setImage(e.target.files[0])} 
-                        style={{ fontSize: '0.85rem' }}
+                        style={{ 
+                            padding: '10px', 
+                            fontSize: '0.85rem', 
+                            borderRadius: '8px', 
+                            border: '1px solid #ddd', 
+                            background: '#f8f9fa',
+                            flex: 1,
+                            cursor: 'pointer'
+                        }}
                     />
                 </div>
-                <button type="submit" className="main-button" style={{ padding: '10px 20px', background: 'var(--admin-primary)', color: 'white', border: 'none', borderRadius: '8px', cursor: 'pointer', fontWeight: 'bold' }}>
-                    + Crear Producto
+                <button type="submit" className="main-button" style={{ 
+                    padding: '12px 25px', 
+                    background: 'var(--admin-primary)', 
+                    color: 'white', 
+                    border: 'none', 
+                    borderRadius: '8px', 
+                    cursor: 'pointer', 
+                    fontWeight: '800',
+                    fontSize: '0.9rem',
+                    height: '45px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    boxShadow: '0 4px 12px rgba(240, 62, 62, 0.2)'
+                }}>
+                    + CREAR PRODUCTO
                 </button>
             </form>
 
@@ -177,18 +199,33 @@ function Products() {
                                                 <textarea value={editData.description} onChange={e => setEditData({...editData, description: e.target.value})} style={{ width: '100%', padding: '10px', border: '1px solid #ddd', borderRadius: '8px', resize: 'vertical', minHeight: '60px' }} />
                                             </div>
                                             
-                                            <div style={{ background: '#f8f9fa', padding: '12px', borderRadius: '8px' }}>
-                                                <label style={{ fontSize: '0.75rem', fontWeight: 'bold', color: '#666', display: 'block', marginBottom: '8px' }}>CAMBIAR IMAGEN</label>
-                                                <input type="file" accept="image/*" onChange={e => setEditData({...editData, image: e.target.files[0], removeImage: false})} style={{ fontSize: '0.8rem', width: '100%', boxSizing: 'border-box' }} />
+                                            <div style={{ background: '#f8f9fa', padding: '15px', borderRadius: '12px', border: '1px solid #eee' }}>
+                                                <label style={{ fontSize: '0.75rem', fontWeight: '800', color: '#888', display: 'block', marginBottom: '8px', textTransform: 'uppercase' }}>Cambiar Fotografía</label>
+                                                <input 
+                                                    type="file" 
+                                                    accept="image/*" 
+                                                    onChange={e => setEditData({...editData, image: e.target.files[0], removeImage: false})} 
+                                                    style={{ 
+                                                        fontSize: '0.85rem', 
+                                                        width: '100%', 
+                                                        boxSizing: 'border-box',
+                                                        padding: '10px',
+                                                        border: '1px solid #ddd',
+                                                        borderRadius: '8px',
+                                                        background: '#fff',
+                                                        cursor: 'pointer'
+                                                    }} 
+                                                />
                                                 
                                                 {prod.image && (
-                                                    <label style={{ display: 'flex', alignItems: 'center', gap: '8px', marginTop: '10px', fontSize: '0.85rem', color: '#e03131', cursor: 'pointer', fontWeight: 'bold' }}>
+                                                    <label style={{ display: 'flex', alignItems: 'center', gap: '8px', marginTop: '12px', fontSize: '0.85rem', color: '#e03131', cursor: 'pointer', fontWeight: '700' }}>
                                                         <input 
                                                             type="checkbox" 
                                                             checked={editData.removeImage} 
                                                             onChange={e => setEditData({...editData, removeImage: e.target.checked})} 
+                                                            style={{ width: '16px', height: '16px' }}
                                                         />
-                                                        Quitar fotografía actual
+                                                        Eliminar fotografía actual
                                                     </label>
                                                 )}
                                             </div>

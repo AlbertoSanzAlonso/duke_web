@@ -425,8 +425,18 @@ function Home() {
           </div>
         </div>
         <div className="marquee">
-          <div className="marquee-content">
-            BURGER - PACHATA - LOMO - PIZZA - BEBIDA - SAN JUAN - BURGER - PACHATA - LOMO - PIZZA - BEBIDA - SAN JUAN - BURGER - PACHATA - LOMO - PIZZA - BEBIDA - SAN JUAN
+          <div className="marquee-content" style={{ display: 'flex', width: 'max-content', gap: '30px' }}>
+            {/* Contenido repetido para bucle infinito sin saltos */}
+            {[1, 2, 3, 4, 5, 6].map((i) => (
+              <span key={i} style={{ 
+                fontFamily: 'var(--font-heading)', 
+                fontSize: '2rem', 
+                color: 'white',
+                whiteSpace: 'nowrap'
+              }}>
+                {deliverySettings.marquee_text || "BURGER - PACHATA - LOMO - PIZZA - BEBIDA - SAN JUAN - "}
+              </span>
+            ))}
           </div>
         </div>
       </header>

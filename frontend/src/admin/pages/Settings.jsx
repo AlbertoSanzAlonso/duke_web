@@ -145,6 +145,9 @@ const Settings = () => {
                     <button onClick={() => setActiveTab('gallery')} className={`tab-btn ${activeTab === 'gallery' ? 'active' : ''}`} style={tabBtnStyle(activeTab === 'gallery')}>
                         <ImageIcon size={18} /> Galería Local
                     </button>
+                    <button onClick={() => setActiveTab('custom')} className={`tab-btn ${activeTab === 'custom' ? 'active' : ''}`} style={tabBtnStyle(activeTab === 'custom')}>
+                        <Save size={18} /> Personalización
+                    </button>
                 </div>
             </div>
 
@@ -283,6 +286,27 @@ const Settings = () => {
                     </div>
                 )}
 
+                {activeTab === 'custom' && (
+                    <div className="tab-content">
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '15px', marginBottom: '25px', borderBottom: '1px solid #eee', paddingBottom: '15px' }}>
+                            <Save size={32} color="#f03e3e" />
+                            <h2 style={{ margin: 0, fontSize: '1.5rem' }}>Personalización</h2>
+                        </div>
+                        <div className="setting-field">
+                            <label style={labelStyle}>Texto del Banner (Marquee)</label>
+                            <textarea 
+                                value={deliveryRates.marquee_text || ''} 
+                                onChange={e => handleRateChange('marquee_text', e.target.value)} 
+                                style={{ ...inputStyle(false), height: '100px', resize: 'vertical' }}
+                                placeholder="Ej: BURGER - PACHATA - LOMO - PIZZA - BEBIDA - SAN JUAN"
+                            />
+                        </div>
+                        <button onClick={saveRates} style={saveButtonStyle} disabled={isSaving}>
+                            <Save size={20} /> {isSaving ? 'GUARDANDO...' : 'GUARDAR CAMBIOS'}
+                        </button>
+                    </div>
+                )}
+
                 {activeTab === 'gallery' && (
                     <div className="tab-content">
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '20px', marginBottom: '25px', borderBottom: '1px solid #eee', paddingBottom: '15px' }}>
@@ -290,8 +314,27 @@ const Settings = () => {
                                 <ImageIcon size={32} color="#f03e3e" />
                                 <h2 style={{ margin: 0, fontSize: '1.5rem' }}>Galería del Local</h2>
                             </div>
-                            <button onClick={() => setIsAddingImg(true)} style={addImgBtnStyle}>
-                                <Plus size={20} /> Añadir Foto
+                            <button 
+                                onClick={() => setIsAddingImg(true)} 
+                                style={{
+                                    background: '#f03e3e',
+                                    color: 'white',
+                                    border: 'none',
+                                    padding: '12px 25px',
+                                    borderRadius: '10px',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    gap: '8px',
+                                    fontWeight: '800',
+                                    fontSize: '0.9rem',
+                                    cursor: 'pointer',
+                                    height: '45px',
+                                    boxShadow: '0 4px 12px rgba(240, 62, 62, 0.2)',
+                                    transition: 'all 0.3s ease'
+                                }}
+                            >
+                                <Plus size={18} /> AÑADIR FOTO
                             </button>
                         </div>
 
@@ -358,8 +401,22 @@ const Settings = () => {
                                 <input type="text" value={newImage.title} placeholder="Ej: Salón Principal" onChange={e => setNewImage({...newImage, title: e.target.value})} style={modalInputStyle} />
                             </div>
                             <div>
-                                <label style={modalLabelStyle}>Archivo de Imagen *</label>
-                                <input type="file" accept="image/*" onChange={e => setNewImage({...newImage, image: e.target.files[0]})} style={modalInputStyle} required />
+                                <label style={{ display: 'block', fontWeight: '800', marginBottom: '8px', fontSize: '0.75rem', color: '#888', textTransform: 'uppercase' }}>Archivo de Imagen *</label>
+                                <input 
+                                    type="file" 
+                                    accept="image/*" 
+                                    onChange={e => setNewImage({...newImage, image: e.target.files[0]})} 
+                                    style={{ 
+                                        width: '100%', 
+                                        padding: '10px', 
+                                        border: '1px solid #ddd', 
+                                        borderRadius: '8px', 
+                                        fontSize: '0.9rem',
+                                        background: '#f8f9fa',
+                                        cursor: 'pointer' 
+                                    }} 
+                                    required 
+                                />
                             </div>
                             <div style={{ display: 'flex', gap: '15px', marginTop: '10px' }}>
                                 <button type="button" onClick={() => setIsAddingImg(false)} style={cancelBtnStyle}>Cancelar</button>

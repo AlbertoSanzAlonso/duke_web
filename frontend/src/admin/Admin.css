@@ -35,6 +35,16 @@ body.admin-mode {
   border-bottom: 1px solid rgba(255, 255, 255, 0.1);
 }
 
+.sidebar-header img {
+  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.sidebar-header img:hover {
+  transform: scale(1.08) translateY(-3px);
+  filter: brightness(1.2) drop-shadow(0 0 15px rgba(240, 62, 62, 0.4));
+  cursor: pointer;
+}
+
 .sidebar-header h2 {
   color: #fff;
   margin: 0;
