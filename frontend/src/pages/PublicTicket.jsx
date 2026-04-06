@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { ShoppingBag, MapPin, Calendar, Clock, ChevronLeft } from 'lucide-react';
+import { ShoppingBag, MapPin, Calendar, Clock, ChevronLeft, Download, Printer } from 'lucide-react';
 import LoadingScreen from '../admin/components/LoadingScreen';
 
 const PublicTicket = () => {
@@ -172,6 +172,30 @@ const PublicTicket = () => {
                             "{order.notes}"
                         </div>
                     )}
+
+                    <div className="no-print" style={{ marginTop: '25px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                        <button 
+                            onClick={() => window.print()}
+                            style={{
+                                width: '100%', 
+                                padding: '15px', 
+                                background: 'white', 
+                                color: 'black', 
+                                border: 'none', 
+                                borderRadius: '10px', 
+                                fontWeight: 'bold', 
+                                fontSize: '1rem',
+                                display: 'flex', 
+                                alignItems: 'center', 
+                                justifyContent: 'center', 
+                                gap: '10px', 
+                                cursor: 'pointer',
+                                boxShadow: '0 4px 15px rgba(255,255,255,0.1)'
+                            }}
+                        >
+                            <Download size={20} /> DESCARGAR TICKET (PDF)
+                        </button>
+                    </div>
                 </div>
             </main>
 
