@@ -112,21 +112,21 @@ const Settings = () => {
 
     const toggleDay = (dayId) => {
         const dId = dayId.toString();
-        setSettings(prev => {
-            const newSettings = prev.map(s => {
+        setSettings(prevSettings => {
+            const updated = prevSettings.map(s => {
                 if (s.key === 'opening_days') {
-                    const currentDays = s.value ? s.value.split(',').filter(d => d.trim() !== '') : [];
-                    let newDays;
-                    if (currentDays.includes(dId)) {
-                        newDays = currentDays.filter(d => d !== dId);
+                    const val = s.value || '';
+                    let days = val.split(',').filter(d => d.trim() !== '');
+                    if (days.includes(dId)) {
+                        days = days.filter(d => d !== dId);
                     } else {
-                        newDays = [...currentDays, dId];
+                        days = [...days, dId];
                     }
-                    return { ...s, value: newDays.sort((a, b) => parseInt(a) - parseInt(b)).join(',') };
+                    return { ...s, value: days.sort().join(',') };
                 }
                 return s;
             });
-            return newSettings;
+            return updated;
         });
     };
 
@@ -212,23 +212,20 @@ const Settings = () => {
                             <label style={labelStyle}>Días de Atención</label>
                             <div style={{ 
                                 display: 'grid', 
-                                gridTemplateColumns: 'repeat(auto-fill, minmax(140px, 1fr))', 
+                                gridTemplateColumns: 'repeat(auto-fill, minmax(130px, 1fr))', 
                                 gap: '10px', 
                                 marginTop: '10px' 
                             }}>
                                 {DAYS.map(day => {
                                     const openingDaysVal = settings.find(s => s.key === 'opening_days')?.value || '';
                                     const daysArray = openingDaysVal.split(',').filter(d => d.trim() !== '');
-                                    const isActive = daysArray.includes(day.id);
+                                    const isActive = daysArray.includes(day.id.toString());
                                     
                                     return (
                                         <button 
                                             key={day.id}
                                             type="button"
-                                            onClick={(e) => {
-                                                e.preventDefault();
-                                                toggleDay(day.id);
-                                            }}
+                                            onClick={() => toggleDay(day.id)}
                                             style={{
                                                 padding: '12px',
                                                 borderRadius: '10px',
@@ -241,7 +238,7 @@ const Settings = () => {
                                                 alignItems: 'center',
                                                 justifyContent: 'center',
                                                 gap: '8px',
-                                                transition: 'all 0.2s ease',
+                                                transition: 'all 0.15s ease',
                                                 fontSize: '0.9rem'
                                             }}
                                         >

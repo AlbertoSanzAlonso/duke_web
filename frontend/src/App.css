@@ -1309,3 +1309,25 @@
     order: 1;
   }
 }
+
+/* Settings Admin Tab Specifics */
+.settings-tabs-container {
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+}
+.settings-tabs-container::-webkit-scrollbar {
+    display: none;
+}
+
+@media (max-width: 1024px) {
+    .settings-tabs {
+        flex-direction: column !important;
+        width: 100% !important;
+        gap: 10px !important;
+    }
+    .settings-tabs .tab-btn {
+        width: 100% !important;
+        justify-content: flex-start !important;
+        padding: 15px !important;
+    }
+}
