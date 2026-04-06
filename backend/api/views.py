@@ -205,7 +205,7 @@ class GlobalSettingViewSet(viewsets.ModelViewSet):
     queryset = GlobalSetting.objects.all().order_by('key')
     serializer_class = GlobalSettingSerializer
     lookup_field = 'key'
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
 
     from rest_framework.decorators import action
     @action(detail=False, methods=['post'], url_path='setup-defaults')

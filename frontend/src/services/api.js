@@ -152,6 +152,16 @@ export const deleteInventoryItem = async (id) => {
     return true;
 };
 
+export const updateInventoryItem = async (id, data) => {
+    const response = await fetch(`${API_URL}/inventory/${id}/`, {
+        method: 'PATCH',
+        headers: getHeaders('application/json'),
+        body: JSON.stringify(data)
+    });
+    if (!response.ok) throw new Error('Error al actualizar inventario');
+    return await response.json();
+};
+
 // SALES (TPV)
 export const createSale = async (data) => {
     const response = await fetch(`${API_URL}/sales/`, {
@@ -214,6 +224,16 @@ export const deleteExpense = async (id) => {
     return true;
 };
 
+export const updateExpense = async (id, data) => {
+    const response = await fetch(`${API_URL}/expenses/${id}/`, {
+        method: 'PATCH',
+        headers: getHeaders('application/json'),
+        body: JSON.stringify(data)
+    });
+    if (!response.ok) throw new Error('Error al actualizar gasto');
+    return await response.json();
+};
+
 export const fetchSupplierOrders = async () => {
     const response = await fetch(`${API_URL}/supplier-orders/`, { headers: getHeaders() });
     if (!response.ok) throw new Error('Error al cargar pedidos de proveedores');
@@ -247,16 +267,6 @@ export const deleteSupplierOrder = async (id) => {
     });
     if (!response.ok) throw new Error('Error al eliminar pedido');
     return true;
-};
-
-export const updateExpense = async (id, data) => {
-    const response = await fetch(`${API_URL}/expenses/${id}/`, {
-        method: 'PATCH',
-        headers: getHeaders('application/json'),
-        body: JSON.stringify(data)
-    });
-    if (!response.ok) throw new Error('Error al actualizar gasto');
-    return await response.json();
 };
 
 // SETTINGS

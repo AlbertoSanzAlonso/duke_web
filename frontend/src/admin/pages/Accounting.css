@@ -262,3 +262,35 @@
         font-size: 1.1rem;
     }
 }
+
+.inline-edit-input {
+    padding: 5px 8px !important;
+    font-size: 0.9rem !important;
+    border: 1px solid #ddd !important;
+    border-radius: 4px !important;
+    background: #fff !important;
+    color: #333 !important;
+    width: 100%;
+}
+
+.edit-btn, .save-btn, .cancel-btn, .delete-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 5px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 4px;
+    transition: all 0.2s ease;
+}
+
+.edit-btn { color: #333 !important; }
+.save-btn { color: #2fb344 !important; }
+.cancel-btn { color: #888 !important; }
+.delete-btn { color: #ff4d4d !important; }
+
+.edit-btn:hover { background: #f0f0f0; transform: scale(1.1); }
+.save-btn:hover { background: #f0fdf4; transform: scale(1.1); }
+.cancel-btn:hover { background: #f8f9fa; transform: scale(1.1); }
+.delete-btn:hover { background: #fff5f5; transform: scale(1.1); }
