@@ -40,8 +40,9 @@ def MeView(request):
             return Response(UserSerializer(user).data)
         return Response(serializer.errors, status=400)
 from django.http import StreamingHttpResponse
-import asyncio
-import json
+import os
+import uuid
+from io import BytesIO
 from asgiref.sync import sync_to_async
 from django.contrib.auth.tokens import default_token_generator
 from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
@@ -259,17 +260,16 @@ from django.http import StreamingHttpResponse
 from django.views.decorators.csrf import csrf_exempt
 
 @csrf_exempt
-async def OrderStreamView(request):
-    async def event_stream():
-        # Obtenemos el último ID de forma asíncrona al conectar
-        last_seen_sale = await Sale.objects.order_by('-id').afirst()
-        last_seen_id = last_seen_sale.id if last_seen_sale else 0
+def OrderStreamView(request):
+    def event_stream():
+        # Conexión sincrónica estable para Gunicorn (WSGI)
+        last_seen_id = Sale.objects.order_by('-id').first().id if Sale.objects.exists() else 0
 
         while True:
-            # Consultamos si hay ventas nuevas usando el iterador asíncrono
+            # Consultamos ventas nuevas de forma eficiente
             new_sales = Sale.objects.filter(id__gt=last_seen_id).order_by('id')
             
-            async for sale in new_sales.aiter():
+            for sale in new_sales:
                 data = {
                     'type': 'new_order',
                     'id': sale.id,
@@ -279,19 +279,19 @@ async def OrderStreamView(request):
                 yield f"data: {json.dumps(data)}\n\n"
                 last_seen_id = sale.id
 
-            # Heartbeat asíncrono
+            # Heartbeat para mantener conexión abierta
             yield f"data: {json.dumps({'type': 'heartbeat'})}\n\n"
             
-            # Espera asíncrona: LIBERA el worker para otras peticiones
-            await asyncio.sleep(2) 
+            # Pausa sincrónica: el motor gthread cederá el paso a otros hilos
+            time.sleep(2) 
 
     response = StreamingHttpResponse(event_stream(), content_type='text/event-stream')
     
     # --- CONFIGURACIÓN CRÍTICA PARA COOLIFY / TRAEFIK / NGINX ---
-    response['X-Accel-Buffering'] = 'no'      # Desactiva el buffering del proxy
-    response['Cache-Control'] = 'no-cache'    # Evita que el navegador cachee el flujo
-    response['Content-Encoding'] = 'none'     # PISA el Gzip de Coolify
-    response['Connection'] = 'keep-alive'     # Mantiene la tubería abierta
+    response['X-Accel-Buffering'] = 'no'      
+    response['Cache-Control'] = 'no-cache'    
+    response['Content-Encoding'] = 'none'     
+    response['Connection'] = 'keep-alive'     
     # ------------------------------------------------------------
     
     return response
