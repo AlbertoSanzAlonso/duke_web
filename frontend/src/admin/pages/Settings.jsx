@@ -146,7 +146,7 @@ const Settings = () => {
                         <ImageIcon size={18} /> Galería Local
                     </button>
                     <button onClick={() => setActiveTab('custom')} className={`tab-btn ${activeTab === 'custom' ? 'active' : ''}`} style={tabBtnStyle(activeTab === 'custom')}>
-                        <Save size={18} /> Personalización
+                        <Save size={18} /> Personalizar
                     </button>
                 </div>
             </div>
@@ -447,7 +447,9 @@ const tabBtnStyle = (active) => ({
     fontFamily: 'inherit',
     textTransform: 'uppercase',
     letterSpacing: '0.5px',
-    fontSize: '0.85rem'
+    fontSize: '0.85rem',
+    whiteSpace: 'nowrap',
+    flexShrink: 0
 });
 
 const labelStyle = { fontWeight: 'bold', fontSize: '0.85rem', color: '#666', textTransform: 'uppercase', marginBottom: '8px', display: 'block' };
