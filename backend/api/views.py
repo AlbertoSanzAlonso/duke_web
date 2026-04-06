@@ -1,20 +1,37 @@
-from rest_framework import viewsets, permissions
+from rest_framework import viewsets, permissions, parsers, status
 from rest_framework.response import Response
-from rest_framework.decorators import api_view, permission_classes, parser_classes
+from rest_framework.decorators import api_view, permission_classes, parser_classes, action
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from django.contrib.auth.models import User
+from django.db.models import Q
 from .models import (Product, MenuEntry, Sale, Expense, InventoryItem, 
-                     SupplierOrder, GlobalSetting, GalleryImage, OpeningHour, DeliverySetting)
+                     SupplierOrder, GlobalSetting, GalleryImage, OpeningHour, DeliverySetting, UserProfile)
 from .serializers import (ProductSerializer, MenuEntrySerializer, SaleSerializer, 
                           SaleCreateSerializer, ExpenseSerializer,
                           InventoryItemSerializer, SupplierOrderSerializer, 
                           SupplierOrderCreateSerializer, GlobalSettingSerializer, 
                           GalleryImageSerializer, OpeningHourSerializer, 
                           DeliverySettingSerializer, UserSerializer)
-from .models import UserProfile
-from rest_framework import permissions, parsers
+
 from django.utils.decorators import method_decorator
 from django.views.decorators.cache import cache_page
+from django.http import StreamingHttpResponse
+from django.views.decorators.csrf import csrf_exempt
+from django.core import management
+from django.conf import settings
+from django.core.mail import send_mail
+from django.template.loader import render_to_string
+from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
+from django.utils.encoding import force_bytes, force_str
+from django.contrib.auth.tokens import default_token_generator
+from asgiref.sync import sync_to_async
+
+import os
+import uuid
+import json
+import time
+import asyncio
+from io import BytesIO
 
 @api_view(['GET', 'PATCH'])
 @permission_classes([permissions.IsAuthenticated])
@@ -41,19 +58,6 @@ def MeView(request):
             # Need to re-serialize after changes
             return Response(UserSerializer(user).data)
         return Response(serializer.errors, status=400)
-from django.http import StreamingHttpResponse
-import os
-import uuid
-from io import BytesIO
-from asgiref.sync import sync_to_async
-from django.contrib.auth.tokens import default_token_generator
-from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
-from django.utils.encoding import force_bytes, force_str
-from django.core.mail import send_mail
-from django.template.loader import render_to_string
-from django.conf import settings
-
-from django.core import management
 
 @api_view(['GET'])
 @permission_classes([permissions.AllowAny])
@@ -193,7 +197,6 @@ class SaleViewSet(viewsets.ModelViewSet):
             return [permissions.AllowAny()]
         return [permissions.IsAuthenticated()]
 
-    from rest_framework.decorators import action
     @action(detail=False, methods=['post'], url_path='bulk-actions')
     def bulk_actions(self, request):
         ids = request.data.get('ids', [])
@@ -238,7 +241,6 @@ class GlobalSettingViewSet(viewsets.ModelViewSet):
     lookup_field = 'key'
     permission_classes = [permissions.IsAuthenticatedOrReadOnly]
 
-    from rest_framework.decorators import action
     @action(detail=False, methods=['post'], url_path='setup-defaults')
     def setup_defaults(self, request):
         defaults = [
@@ -292,12 +294,6 @@ class GalleryImageViewSet(viewsets.ModelViewSet):
         
         # Para el público, solo las activas
         return GalleryImage.objects.filter(is_active=True).order_by('order', '-id')
-
-import time
-import json
-import asyncio
-from django.http import StreamingHttpResponse
-from django.views.decorators.csrf import csrf_exempt
 
 @csrf_exempt
 async def OrderStreamView(request):
