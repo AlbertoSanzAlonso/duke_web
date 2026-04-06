@@ -2,24 +2,33 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Menu, X } from 'lucide-react';
 import InstagramFeed from '../components/InstagramFeed.tsx';
-import { fetchGalleryImages } from '../services/api';
+import { fetchGalleryImages, fetchSettings } from '../services/api';
 
 function About() {
   const [gallery, setGallery] = useState([]);
+  const [settings, setSettings] = useState({});
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const loadGallery = async () => {
+    const loadData = async () => {
       try {
-        const data = await fetchGalleryImages();
-        setGallery(data);
+        const [galleryData, settingsData] = await Promise.all([
+          fetchGalleryImages(),
+          fetchSettings()
+        ]);
+        setGallery(galleryData);
+        
+        // Convert array to object for easy access
+        const settingsObj = {};
+        settingsData.forEach(s => settingsObj[s.key] = s.value);
+        setSettings(settingsObj);
       } catch (error) {
-        console.error("Error loading gallery:", error);
+        console.error("Error loading data:", error);
       } finally {
         setLoading(false);
       }
     };
-    loadGallery();
+    loadData();
   }, []);
 
   return (
@@ -125,8 +134,17 @@ function About() {
               </div>
               <div className="location-card">
                 <h3>HORARIOS</h3>
-                <p>Lunes a Jueves: 20:00 - 00:00</p>
-                <p>Viernes a Domingo: 20:00 - 02:00</p>
+                <p>Apertura: {settings.opening_time || '20:00'} hs</p>
+                <p>Cierre: {settings.closing_time || '00:00'} hs</p>
+                <p style={{ color: 'var(--color-primary)', fontWeight: 'bold', fontSize: '0.9rem', marginTop: '5px' }}>
+                  {(!settings.opening_days || settings.opening_days === '1,2,3,4,5,6,7') 
+                    ? 'TODOS LOS DÍAS' 
+                    : `DÍAS: ${settings.opening_days.split(',').map(d => {
+                        const days = ["", "LUN", "MAR", "MIE", "JUE", "VIE", "SAB", "DOM"];
+                        return days[parseInt(d)];
+                      }).join(', ')}`
+                  }
+                </p>
               </div>
               <div className="location-card">
                 <h3>CONTACTO</h3>
