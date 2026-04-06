@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { fetchMe, logout } from '../services/api';
+import { fetchMe, logout } from '../../services/api';
 import { User, LogOut, Settings, ChevronDown } from 'lucide-react';
 
 const UserDropdown = () => {
