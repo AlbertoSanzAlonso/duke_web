@@ -179,7 +179,7 @@ function Products() {
                                             
                                             <div style={{ background: '#f8f9fa', padding: '12px', borderRadius: '8px' }}>
                                                 <label style={{ fontSize: '0.75rem', fontWeight: 'bold', color: '#666', display: 'block', marginBottom: '8px' }}>CAMBIAR IMAGEN</label>
-                                                <input type="file" accept="image/*" onChange={e => setEditData({...editData, image: e.target.files[0], removeImage: false})} style={{ fontSize: '0.8rem', width: '100%' }} />
+                                                <input type="file" accept="image/*" onChange={e => setEditData({...editData, image: e.target.files[0], removeImage: false})} style={{ fontSize: '0.8rem', width: '100%', boxSizing: 'border-box' }} />
                                                 
                                                 {prod.image && (
                                                     <label style={{ display: 'flex', alignItems: 'center', gap: '8px', marginTop: '10px', fontSize: '0.85rem', color: '#e03131', cursor: 'pointer', fontWeight: 'bold' }}>

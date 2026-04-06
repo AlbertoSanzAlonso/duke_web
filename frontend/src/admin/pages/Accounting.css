@@ -17,6 +17,17 @@
     font-size: 1.1rem;
 }
 
+.search-bar input {
+    transition: all 0.2s ease;
+    outline: none;
+    background: #fff;
+}
+
+.search-bar input:focus {
+    border-color: var(--admin-primary) !important;
+    box-shadow: 0 4px 12px rgba(240, 62, 62, 0.1);
+}
+
 .period-toggle {
     display: flex;
     background: #f1f3f5;
@@ -76,9 +87,12 @@
 }
 
 .summary-card .amount {
-    font-size: 2.2rem;
+    font-size: clamp(1.2rem, 5vw, 2.2rem);
     font-weight: 800;
     margin-bottom: 5px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
 .summary-card .amount.positive {
@@ -222,8 +236,8 @@
     transform: scale(1.2);
 }
 
-/* RESPONSIVIDAD MÓVIL (CONTABILIDAD) */
-@media (max-width: 768px) {
+/* RESPONSIVIDAD MÓVIL (CONTABILIDAD E INVENTARIO) */
+@media (max-width: 900px) {
     .accounting-form .form-row {
         grid-template-columns: 1fr !important;
     }
@@ -255,15 +269,23 @@
     .accounting-table td {
         border: none;
         position: relative;
-        padding-left: 45% !important;
-        text-align: right !important;
+        padding-top: 30px !important; /* Espacio para el label arriba */
+        text-align: left !important;
         padding: 12px 0 !important;
         min-height: 45px;
         display: flex;
-        align-items: center;
-        justify-content: flex-end;
+        flex-direction: column;
+        align-items: flex-start;
+        justify-content: center;
         border-bottom: 1px solid #f9f9f9;
-        font-size: 0.95rem;
+        font-size: 0.9rem;
+        word-break: break-word;
+    }
+
+    .accounting-table td button {
+        padding: 5px 8px !important;
+        font-size: 0.8rem !important;
+        margin-top: 5px;
     }
 
     .accounting-table td:last-child {
@@ -272,9 +294,10 @@
 
     .accounting-table td::before {
         position: absolute;
+        top: 8px;
         left: 0;
-        width: 40%;
-        padding-right: 10px;
+        width: 100%;
+        padding-right: 0;
         white-space: nowrap;
         text-align: left !important;
         font-weight: 800;

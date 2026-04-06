@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { fetchInventory, createInventoryItem, deleteInventoryItem, updateInventoryItem } from '../../services/api';
 import Toast from '../components/Toast';
 import { Edit2, Save, X, Trash2 } from 'lucide-react';
+import './Accounting.css';
 
 function Inventory() {
     const [items, setItems] = useState([]);
@@ -108,8 +109,8 @@ function Inventory() {
                 Inventario de Almacén
             </h2>
             
-            <form onSubmit={handleCreate} style={{ display: 'flex', gap: '10px', marginBottom: '30px', flexWrap: 'wrap', alignItems: 'center', background: '#f8f9fa', padding: '15px', borderRadius: '12px', border: '1px solid #eee' }}>
-                <div style={{ flex: 1, minWidth: '200px' }}>
+            <form onSubmit={handleCreate} style={{ display: 'flex', gap: '15px', marginBottom: '30px', flexWrap: 'wrap', alignItems: 'flex-end', background: '#f8f9fa', padding: '15px', borderRadius: '12px', border: '1px solid #eee' }}>
+                <div style={{ flex: '1 1 200px' }}>
                     <label style={{ fontSize: '0.75rem', fontWeight: 'bold', display: 'block', marginBottom: '4px' }}>NUEVO ARTÍCULO</label>
                     <input 
                         type="text" 
@@ -117,18 +118,18 @@ function Inventory() {
                         value={name} 
                         onChange={e => setName(e.target.value)} 
                         required 
-                        style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid #ddd' }}
+                        style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid #ddd', boxSizing: 'border-box' }}
                     />
                 </div>
                 
-                <div style={{ minWidth: '150px' }}>
+                <div style={{ flex: '1 1 180px' }}>
                     <label style={{ fontSize: '0.75rem', fontWeight: 'bold', display: 'block', marginBottom: '4px' }}>CATEGORÍA</label>
                     {!showNewCategoryInput ? (
                         <div style={{ display: 'flex', gap: '5px' }}>
                             <select 
                                 value={category} 
                                 onChange={e => setCategory(e.target.value)}
-                                style={{ padding: '10px', borderRadius: '8px', border: '1px solid #ddd', flex: 1 }}
+                                style={{ padding: '10px', borderRadius: '8px', border: '1px solid #ddd', flex: 1, boxSizing: 'border-box' }}
                             >
                                 <option value="">Seleccionar...</option>
                                 {categories.map(cat => (
@@ -144,14 +145,14 @@ function Inventory() {
                                 placeholder="Nueva categoría" 
                                 value={newCategory} 
                                 onChange={e => setNewCategory(e.target.value)}
-                                style={{ padding: '10px', borderRadius: '8px', border: '1px solid #ddd', flex: 1 }}
+                                style={{ padding: '10px', borderRadius: '8px', border: '1px solid #ddd', flex: 1, boxSizing: 'border-box' }}
                             />
                             <button type="button" onClick={() => setShowNewCategoryInput(false)} style={{ padding: '8px', borderRadius: '8px', border: '1px solid #ddd', background: '#fff', cursor: 'pointer' }}>X</button>
                         </div>
                     )}
                 </div>
 
-                <div style={{ width: '100px' }}>
+                <div style={{ flex: '1 1 100px' }}>
                     <label style={{ fontSize: '0.75rem', fontWeight: 'bold', display: 'block', marginBottom: '4px' }}>INICIAL</label>
                     <input 
                         type="number" 
@@ -159,13 +160,13 @@ function Inventory() {
                         placeholder="Cantidad" 
                         value={quantity} 
                         onChange={e => setQuantity(e.target.value)} 
-                        style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid #ddd' }}
+                        style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid #ddd', boxSizing: 'border-box' }}
                     />
                 </div>
 
-                <div style={{ width: '100px' }}>
+                <div style={{ flex: '1 1 100px' }}>
                     <label style={{ fontSize: '0.75rem', fontWeight: 'bold', display: 'block', marginBottom: '4px' }}>UNIDAD</label>
-                    <select value={unit} onChange={e => setUnit(e.target.value)} style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid #ddd' }}>
+                    <select value={unit} onChange={e => setUnit(e.target.value)} style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid #ddd', boxSizing: 'border-box' }}>
                         <option value="unidades">Unidades</option>
                         <option value="kg">KG</option>
                         <option value="litros">Litros</option>
@@ -174,18 +175,18 @@ function Inventory() {
                     </select>
                 </div>
 
-                <div style={{ width: '100px' }}>
+                <div style={{ flex: '1 1 100px' }}>
                     <label style={{ fontSize: '0.75rem', fontWeight: 'bold', display: 'block', marginBottom: '4px' }}>MÍNIMO</label>
                     <input 
                         type="number" 
                         step="any" 
                         value={minStock} 
                         onChange={e => setMinStock(e.target.value)} 
-                        style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid #ddd' }}
+                        style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid #ddd', boxSizing: 'border-box' }}
                     />
                 </div>
 
-                <button type="submit" className="main-button" style={{ padding: '12px 24px', background: 'var(--admin-primary)', color: 'white', border: 'none', borderRadius: '8px', cursor: 'pointer', alignSelf: 'flex-end', fontWeight: 'bold' }}>
+                <button type="submit" className="main-button" style={{ flex: '1 1 150px', padding: '12px 24px', background: 'var(--admin-primary)', color: 'white', border: 'none', borderRadius: '8px', cursor: 'pointer', fontWeight: 'bold' }}>
                     REGISTRAR
                 </button>
             </form>

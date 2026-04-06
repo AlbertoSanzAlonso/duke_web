@@ -6,6 +6,7 @@ import { fetchGalleryImages, fetchSettings, fetchOpeningHours } from '../service
 
 function About() {
   const [gallery, setGallery] = useState([]);
+  const [selectedImage, setSelectedImage] = useState(null);
   const [settings, setSettings] = useState({});
   const [openingHours, setOpeningHours] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -91,7 +92,7 @@ function About() {
           ) : gallery.length > 0 ? (
             <div className="gallery-grid">
               {gallery.map((img) => (
-                <div key={img.id} className="gallery-item">
+                <div key={img.id} className="gallery-item" onClick={() => setSelectedImage(img.image)}>
                    <img src={img.image} alt={img.title || 'Duke Burger'} className="gallery-img-full" />
                 </div>
               ))}
@@ -123,6 +124,17 @@ function About() {
         </div>
       </section>
 
+      {/* Visor de imágenes expandidas */}
+      {selectedImage && (
+        <div className="image-viewer-modal" onClick={() => setSelectedImage(null)}>
+          <div className="viewer-close-btn">
+            <X size={40} />
+          </div>
+          <div className="viewer-content" onClick={e => e.stopPropagation()}>
+            <img src={selectedImage} alt="Full View" className="viewer-img" />
+          </div>
+        </div>
+      )}
 
       <section className="location-section">
         <div className="container">

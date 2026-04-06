@@ -157,7 +157,7 @@ const Settings = () => {
                                 <h2 style={{ margin: 0, fontSize: '1.5rem' }}>Parámetros de Envío</h2>
                             </div>
                         </div>
-                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '25px' }}>
+                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 240px), 1fr))', gap: '20px' }}>
                             <div className="setting-field">
                                 <label style={labelStyle}>Precio Base Envío</label>
                                 <div style={{ position: 'relative' }}>
@@ -397,6 +397,8 @@ const labelStyle = { fontWeight: 'bold', fontSize: '0.85rem', color: '#666', tex
 
 const inputStyle = (isKm) => ({
     width: '100%',
+    boxSizing: 'border-box',
+    background: '#fff',
     padding: `15px 15px 15px ${isKm ? '15px' : '35px'}`,
     borderRadius: '10px',
     border: '2px solid #ddd',

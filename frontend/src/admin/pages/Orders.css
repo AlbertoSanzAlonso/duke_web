@@ -56,17 +56,7 @@
     }
 }
 
-@media (max-width: 1024px) {
-    .orders-grid {
-        grid-template-columns: 1fr;
-    }
-    
-    .orders-table {
-        min-width: 800px; /* Force scroll on mobile to avoid squishing */
-    }
-}
-
-@media (max-width: 768px) {
+@media (max-width: 900px) {
     .orders-header {
         flex-direction: column;
         align-items: flex-start;
@@ -76,6 +66,7 @@
         width: 100%;
         display: grid;
         grid-template-columns: 1fr 1fr;
+        gap: 10px;
     }
     
     .stat-card {
@@ -85,6 +76,77 @@
 
     .orders-container {
         padding: 0.5rem;
+    }
+
+    .orders-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .orders-list-card {
+        overflow-x: hidden;
+        background: transparent;
+        box-shadow: none;
+    }
+
+    /* Transform Table to Cards */
+    .orders-table, 
+    .orders-table thead, 
+    .orders-table tbody, 
+    .orders-table th, 
+    .orders-table td, 
+    .orders-table tr {
+        display: block !important;
+        width: 100%;
+        box-sizing: border-box;
+    }
+
+    .orders-table thead tr {
+        position: absolute;
+        top: -9999px;
+        left: -9999px;
+    }
+
+    .orders-table tr {
+        margin-bottom: 2rem;
+        border: 1px solid #eee;
+        border-radius: 12px;
+        padding: 1.5rem;
+        background: #fff;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+    }
+
+    .orders-table td {
+        border: none;
+        position: relative;
+        padding-left: 40% !important;
+        text-align: right !important;
+        padding: 12px 0 !important;
+        display: flex;
+        align-items: center;
+        justify-content: flex-end;
+        border-bottom: 1px solid #f9f9f9;
+        font-size: 0.95rem;
+        word-break: break-word;
+        min-height: 45px;
+    }
+
+    .orders-table td:last-child {
+        border-bottom: none;
+    }
+
+    .orders-table td::before {
+        position: absolute;
+        left: 0;
+        width: 35%;
+        padding-right: 10px;
+        white-space: nowrap;
+        text-align: left !important;
+        font-weight: 800;
+        color: #888;
+        content: attr(data-label);
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
     }
 }
 

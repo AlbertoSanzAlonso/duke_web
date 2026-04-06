@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { fetchMenuEntries, createSale, fetchSales, updateSale, deleteSale, bulkActionSales } from '../../services/api';
+import { Trash2, Edit2, ChevronRight, CheckCircle2, MoreVertical, Plus, Minus, Search, ShoppingCart, Receipt } from 'lucide-react';
 import LoadingScreen from '../components/LoadingScreen';
 import Toast from '../components/Toast';
 import './Sales.css';
@@ -213,7 +214,10 @@ const Sales = () => {
             {toast && <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />}
             {/* FAB para móviles */}
             <button className="pos-fab" onClick={toggleTicket}>
-                <span className="fab-count">{totalItems}</span>
+                <div className="fab-icon-wrapper">
+                    <Receipt size={24} />
+                    <span className="fab-count">{totalItems}</span>
+                </div>
                 <span className="fab-text">Ver Ticket</span>
                 <span className="fab-total">${total.toLocaleString('es-AR')}</span>
             </button>

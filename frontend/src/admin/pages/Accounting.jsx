@@ -8,12 +8,13 @@ import {
 import './Accounting.css';
 import LoadingScreen from '../components/LoadingScreen';
 import Toast from '../components/Toast';
-import { Trash2, Edit2, Save, X } from 'lucide-react';
+import { Save, X, Trash2, Edit2, Search } from 'lucide-react';
 
 const Accounting = () => {
     const [sales, setSales] = useState([]);
     const [supplierOrders, setSupplierOrders] = useState([]);
     const [manualExpenses, setManualExpenses] = useState([]);
+    const [searchTerm, setSearchTerm] = useState('');
     const [loading, setLoading] = useState(true);
     const [toast, setToast] = useState(null); 
     
@@ -174,26 +175,42 @@ const Accounting = () => {
 
     const [viewMode, setViewMode] = useState('daily'); // 'daily', 'weekly', 'monthly'
 
-    const filterByPeriod = (items) => {
+    const filterItems = (items, typeName) => {
         const now = new Date();
         return items.filter(item => {
+            // Period Filter
             const itemDate = new Date(item.date);
+            let dateMatch = true;
             if (viewMode === 'daily') {
-                return itemDate.toDateString() === now.toDateString();
+                dateMatch = itemDate.toDateString() === now.toDateString();
             } else if (viewMode === 'weekly') {
                 const diffTime = Math.abs(now - itemDate);
                 const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-                return diffDays <= 7;
+                dateMatch = diffDays <= 7;
             } else if (viewMode === 'monthly') {
-                return itemDate.getMonth() === now.getMonth() && itemDate.getFullYear() === now.getFullYear();
+                dateMatch = itemDate.getMonth() === now.getMonth() && itemDate.getFullYear() === now.getFullYear();
             }
-            return true;
+
+            if (!dateMatch) return false;
+
+            // Search Filter
+            if (!searchTerm) return true;
+            
+            const term = searchTerm.toLowerCase();
+            const description = (item.description || item.customer_name || item.supplier_name || "").toLowerCase();
+            const amount = item.amount || item.total_amount || item.total_cost || "";
+            const matchesSearch = description.includes(term) || 
+                                 amount.toString().includes(term) ||
+                                 item.date.split('T')[0].includes(term) ||
+                                 typeName.toLowerCase().includes(term);
+            
+            return matchesSearch;
         });
     };
 
-    const filteredSales = filterByPeriod(sales);
-    const filteredSupplierOrders = filterByPeriod(supplierOrders);
-    const filteredExpenses = filterByPeriod(manualExpenses);
+    const filteredSales = filterItems(sales, 'Ingreso');
+    const filteredSupplierOrders = filterItems(supplierOrders, 'Pedido');
+    const filteredExpenses = filterItems(manualExpenses, 'Gasto');
 
     const totalIncome = filteredSales.reduce((acc, s) => acc + parseFloat(s.total_amount), 0);
     const totalSupplierDebt = filteredSupplierOrders.reduce((acc, o) => acc + parseFloat(o.total_cost), 0);
@@ -212,10 +229,22 @@ const Accounting = () => {
                         <h2>Contabilidad Duke</h2>
                         <p>Análisis financiero detallado</p>
                     </div>
-                    <div className="period-toggle">
-                        <button className={viewMode === 'daily' ? 'active' : ''} onClick={() => setViewMode('daily')}>DIARIO</button>
-                        <button className={viewMode === 'weekly' ? 'active' : ''} onClick={() => setViewMode('weekly')}>SEMANAL</button>
-                        <button className={viewMode === 'monthly' ? 'active' : ''} onClick={() => setViewMode('monthly')}>MENSUAL</button>
+                    <div style={{ display: 'flex', gap: '15px', flexWrap: 'wrap', alignItems: 'center' }}>
+                        <div className="search-bar" style={{ position: 'relative' }}>
+                            <Search size={18} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: '#888' }} />
+                            <input 
+                                type="text" 
+                                placeholder="Buscar movimientos..." 
+                                value={searchTerm}
+                                onChange={(e) => setSearchTerm(e.target.value)}
+                                style={{ padding: '10px 15px 10px 40px', borderRadius: '10px', border: '1px solid #ddd', minWidth: '250px', fontSize: '0.9rem', width: '100%' }}
+                            />
+                        </div>
+                        <div className="period-toggle">
+                            <button className={viewMode === 'daily' ? 'active' : ''} onClick={() => setViewMode('daily')}>DIARIO</button>
+                            <button className={viewMode === 'weekly' ? 'active' : ''} onClick={() => setViewMode('weekly')}>SEMANAL</button>
+                            <button className={viewMode === 'monthly' ? 'active' : ''} onClick={() => setViewMode('monthly')}>MENSUAL</button>
+                        </div>
                     </div>
                 </div>
             </header>

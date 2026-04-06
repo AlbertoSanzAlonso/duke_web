@@ -62,26 +62,26 @@ const Orders = () => {
                         <tbody>
                             {orders.map(order => (
                                 <tr key={order.id} className={selectedOrder?.id === order.id ? 'selected' : ''} onClick={() => setSelectedOrder(order)}>
-                                    <td>#{order.id}</td>
-                                    <td>
+                                    <td data-label="ID">#{order.id}</td>
+                                    <td data-label="Fecha">
                                         <div className="date-cell">
                                             <span>{new Date(order.date).toLocaleDateString('es-AR', { timeZone: 'America/Argentina/Buenos_Aires' })}</span>
                                             <small>{new Date(order.date).toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit', timeZone: 'America/Argentina/Buenos_Aires' })}</small>
                                         </div>
                                     </td>
-                                    <td>
+                                    <td data-label="Cliente">
                                         <div className="client-cell">
                                             <strong>{order.customer_name || 'Sin nombre'}</strong>
                                             {order.table_number && <span className="table-badge">{order.table_number}</span>}
                                         </div>
                                     </td>
-                                    <td className="total-cell">${parseFloat(order.total_amount).toFixed(2)}</td>
-                                    <td>
+                                    <td data-label="Total" className="total-cell">${Math.round(parseFloat(order.total_amount)).toLocaleString('es-AR')}</td>
+                                    <td data-label="Estado">
                                         <span className={`status-badge ${order.status.toLowerCase()}`}>
                                             {order.status === 'PENDING' ? 'Pendiente' : order.status === 'COMPLETED' ? 'Completado' : 'Cancelado'}
                                         </span>
                                     </td>
-                                    <td>
+                                    <td data-label="Acción">
                                         <div className="row-actions">
                                             <button className="icon-btn print" title="Imprimir" onClick={(e) => { e.stopPropagation(); handlePrint(order); }}>
                                                 <Printer size={18} />
