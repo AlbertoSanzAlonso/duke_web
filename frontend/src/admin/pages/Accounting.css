@@ -269,23 +269,25 @@
     .accounting-table td {
         border: none;
         position: relative;
-        padding-top: 30px !important; /* Espacio para el label arriba */
-        text-align: left !important;
         padding: 12px 0 !important;
-        min-height: 45px;
+        padding-top: 32px !important; /* Fixed: Added space for the label above, ensuring it doesn't get overwritten */
+        text-align: left !important;
+        min-height: 55px;
         display: flex;
         flex-direction: column;
         align-items: flex-start;
         justify-content: center;
-        border-bottom: 1px solid #f9f9f9;
-        font-size: 0.9rem;
+        border-bottom: 1px solid #f5f5f5;
+        font-size: 0.95rem;
         word-break: break-word;
     }
 
     .accounting-table td button {
-        padding: 5px 8px !important;
-        font-size: 0.8rem !important;
-        margin-top: 5px;
+        padding: 6px 12px !important;
+        font-size: 0.85rem !important;
+        margin-top: 8px;
+        width: 100%;
+        justify-content: center;
     }
 
     .accounting-table td:last-child {
@@ -294,28 +296,30 @@
 
     .accounting-table td::before {
         position: absolute;
-        top: 8px;
+        top: 10px;
         left: 0;
         width: 100%;
-        padding-right: 0;
-        white-space: nowrap;
         text-align: left !important;
         font-weight: 800;
-        color: #888;
+        color: #acacac;
         content: attr(data-label);
-        font-size: 0.75rem;
+        font-size: 0.65rem;
         text-transform: uppercase;
-        letter-spacing: 0.5px;
+        letter-spacing: 1px;
+        line-height: 1;
     }
 
     .accounting-table td .badge {
-        margin-left: auto;
-        font-size: 0.7rem;
+        margin-left: 0;
+        margin-top: 4px;
+        font-size: 0.75rem;
     }
 
     .accounting-table td.negative, 
     .accounting-table td.positive {
-        font-size: 1.1rem;
+        font-size: 1.15rem;
+        font-weight: 800;
+        margin-top: 2px;
     }
 }
 

@@ -348,6 +348,7 @@ function Home() {
       message += `ENTREGA: ${deliveryMode === 'delivery' ? '📍 A DOMICILIO' : '🏪 RETIRO EN LOCAL'}\n`;
       
       if (deliveryMode === 'delivery') {
+        message += `ENVÍO: $${deliveryCost.toLocaleString('es-AR')}\n`;
         message += `\n*La ubicación de entrega se detalla en el ticket digital adjunto.*\n`;
       }
       

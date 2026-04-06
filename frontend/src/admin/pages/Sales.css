@@ -467,42 +467,19 @@
     cursor: not-allowed;
 }
 
-/* Botón flotante siempre visible */
+/* Botón flotante solo visible en móvil */
 .pos-fab {
-    display: flex;
-    position: fixed;
-    bottom: 2rem;
-    right: 2rem;
-    z-index: 1500;
-    width: 60px;
-    height: 60px;
-    background: #28a745;
-    color: white !important;
-    border: none;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
-    cursor: pointer;
-    transition: all 0.3s ease;
-    padding: 0;
+    display: none; /* Hidden on desktop by default */
 }
 
-.pos-fab:hover {
-    transform: scale(1.1);
-    background: #218838;
-}
-
-.fab-text,
-.fab-total {
-    display: none;
+.pos-fab.hidden {
+    display: none !important;
 }
 
 @media (max-width: 992px) {
     .pos-fab {
-        width: auto;
-        height: auto;
+        display: flex; /* Show only on mobile */
+        position: fixed;
         padding: 1rem 1.5rem;
         border-radius: 50px;
         bottom: 1.5rem;

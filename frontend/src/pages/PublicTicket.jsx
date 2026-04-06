@@ -94,6 +94,14 @@ const PublicTicket = () => {
                                 <span style={{ color: '#fff', fontWeight: 'bold' }}>${Math.round(item.quantity * parseFloat(item.price_at_sale)).toLocaleString('es-AR')}</span>
                             </div>
                         ))}
+                        
+                        {/* Delivery Cost Line */}
+                        {parseFloat(order.delivery_cost) > 0 && (
+                            <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '15px', marginBottom: '12px', fontSize: '1rem', borderTop: '1px solid #222', paddingTop: '15px' }}>
+                                <div style={{ color: '#aaa', fontStyle: 'italic' }}>📍 Servicio de Envío</div>
+                                <span style={{ color: '#fff', fontWeight: 'bold' }}>+${Math.round(parseFloat(order.delivery_cost)).toLocaleString('es-AR')}</span>
+                            </div>
+                        )}
                     </div>
 
                     {/* Total */}

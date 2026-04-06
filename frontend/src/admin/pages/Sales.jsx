@@ -213,7 +213,7 @@ const Sales = () => {
         <div className="pos-container">
             {toast && <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />}
             {/* FAB para móviles */}
-            <button className="pos-fab" onClick={toggleTicket}>
+            <button className={`pos-fab ${isTicketOpen ? 'hidden' : ''}`} onClick={toggleTicket}>
                 <div className="fab-icon-wrapper">
                     <Receipt size={24} />
                     <span className="fab-count">{totalItems}</span>

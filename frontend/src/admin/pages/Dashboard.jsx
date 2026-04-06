@@ -32,6 +32,7 @@ const Dashboard = () => {
                 const activePromos = menu.filter(e => e.category === 'Promos' && e.is_available).length;
 
                 // 3. Today's Hours
+                const now = new Date();
                 const dayOfWeek = now.getDay(); // 0=Sun, 1=Mon, ..., 6=Sat
                 const dayMap = { 0: 7, 1: 1, 2: 2, 3: 3, 4: 4, 5: 5, 6: 6 };
                 const dbDay = dayMap[dayOfWeek];
