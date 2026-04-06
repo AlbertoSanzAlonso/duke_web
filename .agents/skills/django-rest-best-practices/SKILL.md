@@ -22,10 +22,13 @@ This skill provides guidelines and checklists to avoid common errors in the Duke
 - Always include validation in serializers for required fields to prevent 500 Internal Server Errors due to database constraint violations.
 - Prefer `ReadOnlyField` or `SerializerMethodField` for nested data that doesn't need to be written back.
 
-## 4. Error Handling
-- Wrap complex DB transactions in `transaction.atomic()` to prevent partial data writes (especially in Sale/Order creation).
-- Return clear error messages in serializers using `serializers.ValidationError`.
+## 4. Streaming & Concurrency (Critical)
+- **Async Views**: All streaming views (SSE) like `OrderStreamView` **MUST** be `async def`.
+- **Iterators**: Use `.aiter()` on QuerySets inside async streaming loops to avoid blocking.
+- **Workers**: Deploy with `gthread` workers in Gunicorn (`--threads 12`) to allow concurrent streaming connections without exhausting server capacity.
+- **Buffering**: Set `X-Accel-Buffering: no` and `Content-Encoding: none` headers in streaming responses to bypass proxy buffering.
 
-## 5. Deployment Check
-- Ensure `ALLOWED_HOSTS` includes both the frontend and backend domains.
-- Confirm `VITE_API_URL` is set correctly in the frontend environment without a trailing slash.
+## 5. Deployment & Infrastructure
+- **Git Push**: Deployment in Coolify/Vercel is triggered by Git. **ALWAYS** commit and push changes for them to take effect.
+- **Port**: The backend listens on port **3000** for Docker/Coolify compatibility.
+- **Storage**: Use `env.bool('USE_S3')` for Supabase S3. Provide defaults for AWS keys to prevent boot crashes if env vars are missing.

@@ -13,10 +13,24 @@ Este proyecto se divide en dos entornos de despliegue claramente separados para 
 ## 2. Backend (Coolify)
 - **Ruta principal:** `/backend`
 - **Framework:** Django + DRF (Django REST Framework).
+- **Puerto de Servicio:** El contenedor escucha en el **puerto 3000**.
+- **Motor de Servidor:** Utiliza `gunicorn` con el worker `gthread` (o `uvicorn` si se despliega como ASGI) para manejar concurrencia en streaming.
+- **Comando de Inicio Recomendado:** `gunicorn -k gthread --threads 12 --workers 2 --bind 0.0.0.0:3000 --timeout 120 config.wsgi:application`.
 - **Infraestructura:** Despliegue en Coolify con base de datos PostgreSQL en Supabase.
-- **Media:** Almacenamiento en volumen persistente `/app/media`. Conversión automática a WebP en el modelo `Product`.
+- **Media:** Almacenamiento en Supabase S3 (preferido) o volumen persistente local. Las imágenes se procesan automáticamente a WebP.
 
-## 3. Guía de Estilo y UX (Crítico)
+## 3. Streaming de Pedidos (Crítico)
+- **Arquitectura:** El endpoint `/api/orders-stream/` DEBE ser asíncrono (`async def`) y utilizar el iterador `.aiter()` de Django para evitar el bloqueo de workers del servidor.
+- **Concurrencia:** Es vital mantener el servidor con al menos 10 threads para que las pantallas de administración no "secuestren" la disponibilidad de la API del resto de usuarios.
+
+## 4. Guía de Estilo y UX (Crítico)
+... (rest of the content remains)
+- **Git Mandatory:** Para cualquier cambio en producción (Coolify), DEBES realizar un `push` a la rama `main` de GitHub. Coolify ignora los archivos locales que no se han empujado al repositorio.
+- **S3 Management:** Si se activa `USE_S3=True`, deben configurarse las variables `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY` y `AWS_S3_ENDPOINT_URL` en el panel de Coolify para evitar caídas del servidor.
+... (rest of labels)
+
+---
+*Mantener la coherencia visual con la marca Duke Burger (Negros profundos, Rojos vibrantes, Tipografía Bebas Neue).*
 - **Moneda:** Todos los precios deben mostrarse en **Pesos Argentinos** utilizando el locale `es-AR` (ej. `$12.900`). Evitar el formato `12900.00`.
 - **Notificaciones:** PROHIBIDO usar `alert()` del navegador. Usar el componente `<Toast />` personalizado.
 - **Loading:** Usar el componente `<LoadingScreen />` que incluye el logo de la marca en lugar de mensajes de texto planos.
