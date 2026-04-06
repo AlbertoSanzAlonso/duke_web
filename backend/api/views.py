@@ -258,12 +258,12 @@ from django.views.decorators.csrf import csrf_exempt
 @csrf_exempt
 def OrderStreamView(request):
     def event_stream():
-        # Get start baseline
+        # Obtenemos el último ID al conectar para solo enviar lo NUEVO
         last_seen_sale = Sale.objects.order_by('-id').first()
         last_seen_id = last_seen_sale.id if last_seen_sale else 0
 
         while True:
-            # Check for new sales synchronously
+            # Consultamos si hay ventas nuevas
             new_sales = Sale.objects.filter(id__gt=last_seen_id).order_by('id')
             
             for sale in new_sales:
@@ -276,11 +276,19 @@ def OrderStreamView(request):
                 yield f"data: {json.dumps(data)}\n\n"
                 last_seen_id = sale.id
 
-            # Heartbeat & Sync Sleep
+            # Heartbeat: Muy importante para que el proxy no cierre la conexión por inactividad
             yield f"data: {json.dumps({'type': 'heartbeat'})}\n\n"
-            time.sleep(10) # 10s to avoid too much worker blocking
+            
+            # Bajamos a 2-5 segundos para que la app se sienta "rápida"
+            time.sleep(2) 
 
     response = StreamingHttpResponse(event_stream(), content_type='text/event-stream')
-    response['Cache-Control'] = 'no-cache'
-    response['X-Accel-Buffering'] = 'no'
+    
+    # --- CONFIGURACIÓN CRÍTICA PARA COOLIFY / TRAEFIK / NGINX ---
+    response['X-Accel-Buffering'] = 'no'      # Desactiva el buffering del proxy
+    response['Cache-Control'] = 'no-cache'    # Evita que el navegador cachee el flujo
+    response['Content-Encoding'] = 'none'     # PISA el Gzip de Coolify
+    response['Connection'] = 'keep-alive'     # Mantiene la tubería abierta
+    # ------------------------------------------------------------
+    
     return response
