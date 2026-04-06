@@ -145,18 +145,18 @@ MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
 
 # Supabase S3 Storage Configuration
-USE_S3 = False # Forzado para recuperar conectividad
+USE_S3 = env.bool('USE_S3', default=False)
 if USE_S3:
     AWS_ACCESS_KEY_ID = env('AWS_ACCESS_KEY_ID', default=None)
     AWS_SECRET_ACCESS_KEY = env('AWS_SECRET_ACCESS_KEY', default=None)
     AWS_STORAGE_BUCKET_NAME = env('AWS_STORAGE_BUCKET_NAME', default='media')
     AWS_S3_ENDPOINT_URL = env('AWS_S3_ENDPOINT_URL', default=None)
-    AWS_S3_REGION_NAME = env('AWS_S3_REGION_NAME', default='sa-east-1') # San Juan / Latam suele ser sa-east-1 o dependiente del proyecto
-    AWS_DEFAULT_ACL = None  # Supabase no soporta ACLs de S3 standard
+    AWS_S3_REGION_NAME = env('AWS_S3_REGION_NAME', default='sa-east-1')
+    AWS_DEFAULT_ACL = None  
     AWS_S3_ADDRESSING_STYLE = 'virtual'
     AWS_S3_SIGNATURE_VERSION = 's3v4'
     AWS_S3_FILE_OVERWRITE = False
-    AWS_QUERYSTRING_AUTH = False # URLs públicas directas
+    AWS_QUERYSTRING_AUTH = False 
     AWS_S3_CUSTOM_DOMAIN = f'{env("SUPABASE_REF", default="")}.supabase.co/storage/v1/object/public/{AWS_STORAGE_BUCKET_NAME}'
     
     STORAGES = {
@@ -168,8 +168,8 @@ if USE_S3:
         },
     }
 
-DEBUG = True
-ALLOWED_HOSTS = ['*']
+DEBUG = env.bool('DEBUG', default=True)
+ALLOWED_HOSTS = env.list('ALLOWED_HOSTS', default=['*'])
 CORS_ALLOW_ALL_ORIGINS = True
 CORS_ALLOW_CREDENTIALS = True
 CORS_ALLOW_HEADERS = ["*"]
