@@ -5,7 +5,8 @@
     padding: 1rem;
     overflow: hidden;
     background-color: #f5f5f5;
-    color: #333 !important; /* Force dark text */
+    color: #333 !important;
+    /* Force dark text */
 }
 
 /* Header de Categorías */
@@ -64,7 +65,8 @@
     flex: 1;
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-    grid-auto-rows: min-content; /* Ensure rows only take needed space */
+    grid-auto-rows: min-content;
+    /* Ensure rows only take needed space */
     align-items: start;
     gap: 1.2rem;
     overflow-y: auto;
@@ -75,17 +77,18 @@
     background: white;
     border-radius: 12px;
     overflow: hidden;
-    box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
     cursor: pointer;
     transition: transform 0.2s, box-shadow 0.2s;
     display: flex;
     flex-direction: column;
-    height: fit-content; /* Avoid stretching to fill grid container */
+    height: fit-content;
+    /* Avoid stretching to fill grid container */
 }
 
 .pos-product-card:hover {
     transform: translateY(-4px);
-    box-shadow: 0 8px 12px rgba(0,0,0,0.1);
+    box-shadow: 0 8px 12px rgba(0, 0, 0, 0.1);
 }
 
 .pos-product-card:active {
@@ -133,7 +136,7 @@
     flex: 0.8;
     background: white;
     border-radius: 12px;
-    box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
     display: flex;
     flex-direction: column;
     max-width: 400px;
@@ -171,7 +174,7 @@
     font-weight: 800;
     font-size: 1.2rem;
     cursor: pointer;
-    box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
     transition: all 0.2s;
 }
 
@@ -206,6 +209,7 @@
     .ticket-meta input {
         width: 100% !important;
     }
+
     .ticket-footer {
         position: sticky;
         bottom: 0;
@@ -213,6 +217,7 @@
         padding-bottom: 1rem;
     }
 }
+
 /* Grid de Acciones (Guardar/Cobrar) */
 .pos-actions-grid {
     display: grid;
@@ -247,7 +252,7 @@
     background: white;
     border-radius: 12px;
     padding: 1.5rem;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
     display: flex;
     flex-direction: column;
     gap: 10px;
@@ -257,7 +262,7 @@
 
 .pending-ticket-card:hover {
     transform: translateY(-5px);
-    box-shadow: 0 8px 16px rgba(0,0,0,0.12);
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.12);
 }
 
 .pending-info {
@@ -478,7 +483,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
     cursor: pointer;
     transition: all 0.3s ease;
     padding: 0;
@@ -489,8 +494,9 @@
     background: #218838;
 }
 
-.fab-text, .fab-total {
-    display: none; /* Hide text in desktop to keep it a small circle */
+.fab-text,
+.fab-total {
+    display: none;
 }
 
 @media (max-width: 992px) {
@@ -502,47 +508,39 @@
         bottom: 1.5rem;
         right: 1.5rem;
     }
-    .fab-text, .fab-total {
+
+    .fab-text,
+    .fab-total {
         display: block;
     }
-}
-    background: white;
-    color: #28a745;
-    width: 24px;
-    height: 24px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-weight: 800;
-    font-size: 0.8rem;
-}
 
-.fab-text {
-    font-weight: 600;
-}
+    .fab-count {
+        background: white;
+        color: #28a745;
+        width: 24px;
+        height: 24px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 800;
+        font-size: 0.8rem;
+    }
 
-.fab-total {
-    font-weight: 800;
-    border-left: 1px solid rgba(255,255,255,0.3);
-    padding-left: 10px;
-}
+    .fab-text {
+        font-weight: 600;
+    }
 
-/* Responsividad General */
-/* Footer del Ticket con padding extra */
-.ticket-footer {
-    padding: 1.5rem;
-    padding-bottom: 2.5rem; /* Evita que los botones se vean pegados o se corten */
-    border-top: 2px dashed #eee;
-    background: #fafafa;
-    border-radius: 0 0 12px 12px;
-}
+    .fab-total {
+        font-weight: 800;
+        border-left: 1px solid rgba(255, 255, 255, 0.3);
+        padding-left: 10px;
+    }
 
-@media (max-width: 992px) {
     .pos-container {
         padding: 0.5rem;
     }
-    
+
     .pos-main {
         flex-direction: column;
     }
@@ -592,47 +590,55 @@
         position: sticky;
         bottom: 0;
     }
-}
 
     .total-price {
-        font-size: 1.5rem; /* Un poco más pequeño en móvil para que no rompa */
+        font-size: 1.5rem;
     }
 
     .pos-product-img-container {
         height: 100px;
     }
 
-.close-ticket-btn {
-    display: none;
+    .close-ticket-btn {
+        display: none;
+    }
+
+    .pos-products-grid::-webkit-scrollbar,
+    .ticket-items::-webkit-scrollbar,
+    .pending-list-container::-webkit-scrollbar {
+        width: 6px;
+    }
+
+    .pos-products-grid::-webkit-scrollbar-track,
+    .ticket-items::-webkit-scrollbar-track,
+    .pending-list-container::-webkit-scrollbar-track {
+        background: transparent;
+    }
+
+    .pos-products-grid::-webkit-scrollbar-thumb,
+    .ticket-items::-webkit-scrollbar-thumb,
+    .pending-list-container::-webkit-scrollbar-thumb {
+        background: #ccc;
+        border-radius: 10px;
+    }
+
+    .pos-products-grid::-webkit-scrollbar-thumb:hover,
+    .ticket-items::-webkit-scrollbar-thumb:hover,
+    .pending-list-container::-webkit-scrollbar-thumb:hover {
+        background: #aaa;
+    }
 }
 
-/* Custom Scrollbar to avoid 'black bars' on some systems */
-.pos-products-grid::-webkit-scrollbar,
-.ticket-items::-webkit-scrollbar,
-.pending-list-container::-webkit-scrollbar {
-    width: 6px;
+/* Ticket Footer fuera del media query */
+.ticket-footer {
+    padding: 1.5rem;
+    padding-bottom: 2.5rem;
+    border-top: 2px dashed #eee;
+    background: #fafafa;
+    border-radius: 0 0 12px 12px;
 }
 
-.pos-products-grid::-webkit-scrollbar-track,
-.ticket-items::-webkit-scrollbar-track,
-.pending-list-container::-webkit-scrollbar-track {
-    background: transparent;
-}
-
-.pos-products-grid::-webkit-scrollbar-thumb,
-.ticket-items::-webkit-scrollbar-thumb,
-.pending-list-container::-webkit-scrollbar-thumb {
-    background: #ccc;
-    border-radius: 10px;
-}
-
-.pos-products-grid::-webkit-scrollbar-thumb:hover,
-.ticket-items::-webkit-scrollbar-thumb:hover,
-.pending-list-container::-webkit-scrollbar-thumb:hover {
-    background: #aaa;
-}
-
-/* Bulk Actions Bar Styles */
+/* Bulk Actions */
 .bulk-actions-bar {
     position: sticky;
     top: 0;
@@ -645,7 +651,7 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
     animation: slideIn 0.3s ease;
 }
 
@@ -690,20 +696,30 @@
         gap: 12px;
         padding: 15px;
     }
+
     .bulk-buttons-group {
         width: 100%;
         justify-content: center;
         flex-wrap: wrap;
     }
+
     .bulk-buttons-group button {
         flex: 1;
         min-width: 100px;
         font-size: 0.8rem;
     }
 }
+
 @keyframes slideIn {
-    from { transform: translateY(-20px); opacity: 0; }
-    to { transform: translateY(0); opacity: 1; }
+    from {
+        transform: translateY(-20px);
+        opacity: 0;
+    }
+
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
 }
 
 .pending-ticket-card.selected {
