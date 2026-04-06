@@ -197,6 +197,16 @@ export const fetchSupplierOrders = async () => {
     return await response.json();
 };
 
+export const createSupplierOrder = async (data) => {
+    const response = await fetch(`${API_URL}/supplier-orders/`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
+    });
+    if (!response.ok) throw new Error('Error al registrar pedido a proveedor');
+    return await response.json();
+};
+
 export const fetchSettings = async () => {
     const response = await fetch(`${API_URL}/settings/`);
     if (!response.ok) throw new Error('Error al cargar configuraciones');
@@ -210,6 +220,41 @@ export const updateSetting = async (key, value) => {
         body: JSON.stringify({ value })
     });
     if (!response.ok) throw new Error('Error al actualizar configuración');
+    return await response.json();
+};
+
+// Opening Hours
+export const fetchOpeningHours = async () => {
+    const response = await fetch(`${API_URL}/opening-hours/`);
+    if (!response.ok) throw new Error('Error al cargar horarios');
+    return await response.json();
+};
+
+export const updateOpeningHour = async (id, data) => {
+    const response = await fetch(`${API_URL}/opening-hours/${id}/`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
+    });
+    if (!response.ok) throw new Error('Error al actualizar horario');
+    return await response.json();
+};
+
+// Delivery Rates
+export const fetchDeliveryRates = async () => {
+    const response = await fetch(`${API_URL}/delivery-rates/`);
+    if (!response.ok) throw new Error('Error al cargar tarifas de envío');
+    return await response.json();
+};
+
+export const updateDeliveryRates = async (data) => {
+    // Only one delivery rate record (id=1)
+    const response = await fetch(`${API_URL}/delivery-rates/1/`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
+    });
+    if (!response.ok) throw new Error('Error al actualizar tarifas de envío');
     return await response.json();
 };
 

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { Menu, X, ShoppingCart, Minus, Plus, MessageCircle, MapPin } from 'lucide-react';
 import { Link } from 'react-router-dom';
-import { fetchMenuEntries, createSale } from '../services/api';
+import { Menu, X, ShoppingCart, Minus, Plus, MessageCircle, MapPin } from 'lucide-react';
+import { fetchMenuEntries, createSale, fetchOpeningHours } from '../services/api';
 
 function Home() {
   const [activeCategory, setActiveCategory] = useState('Burgers');
@@ -25,6 +25,7 @@ function Home() {
   const [addressSuggestions, setAddressSuggestions] = useState([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [deliverySettings, setDeliverySettings] = useState({});
+  const [openingHours, setOpeningHours] = useState([]);
   const [isHoursModalOpen, setIsHoursModalOpen] = useState(false);
 
   useEffect(() => {
@@ -36,6 +37,7 @@ function Home() {
     handleScroll();
     loadMenu();
     loadDeliverySettings();
+    loadOpeningHours();
 
     const handleClickOutside = () => setShowSuggestions(false);
     document.addEventListener('mousedown', handleClickOutside);
@@ -93,26 +95,37 @@ function Home() {
     }
   };
 
+  const loadOpeningHours = async () => {
+    try {
+      const data = await fetchOpeningHours();
+      setOpeningHours(data);
+    } catch (err) {
+      console.error("Error loading opening hours:", err);
+    }
+  };
+
   const isStoreOpen = () => {
-    if (!deliverySettings.opening_days) return true; 
+    if (openingHours.length === 0) return true; 
 
     const now = new Date().toLocaleString("en-US", {timeZone: "America/Argentina/Buenos_Aires"});
     const fechaArg = new Date(now);
     
-    let dayArg = fechaArg.getDay(); 
-    if (dayArg === 0) dayArg = 7; 
+    let dayIdx = fechaArg.getDay(); // 0 (Sun) to 6 (Sat)
+    // Convert to 1-7 (Mon-Sun)
+    const dayDuke = dayIdx === 0 ? 7 : dayIdx;
     
-    const openingDays = deliverySettings.opening_days.split(',');
-    if (!openingDays.includes(dayArg.toString())) return false;
+    const todaySchedule = openingHours.find(h => h.day === dayDuke);
+    if (!todaySchedule || !todaySchedule.is_open) return false;
     
     const currentHourMin = fechaArg.getHours() * 60 + fechaArg.getMinutes();
-    const [openH, openM] = (deliverySettings.opening_time || "20:00").split(':').map(Number);
-    const [closeH, closeM] = (deliverySettings.closing_time || "00:00").split(':').map(Number);
+    const [openH, openM] = (todaySchedule.opening_time || "20:00").split(':').map(Number);
+    const [closeH, closeM] = (todaySchedule.closing_time || "00:00").split(':').map(Number);
     
     const openTimeMin = openH * 60 + openM;
     let closeTimeMin = closeH * 60 + closeM;
     
     if (closeTimeMin <= openTimeMin) {
+       // Support overnight hours (e.g. 20:00 to 02:00)
        return currentHourMin >= openTimeMin || currentHourMin <= closeTimeMin;
     }
     return currentHourMin >= openTimeMin && currentHourMin <= closeTimeMin;
@@ -786,20 +799,17 @@ function Home() {
                 <MessageCircle size={48} color="var(--color-primary)" style={{ marginBottom: '15px' }} />
                 <h3 style={{ fontSize: '1.5rem', marginBottom: '10px' }}>Estamos para servirte</h3>
                 <p style={{ color: '#888', fontSize: '1.1rem' }}>Nuestro local y delivery operan en:</p>
-              </div>
-              
-              <div style={{ background: '#1a1a1a', padding: '20px', borderRadius: '12px', border: '1px solid #333' }}>
-                <div style={{ fontSize: '1.2rem', fontWeight: 'bold', color: 'white', marginBottom: '10px' }}>
-                  {deliverySettings.opening_time || '20:00'} hs — {deliverySettings.closing_time || '00:00'} hs
-                </div>
-                <div style={{ color: 'var(--color-primary)', fontWeight: 'bold', letterSpacing: '1px' }}>
-                  {(!deliverySettings.opening_days || deliverySettings.opening_days === '1,2,3,4,5,6,7') 
-                    ? 'TODOS LOS DÍAS' 
-                    : ` ${deliverySettings.opening_days.split(',').map(d => {
-                        const days = ["", "Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado", "Domingo"];
-                        return days[parseInt(d)];
-                      }).join(', ')}`
-                  }
+                <div style={{ background: '#1a1a1a', padding: '15px', borderRadius: '12px', border: '1px solid #333' }}>
+                  {openingHours.filter(h => h.is_open).length > 0 ? (
+                    openingHours.filter(h => h.is_open).map(h => (
+                      <div key={h.id} style={{ display: 'flex', justifyContent: 'space-between', padding: '8px 0', borderBottom: '1px solid #222' }}>
+                        <span style={{ fontWeight: 'bold', color: 'white' }}>{h.day_name}</span>
+                        <span style={{ color: 'var(--color-primary)' }}>{h.opening_time.slice(0,5)} a {h.closing_time.slice(0,5)} hs</span>
+                      </div>
+                    ))
+                  ) : (
+                    <p style={{ color: 'var(--color-primary)', fontWeight: 'bold' }}>CERRADO</p>
+                  )}
                 </div>
               </div>
               

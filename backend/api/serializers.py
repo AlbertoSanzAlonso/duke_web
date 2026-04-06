@@ -1,5 +1,7 @@
 from rest_framework import serializers
-from .models import Product, MenuEntry, Sale, SaleItem, Expense, InventoryItem, SupplierOrder, SupplierOrderItem, GlobalSetting, GalleryImage
+from .models import (Product, MenuEntry, Sale, SaleItem, Expense, InventoryItem, 
+                     SupplierOrder, SupplierOrderItem, GlobalSetting, GalleryImage,
+                     OpeningHour, DeliverySetting)
 
 class ProductSerializer(serializers.ModelSerializer):
     class Meta:

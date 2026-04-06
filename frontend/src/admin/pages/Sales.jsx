@@ -22,6 +22,7 @@ const Sales = () => {
 
     // List of pending tickets
     const [pendingTickets, setPendingTickets] = useState([]);
+    const [deletingTicketId, setDeletingTicketId] = useState(null);
 
     useEffect(() => {
         loadData();
@@ -152,15 +153,17 @@ const Sales = () => {
         ? menuEntries 
         : menuEntries.filter(e => e.category === selectedCategory);
 
-    const handleDeleteTicket = async (e, id) => {
-        e.stopPropagation();
-        if (!window.confirm("¿Estás seguro de eliminar este ticket pendiente definitivamente?")) return;
+    const handleDeleteTicket = async (id) => {
+        setIsSaving(true);
         try {
             await deleteSale(id);
             setToast({ message: "Ticket eliminado correctamente.", type: 'success' });
+            setDeletingTicketId(null);
             loadData();
         } catch (error) {
             setToast({ message: "Error al eliminar ticket.", type: 'error' });
+        } finally {
+            setIsSaving(false);
         }
     };
 
@@ -364,7 +367,7 @@ const Sales = () => {
                                         <button className="load-btn" onClick={() => loadPendingSale(ticket)}>ABRIR</button>
                                         <button 
                                             className="delete-pending-btn" 
-                                            onClick={(e) => handleDeleteTicket(e, ticket.id)}
+                                            onClick={(e) => { e.stopPropagation(); setDeletingTicketId(ticket.id); }}
                                             style={{ width: '100%', padding: '0.8rem', background: '#f03e3e', color: 'white', border: 'none', borderRadius: '6px', fontWeight: '700', cursor: 'pointer' }}
                                         >
                                             ELIMINAR
@@ -373,6 +376,35 @@ const Sales = () => {
                                 </div>
                             ))
                         )}
+                    </div>
+                </div>
+            )}
+
+            {/* Custom Confirmation Modal */}
+            {deletingTicketId && (
+                <div className="modal-overlay" style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.85)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 5000, padding: '20px' }}>
+                    <div className="admin-modal" style={{ background: '#fff', width: '100%', maxWidth: '400px', borderRadius: '15px', overflow: 'hidden', textAlign: 'center' }}>
+                        <div style={{ padding: '30px' }}>
+                            <div style={{ width: '60px', height: '60px', background: '#fff5f5', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 20px', color: '#f03e3e', fontSize: '2rem' }}>!</div>
+                            <h3 style={{ margin: '0 0 10px', fontSize: '1.4rem' }}>¿Eliminar Ticket #{deletingTicketId}?</h3>
+                            <p style={{ color: '#666', marginBottom: '25px', lineHeight: '1.5' }}>Esta acción no se puede deshacer. Los datos del ticket se perderán definitivamente.</p>
+                            
+                            <div style={{ display: 'flex', gap: '12px' }}>
+                                <button 
+                                    onClick={() => setDeletingTicketId(null)}
+                                    style={{ flex: 1, padding: '15px', background: '#f8f9fa', border: 'none', borderRadius: '10px', fontWeight: 'bold', cursor: 'pointer', color: '#333' }}
+                                >
+                                    CANCELAR
+                                </button>
+                                <button 
+                                    onClick={() => handleDeleteTicket(deletingTicketId)}
+                                    style={{ flex: 1, padding: '15px', background: '#f03e3e', border: 'none', borderRadius: '10px', fontWeight: 'bold', cursor: 'pointer', color: '#fff' }}
+                                    disabled={isSaving}
+                                >
+                                    {isSaving ? 'ELIMINANDO...' : 'SÍ, ELIMINAR'}
+                                </button>
+                            </div>
+                        </div>
                     </div>
                 </div>
             )}

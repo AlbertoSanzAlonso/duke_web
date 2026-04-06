@@ -1,8 +1,11 @@
-from rest_framework import viewsets
-from rest_framework.response import Response
-from .models import Product, MenuEntry, Sale, Expense, InventoryItem, SupplierOrder, GlobalSetting, GalleryImage
-from .serializers import (ProductSerializer, MenuEntrySerializer, SaleSerializer, SaleCreateSerializer, ExpenseSerializer,
-                          InventoryItemSerializer, SupplierOrderSerializer, SupplierOrderCreateSerializer, GlobalSettingSerializer, GalleryImageSerializer)
+from .models import (Product, MenuEntry, Sale, Expense, InventoryItem, 
+                     SupplierOrder, GlobalSetting, GalleryImage, OpeningHour, DeliverySetting)
+from .serializers import (ProductSerializer, MenuEntrySerializer, SaleSerializer, 
+                          SaleCreateSerializer, ExpenseSerializer,
+                          InventoryItemSerializer, SupplierOrderSerializer, 
+                          SupplierOrderCreateSerializer, GlobalSettingSerializer, 
+                          GalleryImageSerializer, OpeningHourSerializer, 
+                          DeliverySettingSerializer)
 from django.http import StreamingHttpResponse
 import asyncio
 import json
@@ -72,6 +75,24 @@ class GlobalSettingViewSet(viewsets.ModelViewSet):
             if created: created_count += 1
         
         return Response({'message': f'Configuraciones inicializadas. {created_count} nuevas creadas.', 'total': GlobalSetting.objects.count()})
+
+class OpeningHourViewSet(viewsets.ModelViewSet):
+    queryset = OpeningHour.objects.all()
+    serializer_class = OpeningHourSerializer
+
+class DeliverySettingViewSet(viewsets.ModelViewSet):
+    queryset = DeliverySetting.objects.all()
+    serializer_class = DeliverySettingSerializer
+
+    def get_object(self):
+        # Always return the first setting (Singleton logic)
+        obj, created = DeliverySetting.objects.get_or_create(id=1)
+        return obj
+
+    def list(self, request, *args, **kwargs):
+        instance = self.get_object()
+        serializer = self.get_serializer(instance)
+        return Response(serializer.data)
 
 class GalleryImageViewSet(viewsets.ModelViewSet):
     queryset = GalleryImage.objects.filter(is_active=True)

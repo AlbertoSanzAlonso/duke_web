@@ -1,32 +1,27 @@
 import React, { useState, useEffect } from 'react';
-import { fetchSettings, updateSetting, fetchGalleryImages, createGalleryImage, deleteGalleryImage, updateGalleryImage } from '../../services/api';
+import { 
+    fetchOpeningHours, updateOpeningHour, 
+    fetchDeliveryRates, updateDeliveryRates, 
+    fetchGalleryImages, createGalleryImage, deleteGalleryImage, updateGalleryImage 
+} from '../../services/api';
 import LoadingScreen from '../components/LoadingScreen';
 import Toast from '../components/Toast';
-import { Settings as SettingsIcon, Save, Truck, Clock, Image as ImageIcon, Plus, Trash2, X, Calendar } from 'lucide-react';
+import { Settings as SettingsIcon, Save, Truck, Clock, Image as ImageIcon, Plus, Trash2, X, AlertTriangle } from 'lucide-react';
 
 const Settings = () => {
     const [activeTab, setActiveTab] = useState('delivery');
-    const [settings, setSettings] = useState([]);
+    const [openingHours, setOpeningHours] = useState([]);
+    const [deliveryRates, setDeliveryRates] = useState({ base_price: 0, km_price: 0, max_km: 0 });
     const [gallery, setGallery] = useState([]);
     const [loading, setLoading] = useState(true);
     const [isSaving, setIsSaving] = useState(false);
     const [toast, setToast] = useState(null);
-    const [error, setError] = useState(null);
+    const [confirmDelete, setConfirmDelete] = useState(null); // { type, id, title }
 
     // Gallery state
     const [isAddingImg, setIsAddingImg] = useState(false);
     const [newImage, setNewImage] = useState({ title: '', image: null, order: 0 });
     const [imgSaving, setImgSaving] = useState(false);
-
-    const DAYS = [
-        { id: '1', name: 'Lunes' },
-        { id: '2', name: 'Martes' },
-        { id: '3', name: 'Miércoles' },
-        { id: '4', name: 'Jueves' },
-        { id: '5', name: 'Viernes' },
-        { id: '6', name: 'Sábado' },
-        { id: '7', name: 'Domingo' }
-    ];
 
     useEffect(() => {
         loadAllData();
@@ -34,40 +29,55 @@ const Settings = () => {
 
     const loadAllData = async () => {
         setLoading(true);
-        setError(null);
         try {
-            const [settingsData, galleryData] = await Promise.all([
-                fetchSettings(),
+            const [hoursData, ratesData, galleryData] = await Promise.all([
+                fetchOpeningHours(),
+                fetchDeliveryRates(),
                 fetchGalleryImages()
             ]);
-            setSettings(settingsData);
+            setOpeningHours(hoursData);
+            setDeliveryRates(ratesData);
             setGallery(galleryData);
         } catch (error) {
-            console.error("Error loading settings/gallery:", error);
-            setError(error.message);
+            console.error("Error loading settings:", error);
+            setToast({ message: 'Error al cargar los datos', type: 'error' });
         } finally {
             setLoading(false);
         }
     };
 
-    const handleSettingChange = (key, value) => {
-        setSettings(prev => prev.map(s => s.key === key ? { ...s, value } : s));
+    const handleRateChange = (field, value) => {
+        setDeliveryRates(prev => ({ ...prev, [field]: value }));
     };
 
-    const saveSettings = async () => {
+    const handleHourChange = (id, field, value) => {
+        setOpeningHours(prev => prev.map(h => h.id === id ? { ...h, [field]: value } : h));
+    };
+
+    const saveRates = async () => {
         setIsSaving(true);
         try {
-            await Promise.all(settings.map(s => updateSetting(s.key, s.value)));
-            setToast({ message: 'Configuración guardada correctamente', type: 'success' });
-            loadAllData();
+            await updateDeliveryRates(deliveryRates);
+            setToast({ message: 'Tarifas guardadas correctamente', type: 'success' });
         } catch (err) {
-            setToast({ message: 'Error al actualizar configuraciones', type: 'error' });
+            setToast({ message: 'Error al actualizar tarifas', type: 'error' });
         } finally {
             setIsSaving(false);
         }
     };
 
-    // Gallery handlers
+    const saveAllHours = async () => {
+        setIsSaving(true);
+        try {
+            await Promise.all(openingHours.map(h => updateOpeningHour(h.id, h)));
+            setToast({ message: 'Todos los horarios guardados', type: 'success' });
+        } catch (err) {
+            setToast({ message: 'Error al guardar horarios', type: 'error' });
+        } finally {
+            setIsSaving(false);
+        }
+    };
+
     const handleAddImage = async (e) => {
         e.preventDefault();
         if (!newImage.image) return;
@@ -80,8 +90,7 @@ const Settings = () => {
             await createGalleryImage(formData);
             setIsAddingImg(false);
             setNewImage({ title: '', image: null, order: 0 });
-            const galleryData = await fetchGalleryImages();
-            setGallery(galleryData);
+            setGallery(await fetchGalleryImages());
             setToast({ message: 'Imagen añadida con éxito', type: 'success' });
         } catch (error) {
             setToast({ message: 'Error al subir imagen', type: 'error' });
@@ -90,14 +99,18 @@ const Settings = () => {
         }
     };
 
-    const handleDeleteImage = async (id) => {
-        if (!window.confirm("¿Eliminar esta imagen de la galería?")) return;
+    const executeDelete = async () => {
+        if (!confirmDelete) return;
         try {
-            await deleteGalleryImage(id);
-            setGallery(gallery.filter(i => i.id !== id));
-            setToast({ message: 'Imagen eliminada', type: 'success' });
+            if (confirmDelete.type === 'image') {
+                await deleteGalleryImage(confirmDelete.id);
+                setGallery(gallery.filter(i => i.id !== confirmDelete.id));
+                setToast({ message: 'Imagen eliminada', type: 'success' });
+            }
         } catch (error) {
             setToast({ message: 'Error al eliminar', type: 'error' });
+        } finally {
+            setConfirmDelete(null);
         }
     };
 
@@ -110,31 +123,7 @@ const Settings = () => {
         }
     };
 
-    const toggleDay = (dayId) => {
-        const dId = dayId.toString();
-        setSettings(prevSettings => {
-            const updated = prevSettings.map(s => {
-                if (s.key === 'opening_days') {
-                    const val = s.value || '';
-                    let days = val.split(',').filter(d => d.trim() !== '');
-                    if (days.includes(dId)) {
-                        days = days.filter(d => d !== dId);
-                    } else {
-                        days = [...days, dId];
-                    }
-                    return { ...s, value: days.sort().join(',') };
-                }
-                return s;
-            });
-            return updated;
-        });
-    };
-
     if (loading) return <LoadingScreen />;
-
-    // Separate settings by category
-    const deliverySettings = settings.filter(s => s.key.startsWith('delivery_'));
-    const openingSettings = settings.filter(s => s.key.startsWith('opening_') || s.key.startsWith('closing_'));
 
     return (
         <div style={{ maxWidth: '1000px', margin: '0 auto', padding: '20px' }}>
@@ -142,31 +131,19 @@ const Settings = () => {
             
             <div style={{ display: 'flex', alignItems: 'center', gap: '15px', marginBottom: '30px' }}>
                 <SettingsIcon size={32} color="#333" />
-                <h2 style={{ margin: 0, fontSize: '2rem' }}>Configuración</h2>
+                <h2 style={{ margin: 0, fontSize: '2rem' }}>Configuración Duke</h2>
             </div>
 
             <div className="settings-tabs-container" style={{ overflowX: 'auto', paddingBottom: '10px', marginBottom: '20px' }}>
                 <div className="settings-tabs" style={{ display: 'flex', gap: '10px', minWidth: 'max-content' }}>
-                    <button 
-                        onClick={() => setActiveTab('delivery')}
-                        className={`tab-btn ${activeTab === 'delivery' ? 'active' : ''}`}
-                        style={tabBtnStyle(activeTab === 'delivery')}
-                    >
-                        <Truck size={18} /> Tarifas de Envío
+                    <button onClick={() => setActiveTab('delivery')} className={`tab-btn ${activeTab === 'delivery' ? 'active' : ''}`} style={tabBtnStyle(activeTab === 'delivery')}>
+                        <Truck size={18} /> Tarifas Envío
                     </button>
-                    <button 
-                        onClick={() => setActiveTab('hours')}
-                        className={`tab-btn ${activeTab === 'hours' ? 'active' : ''}`}
-                        style={tabBtnStyle(activeTab === 'hours')}
-                    >
-                        <Clock size={18} /> Horarios
+                    <button onClick={() => setActiveTab('hours')} className={`tab-btn ${activeTab === 'hours' ? 'active' : ''}`} style={tabBtnStyle(activeTab === 'hours')}>
+                        <Clock size={18} /> Tabla Horarios
                     </button>
-                    <button 
-                        onClick={() => setActiveTab('gallery')}
-                        className={`tab-btn ${activeTab === 'gallery' ? 'active' : ''}`}
-                        style={tabBtnStyle(activeTab === 'gallery')}
-                    >
-                        <ImageIcon size={18} /> Galería Locales
+                    <button onClick={() => setActiveTab('gallery')} className={`tab-btn ${activeTab === 'gallery' ? 'active' : ''}`} style={tabBtnStyle(activeTab === 'gallery')}>
+                        <ImageIcon size={18} /> Galería Local
                     </button>
                 </div>
             </div>
@@ -176,26 +153,32 @@ const Settings = () => {
                     <div className="tab-content">
                         <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '25px', borderBottom: '1px solid #eee', paddingBottom: '15px' }}>
                             <Truck size={22} color="#f03e3e" />
-                            <h3 style={{ margin: 0 }}>Tarifas de Envío (Cadetería)</h3>
+                            <h3 style={{ margin: 0 }}>Parámetros de Envío</h3>
                         </div>
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-                            {deliverySettings.map(s => (
-                                <div key={s.id} className="setting-field">
-                                    <label style={labelStyle}>{s.description || s.key}</label>
-                                    <div style={{ position: 'relative' }}>
-                                        {!s.key.includes('max_km') && <span style={priceSymbolStyle}>$</span>}
-                                        <input 
-                                            type="number"
-                                            value={s.value}
-                                            onChange={e => handleSettingChange(s.key, e.target.value)}
-                                            style={inputStyle(s.key.includes('max_km'))}
-                                        />
-                                        {s.key.includes('max_km') && <span style={kmTextStyle}>KM</span>}
-                                    </div>
+                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '25px' }}>
+                            <div className="setting-field">
+                                <label style={labelStyle}>Precio Base Envío</label>
+                                <div style={{ position: 'relative' }}>
+                                    <span style={priceSymbolStyle}>$</span>
+                                    <input type="number" value={deliveryRates.base_price} onChange={e => handleRateChange('base_price', e.target.value)} style={inputStyle(false)} />
                                 </div>
-                            ))}
+                            </div>
+                            <div className="setting-field">
+                                <label style={labelStyle}>Plus por KM Recorrido</label>
+                                <div style={{ position: 'relative' }}>
+                                    <span style={priceSymbolStyle}>$</span>
+                                    <input type="number" value={deliveryRates.km_price} onChange={e => handleRateChange('km_price', e.target.value)} style={inputStyle(false)} />
+                                </div>
+                            </div>
+                            <div className="setting-field">
+                                <label style={labelStyle}>Distancia Máxima (GPS)</label>
+                                <div style={{ position: 'relative' }}>
+                                    <input type="number" value={deliveryRates.max_km} onChange={e => handleRateChange('max_km', e.target.value)} style={inputStyle(true)} />
+                                    <span style={kmTextStyle}>KM</span>
+                                </div>
+                            </div>
                         </div>
-                        <button onClick={saveSettings} style={saveButtonStyle} disabled={isSaving}>
+                        <button onClick={saveRates} style={saveButtonStyle} disabled={isSaving}>
                             <Save size={20} /> {isSaving ? 'GUARDANDO...' : 'GUARDAR TARIFAS'}
                         </button>
                     </div>
@@ -205,78 +188,72 @@ const Settings = () => {
                     <div className="tab-content">
                         <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '25px', borderBottom: '1px solid #eee', paddingBottom: '15px' }}>
                             <Clock size={22} color="#f03e3e" />
-                            <h3 style={{ margin: 0 }}>Horarios de Apertura</h3>
+                            <h3 style={{ margin: 0 }}>Gestión de Horarios por Día</h3>
                         </div>
                         
-                        <div style={{ marginBottom: '30px' }}>
-                            <label style={labelStyle}>Días de Atención</label>
-                            <div style={{ 
-                                display: 'grid', 
-                                gridTemplateColumns: 'repeat(auto-fill, minmax(130px, 1fr))', 
-                                gap: '10px', 
-                                marginTop: '10px' 
-                            }}>
-                                {DAYS.map(day => {
-                                    const openingDaysVal = settings.find(s => s.key === 'opening_days')?.value || '';
-                                    const daysArray = openingDaysVal.split(',').filter(d => d.trim() !== '');
-                                    const isActive = daysArray.includes(day.id.toString());
-                                    
-                                    return (
-                                        <button 
-                                            key={day.id}
-                                            type="button"
-                                            onClick={() => toggleDay(day.id)}
-                                            style={{
-                                                padding: '12px',
-                                                borderRadius: '10px',
-                                                border: isActive ? '2px solid #f03e3e' : '2px solid #eee',
-                                                background: isActive ? '#f03e3e' : '#fff',
-                                                color: isActive ? '#fff' : '#444',
-                                                fontWeight: 'bold',
-                                                cursor: 'pointer',
-                                                display: 'flex',
-                                                alignItems: 'center',
-                                                justifyContent: 'center',
-                                                gap: '8px',
-                                                transition: 'all 0.15s ease',
-                                                fontSize: '0.9rem'
-                                            }}
-                                        >
-                                            <Calendar size={16} /> {day.name}
-                                        </button>
-                                    );
-                                })}
-                            </div>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
+                            {openingHours.map(hour => (
+                                <div key={hour.id} style={{ 
+                                    display: 'flex', 
+                                    alignItems: 'center', 
+                                    justifyContent: 'space-between', 
+                                    background: hour.is_open ? '#fff' : '#f8f9fa',
+                                    padding: '15px', 
+                                    borderRadius: '12px',
+                                    border: '1px solid #eee',
+                                    gap: '15px',
+                                    flexWrap: 'wrap'
+                                }}>
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px', minWidth: '120px' }}>
+                                        <div style={{ 
+                                            width: '40px', height: '40px', borderRadius: '50%', 
+                                            background: hour.is_open ? '#f03e3e' : '#ccc', color: '#fff',
+                                            display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold'
+                                        }}>
+                                            {hour.day_name.charAt(0)}
+                                        </div>
+                                        <span style={{ fontWeight: 'bold', fontSize: '1.1rem' }}>{hour.day_name}</span>
+                                    </div>
+
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: '15px', flex: 1, minWidth: '250px' }}>
+                                        <input 
+                                            type="time" 
+                                            value={hour.opening_time} 
+                                            disabled={!hour.is_open}
+                                            onChange={e => handleHourChange(hour.id, 'opening_time', e.target.value)}
+                                            style={{ ...timeInputSmallStyle, opacity: hour.is_open ? 1 : 0.5 }}
+                                        />
+                                        <span style={{ color: '#888' }}>a</span>
+                                        <input 
+                                            type="time" 
+                                            value={hour.closing_time} 
+                                            disabled={!hour.is_open}
+                                            onChange={e => handleHourChange(hour.id, 'closing_time', e.target.value)}
+                                            style={{ ...timeInputSmallStyle, opacity: hour.is_open ? 1 : 0.5 }}
+                                        />
+                                    </div>
+
+                                    <button 
+                                        onClick={() => handleHourChange(hour.id, 'is_open', !hour.is_open)}
+                                        style={{
+                                            padding: '8px 15px',
+                                            borderRadius: '8px',
+                                            border: 'none',
+                                            background: hour.is_open ? '#ebfbee' : '#fff5f5',
+                                            color: hour.is_open ? '#2b8a3e' : '#f03e3e',
+                                            fontWeight: 'bold',
+                                            cursor: 'pointer',
+                                            fontSize: '0.85rem'
+                                        }}
+                                    >
+                                        {hour.is_open ? 'ABIERTO' : 'CERRADO'}
+                                    </button>
+                                </div>
+                            ))}
                         </div>
 
-                        <div style={{ 
-                            display: 'grid', 
-                            gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', 
-                            gap: '20px', 
-                            marginBottom: '30px' 
-                        }}>
-                            <div className="setting-field">
-                                <label style={labelStyle}>Hora de Apertura</label>
-                                <input 
-                                    type="time"
-                                    value={settings.find(s => s.key === 'opening_time')?.value || '20:00'}
-                                    onChange={e => handleSettingChange('opening_time', e.target.value)}
-                                    style={timeInputStyle}
-                                />
-                            </div>
-                            <div className="setting-field">
-                                <label style={labelStyle}>Hora de Cierre</label>
-                                <input 
-                                    type="time"
-                                    value={settings.find(s => s.key === 'closing_time')?.value || '00:00'}
-                                    onChange={handleSettingChange ? (e) => handleSettingChange('closing_time', e.target.value) : undefined}
-                                    style={timeInputStyle}
-                                />
-                            </div>
-                        </div>
-
-                        <button onClick={saveSettings} style={saveButtonStyle} disabled={isSaving}>
-                            <Save size={20} /> {isSaving ? 'GUARDANDO...' : 'GUARDAR HORARIOS'}
+                        <button onClick={saveAllHours} style={saveButtonStyle} disabled={isSaving}>
+                            <Save size={20} /> {isSaving ? 'GUARDANDO MESA DE HORARIOS...' : 'GUARDAR TODA LA TABLA'}
                         </button>
                     </div>
                 )}
@@ -311,25 +288,36 @@ const Settings = () => {
                                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                                             <div style={{ display: 'flex', alignItems: 'center', gap: '5px', fontSize: '0.8rem' }}>
                                                 Orden: 
-                                                <input 
-                                                    type="number"
-                                                    value={img.order}
-                                                    onChange={(e) => handleReorderImage(img.id, parseInt(e.target.value) || 0)}
-                                                    style={orderInputStyle}
-                                                />
+                                                <input type="number" value={img.order} onChange={(e) => handleReorderImage(img.id, parseInt(e.target.value) || 0)} style={orderInputStyle} />
                                             </div>
-                                            <button onClick={() => handleDeleteImage(img.id)} style={deleteBtnStyle}>
+                                            <button onClick={() => setConfirmDelete({ type: 'image', id: img.id, title: img.title })} style={deleteBtnStyle}>
                                                 <Trash2 size={16} />
                                             </button>
                                         </div>
                                     </div>
                                 </div>
                             ))}
-                            {gallery.length === 0 && <p style={{ color: '#888', gridColumn: '1/-1', textAlign: 'center' }}>No hay imágenes cargadas.</p>}
                         </div>
                     </div>
                 )}
             </div>
+
+            {/* Custom Confirms */}
+            {confirmDelete && (
+                <div className="modal-overlay" style={modalOverlayStyle}>
+                    <div className="admin-modal" style={{ ...modalStyle, maxWidth: '400px', textAlign: 'center' }}>
+                        <div style={{ padding: '30px' }}>
+                            <div style={{ color: '#f03e3e', marginBottom: '15px' }}><AlertTriangle size={48} style={{ margin: '0 auto' }} /></div>
+                            <h3>¿Estás seguro?</h3>
+                            <p style={{ color: '#666' }}>Vas a eliminar la imagen <strong>{confirmDelete.title || 'sin título'}</strong>. Esta acción no se puede deshacer.</p>
+                            <div style={{ display: 'flex', gap: '15px', marginTop: '25px' }}>
+                                <button onClick={() => setConfirmDelete(null)} style={cancelBtnStyle}>CANCELAR</button>
+                                <button onClick={executeDelete} style={{ ...saveImgBtnStyle, background: '#f03e3e' }}>SÍ, ELIMINAR</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
 
             {/* Modal para añadir imagen */}
             {isAddingImg && (
@@ -342,29 +330,15 @@ const Settings = () => {
                         <form onSubmit={handleAddImage} style={{ padding: '20px', display: 'flex', flexDirection: 'column', gap: '20px' }}>
                             <div>
                                 <label style={modalLabelStyle}>Título (Opcional)</label>
-                                <input 
-                                    type="text" 
-                                    value={newImage.title}
-                                    placeholder="Ej: Salón Principal"
-                                    onChange={e => setNewImage({...newImage, title: e.target.value})}
-                                    style={modalInputStyle}
-                                />
+                                <input type="text" value={newImage.title} placeholder="Ej: Salón Principal" onChange={e => setNewImage({...newImage, title: e.target.value})} style={modalInputStyle} />
                             </div>
                             <div>
                                 <label style={modalLabelStyle}>Archivo de Imagen *</label>
-                                <input 
-                                    type="file"
-                                    accept="image/*"
-                                    onChange={e => setNewImage({...newImage, image: e.target.files[0]})}
-                                    style={modalInputStyle}
-                                    required
-                                />
+                                <input type="file" accept="image/*" onChange={e => setNewImage({...newImage, image: e.target.files[0]})} style={modalInputStyle} required />
                             </div>
                             <div style={{ display: 'flex', gap: '15px', marginTop: '10px' }}>
                                 <button type="button" onClick={() => setIsAddingImg(false)} style={cancelBtnStyle}>Cancelar</button>
-                                <button type="submit" disabled={imgSaving} style={saveImgBtnStyle}>
-                                    {imgSaving ? 'Subiendo...' : 'Publicar Imagen'}
-                                </button>
+                                <button type="submit" disabled={imgSaving} style={saveImgBtnStyle}>{imgSaving ? 'Subiendo...' : 'Publicar Imagen'}</button>
                             </div>
                         </form>
                     </div>
@@ -374,12 +348,8 @@ const Settings = () => {
     );
 };
 
-// Styles
+// Internal styles
 const tabBtnStyle = (active) => ({
-    padding: '12px 20px',
-    border: 'none',
-    borderRadius: '10px',
-    background: active ? '#f03e3e' : '#fff',
     color: active ? '#fff' : '#666',
     fontWeight: active ? '700' : '500',
     cursor: 'pointer',

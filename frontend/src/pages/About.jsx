@@ -2,21 +2,24 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Menu, X } from 'lucide-react';
 import InstagramFeed from '../components/InstagramFeed.tsx';
-import { fetchGalleryImages, fetchSettings } from '../services/api';
+import { fetchGalleryImages, fetchSettings, fetchOpeningHours } from '../services/api';
 
 function About() {
   const [gallery, setGallery] = useState([]);
   const [settings, setSettings] = useState({});
+  const [openingHours, setOpeningHours] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const loadData = async () => {
       try {
-        const [galleryData, settingsData] = await Promise.all([
+        const [galleryData, settingsData, hoursData] = await Promise.all([
           fetchGalleryImages(),
-          fetchSettings()
+          fetchSettings(),
+          fetchOpeningHours()
         ]);
         setGallery(galleryData);
+        setOpeningHours(hoursData);
         
         // Convert array to object for easy access
         const settingsObj = {};
@@ -134,17 +137,18 @@ function About() {
               </div>
               <div className="location-card">
                 <h3>HORARIOS</h3>
-                <p>Apertura: {settings.opening_time || '20:00'} hs</p>
-                <p>Cierre: {settings.closing_time || '00:00'} hs</p>
-                <p style={{ color: 'var(--color-primary)', fontWeight: 'bold', fontSize: '0.9rem', marginTop: '5px' }}>
-                  {(!settings.opening_days || settings.opening_days === '1,2,3,4,5,6,7') 
-                    ? 'TODOS LOS DÍAS' 
-                    : `DÍAS: ${settings.opening_days.split(',').map(d => {
-                        const days = ["", "LUN", "MAR", "MIE", "JUE", "VIE", "SAB", "DOM"];
-                        return days[parseInt(d)];
-                      }).join(', ')}`
-                  }
-                </p>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
+                  {openingHours.filter(h => h.is_open).length > 0 ? (
+                    openingHours.filter(h => h.is_open).map(h => (
+                      <p key={h.id} style={{ display: 'flex', justifyContent: 'space-between', gap: '20px' }}>
+                        <span style={{ fontWeight: 'bold' }}>{h.day_name}:</span>
+                        <span>{h.opening_time.slice(0,5)} a {h.closing_time.slice(0,5)} hs</span>
+                      </p>
+                    ))
+                  ) : (
+                    <p style={{ color: 'var(--color-primary)', fontWeight: 'bold' }}>CERRADO TEMPORALMENTE</p>
+                  )}
+                </div>
               </div>
               <div className="location-card">
                 <h3>CONTACTO</h3>

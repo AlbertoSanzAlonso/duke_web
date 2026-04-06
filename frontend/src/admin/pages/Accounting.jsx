@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { fetchSales, fetchSupplierOrders, fetchExpenses, createExpense, deleteExpense } from '../../services/api';
+import { fetchSales, fetchSupplierOrders, createSupplierOrder, fetchExpenses, createExpense, deleteExpense } from '../../services/api';
 import './Accounting.css';
 import LoadingScreen from '../components/LoadingScreen';
 import Toast from '../components/Toast';
@@ -11,11 +11,11 @@ const Accounting = () => {
     const [loading, setLoading] = useState(true);
     const [toast, setToast] = useState(null); // { message, type }
     
-    // Manual expense form
-    const [desc, setDesc] = useState('');
-    const [amount, setAmount] = useState('');
-    const [category, setCategory] = useState('Otros');
     const [isSaving, setIsSaving] = useState(false);
+
+    // Supplier order form
+    const [supplierName, setSupplierName] = useState('');
+    const [supplierCost, setSupplierCost] = useState('');
 
     useEffect(() => {
         loadData();
@@ -58,6 +58,28 @@ const Accounting = () => {
             loadData();
         } catch (error) {
             setToast({ message: "Error al registrar el gasto", type: 'error' });
+        } finally {
+            setIsSaving(false);
+        }
+    };
+
+    const handleAddSupplierOrder = async (e) => {
+        e.preventDefault();
+        if (!supplierName || !supplierCost) return;
+        setIsSaving(true);
+        try {
+            await createSupplierOrder({
+                supplier_name: supplierName,
+                total_cost: parseFloat(supplierCost),
+                status: 'DELIVERED',
+                items: [] // Simple order without per-item tracking for accounting
+            });
+            setSupplierName('');
+            setSupplierCost('');
+            setToast({ message: "Pago a proveedor registrado", type: 'success' });
+            loadData();
+        } catch (error) {
+            setToast({ message: "Error al registrar pedido", type: 'error' });
         } finally {
             setIsSaving(false);
         }
@@ -113,22 +135,51 @@ const Accounting = () => {
             <div className="accounting-main-layout">
                 <div className="accounting-forms">
                     <div className="admin-card">
-                        <h3>Añadir Gasto Manual</h3>
+                        <h3>Compra / Pago Proveedor</h3>
+                        <form onSubmit={handleAddSupplierOrder} className="accounting-form">
+                            <div className="form-group">
+                                <label>Concepto (Proveedor/Materia Prima)</label>
+                                <input 
+                                    type="text" 
+                                    value={supplierName} 
+                                    onChange={e => setSupplierName(e.target.value)} 
+                                    placeholder="Ej: Panadería, Mercado Central..."
+                                    required/ >
+                            </div>
+                            <div className="form-group">
+                                <label>Importe Gasto ($)</label>
+                                <input 
+                                    type="number" 
+                                    step="100" 
+                                    value={supplierCost} 
+                                    onChange={e => setSupplierCost(e.target.value)} 
+                                    placeholder="0"
+                                    required/ >
+                            </div>
+                            <button type="submit" className="main-button supplier-btn" disabled={isSaving}>
+                                {isSaving ? "Guardando..." : "Registrar Compra"}
+                            </button>
+                        </form>
+                    </div>
+
+                    <div className="admin-card" style={{ marginTop: '20px' }}>
+                        <h3>Gasto Fijo / Varios</h3>
                         <form onSubmit={handleAddExpense} className="accounting-form">
                             <div className="form-group">
-                                <label>Descripción</label>
+                                <label>Descripción del Gasto</label>
                                 <input 
                                     type="text" 
                                     value={desc} 
                                     onChange={e => setDesc(e.target.value)} 
-                                    placeholder="Ej: Recibo de luz, Alquiler..."
+                                    placeholder="Ej: Luz, Alquiler, Sueldos..."
                                     required/ >
                             </div>
                             <div className="form-row">
                                 <div className="form-group">
                                     <label>Importe ($)</label>
                                     <input 
-                                        step="1" 
+                                        type="number"
+                                        step="100" 
                                         value={amount} 
                                         onChange={e => setAmount(e.target.value)} 
                                         placeholder="0"
@@ -137,16 +188,14 @@ const Accounting = () => {
                                 <div className="form-group">
                                     <label>Categoría</label>
                                     <select value={category} onChange={e => setCategory(e.target.value)}>
-                                        <option value="Suministros">Suministros (Luz, Agua)</option>
+                                        <option value="Suministros">Suministros</option>
                                         <option value="Alquiler">Alquiler</option>
                                         <option value="Personal">Personal</option>
-                                        <option value="Mantenimiento">Mantenimiento</option>
-                                        <option value="Marketing">Marketing</option>
                                         <option value="Otros">Otros</option>
                                     </select>
                                 </div>
                             </div>
-                            <button type="submit" className="main-button" disabled={isSaving}>
+                            <button type="submit" className="outline-button" disabled={isSaving}>
                                 {isSaving ? "Guardando..." : "Registrar Gasto"}
                             </button>
                         </form>
