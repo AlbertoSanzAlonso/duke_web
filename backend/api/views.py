@@ -309,7 +309,7 @@ async def OrderStreamView(request):
             # .aiter() permite iterar sin bloquear el thread secundario de Gthread
             new_sales_qs = Sale.objects.filter(id__gt=last_seen_id).order_by('id')
             
-            async for sale in new_sales_qs.aiter():
+            async for sale in new_sales_qs:
                 data = {
                     'type': 'new_order',
                     'id': sale.id,
