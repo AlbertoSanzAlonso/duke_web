@@ -34,12 +34,32 @@ def AdminSetupView(request):
             created.append(username)
         else:
             skipped.append(username)
+
+    # 2. Setup Default Opening Hours
+    hours_created = 0
+    if not OpeningHour.objects.exists():
+        for i in range(1, 8):
+            OpeningHour.objects.get_or_create(day=i, defaults={
+                'opening_time': '20:00',
+                'closing_time': '00:00',
+                'is_open': True
+            })
+            hours_created += 1
+
+    # 3. Setup Default Delivery Rates
+    delivery_setup = False
+    if not DeliverySetting.objects.filter(id=1).exists():
+        DeliverySetting.objects.create(id=1, base_price=1000, km_price=200, max_km=15)
+        delivery_setup = True
             
     return Response({
         'status': 'Success',
-        'created': created,
-        'already_existed': skipped,
-        'message': 'Admin accounts are ready. You can now use /login'
+        'auth': {'created': created, 'skipped': skipped},
+        'config': {
+            'hours_restored': hours_created,
+            'delivery_defaults': delivery_setup
+        },
+        'message': 'Admin accounts and initial configuration are ready on Supabase. Refresh /admin/config'
     })
 
 class ProductViewSet(viewsets.ModelViewSet):
