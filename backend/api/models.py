@@ -221,12 +221,19 @@ class UserProfile(models.Model):
             if extension.lower() != '.webp':
                 try:
                     im = Image.open(self.avatar)
-                    im = im.convert("RGB")
+                    if im.mode in ("RGBA", "P"):
+                        im = im.convert("RGBA")
+                    else:
+                        im = im.convert("RGB")
+                    
                     output = BytesIO()
                     im.save(output, format='WEBP', quality=80)
                     output.seek(0)
-                    self.avatar = ContentFile(output.read(), name=f"{name}.webp")
-                except: pass
+                    
+                    safe_name = "".join([c if (c.isalnum() or c in ("_", "-")) else "_" for c in name])
+                    self.avatar = ContentFile(output.read(), name=f"{safe_name}.webp")
+                except Exception as e:
+                    print(f"Error processing avatar {name}: {e}")
         super().save(*args, **kwargs)
 
     def __str__(self):

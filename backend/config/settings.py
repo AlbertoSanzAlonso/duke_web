@@ -145,17 +145,28 @@ MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
 
 # Supabase S3 Storage Configuration
-USE_S3 = env('USE_S3', default=False)
+USE_S3 = env.bool('USE_S3', default=False)
 if USE_S3:
-    AWS_ACCESS_KEY_ID = env('AWS_ACCESS_KEY_ID')
-    AWS_SECRET_ACCESS_KEY = env('AWS_SECRET_ACCESS_KEY')
+    AWS_ACCESS_KEY_ID = env('AWS_ACCESS_KEY_ID', default=None)
+    AWS_SECRET_ACCESS_KEY = env('AWS_SECRET_ACCESS_KEY', default=None)
     AWS_STORAGE_BUCKET_NAME = env('AWS_STORAGE_BUCKET_NAME', default='media')
-    AWS_S3_ENDPOINT_URL = env('AWS_S3_ENDPOINT_URL')
-    AWS_S3_REGION_NAME = env('AWS_S3_REGION_NAME', default='eu-west-1') # Typical EU region
-    AWS_DEFAULT_ACL = 'public-read'
+    AWS_S3_ENDPOINT_URL = env('AWS_S3_ENDPOINT_URL', default=None)
+    AWS_S3_REGION_NAME = env('AWS_S3_REGION_NAME', default='sa-east-1') # San Juan / Latam suele ser sa-east-1 o dependiente del proyecto
+    AWS_DEFAULT_ACL = None  # Supabase no soporta ACLs de S3 standard
+    AWS_S3_ADDRESSING_STYLE = 'virtual'
+    AWS_S3_SIGNATURE_VERSION = 's3v4'
+    AWS_S3_FILE_OVERWRITE = False
+    AWS_QUERYSTRING_AUTH = False # URLs públicas directas
     AWS_S3_CUSTOM_DOMAIN = f'{env("SUPABASE_REF", default="")}.supabase.co/storage/v1/object/public/{AWS_STORAGE_BUCKET_NAME}'
     
-    DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
+    STORAGES = {
+        "default": {
+            "BACKEND": "storages.backends.s3boto3.S3Boto3Storage",
+        },
+        "staticfiles": {
+            "BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage",
+        },
+    }
 
 ALLOWED_HOSTS = [
     'api.dukeburger-sj.com', 
@@ -175,21 +186,18 @@ CORS_ALLOWED_ORIGINS = [
 CSRF_TRUSTED_ORIGINS = [
     "https://dukeburger-sj.com",
     "https://api.dukeburger-sj.com",
-    "https://duke-web-git-main-albertosanzdevs-projects.vercel.app", # <--- TAMBIÉN AQUÍ
+    "https://duke-web-git-main-albertosanzdevs-projects.vercel.app",
+    "http://localhost:5173",
 ]
 CORS_ALLOW_ALL_ORIGINS = False
 CORS_ALLOW_CREDENTIALS = True
-CORS_ALLOW_HEADERS = [
-    "accept",
-    "accept-encoding",
-    "authorization",
-    "content-type",
-    "dnt",
-    "origin",
-    "user-agent",
+from corsheaders.defaults import default_headers
+
+CORS_ALLOW_HEADERS = list(default_headers) + [
     "x-csrftoken",
-    "x-requested-with",
 ]
+
+CORS_PREFLIGHT_MAX_AGE = 86400  # 24 horas caché de CORS
 
 # Email Configuration
 EMAIL_BACKEND = env('EMAIL_BACKEND', default='django.core.mail.backends.console.EmailBackend')

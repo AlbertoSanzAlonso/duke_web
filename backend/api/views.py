@@ -256,17 +256,17 @@ import time
 from django.views.decorators.csrf import csrf_exempt
 
 @csrf_exempt
-def OrderStreamView(request):
-    def event_stream():
-        # Obtenemos el último ID al conectar para solo enviar lo NUEVO
-        last_seen_sale = Sale.objects.order_by('-id').first()
+async def OrderStreamView(request):
+    async def event_stream():
+        # Obtenemos el último ID de forma asíncrona al conectar
+        last_seen_sale = await Sale.objects.order_by('-id').afirst()
         last_seen_id = last_seen_sale.id if last_seen_sale else 0
 
         while True:
-            # Consultamos si hay ventas nuevas
+            # Consultamos si hay ventas nuevas usando el iterador asíncrono
             new_sales = Sale.objects.filter(id__gt=last_seen_id).order_by('id')
             
-            for sale in new_sales:
+            async for sale in new_sales.aiter():
                 data = {
                     'type': 'new_order',
                     'id': sale.id,
@@ -276,11 +276,11 @@ def OrderStreamView(request):
                 yield f"data: {json.dumps(data)}\n\n"
                 last_seen_id = sale.id
 
-            # Heartbeat: Muy importante para que el proxy no cierre la conexión por inactividad
+            # Heartbeat asíncrono
             yield f"data: {json.dumps({'type': 'heartbeat'})}\n\n"
             
-            # Bajamos a 2-5 segundos para que la app se sienta "rápida"
-            time.sleep(2) 
+            # Espera asíncrona: LIBERA el worker para otras peticiones
+            await asyncio.sleep(2) 
 
     response = StreamingHttpResponse(event_stream(), content_type='text/event-stream')
     
