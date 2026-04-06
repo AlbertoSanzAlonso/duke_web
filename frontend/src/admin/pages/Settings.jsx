@@ -134,18 +134,23 @@ const Settings = () => {
                 <h2 style={{ margin: 0, fontSize: '2rem' }}>Configuración Duke</h2>
             </div>
 
-            <div className="settings-tabs-container" style={{ overflowX: 'auto', paddingBottom: '10px', marginBottom: '20px', width: '100%' }}>
-                <div className="settings-tabs" style={{ display: 'flex', gap: '12px', width: 'max-content', padding: '4px' }}>
-                    <button onClick={() => setActiveTab('delivery')} className={`tab-btn ${activeTab === 'delivery' ? 'active' : ''}`} style={tabBtnStyle(activeTab === 'delivery')}>
+            <div className="settings-tabs-container" style={{ marginBottom: '30px', width: '100%', overflow: 'hidden' }}>
+                <div className="settings-tabs" style={{ 
+                    display: 'grid', 
+                    gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 180px), 1fr))', 
+                    gap: '10px', 
+                    width: '100%' 
+                }}>
+                    <button onClick={() => setActiveTab('delivery')} className={`tab-btn ${activeTab === 'delivery' ? 'active' : ''}`} style={{ ...tabBtnStyle(activeTab === 'delivery'), flex: 1 }}>
                         <Truck size={18} /> Tarifas Envío
                     </button>
-                    <button onClick={() => setActiveTab('hours')} className={`tab-btn ${activeTab === 'hours' ? 'active' : ''}`} style={tabBtnStyle(activeTab === 'hours')}>
+                    <button onClick={() => setActiveTab('hours')} className={`tab-btn ${activeTab === 'hours' ? 'active' : ''}`} style={{ ...tabBtnStyle(activeTab === 'hours'), flex: 1 }}>
                         <Clock size={18} /> Tabla Horarios
                     </button>
-                    <button onClick={() => setActiveTab('gallery')} className={`tab-btn ${activeTab === 'gallery' ? 'active' : ''}`} style={tabBtnStyle(activeTab === 'gallery')}>
+                    <button onClick={() => setActiveTab('gallery')} className={`tab-btn ${activeTab === 'gallery' ? 'active' : ''}`} style={{ ...tabBtnStyle(activeTab === 'gallery'), flex: 1 }}>
                         <ImageIcon size={18} /> Galería Local
                     </button>
-                    <button onClick={() => setActiveTab('custom')} className={`tab-btn ${activeTab === 'custom' ? 'active' : ''}`} style={tabBtnStyle(activeTab === 'custom')}>
+                    <button onClick={() => setActiveTab('custom')} className={`tab-btn ${activeTab === 'custom' ? 'active' : ''}`} style={{ ...tabBtnStyle(activeTab === 'custom'), flex: 1 }}>
                         <Save size={18} /> Personalizar
                     </button>
                 </div>
