@@ -253,9 +253,9 @@ class GalleryImageViewSet(viewsets.ModelViewSet):
     permission_classes = [permissions.IsAuthenticatedOrReadOnly]
 
 import time
+from django.views.decorators.csrf import csrf_exempt
 
-@api_view(['GET'])
-@permission_classes([AllowAny])
+@csrf_exempt
 def OrderStreamView(request):
     def event_stream():
         # Get start baseline
