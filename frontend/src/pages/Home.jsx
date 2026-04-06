@@ -310,7 +310,7 @@ function Home() {
 
   const sendWhatsAppOrder = async () => {
     if (!customerName.trim()) {
-      alert("Por favor, ingresa tu nombre para el pedido.");
+      setErrorMessage("Por favor, ingresa tu nombre para el pedido.");
       return;
     }
 
@@ -370,7 +370,7 @@ function Home() {
       setIsCartOpen(false);
     } catch (error) {
       console.error("Error creating sale:", error);
-      alert("Hubo un error al procesar tu pedido. Por favor, intenta de nuevo.");
+      setErrorMessage("Hubo un error al procesar tu pedido. Por favor, intenta de nuevo.");
     } finally {
       setIsSaving(false);
     }
@@ -598,19 +598,21 @@ function Home() {
                         {isCalculating ? '...' : 'Calcular'}
                       </button>
                     </div>
-                    {errorMessage && (
-                      <p style={{ color: '#ff4d4d', fontSize: '0.8rem', marginTop: '10px', background: 'rgba(255, 77, 77, 0.1)', padding: '8px', borderRadius: '4px' }}>
-                        {errorMessage}
-                      </p>
-                    )}
-                    {deliveryCost > 0 && !errorMessage && (
-                      <p style={{ fontSize: '0.9rem', color: 'var(--color-primary)', marginTop: '10px', fontWeight: 'bold' }}>
-                        Costo de envío: ${deliveryCost.toLocaleString('es-AR')}
-                      </p>
-                    )}
-                  </div>
+
+
+                {errorMessage && (
+                  <p className="error-display-modal" style={{ color: '#ff4d4d', fontSize: '0.9rem', marginTop: '15px', background: 'rgba(255, 77, 77, 0.1)', padding: '12px', borderRadius: '6px', border: '1px solid rgba(255, 77, 77, 0.2)', fontWeight: 'bold', textAlign: 'center' }}>
+                    {errorMessage}
+                  </p>
+                )}
+                {deliveryCost > 0 && !errorMessage && (
+                  <p style={{ fontSize: '0.9rem', color: 'var(--color-primary)', marginTop: '10px', fontWeight: 'bold' }}>
+                    Costo de envío: ${deliveryCost.toLocaleString('es-AR')}
+                  </p>
                 )}
               </div>
+            )}
+          </div>
 
               <div className="customer-info-section">
                 <label>TU NOMBRE *</label>

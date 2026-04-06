@@ -168,30 +168,13 @@ if USE_S3:
         },
     }
 
+DEBUG = True
 ALLOWED_HOSTS = ['*']
-
-CORS_ALLOWED_ORIGINS = [
-    "https://dukeburger-sj.com",
-    "https://www.dukeburger-sj.com",
-    "https://duke-web-git-main-albertosanzdevs-projects.vercel.app", 
-    "http://localhost:5173",
-]
-
-CSRF_TRUSTED_ORIGINS = [
-    "https://dukeburger-sj.com",
-    "https://api.dukeburger-sj.com",
-    "https://duke-web-git-main-albertosanzdevs-projects.vercel.app",
-    "http://localhost:5173",
-]
 CORS_ALLOW_ALL_ORIGINS = True
 CORS_ALLOW_CREDENTIALS = True
-from corsheaders.defaults import default_headers
-
-CORS_ALLOW_HEADERS = list(default_headers) + [
-    "x-csrftoken",
-]
-
-CORS_PREFLIGHT_MAX_AGE = 86400  # 24 horas caché de CORS
+CORS_ALLOW_HEADERS = ["*"]
+CORS_ALLOW_METHODS = ["*"]
+CORS_PREFLIGHT_MAX_AGE = 86400
 
 # Email Configuration
 EMAIL_BACKEND = env('EMAIL_BACKEND', default='django.core.mail.backends.console.EmailBackend')
