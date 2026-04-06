@@ -7,7 +7,7 @@ if (!base_api_url.endsWith('/api')) {
 }
 const API_URL = base_api_url;
 
-const getHeaders = (contentType = 'application/json') => {
+const getHeaders = (contentType = null) => {
     const headers = {};
     if (contentType) headers['Content-Type'] = contentType;
     const token = localStorage.getItem('duke_admin_token');
@@ -100,7 +100,7 @@ export const fetchMenuEntries = async () => {
 export const createMenuEntry = async (data) => {
     const response = await fetch(`${API_URL}/menu-entries/`, {
         method: 'POST',
-        headers: getHeaders(),
+        headers: getHeaders('application/json'),
         body: JSON.stringify(data)
     });
     if (!response.ok) throw new Error('Error al añadir producto a la carta');
@@ -119,7 +119,7 @@ export const deleteMenuEntry = async (id) => {
 export const updateMenuEntry = async (id, data) => {
     const response = await fetch(`${API_URL}/menu-entries/${id}/`, {
         method: 'PATCH',
-        headers: getHeaders(),
+        headers: getHeaders('application/json'),
         body: JSON.stringify(data)
     });
     if (!response.ok) throw new Error('Error al modificar precio de la carta');
@@ -136,7 +136,7 @@ export const fetchInventory = async () => {
 export const createInventoryItem = async (data) => {
     const response = await fetch(`${API_URL}/inventory/`, {
         method: 'POST',
-        headers: getHeaders(),
+        headers: getHeaders('application/json'),
         body: JSON.stringify(data)
     });
     if (!response.ok) throw new Error('Error al crear elemento de inventario');
@@ -156,7 +156,7 @@ export const deleteInventoryItem = async (id) => {
 export const createSale = async (data) => {
     const response = await fetch(`${API_URL}/sales/`, {
         method: 'POST',
-        headers: getHeaders(),
+        headers: getHeaders('application/json'),
         body: JSON.stringify(data)
     });
     if (!response.ok) throw new Error('Error al registrar la venta');
@@ -172,7 +172,7 @@ export const fetchSales = async () => {
 export const updateSale = async (id, data) => {
     const response = await fetch(`${API_URL}/sales/${id}/`, {
         method: 'PATCH',
-        headers: getHeaders(),
+        headers: getHeaders('application/json'),
         body: JSON.stringify(data)
     });
     if (!response.ok) throw new Error('Error al actualizar venta');
@@ -198,7 +198,7 @@ export const fetchExpenses = async () => {
 export const createExpense = async (data) => {
     const response = await fetch(`${API_URL}/expenses/`, {
         method: 'POST',
-        headers: getHeaders(),
+        headers: getHeaders('application/json'),
         body: JSON.stringify(data)
     });
     if (!response.ok) throw new Error('Error al registrar gasto');
@@ -223,7 +223,7 @@ export const fetchSupplierOrders = async () => {
 export const createSupplierOrder = async (data) => {
     const response = await fetch(`${API_URL}/supplier-orders/`, {
         method: 'POST',
-        headers: getHeaders(),
+        headers: getHeaders('application/json'),
         body: JSON.stringify(data)
     });
     if (!response.ok) throw new Error('Error al registrar pedido a proveedor');
@@ -240,7 +240,7 @@ export const fetchSettings = async () => {
 export const updateSetting = async (key, value) => {
     const response = await fetch(`${API_URL}/settings/${key}/`, {
         method: 'PATCH',
-        headers: getHeaders(),
+        headers: getHeaders('application/json'),
         body: JSON.stringify({ value })
     });
     if (!response.ok) throw new Error('Error al actualizar configuración');
@@ -256,7 +256,7 @@ export const fetchOpeningHours = async () => {
 export const updateOpeningHour = async (id, data) => {
     const response = await fetch(`${API_URL}/opening-hours/${id}/`, {
         method: 'PATCH',
-        headers: getHeaders(),
+        headers: getHeaders('application/json'),
         body: JSON.stringify(data)
     });
     if (!response.ok) throw new Error('Error al actualizar horario');
@@ -272,7 +272,7 @@ export const fetchDeliveryRates = async () => {
 export const updateDeliveryRates = async (data) => {
     const response = await fetch(`${API_URL}/delivery-rates/1/`, {
         method: 'PATCH',
-        headers: getHeaders(),
+        headers: getHeaders('application/json'),
         body: JSON.stringify(data)
     });
     if (!response.ok) throw new Error('Error al actualizar tarifas de envío');
