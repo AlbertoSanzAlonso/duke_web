@@ -145,7 +145,7 @@ MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
 
 # Supabase S3 Storage Configuration
-USE_S3 = env.bool('USE_S3', default=False)
+USE_S3 = False # Forzado para recuperar conectividad
 if USE_S3:
     AWS_ACCESS_KEY_ID = env('AWS_ACCESS_KEY_ID', default=None)
     AWS_SECRET_ACCESS_KEY = env('AWS_SECRET_ACCESS_KEY', default=None)
@@ -168,13 +168,7 @@ if USE_S3:
         },
     }
 
-ALLOWED_HOSTS = [
-    'api.dukeburger-sj.com', 
-    'dukeburger-sj.com', 
-    'localhost', 
-    '127.0.0.1',
-    'duke-web-git-main-albertosanzdevs-projects.vercel.app', 
-]
+ALLOWED_HOSTS = ['*']
 
 CORS_ALLOWED_ORIGINS = [
     "https://dukeburger-sj.com",
@@ -189,7 +183,7 @@ CSRF_TRUSTED_ORIGINS = [
     "https://duke-web-git-main-albertosanzdevs-projects.vercel.app",
     "http://localhost:5173",
 ]
-CORS_ALLOW_ALL_ORIGINS = False
+CORS_ALLOW_ALL_ORIGINS = True
 CORS_ALLOW_CREDENTIALS = True
 from corsheaders.defaults import default_headers
 
