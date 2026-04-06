@@ -185,7 +185,19 @@ if USE_S3:
 
 DEBUG = True
 ALLOWED_HOSTS = ['*']
-CORS_ALLOW_ALL_ORIGINS = True
+
+# Explicitly allow production origins for CORS (Crucial when using Credentials)
+CORS_ALLOWED_ORIGINS = [
+    "https://dukeburger-sj.com",
+    "https://www.dukeburger-sj.com",
+    "http://localhost:5173", # Dev
+]
+
+CSRF_TRUSTED_ORIGINS = [
+    "https://dukeburger-sj.com",
+    "https://api.dukeburger-sj.com",
+]
+
 CORS_ALLOW_CREDENTIALS = True
 CORS_ALLOW_HEADERS = ["*"]
 CORS_ALLOW_METHODS = ["*"]
