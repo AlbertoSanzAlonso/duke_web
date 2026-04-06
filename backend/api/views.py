@@ -1,6 +1,6 @@
 from rest_framework import viewsets, permissions
 from rest_framework.response import Response
-from rest_framework.decorators import api_view, permission_classes
+from rest_framework.decorators import api_view, permission_classes, parser_classes
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from django.contrib.auth.models import User
 from .models import (Product, MenuEntry, Sale, Expense, InventoryItem, 
@@ -12,7 +12,6 @@ from .serializers import (ProductSerializer, MenuEntrySerializer, SaleSerializer
                           GalleryImageSerializer, OpeningHourSerializer, 
                           DeliverySettingSerializer, UserSerializer)
 from .models import UserProfile
-
 from rest_framework import permissions, parsers
 
 @api_view(['GET', 'PATCH'])

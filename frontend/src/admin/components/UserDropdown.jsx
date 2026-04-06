@@ -59,7 +59,7 @@ const UserDropdown = () => {
             {isOpen && (
                 <div className="dropdown-menu">
                     <div className="dropdown-header">
-                        <p className="email">{me.email}</p>
+                        <p className="email">{me?.email || ''}</p>
                     </div>
                     <Link to="/admin/perfil" className="dropdown-item" onClick={() => setIsOpen(false)}>
                         <User size={18} />
