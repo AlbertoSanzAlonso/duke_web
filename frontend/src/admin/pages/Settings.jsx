@@ -141,16 +141,16 @@ const Settings = () => {
                     gap: '12px', 
                     width: '100%' 
                 }}>
-                    <button onClick={() => setActiveTab('delivery')} className={`tab-btn ${activeTab === 'delivery' ? 'active' : ''}`} style={{ ...tabBtnStyle(activeTab === 'delivery'), flex: 1 }}>
+                    <button onClick={() => setActiveTab('delivery')} className={`tab-btn ${activeTab === 'delivery' ? 'active' : ''}`} style={{ ...tabBtnStyle(activeTab === 'delivery'), width: '100%' }}>
                         <Truck size={18} /> Tarifas Envío
                     </button>
-                    <button onClick={() => setActiveTab('hours')} className={`tab-btn ${activeTab === 'hours' ? 'active' : ''}`} style={{ ...tabBtnStyle(activeTab === 'hours'), flex: 1 }}>
+                    <button onClick={() => setActiveTab('hours')} className={`tab-btn ${activeTab === 'hours' ? 'active' : ''}`} style={{ ...tabBtnStyle(activeTab === 'hours'), width: '100%' }}>
                         <Clock size={18} /> Tabla Horarios
                     </button>
-                    <button onClick={() => setActiveTab('gallery')} className={`tab-btn ${activeTab === 'gallery' ? 'active' : ''}`} style={{ ...tabBtnStyle(activeTab === 'gallery'), flex: 1 }}>
+                    <button onClick={() => setActiveTab('gallery')} className={`tab-btn ${activeTab === 'gallery' ? 'active' : ''}`} style={{ ...tabBtnStyle(activeTab === 'gallery'), width: '100%' }}>
                         <ImageIcon size={18} /> Galería Local
                     </button>
-                    <button onClick={() => setActiveTab('custom')} className={`tab-btn ${activeTab === 'custom' ? 'active' : ''}`} style={{ ...tabBtnStyle(activeTab === 'custom'), flex: 1 }}>
+                    <button onClick={() => setActiveTab('custom')} className={`tab-btn ${activeTab === 'custom' ? 'active' : ''}`} style={{ ...tabBtnStyle(activeTab === 'custom'), width: '100%' }}>
                         <Save size={18} /> Personalizar
                     </button>
                 </div>
@@ -437,24 +437,25 @@ const Settings = () => {
 
 // Internal styles
 const tabBtnStyle = (active) => ({
-    padding: '12px 20px',
-    borderRadius: '10px',
-    border: 'none',
-    backgroundColor: active ? '#f03e3e' : '#f1f3f5',
+    padding: '12px 10px',
+    backgroundColor: active ? 'var(--admin-primary)' : '#fff',
     color: active ? '#fff' : '#495057',
-    fontWeight: '700',
+    border: '1px solid',
+    borderColor: active ? 'var(--admin-primary)' : '#ddd',
+    borderRadius: '12px',
     cursor: 'pointer',
     display: 'flex',
     alignItems: 'center',
     gap: '8px',
-    boxShadow: active ? '0 4px 10px rgba(0, 0, 0, 0.15)' : 'none',
     transition: 'all 0.2s ease',
+    boxShadow: active ? '0 4px 12px rgba(240, 62, 62, 0.2)' : 'none',
+    fontWeight: '700',
     fontFamily: 'inherit',
     textTransform: 'uppercase',
-    letterSpacing: '0.5px',
-    fontSize: '0.85rem',
+    letterSpacing: '0.1px',
+    fontSize: '0.8rem',
     whiteSpace: 'nowrap',
-    flex: 1,
+    width: '100%',
     justifyContent: 'center'
 });
 
