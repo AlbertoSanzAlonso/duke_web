@@ -19,14 +19,11 @@ import {
 } from 'lucide-react';
 import './Admin.css';
 
+import UserDropdown from './components/UserDropdown';
+
 const AdminLayout = () => {
   const [isMobileOpen, setIsMobileOpen] = useState(false);
   const navigate = useNavigate();
-
-  const handleLogout = () => {
-    logout();
-    navigate('/login');
-  };
 
   const menuItems = [
     { name: 'Dashboard', path: '/admin', icon: <LayoutDashboard size={20} /> },
@@ -70,19 +67,19 @@ const AdminLayout = () => {
               <span>{item.name}</span>
             </NavLink>
           ))}
-          <button onClick={handleLogout} className="nav-item logout-nav-btn">
-            <LogOut size={20} />
-            <span>Cerrar Sesión</span>
-          </button>
         </nav>
       </aside>
       
       <main className="admin-main">
-        <header className="admin-header">
-          <button className="admin-mobile-toggle" onClick={() => setIsMobileOpen(!isMobileOpen)}>
-            <Menu size={24} />
-          </button>
-          <h3>Panel de Control</h3>
+        <header className="admin-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '10px 20px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
+            <button className="admin-mobile-toggle" onClick={() => setIsMobileOpen(!isMobileOpen)}>
+              <Menu size={24} />
+            </button>
+            <h3 style={{ margin: 0 }}>Panel de Control</h3>
+          </div>
+          
+          <UserDropdown />
         </header>
         <div className="admin-content">
           <Outlet />

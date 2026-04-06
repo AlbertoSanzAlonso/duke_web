@@ -53,6 +53,7 @@ function App() {
             <Route path="contabilidad" element={<Accounting />} />
             <Route path="historial" element={<HistoryLog />} />
             <Route path="config" element={<Settings />} />
+            <Route path="perfil" element={<Profile />} />
           </Route>
         </Route>
       </Routes>

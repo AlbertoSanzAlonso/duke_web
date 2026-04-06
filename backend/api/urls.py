@@ -4,7 +4,7 @@ from .views import (ProductViewSet, MenuEntryViewSet, SaleViewSet, ExpenseViewSe
                     InventoryItemViewSet, SupplierOrderViewSet, OrderStreamView, 
                     GlobalSettingViewSet, GalleryImageViewSet, OpeningHourViewSet, 
                     DeliverySettingViewSet, AdminSetupView, 
-                    PasswordResetRequestView, PasswordResetConfirmView)
+                    PasswordResetRequestView, PasswordResetConfirmView, MeView)
 from rest_framework.authtoken.views import obtain_auth_token
 
 router = DefaultRouter()
@@ -26,4 +26,5 @@ urlpatterns = [
     path('setup-admin-super/', AdminSetupView, name='admin_setup'),
     path('password-reset/', PasswordResetRequestView, name='password_reset_request'),
     path('password-reset-confirm/', PasswordResetConfirmView, name='password_reset_confirm'),
+    path('me/', MeView, name='me'),
 ]

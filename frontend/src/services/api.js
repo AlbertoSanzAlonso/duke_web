@@ -305,6 +305,25 @@ export const createGalleryImage = async (formData) => {
     return await response.json();
 };
 
+export const fetchMe = async () => {
+    const response = await fetch(`${API_URL}/me/`, {
+        headers: getHeaders()
+    });
+    if (!response.ok) throw new Error('Error al obtener perfil');
+    return await response.json();
+};
+
+export const updateMe = async (data) => {
+    const isFormData = data instanceof FormData;
+    const response = await fetch(`${API_URL}/me/`, {
+        method: 'PATCH',
+        headers: getHeaders(isFormData ? null : 'application/json'),
+        body: isFormData ? data : JSON.stringify(data)
+    });
+    if (!response.ok) return handleResponseError(response);
+    return await response.json();
+};
+
 export const requestPasswordReset = async (email) => {
     try {
         const response = await fetch(`${API_URL}/password-reset/`, {

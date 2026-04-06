@@ -13,9 +13,10 @@ const Accounting = () => {
     
     const [isSaving, setIsSaving] = useState(false);
 
-    // Supplier order form
-    const [supplierName, setSupplierName] = useState('');
-    const [supplierCost, setSupplierCost] = useState('');
+    // Form states
+    const [desc, setDesc] = useState('');
+    const [amount, setAmount] = useState('');
+    const [category, setCategory] = useState('Otros');
 
     useEffect(() => {
         loadData();

@@ -9,7 +9,32 @@ from .serializers import (ProductSerializer, MenuEntrySerializer, SaleSerializer
                           InventoryItemSerializer, SupplierOrderSerializer, 
                           SupplierOrderCreateSerializer, GlobalSettingSerializer, 
                           GalleryImageSerializer, OpeningHourSerializer, 
-                          DeliverySettingSerializer)
+                          DeliverySettingSerializer, UserSerializer)
+from .models import UserProfile
+
+@api_view(['GET', 'PATCH'])
+@permission_classes([permissions.IsAuthenticated])
+def MeView(request):
+    user = request.user
+    if request.method == 'GET':
+        # Ensure profile exists
+        UserProfile.objects.get_or_create(user=user)
+        serializer = UserSerializer(user)
+        return Response(serializer.data)
+    
+    if request.method == 'PATCH':
+        serializer = UserSerializer(user, data=request.data, partial=True)
+        if serializer.is_valid():
+            serializer.save()
+            
+            # Handle avatar if provided
+            if 'avatar' in request.FILES:
+                profile, _ = UserProfile.objects.get_or_create(user=user)
+                profile.avatar = request.FILES['avatar']
+                profile.save()
+            
+            return Response(UserSerializer(user).data)
+        return Response(serializer.errors, status=400)
 from django.http import StreamingHttpResponse
 import asyncio
 import json
@@ -21,9 +46,14 @@ from django.core.mail import send_mail
 from django.template.loader import render_to_string
 from django.conf import settings
 
+from django.core import management
+
 @api_view(['GET'])
 @permission_classes([permissions.AllowAny])
 def AdminSetupView(request):
+    # Run migrations to ensure UserProfile and other new tables exist
+    management.call_command('migrate')
+    
     """
     Temporary view to setup admin users on the database (Supabase).
     """

@@ -195,5 +195,25 @@ class GalleryImage(models.Model):
                     print(f"Error processing gallery image {name}: {e}")
         super().save(*args, **kwargs)
 
+from django.contrib.auth.models import User
+
+class UserProfile(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='profile')
+    avatar = models.FileField(upload_to='avatars/', null=True, blank=True)
+
+    def save(self, *args, **kwargs):
+        if self.avatar:
+            name, extension = os.path.splitext(self.avatar.name)
+            if extension.lower() != '.webp':
+                try:
+                    im = Image.open(self.avatar)
+                    im = im.convert("RGB")
+                    output = BytesIO()
+                    im.save(output, format='WEBP', quality=80)
+                    output.seek(0)
+                    self.avatar = ContentFile(output.read(), name=f"{name}.webp")
+                except: pass
+        super().save(*args, **kwargs)
+
     def __str__(self):
-        return self.title or f"Gallery Image {self.id}"
+        return f"Perfil de {self.user.username}"
