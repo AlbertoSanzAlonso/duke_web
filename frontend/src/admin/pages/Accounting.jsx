@@ -109,7 +109,7 @@ const Accounting = () => {
             {toast && <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />}
             <header className="accounting-header">
                 <h2>Balance General</h2>
-                <p>Resumen financiero de Duke Burgers</p>
+                <p>Resumen financiero de Duke Burger</p>
             </header>
 
             <div className="accounting-summary-grid">

@@ -83,7 +83,7 @@ def PasswordResetRequestView(request):
         # In a real app, this would be a link to your FRONTEND reset page
         reset_url = f"{settings.ALLOWED_HOSTS[0]}/reset-password/{uid}/{token}" # Or the frontend URL
         
-        message = f"Hola {user.username},\n\nPara restablcer tu contraseña en Duke Burgers, haz clic en el siguiente enlace:\n{reset_url}\n\nSi no solicitaste esto, ignora este correo."
+        message = f"Hola {user.username},\n\nPara restablcer tu contraseña en Duke Burger, haz clic en el siguiente enlace:\n{reset_url}\n\nSi no solicitaste esto, ignora este correo."
         
         send_mail(
             'Restablecer Contraseña - Duke Burger',

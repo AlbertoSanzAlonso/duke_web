@@ -451,7 +451,7 @@ function Home() {
 
           <div className="menu-grid">
             {loading ? (
-              <p style={{ gridColumn: '1/-1', textAlign: 'center', padding: '50px' }}>Cargando carta de Duke Burgers...</p>
+              <p style={{ gridColumn: '1/-1', textAlign: 'center', padding: '50px' }}>Cargando carta de Duke Burger...</p>
             ) : categories.length === 0 ? (
               <p style={{ gridColumn: '1/-1', textAlign: 'center', padding: '50px' }}>No hay platos disponibles en este momento.</p>
             ) : (
