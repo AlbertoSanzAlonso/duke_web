@@ -157,17 +157,25 @@ if USE_S3:
     
     DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
 
-ALLOWED_HOSTS = ['api.dukeburger-sj.com', 'dukeburger-sj.com', 'localhost', '127.0.0.1']
-
-CSRF_TRUSTED_ORIGINS = [
-    "https://dukeburger-sj.com",
-    "https://api.dukeburger-sj.com",
+ALLOWED_HOSTS = [
+    'api.dukeburger-sj.com', 
+    'dukeburger-sj.com', 
+    'localhost', 
+    '127.0.0.1',
+    'duke-web-git-main-albertosanzdevs-projects.vercel.app', 
 ]
 
 CORS_ALLOWED_ORIGINS = [
     "https://dukeburger-sj.com",
     "https://www.dukeburger-sj.com",
+    "https://duke-web-git-main-albertosanzdevs-projects.vercel.app", 
     "http://localhost:5173",
+]
+
+CSRF_TRUSTED_ORIGINS = [
+    "https://dukeburger-sj.com",
+    "https://api.dukeburger-sj.com",
+    "https://duke-web-git-main-albertosanzdevs-projects.vercel.app", # <--- TAMBIÉN AQUÍ
 ]
 CORS_ALLOW_ALL_ORIGINS = False
 CORS_ALLOW_CREDENTIALS = True
