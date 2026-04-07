@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { fetchSales } from '../../services/api';
-import { Printer, Eye, Calendar, User, Hash, Search, Filter, LayoutGrid } from 'lucide-react';
+import { Printer, Eye, Calendar, User, Hash, Search, Filter, LayoutGrid, X, ShoppingBag } from 'lucide-react';
 import LoadingScreen from '../components/LoadingScreen';
 import Toast from '../components/Toast';
 import './Orders.css';
