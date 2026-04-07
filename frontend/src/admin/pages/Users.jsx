@@ -17,6 +17,7 @@ const Users = () => {
     const [formData, setFormData] = useState({
         username: '',
         password: '',
+        confirmPassword: '',
         email: '',
         profile: {
             can_use_tpv: false,
@@ -53,7 +54,8 @@ const Users = () => {
             setFormData({
                 username: user.username,
                 email: user.email || '',
-                password: '', // Don't show password
+                password: '', 
+                confirmPassword: '',
                 profile: user.profile || {
                     can_use_tpv: false,
                     can_use_accounting: false,
@@ -70,6 +72,7 @@ const Users = () => {
             setFormData({
                 username: '',
                 password: '',
+                confirmPassword: '',
                 email: '',
                 profile: {
                     can_use_tpv: false,
@@ -103,10 +106,15 @@ const Users = () => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+        if (formData.password && formData.password !== formData.confirmPassword) {
+            setToast({ message: "Las contraseñas no coinciden", type: 'error' });
+            return;
+        }
+
         try {
             if (editingUser) {
-                // Remove password if empty in update
                 const dataToUpdate = { ...formData };
+                delete dataToUpdate.confirmPassword;
                 if (!dataToUpdate.password) delete dataToUpdate.password;
                 
                 await updateUser(editingUser.id, dataToUpdate);
@@ -116,7 +124,9 @@ const Users = () => {
                     setToast({ message: "La contraseña es obligatoria", type: 'error' });
                     return;
                 }
-                await createUser(formData);
+                const dataToCreate = { ...formData };
+                delete dataToCreate.confirmPassword;
+                await createUser(dataToCreate);
                 setToast({ message: "Usuario creado", type: 'success' });
             }
             handleCloseModal();
@@ -231,37 +241,52 @@ const Users = () => {
                             {editingUser ? 'Editar Usuario' : 'Crear Nuevo Usuario'}
                         </h3>
                         <form onSubmit={handleSubmit} style={{ marginTop: '0' }}>
-                            <div className="form-grid" style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) minmax(0, 1fr)', gap: '15px' }}>
-                                <div className="form-group" style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
-                                    <label style={{ color: '#666', fontSize: '0.85rem', fontWeight: 'bold' }}><UserIcon size={14} style={{ marginRight: '5px' }} /> USERNAME</label>
+                            <div className="form-grid" style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) minmax(0, 1fr)', gap: '20px' }}>
+                                <div className="form-group" style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                                    <label style={{ color: '#444', fontSize: '0.9rem', fontWeight: 'bold', letterSpacing: '0.5px' }}><UserIcon size={14} style={{ marginRight: '5px' }} /> NOMBRE DE USUARIO</label>
                                     <input 
                                         type="text" 
                                         value={formData.username} 
                                         onChange={e => setFormData({...formData, username: e.target.value})}
                                         required
                                         placeholder="ej: juanperez"
-                                        style={{ padding: '12px', borderRadius: '8px', border: '1px solid #ddd' }}
+                                        style={{ padding: '16px', borderRadius: '12px', border: '2px solid #f1f3f5', fontSize: '1rem', background: '#fcfcfc', color: '#111', transition: 'all 0.2s' }}
+                                        className="styled-modal-input"
                                     />
                                 </div>
-                                <div className="form-group" style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
-                                    <label style={{ color: '#666', fontSize: '0.85rem', fontWeight: 'bold' }}><Mail size={14} style={{ marginRight: '5px' }} /> EMAIL</label>
+                                <div className="form-group" style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                                    <label style={{ color: '#444', fontSize: '0.9rem', fontWeight: 'bold', letterSpacing: '0.5px' }}><Mail size={14} style={{ marginRight: '5px' }} /> EMAIL</label>
                                     <input 
                                         type="email" 
                                         value={formData.email} 
                                         onChange={e => setFormData({...formData, email: e.target.value})}
                                         placeholder="ej: juan@gmail.com"
-                                        style={{ padding: '12px', borderRadius: '8px', border: '1px solid #ddd' }}
+                                        style={{ padding: '16px', borderRadius: '12px', border: '2px solid #f1f3f5', fontSize: '1rem', background: '#fcfcfc', color: '#111', transition: 'all 0.2s' }}
+                                        className="styled-modal-input"
                                     />
                                 </div>
-                                <div className="form-group" style={{ gridColumn: 'span 2', display: 'flex', flexDirection: 'column', gap: '5px' }}>
-                                    <label style={{ color: '#666', fontSize: '0.85rem', fontWeight: 'bold' }}><Key size={14} style={{ marginRight: '5px' }} /> {editingUser ? 'NUEVA CONTRASEÑA (OPCIONAL)' : 'CONTRASEÑA'}</label>
+                                <div className="form-group" style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                                    <label style={{ color: '#444', fontSize: '0.9rem', fontWeight: 'bold', letterSpacing: '0.5px' }}><Key size={14} style={{ marginRight: '5px' }} /> {editingUser ? 'NUEVA CONTRASEÑA' : 'CONTRASEÑA'}</label>
                                     <input 
                                         type="password" 
                                         value={formData.password} 
                                         onChange={e => setFormData({...formData, password: e.target.value})}
                                         required={!editingUser}
                                         placeholder="********"
-                                        style={{ padding: '12px', borderRadius: '8px', border: '1px solid #ddd' }}
+                                        style={{ padding: '16px', borderRadius: '12px', border: '2px solid #f1f3f5', fontSize: '1rem', background: '#fcfcfc', color: '#111', transition: 'all 0.2s' }}
+                                        className="styled-modal-input"
+                                    />
+                                </div>
+                                <div className="form-group" style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                                    <label style={{ color: '#444', fontSize: '0.9rem', fontWeight: 'bold', letterSpacing: '0.5px' }}><Key size={14} style={{ marginRight: '5px' }} /> REPETIR CONTRASEÑA</label>
+                                    <input 
+                                        type="password" 
+                                        value={formData.confirmPassword} 
+                                        onChange={e => setFormData({...formData, confirmPassword: e.target.value})}
+                                        required={!editingUser || formData.password !== ''}
+                                        placeholder="********"
+                                        style={{ padding: '16px', borderRadius: '12px', border: '2px solid #f1f3f5', fontSize: '1rem', background: '#fcfcfc', color: '#111', transition: 'all 0.2s' }}
+                                        className="styled-modal-input"
                                     />
                                 </div>
                             </div>
@@ -337,6 +362,13 @@ const Users = () => {
                 }
                 .perm-toggle:hover { background: #f1f3f5; }
                 .perm-toggle.active { background: #fff5f5; border: 1px solid #ffc9c9; }
+
+                .styled-modal-input:focus {
+                    border-color: var(--admin-primary) !important;
+                    background: #fff !important;
+                    box-shadow: 0 0 0 4px rgba(227, 24, 55, 0.1);
+                    outline: none;
+                }
                 
                 .switch {
                     position: relative;
