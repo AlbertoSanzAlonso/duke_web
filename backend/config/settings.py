@@ -193,9 +193,13 @@ STATIC_ROOT = BASE_DIR / "staticfiles"
 DEBUG = env.bool('DEBUG', default=False)
 ALLOWED_HOSTS = ['api.dukeburger-sj.com', 'dukeburger-sj.com', '*']
 
-# CORS simplified for production (Token auth doesn't require credentials)
-CORS_ALLOW_ALL_ORIGINS = True
-CORS_ALLOW_CREDENTIALS = False
+# CORS and Security
+CORS_ALLOW_ALL_ORIGINS = True # Mantener para flexibilidad inicial
+CORS_ALLOWED_ORIGINS = [
+    "https://dukeburger-sj.com",
+    "https://api.dukeburger-sj.com",
+]
+CORS_ALLOW_CREDENTIALS = True
 CORS_ALLOW_HEADERS = ["*"]
 CORS_ALLOW_METHODS = ["*"]
 
