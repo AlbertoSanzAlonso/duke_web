@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { resetPasswordConfirm } from '../../services/api';
 import Toast from '../components/Toast';
 import './Login.css';
+import { Eye, EyeOff } from 'lucide-react';
 
 const ResetPassword = () => {
     const { uid, token } = useParams();
@@ -11,6 +12,8 @@ const ResetPassword = () => {
     const [loading, setLoading] = useState(false);
     const [toast, setToast] = useState(null);
     const navigate = useNavigate();
+    const [showPassword, setShowPassword] = useState(false);
+    const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -43,23 +46,49 @@ const ResetPassword = () => {
                 <form onSubmit={handleSubmit} className="login-form">
                     <div className="form-group">
                         <label>Nueva Contraseña</label>
-                        <input 
-                            type="password" 
-                            value={password} 
-                            onChange={e => setPassword(e.target.value)} 
-                            placeholder="••••••••"
-                            required 
-                        />
+                        <div style={{ position: 'relative' }}>
+                            <input 
+                                type={showPassword ? "text" : "password"} 
+                                value={password} 
+                                onChange={e => setPassword(e.target.value)} 
+                                placeholder="••••••••"
+                                required 
+                                style={{ paddingRight: '45px' }}
+                            />
+                            <button 
+                                type="button"
+                                onClick={() => setShowPassword(!showPassword)}
+                                style={{ 
+                                    position: 'absolute', right: '12px', top: '50%', transform: 'translateY(-50%)',
+                                    background: 'none', border: 'none', color: '#888', cursor: 'pointer'
+                                }}
+                            >
+                                {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                            </button>
+                        </div>
                     </div>
                     <div className="form-group">
                         <label>Confirmar Nueva Contraseña</label>
-                        <input 
-                            type="password" 
-                            value={confirmPassword} 
-                            onChange={e => setConfirmPassword(e.target.value)} 
-                            placeholder="••••••••"
-                            required 
-                        />
+                        <div style={{ position: 'relative' }}>
+                            <input 
+                                type={showConfirmPassword ? "text" : "password"} 
+                                value={confirmPassword} 
+                                onChange={e => setConfirmPassword(e.target.value)} 
+                                placeholder="••••••••"
+                                required 
+                                style={{ paddingRight: '45px' }}
+                            />
+                            <button 
+                                type="button"
+                                onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                                style={{ 
+                                    position: 'absolute', right: '12px', top: '50%', transform: 'translateY(-50%)',
+                                    background: 'none', border: 'none', color: '#888', cursor: 'pointer'
+                                }}
+                            >
+                                {showConfirmPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                            </button>
+                        </div>
                     </div>
                     <button type="submit" className="login-button" disabled={loading}>
                         {loading ? 'RESTABLECIENDO...' : 'CAMBIAR CONTRASEÑA'}
