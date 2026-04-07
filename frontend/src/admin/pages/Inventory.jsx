@@ -22,9 +22,6 @@ function Inventory() {
     const [unit, setUnit] = useState('unidades');
     const [minStock, setMinStock] = useState('0');
 
-    const [showNewCategoryInput, setShowNewCategoryInput] = useState(false);
-    const [newCategory, setNewCategory] = useState('');
-
     const defaultCategories = ['Carne', 'Verdura', 'Quesos', 'Pan', 'Bebidas', 'Salsas', 'Desechables'];
     const existingCategories = [...new Set(items.map(item => item.category).filter(Boolean))];
     const categories = [...new Set([...defaultCategories, ...existingCategories])];
@@ -55,21 +52,18 @@ function Inventory() {
 
     const handleCreate = async (e) => {
         e.preventDefault();
-        const finalCategory = showNewCategoryInput ? newCategory : category;
-        if (!name || (showNewCategoryInput && !newCategory)) return;
+        if (!name || !category) return;
         
         try {
             await createInventoryItem({
                 name,
-                category: finalCategory,
+                category,
                 quantity: parseFloat(quantity) || 0,
                 unit,
                 min_stock: parseFloat(minStock) || 0
             });
             setName('');
             setCategory('');
-            setNewCategory('');
-            setShowNewCategoryInput(false);
             setQuantity('');
             setMinStock('0');
             loadInventory();
@@ -135,32 +129,18 @@ function Inventory() {
                 
                 <div style={{ flex: '1 1 180px' }}>
                     <label style={{ fontSize: '0.75rem', fontWeight: 'bold', display: 'block', marginBottom: '4px' }}>CATEGORÍA</label>
-                    {!showNewCategoryInput ? (
-                        <div style={{ display: 'flex', gap: '5px' }}>
-                            <select 
-                                value={category} 
-                                onChange={e => setCategory(e.target.value)}
-                                style={{ padding: '10px', borderRadius: '8px', border: '1px solid #ddd', flex: 1, boxSizing: 'border-box' }}
-                            >
-                                <option value="">Seleccionar...</option>
-                                {categories.map(cat => (
-                                    <option key={cat} value={cat}>{cat}</option>
-                                ))}
-                            </select>
-                            <button type="button" onClick={() => setShowNewCategoryInput(true)} style={{ padding: '8px', borderRadius: '8px', border: '1px solid #ddd', background: '#fff', cursor: 'pointer' }}>+</button>
-                        </div>
-                    ) : (
-                        <div style={{ display: 'flex', gap: '5px' }}>
-                            <input 
-                                type="text" 
-                                placeholder="Nueva categoría" 
-                                value={newCategory} 
-                                onChange={e => setNewCategory(e.target.value)}
-                                style={{ padding: '10px', borderRadius: '8px', border: '1px solid #ddd', flex: 1, boxSizing: 'border-box' }}
-                            />
-                            <button type="button" onClick={() => setShowNewCategoryInput(false)} style={{ padding: '8px', borderRadius: '8px', border: '1px solid #ddd', background: '#fff', cursor: 'pointer' }}>X</button>
-                        </div>
-                    )}
+                    <input 
+                        list="inventory-categories"
+                        placeholder="Elegir o escribir..."
+                        value={category} 
+                        onChange={e => setCategory(e.target.value)}
+                        style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid #ddd', boxSizing: 'border-box' }}
+                    />
+                    <datalist id="inventory-categories">
+                        {categories.map(cat => (
+                            <option key={cat} value={cat} />
+                        ))}
+                    </datalist>
                 </div>
 
                 <div style={{ flex: '1 1 100px' }}>
@@ -197,7 +177,7 @@ function Inventory() {
                     />
                 </div>
 
-                <button type="submit" className="main-button" style={{ flex: '1 1 150px', padding: '12px 24px', background: 'var(--admin-primary)', color: 'white', border: 'none', borderRadius: '8px', cursor: 'pointer', fontWeight: 'bold' }}>
+                <button type="submit" className="main-button" style={{ flex: '1 1 150px', padding: '10px 24px', height: '40px', background: 'var(--admin-primary)', color: 'white', border: 'none', borderRadius: '8px', cursor: 'pointer', fontWeight: 'bold' }}>
                     REGISTRAR
                 </button>
             </form>
