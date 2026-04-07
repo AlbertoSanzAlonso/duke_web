@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { fetchSupplierOrders, createSupplierOrder, fetchInventory } from '../../services/api';
+import { fetchSupplierOrders, createSupplierOrder, fetchInventory, createInventoryItem } from '../../services/api';
 import LoadingScreen from '../components/LoadingScreen';
 import Toast from '../components/Toast';
 import { Truck, Plus, History, Trash2, ShoppingCart, Search } from 'lucide-react';
@@ -73,7 +73,7 @@ const SupplierOrders = () => {
                 setNewItemData({ name: '', unit: 'unidades', category: 'Otros' });
                 setIsAddingNewItem(false);
             } catch (err) {
-                setToast({ message: "Error al crear producto nuevo", type: 'error' });
+                setToast({ message: `Error: ${err.message}`, type: 'error' });
             } finally {
                 setIsSaving(false);
             }
@@ -148,7 +148,7 @@ const SupplierOrders = () => {
                 <p style={{ color: '#666' }}>Suministros que incrementan automáticamente el stock del inventario.</p>
             </header>
 
-            <div style={{ display: 'grid', gridTemplateColumns: 'minmax(400px, 1fr) 1.5fr', gap: '30px', alignItems: 'start' }} className="promo-form-grid">
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 400px), 1fr))', gap: '30px', alignItems: 'start' }} className="promo-form-grid">
                 {/* Formulario */}
                 <div className="admin-card">
                     <h3 style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '20px' }}>
@@ -176,7 +176,7 @@ const SupplierOrders = () => {
                                 <button 
                                     type="button" 
                                     onClick={() => setIsAddingNewItem(!isAddingNewItem)}
-                                    style={{ background: isAddingNewItem ? '#333' : '#fff', color: isAddingNewItem ? '#fff' : '#333', border: '1px solid #ccc', borderRadius: '6px', padding: '4px 8px', fontSize: '0.7rem', cursor: 'pointer', fontWeight: 'bold' }}
+                                    style={{ background: isAddingNewItem ? '#f03e3e' : '#fff', color: isAddingNewItem ? '#fff' : '#000', border: '1px solid #ccc', borderRadius: '6px', padding: '6px 12px', fontSize: '0.75rem', cursor: 'pointer', fontWeight: '900' }}
                                 >
                                     {isAddingNewItem ? "CANCELAR" : "+ PRODUCTO NUEVO"}
                                 </button>
@@ -184,7 +184,7 @@ const SupplierOrders = () => {
                             
                             <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
                                 {isAddingNewItem ? (
-                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                                        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                                         <input 
                                             type="text" 
                                             placeholder="Nombre del producto nuevo..." 
@@ -192,11 +192,11 @@ const SupplierOrders = () => {
                                             onChange={e => setNewItemData({...newItemData, name: e.target.value})}
                                             style={{ width: '100%', padding: '10px', borderRadius: '8px' }}
                                         />
-                                        <div style={{ display: 'flex', gap: '8px' }}>
+                                        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
                                             <select 
                                                 value={newItemData.unit}
                                                 onChange={e => setNewItemData({...newItemData, unit: e.target.value})}
-                                                style={{ flex: 1, padding: '10px', borderRadius: '8px' }}
+                                                style={{ flex: '1 1 120px', padding: '10px', borderRadius: '8px' }}
                                             >
                                                 <option value="unidades">Unidades</option>
                                                 <option value="kg">Kilogramos</option>
@@ -207,7 +207,7 @@ const SupplierOrders = () => {
                                             <select 
                                                 value={newItemData.category}
                                                 onChange={e => setNewItemData({...newItemData, category: e.target.value})}
-                                                style={{ flex: 1, padding: '10px', borderRadius: '8px' }}
+                                                style={{ flex: '1 1 120px', padding: '10px', borderRadius: '8px' }}
                                             >
                                                 <option value="Mercadería">Mercadería</option>
                                                 <option value="Materia Prima">Materia Prima</option>
@@ -230,21 +230,21 @@ const SupplierOrders = () => {
                                     </select>
                                 )}
 
-                                <div style={{ display: 'flex', gap: '10px' }}>
+                                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px' }}>
                                     <input 
                                         type="number" 
                                         placeholder="Cant." 
                                         step="0.1"
                                         value={itemQty} 
                                         onChange={e => setItemQty(e.target.value)} 
-                                        style={{ flex: 1, padding: '10px', borderRadius: '8px' }}
+                                        style={{ flex: '1 1 80px', padding: '10px', borderRadius: '8px' }}
                                     />
                                     <input 
                                         type="number" 
                                         placeholder="Costo total ($)" 
                                         value={itemCost} 
                                         onChange={e => setItemCost(e.target.value)} 
-                                        style={{ flex: 2, padding: '10px', borderRadius: '8px' }}
+                                        style={{ flex: '1 1 120px', padding: '10px', borderRadius: '8px' }}
                                     />
                                 </div>
                                 <button 

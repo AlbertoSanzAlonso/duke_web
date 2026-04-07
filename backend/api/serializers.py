@@ -156,7 +156,7 @@ class OpeningHourSerializer(serializers.ModelSerializer):
 class DeliverySettingSerializer(serializers.ModelSerializer):
     class Meta:
         model = DeliverySetting
-        fields = ['id', 'base_price', 'km_price', 'max_km']
+        fields = ['id', 'base_price', 'km_price', 'max_km', 'marquee_text']
 
 class GalleryImageSerializer(serializers.ModelSerializer):
     class Meta:

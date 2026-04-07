@@ -89,6 +89,17 @@ function Home() {
       
       // Store all settings in deliverySettings for easy access
       const settingsMap = settings.reduce((acc, s) => ({ ...acc, [s.key]: s.value }), {});
+      
+      // ALSO FETCH FROM DELIVERY RATES SINGLETON (More authoritative for banner/prices now)
+      try {
+        const dResponse = await fetch(`${import.meta.env.VITE_API_URL}/api/delivery-rates/`);
+        const dRates = await dResponse.json();
+        // Prefer the marquee from delivery-rates if it exists
+        if (dRates.marquee_text) {
+          settingsMap.marquee_text = dRates.marquee_text;
+        }
+      } catch(e) { console.error("Error loading delivery-rates for banner", e); }
+
       setDeliverySettings(settingsMap);
     } catch (err) {
       console.error("Error loading delivery settings:", err);
@@ -159,28 +170,38 @@ function Home() {
         
         const cat = entry.category || 'General';
         if (!acc[cat]) acc[cat] = [];
-        acc[cat].push({
+        
+        const itemObj = {
           id: entry.id,
-          name: entry.product.name,
-          description: entry.product.description,
-          ingredients: entry.product.ingredients,
+          name: entry.product?.name || 'Producto sin nombre',
+          description: entry.product?.description || '',
+          ingredients: entry.product?.ingredients || '',
           price: entry.price,
-          image: entry.product.image
-        });
+          image: entry.product?.image || null
+        };
+        
+        acc[cat].push(itemObj);
+        
+        // Also add to 'Todas' category
+        if (!acc['Todas']) acc['Todas'] = [];
+        acc['Todas'].push(itemObj);
+
         return acc;
       }, {});
       
-      const availableCategories = Object.keys(grouped);
-      console.log("Menu loaded successfully. Categories found:", availableCategories);
+      const availableCategories = Object.keys(grouped).filter(c => c !== 'Todas');
+      // Sort alphabetically but put 'Todas' first
+      const finalCategories = grouped['Todas'] ? ['Todas', ...availableCategories] : availableCategories;
+      
+      console.log("Menu loaded successfully. Categories found:", finalCategories);
       
       setMenuData(grouped);
       
       // Ensure we have a valid activeCategory
-      if (availableCategories.length > 0) {
-        // If current activeCategory doesn't exist in data, pick the first one
+      if (finalCategories.length > 0) {
         const normalActive = activeCategory;
-        if (!activeCategory || !availableCategories.some(c => c.toLowerCase() === normalActive.toLowerCase())) {
-          setActiveCategory(availableCategories[0]);
+        if (!activeCategory || !finalCategories.some(c => c.toLowerCase() === normalActive.toLowerCase())) {
+          setActiveCategory('Todas');
         }
       }
     } catch (error) {
@@ -330,7 +351,22 @@ function Home() {
     }
 
     if (!isStoreOpen()) {
-      setErrorMessage(`Actualmente estamos CERRADOS. Nuestro horario es de ${deliverySettings.opening_time} a ${deliverySettings.closing_time}. El pedido se mantendrá en tu carrito si deseas guardarlo.`);
+      const now = new Date().toLocaleString("en-US", {timeZone: "America/Argentina/Buenos_Aires"});
+      const fechaArg = new Date(now);
+      let dayIdx = fechaArg.getDay(); // 0 (Sun) to 6 (Sat)
+      const dayDuke = dayIdx === 0 ? 7 : dayIdx;
+      const todaySchedule = openingHours.find(h => h.day === dayDuke);
+      
+      let closedMsg = "Lo sentimos, actualmente estamos CERRADOS.";
+      if (todaySchedule) {
+        if (todaySchedule.is_open) {
+          closedMsg = `Lo sentimos, actualmente estamos CERRADOS. Hoy ${todaySchedule.day_name} atendemos de ${todaySchedule.opening_time.slice(0,5)} a ${todaySchedule.closing_time.slice(0,5)} hs.`;
+        } else {
+          closedMsg = `Lo sentimos, actualmente estamos CERRADOS. Hoy ${todaySchedule.day_name} el local permanece cerrado.`;
+        }
+      }
+      
+      setErrorMessage(`${closedMsg} El pedido se mantendrá en tu carrito si deseas enviarlo más tarde.`);
       return;
     }
 
