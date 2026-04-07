@@ -663,12 +663,12 @@ const Sales = () => {
                                 <div style={{ position: 'relative' }}>
                                     <span style={{ 
                                         position: 'absolute', 
-                                        left: '14px', 
-                                        top: '50%', 
+                                        left: '16px', 
+                                        top: '50.5%', 
                                         transform: 'translateY(-50%)', 
-                                        fontWeight: '800', 
+                                        fontWeight: '900', 
                                         color: '#333',
-                                        fontSize: '1.2rem',
+                                        fontSize: '1.4rem',
                                         zIndex: 5
                                     }}>
                                         {modalPriceType === 'percent' ? '%' : '$'}
@@ -680,12 +680,13 @@ const Sales = () => {
                                         onChange={e => setModalPriceValue(e.target.value)}
                                         style={{ 
                                             width: '100%', 
-                                            padding: '15px 15px 15px 35px', 
+                                            padding: '15px 15px 15px 48px', 
                                             borderRadius: '12px', 
-                                            border: '2px solid #eee', 
+                                            border: '2px solid #333', 
                                             fontSize: '1.4rem', 
                                             fontWeight: '900',
-                                            background: '#f8f9fa'
+                                            background: '#ffffff',
+                                            outline: 'none'
                                         }}
                                         placeholder="0"
                                         className="no-arrows-input modal-price-input"
