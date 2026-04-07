@@ -630,7 +630,8 @@ def AIHelpView(request):
             data=json.dumps(payload).encode('utf-8'), 
             headers={
                 'Content-Type': 'application/json',
-                'Authorization': f'Bearer {api_key}'
+                'Authorization': f'Bearer {api_key}',
+                'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
             }
         )
         with urllib.request.urlopen(req, timeout=15) as response:
