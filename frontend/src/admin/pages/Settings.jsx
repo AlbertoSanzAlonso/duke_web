@@ -83,12 +83,7 @@ const Settings = () => {
             </div>
 
             <div className="settings-tabs-container" style={{ marginBottom: '30px', width: '100%' }}>
-                <div className="settings-tabs" style={{ 
-                    display: 'grid', 
-                    gridTemplateColumns: 'repeat(5, 1fr)', 
-                    gap: '12px', 
-                    width: '100%' 
-                }}>
+                <div className="settings-tabs">
                     <button onClick={() => setActiveTab('delivery')} className={`tab-btn ${activeTab === 'delivery' ? 'active' : ''}`} style={{ ...tabBtnStyle(activeTab === 'delivery'), width: '100%' }}>
                         <Truck size={18} /> Tarifas
                     </button>

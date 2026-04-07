@@ -158,15 +158,17 @@ body, .admin-container, .admin-main, .admin-content {
 .admin-content div,
 .admin-content table,
 .admin-content td,
-.admin-content th {
+.admin-content th,
+.admin-content button {
     color: #333 !important;
 }
 
 /* Allow white text on dark backgrounds like badges */
-.admin-content [style*="color: rgb(255, 255, 255)"],
 .admin-content [style*="color: #ffffff"],
 .admin-content [style*="color: white"],
-.admin-content .badge-text-white {
+.admin-content .badge-text-white,
+.admin-content .tab-btn.active,
+.admin-content .tab-btn.active svg {
     color: #ffffff !important;
 }
 
@@ -294,4 +296,20 @@ body, .admin-container, .admin-main, .admin-content {
   font-size: 0.9rem !important;
   font-weight: normal !important;
   opacity: 0.6;
+}
+
+/* Configuracion Tabs Layout Responsivo */
+.settings-tabs {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 12px;
+    width: 100%;
+    margin-bottom: 20px;
+}
+
+@media (max-width: 768px) {
+    .settings-tabs {
+        grid-template-columns: 1fr !important;
+        gap: 8px;
+    }
 }
