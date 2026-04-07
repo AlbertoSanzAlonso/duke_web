@@ -96,7 +96,7 @@ const Dashboard = () => {
                 </Link>
 
                 {/* 2. PROMOS ACTIVAS */}
-                <div className="stat-card" style={{ flexDirection: 'column', textAlign: 'center' }}>
+                <Link to="/admin/promos" className="stat-card" style={{ flexDirection: 'column', textAlign: 'center', textDecoration: 'none' }}>
                     <div className="stat-icon-box icon-orange" style={{ margin: '0 auto 10px' }}>
                         <Star size={24} />
                     </div>
@@ -104,10 +104,10 @@ const Dashboard = () => {
                         <div className="stat-label">Promos en Cartelera</div>
                         <div className="stat-value" style={{ fontSize: '1.8rem' }}>{data.activePromos}</div>
                     </div>
-                </div>
+                </Link>
 
                 {/* 3. HORARIO HOY */}
-                <div className="stat-card">
+                <Link to="/admin/config?tab=hours" className="stat-card" style={{ textDecoration: 'none' }}>
                     <div className="stat-icon-box icon-purple">
                         <Clock size={24} />
                     </div>
@@ -119,10 +119,10 @@ const Dashboard = () => {
                                 : 'CERRADO'}
                         </div>
                     </div>
-                </div>
+                </Link>
 
                 {/* 4. STOCK CRÍTICO */}
-                <div className={`stat-card ${data.lowStockItems.length > 0 ? 'critical-border' : ''}`} style={{ borderLeft: data.lowStockItems.length > 0 ? '4px solid #e03131' : '' }}>
+                <Link to="/admin/inventario" className={`stat-card ${data.lowStockItems.length > 0 ? 'critical-border' : ''}`} style={{ borderLeft: data.lowStockItems.length > 0 ? '4px solid #e03131' : '', textDecoration: 'none' }}>
                     <div className={`stat-icon-box ${data.lowStockItems.length > 0 ? 'icon-red' : 'icon-gray'}`}>
                         <AlertTriangle size={24} />
                     </div>
@@ -132,7 +132,7 @@ const Dashboard = () => {
                             {data.lowStockItems.length} {data.lowStockItems.length === 1 ? 'Ítem' : 'Ítems'}
                         </div>
                     </div>
-                </div>
+                </Link>
 
                 {/* 5. ACCESO WEBMAIL */}
                 {(profile?.is_superuser || profile?.profile?.can_use_webmail) && (

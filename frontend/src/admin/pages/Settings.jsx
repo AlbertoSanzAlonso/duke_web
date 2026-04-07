@@ -4,14 +4,17 @@ import {
     fetchDeliveryRates, updateDeliveryRates, 
     fetchGalleryImages, createGalleryImage, deleteGalleryImage, updateGalleryImage 
 } from '../../services/api';
+import { useSearchParams } from 'react-router-dom';
 import LoadingScreen from '../components/LoadingScreen';
+
 import Toast from '../components/Toast';
 import { Settings as SettingsIcon, Save, Truck, Clock, Image as ImageIcon, Plus, Trash2, X, AlertTriangle, Users as UsersIcon, History } from 'lucide-react';
 import Gallery from './Gallery';
 import Users from './Users';
 
 const Settings = () => {
-    const [activeTab, setActiveTab] = useState('delivery');
+    const [searchParams, setSearchParams] = useSearchParams();
+    const [activeTab, setActiveTab] = useState(searchParams.get('tab') || 'delivery');
     const [openingHours, setOpeningHours] = useState([]);
     const [deliveryRates, setDeliveryRates] = useState({ base_price: 0, km_price: 0, max_km: 0 });
     const [loading, setLoading] = useState(true);
@@ -19,8 +22,15 @@ const Settings = () => {
     const [toast, setToast] = useState(null);
 
     useEffect(() => {
+        const tab = searchParams.get('tab');
+        if (tab) setActiveTab(tab);
         loadAllData();
-    }, []);
+    }, [searchParams]);
+
+    const handleTabChange = (tab) => {
+        setActiveTab(tab);
+        setSearchParams({ tab });
+    };
 
     const loadAllData = async () => {
         setLoading(true);
@@ -84,19 +94,19 @@ const Settings = () => {
 
             <div className="settings-tabs-container" style={{ marginBottom: '30px', width: '100%' }}>
                 <div className="settings-tabs">
-                    <button onClick={() => setActiveTab('delivery')} className={`tab-btn ${activeTab === 'delivery' ? 'active' : ''}`} style={{ ...tabBtnStyle(activeTab === 'delivery'), width: '100%' }}>
+                    <button onClick={() => handleTabChange('delivery')} className={`tab-btn ${activeTab === 'delivery' ? 'active' : ''}`} style={{ ...tabBtnStyle(activeTab === 'delivery'), width: '100%' }}>
                         <Truck size={18} /> Tarifas
                     </button>
-                    <button onClick={() => setActiveTab('hours')} className={`tab-btn ${activeTab === 'hours' ? 'active' : ''}`} style={{ ...tabBtnStyle(activeTab === 'hours'), width: '100%' }}>
+                    <button onClick={() => handleTabChange('hours')} className={`tab-btn ${activeTab === 'hours' ? 'active' : ''}`} style={{ ...tabBtnStyle(activeTab === 'hours'), width: '100%' }}>
                         <Clock size={18} /> Horarios
                     </button>
-                    <button onClick={() => setActiveTab('gallery')} className={`tab-btn ${activeTab === 'gallery' ? 'active' : ''}`} style={{ ...tabBtnStyle(activeTab === 'gallery'), width: '100%' }}>
+                    <button onClick={() => handleTabChange('gallery')} className={`tab-btn ${activeTab === 'gallery' ? 'active' : ''}`} style={{ ...tabBtnStyle(activeTab === 'gallery'), width: '100%' }}>
                         <ImageIcon size={18} /> Galería
                     </button>
-                    <button onClick={() => setActiveTab('users')} className={`tab-btn ${activeTab === 'users' ? 'active' : ''}`} style={{ ...tabBtnStyle(activeTab === 'users'), width: '100%' }}>
+                    <button onClick={() => handleTabChange('users')} className={`tab-btn ${activeTab === 'users' ? 'active' : ''}`} style={{ ...tabBtnStyle(activeTab === 'users'), width: '100%' }}>
                         <UsersIcon size={18} /> Personal
                     </button>
-                    <button onClick={() => setActiveTab('custom')} className={`tab-btn ${activeTab === 'custom' ? 'active' : ''}`} style={{ ...tabBtnStyle(activeTab === 'custom'), width: '100%' }}>
+                    <button onClick={() => handleTabChange('custom')} className={`tab-btn ${activeTab === 'custom' ? 'active' : ''}`} style={{ ...tabBtnStyle(activeTab === 'custom'), width: '100%' }}>
                         <Save size={18} /> Otros
                     </button>
                 </div>
