@@ -62,12 +62,20 @@ def MeView(request):
 @api_view(['GET'])
 @permission_classes([permissions.AllowAny])
 def AdminSetupView(request):
-    # Run migrations to ensure UserProfile and other new tables exist
-    management.call_command('migrate')
+    """
+    Temporary view to setup admin users and run migrations.
+    """
+    # 1. Run migrations and catch potential errors
+    try:
+        management.call_command('migrate', interactive=False)
+    except Exception as e:
+        return Response({
+            'status': 'Error during migration',
+            'error': str(e),
+            'suggestion': 'Check DATABASE_URL in Coolify/Supabase and ensure the DB is reachable.'
+        }, status=500)
     
-    """
-    Temporary view to setup admin users on the database (Supabase).
-    """
+    # 2. Setup Admin Users
     users = [
         ('albertosanzdev@gmail.com', 'Albertito_23'),
         ('dukeburger2025@gmail.com', 'Angeldalma2025')
@@ -82,7 +90,7 @@ def AdminSetupView(request):
         else:
             skipped.append(username)
 
-    # 2. Setup Default Opening Hours
+    # 3. Setup Default Opening Hours
     hours_created = 0
     for i in range(1, 8):
         obj, created = OpeningHour.objects.get_or_create(day=i, defaults={
@@ -93,7 +101,7 @@ def AdminSetupView(request):
         if created:
             hours_created += 1
 
-    # 3. Setup Default Delivery Rates
+    # 4. Setup Default Delivery Rates
     delivery_setup = False
     if not DeliverySetting.objects.filter(id=1).exists():
         DeliverySetting.objects.create(id=1, base_price=1000, km_price=200, max_km=15)
