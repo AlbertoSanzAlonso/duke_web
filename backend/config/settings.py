@@ -208,7 +208,7 @@ CORS_PREFLIGHT_MAX_AGE = 86400
 
 # Email Configuration
 EMAIL_BACKEND = env('EMAIL_BACKEND', default='django.core.mail.backends.smtp.EmailBackend')
-EMAIL_HOST = env('EMAIL_HOST', default='smtp.hostinger.com')
+EMAIL_HOST = env('EMAIL_HOST', default='smtp.dondominio.com')
 EMAIL_PORT = env.int('EMAIL_PORT', default=587)
 EMAIL_USE_TLS = env.bool('EMAIL_USE_TLS', default=True)
 EMAIL_HOST_USER = env('EMAIL_HOST_USER', default='contacto@dukeburger-sj.com')
