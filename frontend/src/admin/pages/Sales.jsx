@@ -616,14 +616,8 @@ const Sales = () => {
                                     ].map(type => (
                                         <button 
                                             key={type.id}
+                                            className={`mode-selector-btn ${modalPriceType === type.id ? 'active' : ''}`}
                                             onClick={() => setModalPriceType(type.id)}
-                                            style={{ 
-                                                flex: 1, padding: '10px 5px', fontSize: '0.75rem', fontWeight: 'bold', 
-                                                borderRadius: '8px', border: 'none', cursor: 'pointer',
-                                                background: modalPriceType === type.id ? '#333' : '#f1f3f5',
-                                                color: modalPriceType === type.id ? '#fff' : '#666',
-                                                transition: 'all 0.2s'
-                                            }}
                                         >
                                             {type.label}
                                         </button>

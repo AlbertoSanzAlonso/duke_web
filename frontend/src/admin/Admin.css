@@ -161,6 +161,25 @@ body, .admin-container, .admin-main, .admin-content {
     display: block;
 }
 
+/* Selector de Modo (Modal y TPV) */
+.mode-selector-btn {
+    flex: 1;
+    padding: 10px 5px;
+    font-size: 0.75rem;
+    font-weight: bold;
+    border-radius: 8px;
+    border: none;
+    cursor: pointer;
+    background: #f1f3f5;
+    color: #666 !important;
+    transition: all 0.2s;
+}
+
+.mode-selector-btn.active {
+    background: #333 !important;
+    color: #ffffff !important;
+}
+
 /* Fix text color in admin forms to prevent white-on-white from the global dark theme */
 .admin-content,
 .admin-content h1,
