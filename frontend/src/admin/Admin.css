@@ -186,7 +186,9 @@ body, .admin-container, .admin-main, .admin-content {
 }
 .admin-content input::placeholder, 
 .admin-content textarea::placeholder {
-    color: #999 !important;
+    color: #495057 !important;
+    font-weight: 600 !important;
+    opacity: 0.9 !important;
 }
 
 @media (max-width: 768px) {
@@ -288,14 +290,6 @@ body, .admin-container, .admin-main, .admin-content {
 }
 .admin-content textarea::-webkit-scrollbar-thumb:hover {
   background: #bbb;
-}
-
-/* Placeholder refinement */
-.admin-content textarea::placeholder, 
-.admin-content input::placeholder {
-  font-size: 0.9rem !important;
-  font-weight: normal !important;
-  opacity: 0.6;
 }
 
 /* Configuracion Tabs Layout Responsivo */

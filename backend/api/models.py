@@ -9,7 +9,7 @@ from pillow_heif import register_heif_opener
 register_heif_opener()
 
 class Product(models.Model):
-    name = models.CharField(max_length=200)
+    name = models.CharField(max_length=200, db_index=True)
     description = models.TextField(blank=True, null=True)
     ingredients = models.TextField(blank=True, null=True)
     image = models.FileField(upload_to='products/', blank=True, null=True)
@@ -47,8 +47,8 @@ class Product(models.Model):
 class MenuEntry(models.Model):
     product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='menu_entries')
     price = models.DecimalField(max_digits=10, decimal_places=2)
-    category = models.CharField(max_length=100, default='General')
-    is_available = models.BooleanField(default=True)
+    category = models.CharField(max_length=100, default='General', db_index=True)
+    is_available = models.BooleanField(default=True, db_index=True)
     
     # Scheduling
     active_monday = models.BooleanField(default=True)
@@ -72,8 +72,8 @@ class Sale(models.Model):
         ('CANCELLED', 'Cancelado')
     ]
     total_amount = models.DecimalField(max_digits=10, decimal_places=2)
-    date = models.DateTimeField(auto_now_add=True)
-    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='COMPLETED')
+    date = models.DateTimeField(auto_now_add=True, db_index=True)
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='COMPLETED', db_index=True)
     customer_name = models.CharField(max_length=100, blank=True, null=True)
     table_number = models.CharField(max_length=255, blank=True, null=True)
     delivery_cost = models.DecimalField(max_digits=10, decimal_places=2, default=0)
@@ -94,15 +94,15 @@ class SaleItem(models.Model):
 class Expense(models.Model):
     description = models.CharField(max_length=255)
     amount = models.DecimalField(max_digits=10, decimal_places=2)
-    date = models.DateTimeField(auto_now_add=True)
-    category = models.CharField(max_length=100, blank=True, null=True)
+    date = models.DateTimeField(auto_now_add=True, db_index=True)
+    category = models.CharField(max_length=100, blank=True, null=True, db_index=True)
 
     def __str__(self):
         return f"{self.description} - {self.amount}"
 
 class InventoryItem(models.Model):
-    name = models.CharField(max_length=200)
-    category = models.CharField(max_length=100, blank=True, null=True)
+    name = models.CharField(max_length=200, db_index=True)
+    category = models.CharField(max_length=100, blank=True, null=True, db_index=True)
     quantity = models.DecimalField(max_digits=10, decimal_places=2, default=0)
     unit = models.CharField(max_length=50, default='unidades')
     min_stock = models.DecimalField(max_digits=10, decimal_places=2, default=0)
@@ -278,7 +278,7 @@ class ActionLog(models.Model):
     module = models.CharField(max_length=50) # 'CONTABILIDAD', 'TPV', 'PRODUCTOS', etc
     action_type = models.CharField(max_length=50) # 'CREATE', 'UPDATE', 'DELETE'
     description = models.TextField()
-    timestamp = models.DateTimeField(auto_now_add=True)
+    timestamp = models.DateTimeField(auto_now_add=True, db_index=True)
 
     class Meta:
         ordering = ['-timestamp']

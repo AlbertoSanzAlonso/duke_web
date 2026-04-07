@@ -73,7 +73,7 @@ class UserViewSet(viewsets.ModelViewSet):
         instance.delete()
 
 class ActionLogViewSet(viewsets.ReadOnlyModelViewSet):
-    queryset = ActionLog.objects.all().order_by('-timestamp')
+    queryset = ActionLog.objects.select_related('user').all().order_by('-timestamp')
     serializer_class = ActionLogSerializer
     permission_classes = [permissions.IsAuthenticated] # Maybe strict later
 
@@ -241,7 +241,7 @@ class ProductViewSet(viewsets.ModelViewSet):
         cache.delete("menu_list_public")
 
 class MenuEntryViewSet(viewsets.ModelViewSet):
-    queryset = MenuEntry.objects.all().order_by('product__name')
+    queryset = MenuEntry.objects.select_related('product').all().order_by('product__name')
     serializer_class = MenuEntrySerializer
     
     def get_permissions(self):
@@ -279,7 +279,7 @@ class MenuEntryViewSet(viewsets.ModelViewSet):
         cache.delete("menu_list_public")
 
 class SaleViewSet(viewsets.ModelViewSet):
-    queryset = Sale.objects.all().order_by('-date')
+    queryset = Sale.objects.prefetch_related('items', 'items__menu_entry', 'items__menu_entry__product').all().order_by('-date')
     
     def get_serializer_class(self):
         if self.action == 'create':
@@ -343,7 +343,7 @@ class InventoryItemViewSet(viewsets.ModelViewSet):
         instance.delete()
 
 class SupplierOrderViewSet(viewsets.ModelViewSet):
-    queryset = SupplierOrder.objects.all().order_by('-date')
+    queryset = SupplierOrder.objects.prefetch_related('items', 'items__item').all().order_by('-date')
     permission_classes = [permissions.IsAuthenticated, HasInventoryPermission]
     
     def get_serializer_class(self):

@@ -6,29 +6,28 @@ const LoadingScreen = () => {
             position: 'fixed',
             top: 0,
             left: 0,
-            width: '100vw',
-            height: '100vh',
-            background: 'rgba(255, 255, 255, 0.9)',
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            justifyContent: 'center',
-            zIndex: 9999
+            width: '100%',
+            height: '4px',
+            background: '#eee',
+            zIndex: 10000,
+            overflow: 'hidden'
         }}>
-            <img 
-                src="/brand/duke burger 3 positivo.png" 
-                alt="Loading..." 
-                style={{
-                    width: '120px',
-                    height: '120px',
-                    objectFit: 'contain',
-                    animation: 'spin 2s linear infinite'
-                }} 
-            />
+            <div style={{
+                width: '100%',
+                height: '100%',
+                background: 'linear-gradient(90deg, transparent, var(--admin-primary), transparent)',
+                animation: 'loading-bar 1.5s infinite linear'
+            }}></div>
             <style>{`
-                @keyframes spin {
-                    from { transform: rotate(0deg); }
-                    to { transform: rotate(360deg); }
+                @keyframes loading-bar {
+                    0% { transform: translateX(-100%); }
+                    100% { transform: translateX(100%); }
+                }
+                .admin-content input::placeholder, 
+                .admin-content textarea::placeholder {
+                    color: #495057 !important;
+                    font-weight: 600 !important;
+                    opacity: 1 !important;
                 }
             `}</style>
         </div>
