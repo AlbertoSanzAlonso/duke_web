@@ -474,9 +474,11 @@ a.stat-card { text-decoration: none; cursor: pointer; }
 .ai-chat-wrapper {
     position: fixed;
     bottom: 25px;
-    right: 25px;
+    left: 25px;
+    right: auto;
     z-index: 5000;
 }
+
 
 .ai-chat-bubble {
     background: #1a1b1e;
