@@ -90,14 +90,14 @@ const AdminLayout = () => {
   return (
     <div className="admin-container">
       {/* Overlay to close sidebar on mobile when clicking outside */}
-      {isMobileOpen && <div className="sidebar-overlay" onClick={() => setIsMobileOpen(false)}></div>}
+      <div className={`sidebar-overlay ${isMobileOpen ? 'visible' : ''}`} onClick={() => setIsMobileOpen(false)}></div>
       
       <aside className={`sidebar ${isMobileOpen ? 'open' : ''}`}>
         <div className="sidebar-header">
-          <Link to="/" title="Ir a la Web principal">
-            <img src="/brand/duke burger 1 negativo.png" alt="Duke Admin Logo" style={{ height: '80px', objectFit: 'contain', cursor: 'pointer' }} />
+          <Link to="/" title="Ir a la Web principal" onClick={() => setIsMobileOpen(false)}>
+            <img src="/brand/duke burger 1 negativo.png" alt="Duke Admin Logo" style={{ height: '60px', objectFit: 'contain', cursor: 'pointer' }} />
           </Link>
-          <button className="close-sidebar-btn" onClick={() => setIsMobileOpen(false)}>
+          <button className="close-sidebar-btn" onClick={() => setIsMobileOpen(false)} style={{ display: 'block' }}>
             <X size={24} color="#fff" />
           </button>
         </div>

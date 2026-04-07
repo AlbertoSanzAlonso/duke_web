@@ -310,38 +310,40 @@ const Sales = () => {
 
                         {/* Sidebar del Ticket */}
                         <div className={`pos-ticket-sidebar ${isTicketOpen ? 'open' : ''}`}>
-                            <div className="ticket-header">
-                                <button className="close-ticket-btn" onClick={() => setIsTicketOpen(false)}>×</button>
-                                <h2>{currentSaleId ? `Editando Ticket #${currentSaleId}` : "Ticket Actual"}</h2>
-                                <button className="clear-btn" onClick={resetCart}>Cancelar</button>
+                            <div className="ticket-header" style={{ padding: '8px 12px' }}>
+                                {window.innerWidth <= 992 && <button className="close-ticket-btn" onClick={() => setIsTicketOpen(false)}>×</button>}
+                                <h2 style={{ fontSize: '0.9rem', fontWeight: '900', letterSpacing: '0' }}>{currentSaleId ? `Editando #${currentSaleId}` : "TICKET ACTUAL"}</h2>
+                                <button className="clear-btn" onClick={resetCart} style={{ fontSize: '0.7rem' }}>Cancelar</button>
                             </div>
                             
-                            <div className="ticket-meta">
+                            <div className="ticket-meta" style={{ padding: '8px', gap: '6px' }}>
                                 <input 
                                     type="text" 
                                     placeholder="Cliente / Nombre * (Obligatorio)" 
                                     value={customerName}
                                     onChange={e => setCustomerName(e.target.value)}
                                     className={!customerName && cart.length > 0 ? "input-required" : ""}
+                                    style={{ padding: '8px', fontSize: '0.8rem', height: '32px' }}
                                 />
                                 <input 
                                     type="text" 
                                     placeholder="Anotaciones (Opcional)" 
                                     value={saleNotes}
                                     onChange={e => setSaleNotes(e.target.value)}
+                                    style={{ padding: '8px', fontSize: '0.8rem', height: '32px' }}
                                 />
-                                <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginTop: '5px' }}>
-                                    <label style={{ display: 'flex', alignItems: 'center', gap: '5px', fontSize: '0.9rem', cursor: 'pointer' }}>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginTop: '2px' }}>
+                                    <label style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '0.75rem', cursor: 'pointer', fontWeight: 'bold' }}>
                                         <input 
                                             type="checkbox" 
                                             checked={isDelivery} 
                                             onChange={(e) => setIsDelivery(e.target.checked)} 
                                         />
-                                        Envío
+                                        ENVÍO
                                     </label>
                                     {isDelivery && (
                                         <div style={{ flex: 1, position: 'relative' }}>
-                                            <span style={{ position: 'absolute', left: '8px', top: '50%', transform: 'translateY(-50%)', fontSize: '0.8rem', color: '#666' }}>$</span>
+                                            <span style={{ position: 'absolute', left: '8px', top: '50%', transform: 'translateY(-50%)', fontSize: '0.7rem', color: '#666' }}>$</span>
                                             <input 
                                                 type="number" 
                                                 placeholder="Costo"
@@ -350,51 +352,47 @@ const Sales = () => {
                                                 className="no-arrows-input"
                                                 value={deliveryCost}
                                                 onChange={e => setDeliveryCost(e.target.value)}
-                                                style={{ paddingLeft: '20px', height: '35px', width: '100%', fontWeight: 'bold' }}
+                                                style={{ paddingLeft: '15px', height: '28px', width: '100%', fontWeight: 'bold', fontSize: '0.8rem' }}
                                             />
                                         </div>
                                     )}
                                 </div>
                             </div>
 
-                            <div className="ticket-items">
+            <div className="ticket-items" style={{ flex: 1, overflowY: 'auto', padding: '4px 12px' }}>
                                 {cart.length === 0 ? (
-                                    <div className="empty-cart-msg">No hay productos en el ticket</div>
+                                    <div className="empty-cart-msg" style={{ fontSize: '0.8rem', marginTop: '1rem' }}>No hay productos en el ticket</div>
                                 ) : (
                                     cart.map(item => (
-                                        <div key={item.menu_entry} className="ticket-item">
-                                            <div className="item-details">
-                                                <span className="item-name">{item.name}</span>
-                                                <span className="item-subtotal">${(parseFloat(item.price) * item.quantity).toLocaleString('es-AR')}</span>
+                                        <div key={item.menu_entry} className="ticket-item" style={{ padding: '6px 0', borderBottom: '1px solid #eee' }}>
+                                            <div className="item-details" style={{ marginBottom: '2px', display: 'flex', justifyContent: 'space-between' }}>
+                                                <span className="item-name" style={{ fontSize: '0.85rem', fontWeight: '600' }}>{item.name}</span>
+                                                <span className="item-subtotal" style={{ fontSize: '0.85rem', fontWeight: 'bold' }}>${(parseFloat(item.price) * item.quantity).toLocaleString('es-AR')}</span>
                                             </div>
-                                            <div className="item-controls" style={{ gap: '4px' }}>
-                                                <div style={{ display: 'flex', alignItems: 'center', background: '#f1f3f5', borderRadius: '4px', marginRight: '4px' }}>
-                                                    <button onClick={() => updateQuantity(item.menu_entry, -1)} style={{ background: 'transparent', border: 'none', padding: '2px 8px', fontSize: '1.2rem'}}>−</button>
-                                                    <span className="item-qty" style={{ fontWeight: '800', width: '20px', textAlign: 'center' }}>{item.quantity}</span>
-                                                    <button onClick={() => updateQuantity(item.menu_entry, 1)} style={{ background: 'transparent', border: 'none', padding: '2px 8px', fontSize: '1.2rem'}}>+</button>
+                                            <div className="item-controls" style={{ display: 'flex', alignItems: 'center', gap: '4px', justifyContent: 'space-between' }}>
+                                                <div style={{ display: 'flex', alignItems: 'center', background: '#f1f3f5', borderRadius: '4px' }}>
+                                                    <button onClick={() => updateQuantity(item.menu_entry, -1)} style={{ background: 'transparent', border: 'none', padding: '1px 6px', fontSize: '1rem', cursor: 'pointer' }}>−</button>
+                                                    <span className="item-qty" style={{ fontWeight: '800', width: '15px', textAlign: 'center', fontSize: '0.75rem' }}>{item.quantity}</span>
+                                                    <button onClick={() => updateQuantity(item.menu_entry, 1)} style={{ background: 'transparent', border: 'none', padding: '1px 6px', fontSize: '1rem', cursor: 'pointer' }}>+</button>
                                                 </div>
                                                 
-                                                {/* Price Edit Control */}
-                                                <div style={{ display: 'flex', gap: '2px' }}>
+                                                <div style={{ display: 'flex', gap: '2px', alignItems: 'center' }}>
                                                     <button 
-                                                        className="price-edit-btn" 
                                                         onClick={() => {
                                                             const newP = prompt("Nuevo precio para " + item.name, item.price);
                                                             if (newP !== null) updatePrice(item.menu_entry, newP);
                                                         }}
-                                                        style={{ padding: '4px 6px', background: '#333', color: 'white', borderRadius: '4px', border: 'none', cursor: 'pointer', fontSize: '0.7rem'}}
-                                                        title="Editar Precio"
+                                                        style={{ padding: '3px 6px', background: '#333', color: 'white', borderRadius: '4px', border: 'none', cursor: 'pointer', fontSize: '0.6rem'}}
                                                     >
-                                                        <Edit2 size={12} />
+                                                        <Edit2 size={10} />
                                                     </button>
                                                     <button 
                                                         onClick={() => updatePrice(item.menu_entry, 0)}
-                                                        style={{ padding: '4px 6px', background: '#fa5252', color: 'white', borderRadius: '4px', border: 'none', cursor: 'pointer', fontSize: '0.7rem', fontWeight: 'bold'}}
-                                                        title="Regalar artículo"
+                                                        style={{ padding: '3px 6px', background: '#fa5252', color: 'white', borderRadius: '4px', border: 'none', cursor: 'pointer', fontSize: '0.65rem'}}
                                                     >
                                                         🎁
                                                     </button>
-                                                    <button className="delete-item-btn" onClick={() => removeFromCart(item.menu_entry)} style={{ marginLeft: '4px'}}>×</button>
+                                                    <button onClick={() => removeFromCart(item.menu_entry)} style={{ marginLeft: '4px', background: 'none', border: 'none', color: '#ff4d4d', cursor: 'pointer', fontSize: '1rem', fontWeight: 'bold'}}>×</button>
                                                 </div>
                                             </div>
                                         </div>
@@ -402,62 +400,61 @@ const Sales = () => {
                                 )}
                             </div>
 
-                            <div className="ticket-footer">
-                                <div className="total-row">
-                                    <span>SUBTOTAL:</span>
-                                    <span>${subtotal.toLocaleString('es-AR')}</span>
+                            <div className="ticket-footer" style={{ padding: '12px', borderTop: '1px solid #333' }}>
+                                <div className="total-row" style={{ marginBottom: '4px' }}>
+                                    <span style={{ fontSize: '0.85rem' }}>SUBTOTAL:</span>
+                                    <span style={{ fontSize: '0.85rem' }}>${subtotal.toLocaleString('es-AR')}</span>
                                 </div>
 
-                                <div className="discount-controls" style={{ background: '#f8f9fa', padding: '10px', borderRadius: '10px', margin: '10px 0' }}>
-                                    <label style={{ fontSize: '0.75rem', fontWeight: 'bold', display: 'block', marginBottom: '5px', color: '#666' }}>DESCUENTO GLOBAL</label>
+                                <div className="discount-controls" style={{ background: '#f1f3f5', padding: '6px', borderRadius: '8px', marginBottom: '8px' }}>
                                     <div style={{ display: 'flex', gap: '5px' }}>
                                         <select 
                                             value={discountType} 
                                             onChange={e => setDiscountType(e.target.value)}
-                                            style={{ padding: '5px', borderRadius: '6px', border: '1px solid #ddd', fontSize: '0.8rem' }}
+                                            style={{ padding: '3px', borderRadius: '4px', border: '1px solid #ccc', fontSize: '0.75rem' }}
                                         >
-                                            <option value="fixed">$ Fijo</option>
-                                            <option value="percent">% Porcentaje</option>
+                                            <option value="fixed">$ DESC</option>
+                                            <option value="percent">% DESC</option>
                                         </select>
                                         <input 
                                             type="number" 
-                                            placeholder="Valor..."
+                                            placeholder="Valor"
                                             value={discountValue || ''}
                                             onChange={e => setDiscountValue(e.target.value)}
                                             className="no-arrows-input"
-                                            style={{ flex: 1, padding: '5px', borderRadius: '6px', border: '1px solid #ddd', fontSize: '0.9rem', fontWeight: 'bold' }}
+                                            style={{ flex: 1, padding: '3px', borderRadius: '4px', border: '1px solid #ccc', fontSize: '0.85rem', fontWeight: 'bold' }}
                                         />
                                     </div>
-                                    {calculatedDiscount > 0 && (
-                                        <div style={{ marginTop: '5px', textAlign: 'right', fontSize: '0.8rem', color: '#fa5252', fontWeight: 'bold' }}>
-                                            − ${calculatedDiscount.toLocaleString('es-AR')}
-                                        </div>
-                                    )}
                                 </div>
+
                                 {isDelivery && (
-                                    <div className="total-row" style={{ color: '#f03e3e', fontSize: '0.9rem' }}>
-                                        <span>DIRECCIÓN / ENVÍO:</span>
+                                    <div className="total-row" style={{ color: '#f03e3e', fontSize: '0.8rem', marginBottom: '4px' }}>
+                                        <span>ENVÍO:</span>
                                         <span>+ ${parseFloat(deliveryCost || 0).toLocaleString('es-AR')}</span>
                                     </div>
                                 )}
-                                <div className="total-row" style={{ borderTop: '2px solid #333', paddingTop: '10px', marginTop: '5px' }}>
-                                    <span>TOTAL FINAL:</span>
-                                    <span className="total-price">${total.toLocaleString('es-AR')}</span>
+                                
+                                <div className="total-row" style={{ borderTop: '2px solid #333', paddingTop: '6px', marginTop: '4px', marginBottom: '10px' }}>
+                                    <span style={{ fontSize: '1rem', fontWeight: '900' }}>TOTAL:</span>
+                                    <span className="total-price" style={{ fontSize: '1.4rem' }}>${total.toLocaleString('es-AR')}</span>
                                 </div>
-                                <div className="pos-actions-grid">
+                                
+                                <div className="pos-actions-grid" style={{ gap: '6px' }}>
                                     <button 
                                         className="pending-btn" 
                                         disabled={cart.length === 0 || isSaving}
                                         onClick={() => handleSaveTicket('PENDING')}
+                                        style={{ padding: '8px', fontSize: '0.8rem' }}
                                     >
-                                        GUARDAR PENDIENTE
+                                        PENDIENTE
                                     </button>
                                     <button 
                                         className="checkout-btn" 
                                         disabled={cart.length === 0 || isSaving}
                                         onClick={() => handleSaveTicket('COMPLETED')}
+                                        style={{ padding: '8px', fontSize: '0.9rem', background: '#28a745' }}
                                     >
-                                        {isSaving ? "Procesando..." : "COBRAR TICKET"}
+                                        COBRAR
                                     </button>
                                 </div>
                             </div>
