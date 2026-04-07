@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { useSearchParams, useNavigate } from 'react-router-dom';
 import { fetchSales } from '../../services/api';
-import { Printer, Eye, Calendar, User, Hash, Search, Filter } from 'lucide-react';
+import { Printer, Eye, Calendar, User, Hash, Search, Filter, LayoutGrid } from 'lucide-react';
 import LoadingScreen from '../components/LoadingScreen';
 import './Orders.css';
 
@@ -12,6 +12,10 @@ const Orders = () => {
     const [searchTerm, setSearchTerm] = useState('');
     const [searchParams] = useSearchParams();
     const [filterType, setFilterType] = useState('all'); // 'all', 'daily', 'weekly', 'monthly'
+    const navigate = useNavigate();
+
+    // ... (rest of search/memo logic remains same)
+    // ... loadOrders here briefly to restore context if needed ...
 
     useEffect(() => {
         const initialFilter = searchParams.get('filter');
@@ -71,6 +75,8 @@ const Orders = () => {
     };
 
     if (loading) return <LoadingScreen />;
+
+    // ... header JSX ...
 
     return (
         <div className="orders-container">
@@ -156,10 +162,15 @@ const Orders = () => {
                                         </span>
                                     </td>
                                     <td data-label="Acción">
-                                        <div className="row-actions">
+                                        <div className="row-actions" style={{ display: 'flex', gap: '5px' }}>
                                             <button className="icon-btn print" title="Imprimir" onClick={(e) => { e.stopPropagation(); handlePrint(order); }}>
                                                 <Printer size={18} />
                                             </button>
+                                            {order.status === 'PENDING' && (
+                                                <button className="icon-btn tpv" title="Ir al TPV" onClick={(e) => { e.stopPropagation(); navigate('/admin/tpv'); }}>
+                                                    <LayoutGrid size={18} />
+                                                </button>
+                                            )}
                                         </div>
                                     </td>
                                 </tr>
@@ -197,9 +208,20 @@ const Orders = () => {
                                 <strong>${parseFloat(selectedOrder.total_amount).toFixed(2)}</strong>
                             </div>
 
-                            <button className="print-full-btn" onClick={() => handlePrint(selectedOrder)}>
-                                <Printer size={20} /> IMPRIMIR TICKET FISCAL
-                            </button>
+                            <div style={{ display: 'flex', gap: '10px', marginTop: '1rem' }}>
+                                <button className="print-full-btn" style={{ flex: 1 }} onClick={() => handlePrint(selectedOrder)}>
+                                    <Printer size={20} /> IMPRIMIR TICKET
+                                </button>
+                                {selectedOrder.status === 'PENDING' && (
+                                    <button 
+                                        className="print-full-btn" 
+                                        style={{ flex: 1, background: '#2b8a3e' }} 
+                                        onClick={() => navigate('/admin/tpv')}
+                                    >
+                                        <LayoutGrid size={20} /> COBRAR EN TPV
+                                    </button>
+                                )}
+                            </div>
                         </div>
                     </div>
                 )}
