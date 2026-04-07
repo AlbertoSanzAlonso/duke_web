@@ -214,7 +214,8 @@ def PasswordResetConfirmView(request):
         return Response({'error': 'Token inválido o expirado'}, status=400)
 
 class ProductViewSet(viewsets.ModelViewSet):
-    queryset = Product.objects.all().order_by('-created_at')
+    # Safety fallback to -id until all migrations are applied
+    queryset = Product.objects.all().order_by('-id')
     serializer_class = ProductSerializer
     
     def get_permissions(self):
@@ -326,7 +327,8 @@ class ExpenseViewSet(viewsets.ModelViewSet):
         instance.delete()
 
 class InventoryItemViewSet(viewsets.ModelViewSet):
-    queryset = InventoryItem.objects.all().order_by('-created_at')
+    # Order by -id to ensure stability even if created_at migration is pending
+    queryset = InventoryItem.objects.all().order_by('-id')
     serializer_class = InventoryItemSerializer
     permission_classes = [permissions.IsAuthenticated, HasInventoryPermission]
 

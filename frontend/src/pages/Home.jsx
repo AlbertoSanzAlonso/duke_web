@@ -118,17 +118,34 @@ function Home() {
   const isStoreOpen = () => {
     if (openingHours.length === 0) return true; 
 
-    const now = new Date().toLocaleString("en-US", {timeZone: "America/Argentina/Buenos_Aires"});
-    const fechaArg = new Date(now);
+    // Better way to get Argentina time parts
+    const argentinianTime = new Intl.DateTimeFormat('en-US', {
+      timeZone: 'America/Argentina/Buenos_Aires',
+      hour12: false,
+      year: 'numeric', month: 'numeric', day: 'numeric',
+      hour: 'numeric', minute: 'numeric', second: 'numeric',
+      weekday: 'numeric' // 1: Monday, 7: Sunday (usually, but let's check)
+    });
     
-    let dayIdx = fechaArg.getDay(); // 0 (Sun) to 6 (Sat)
-    // Convert to 1-7 (Mon-Sun)
-    const dayDuke = dayIdx === 0 ? 7 : dayIdx;
+    // In Intl, weekday 1 is Monday in some locales, but let's use a simpler mapping
+    const now = new Date();
+    const parts = argentinianTime.formatToParts(now);
+    const getPart = (type) => parts.find(p => p.type === type)?.value;
+    
+    // Day calculation (Sunday=0 in JS, let's map to Duke days 1-7)
+    // Actually, formatToParts weekday depends on locale, but let's use JS's getDay on the translated string digits
+    // Or even better:
+    const dayDukeMap = { 'Monday': 1, 'Tuesday': 2, 'Wednesday': 3, 'Thursday': 4, 'Friday': 5, 'Saturday': 6, 'Sunday': 7 };
+    const weekdayName = new Intl.DateTimeFormat('en-US', { timeZone: 'America/Argentina/Buenos_Aires', weekday: 'long' }).format(now);
+    const dayDuke = dayDukeMap[weekdayName] || 1;
+
+    const hour = parseInt(getPart('hour'));
+    const minute = parseInt(getPart('minute'));
+    const currentHourMin = hour * 60 + minute;
     
     const todaySchedule = openingHours.find(h => h.day === dayDuke);
     if (!todaySchedule || !todaySchedule.is_open) return false;
     
-    const currentHourMin = fechaArg.getHours() * 60 + fechaArg.getMinutes();
     const [openH, openM] = (todaySchedule.opening_time || "20:00").split(':').map(Number);
     const [closeH, closeM] = (todaySchedule.closing_time || "00:00").split(':').map(Number);
     

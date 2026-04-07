@@ -40,10 +40,13 @@ const Orders = () => {
 
         // 1. Time filter
         const now = new Date();
+        const todayStr = now.toLocaleDateString('en-CA'); // YYYY-MM-DD
+        
         if (filterType === 'daily') {
-            const today = new Date();
-            today.setHours(0, 0, 0, 0);
-            filtered = filtered.filter(o => new Date(o.date) >= today);
+            filtered = filtered.filter(o => {
+                const orderDate = new Date(o.date).toLocaleDateString('en-CA');
+                return orderDate === todayStr;
+            });
         } else if (filterType === 'weekly') {
             const lastWeek = new Date();
             lastWeek.setDate(now.getDate() - 7);
@@ -322,11 +325,29 @@ const Orders = () => {
                                 <LayoutGrid size={32} />
                             </div>
                             <h2 style={{ margin: 0, fontSize: '1.2rem', textTransform: 'uppercase', letterSpacing: '1px' }}>
-                                Resumen de Facturación
+                                Insight de Ventas
                             </h2>
-                            <p style={{ color: '#999', margin: '5px 0 0 0', textTransform: 'uppercase', fontSize: '0.75rem', fontWeight: '800' }}>
+                            <p style={{ color: '#999', margin: '5px 0 15px 0', textTransform: 'uppercase', fontSize: '0.75rem', fontWeight: '800' }}>
                                 Periodo: {filterType === 'all' ? 'Histórico Total' : filterType === 'daily' ? 'Hoy' : filterType === 'weekly' ? 'Última Semana' : 'Último Mes'}
                             </p>
+                            
+                            <div className="filter-group-segmented" style={{ display: 'flex', background: '#f1f3f5', padding: '4px', borderRadius: '10px', width: 'fit-content', margin: '0 auto' }}>
+                                {[
+                                    { id: 'all', label: 'TODO' },
+                                    { id: 'daily', label: 'DIARIO' },
+                                    { id: 'weekly', label: 'SEMANAL' },
+                                    { id: 'monthly', label: 'MENSUAL' }
+                                ].map(f => (
+                                    <button 
+                                        key={f.id}
+                                        onClick={() => setFilterType(f.id)}
+                                        className={`mode-selector-btn ${filterType === f.id ? 'active' : ''}`}
+                                        style={{ padding: '6px 12px', borderRadius: '8px', minWidth: '60px', fontSize: '0.7rem' }}
+                                    >
+                                        {f.label}
+                                    </button>
+                                ))}
+                            </div>
                         </div>
 
                         <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '20px' }}>
