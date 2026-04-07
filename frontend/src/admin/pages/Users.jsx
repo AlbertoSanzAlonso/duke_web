@@ -27,6 +27,7 @@ const Users = () => {
             can_use_promos: false,
             can_use_gallery: false,
             can_use_settings: false,
+            can_use_webmail: false,
             is_admin_manager: false
         }
     });
@@ -64,6 +65,7 @@ const Users = () => {
                     can_use_promos: false,
                     can_use_gallery: false,
                     can_use_settings: false,
+                    can_use_webmail: false,
                     is_admin_manager: false
                 }
             });
@@ -82,6 +84,7 @@ const Users = () => {
                     can_use_promos: false,
                     can_use_gallery: false,
                     can_use_settings: false,
+                    can_use_webmail: false,
                     is_admin_manager: false
                 }
             });
@@ -231,6 +234,7 @@ const Users = () => {
                                                     {user.profile?.can_use_accounting && <span className="badge-perm">Conta</span>}
                                                     {user.profile?.can_use_menu && <span className="badge-perm">Menu</span>}
                                                     {user.profile?.can_use_inventory && <span className="badge-perm">Almacen</span>}
+                                                    {user.profile?.can_use_webmail && <span className="badge-perm">Webmail</span>}
                                                     {user.profile?.is_admin_manager && <span className="badge-perm success">Admin</span>}
                                                 </>
                                             )}
@@ -343,6 +347,11 @@ const Users = () => {
                                         label="Administrar Usuarios" 
                                         active={formData.profile.is_admin_manager} 
                                         onChange={() => handlePermissionChange('is_admin_manager')} 
+                                    />
+                                    <PermissionToggle 
+                                        label="Acceso a WEBMAIL" 
+                                        active={formData.profile.can_use_webmail} 
+                                        onChange={() => handlePermissionChange('can_use_webmail')} 
                                     />
                                 </div>
                             </div>

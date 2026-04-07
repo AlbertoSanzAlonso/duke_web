@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { fetchSales, fetchMenuEntries, fetchOpeningHours, fetchInventory } from '../../services/api';
+import { fetchSales, fetchMenuEntries, fetchOpeningHours, fetchInventory, fetchMe } from '../../services/api';
 import LoadingScreen from '../components/LoadingScreen';
 import { ShoppingBag, Star, Clock, AlertTriangle, TrendingUp, Package, CalendarOff, Mail } from 'lucide-react';
 
@@ -11,17 +11,21 @@ const Dashboard = () => {
         todayHours: null,
         lowStockItems: []
     });
+    const [profile, setProfile] = useState(null);
 
     useEffect(() => {
         const loadDashboardData = async () => {
             try {
                 setLoading(true);
-                const [sales, menu, hours, inventory] = await Promise.all([
+                const [sales, menu, hours, inventory, profileData] = await Promise.all([
                     fetchSales(),
                     fetchMenuEntries(),
                     fetchOpeningHours(),
-                    fetchInventory()
+                    fetchInventory(),
+                    fetchMe()
                 ]);
+
+                setProfile(profileData);
 
                 // 1. Sales today (Local Time)
                 const todayStart = new Date();
@@ -129,21 +133,23 @@ const Dashboard = () => {
                 </div>
 
                 {/* 5. ACCESO WEBMAIL */}
-                <a 
-                    href="https://webmail.dondominio.com/" 
-                    target="_blank" 
-                    rel="noopener noreferrer" 
-                    className="admin-card" 
-                    style={{ ...cardStyle, background: '#e7f5ff', border: '1px solid #a5d8ff', textDecoration: 'none' }}
-                >
-                    <div style={iconBoxStyle('#d0ebff', '#228be6')}>
-                        <Mail size={24} />
-                    </div>
-                    <div>
-                        <div style={labelStyle}>Correo Corporativo</div>
-                        <div style={{ ...valueStyle, fontSize: '1.2rem', color: '#1c7ed6' }}>ACCEDER WEBMAIL ↗</div>
-                    </div>
-                </a>
+                {(profile?.is_superuser || profile?.profile?.can_use_webmail) && (
+                    <a 
+                        href="https://webmail.dondominio.com/" 
+                        target="_blank" 
+                        rel="noopener noreferrer" 
+                        className="admin-card" 
+                        style={{ ...cardStyle, background: '#e7f5ff', border: '1px solid #a5d8ff', textDecoration: 'none' }}
+                    >
+                        <div style={iconBoxStyle('#d0ebff', '#228be6')}>
+                            <Mail size={24} />
+                        </div>
+                        <div>
+                            <div style={labelStyle}>Correo Corporativo</div>
+                            <div style={{ ...valueStyle, fontSize: '1.2rem', color: '#1c7ed6' }}>ACCEDER WEBMAIL ↗</div>
+                        </div>
+                    </a>
+                )}
             </div>
 
             {/* DETALLE DE STOCK BAJO (Si hay) */}

@@ -119,16 +119,18 @@ const AdminLayout = () => {
             </NavLink>
           ))}
           
-          <a 
-            href="https://webmail.dondominio.com/" 
-            target="_blank" 
-            rel="noopener noreferrer"
-            className="nav-item"
-            style={{ marginTop: '20px', borderTop: '1px solid rgba(255,255,255,0.1)', paddingTop: '20px' }}
-          >
-            <Mail size={20} color="#fcc419" />
-            <span style={{ color: '#fff' }}>WEBMAIL</span>
-          </a>
+          {(profile?.is_superuser || profile?.profile?.can_use_webmail) && (
+            <a 
+              href="https://webmail.dondominio.com/" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="nav-item"
+              style={{ marginTop: '20px', borderTop: '1px solid rgba(255,255,255,0.1)', paddingTop: '20px' }}
+            >
+              <Mail size={20} color="#fcc419" />
+              <span style={{ color: '#fff' }}>WEBMAIL</span>
+            </a>
+          )}
         </nav>
       </aside>
       

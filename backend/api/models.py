@@ -246,6 +246,7 @@ class UserProfile(models.Model):
     can_use_promos = models.BooleanField(default=False)
     can_use_gallery = models.BooleanField(default=False)
     can_use_settings = models.BooleanField(default=False)
+    can_use_webmail = models.BooleanField(default=False)
     is_admin_manager = models.BooleanField(default=False)
 
     def save(self, *args, **kwargs):
