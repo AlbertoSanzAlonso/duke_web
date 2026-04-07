@@ -551,7 +551,7 @@ def PasswordResetConfirmView(request):
 
 import urllib.request
 @api_view(['POST'])
-@permission_classes([permissions.IsAuthenticated])
+@permission_classes([permissions.AllowAny])
 def AIHelpView(request):
     question = request.data.get('question')
     if not question:
