@@ -277,13 +277,14 @@ const Sales = () => {
         <div className="pos-container">
             {toast && <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />}
             {/* FAB para móviles */}
+            {/* FAB para móviles - Simplificado */}
             <button className={`pos-fab ${isTicketOpen ? 'hidden' : ''}`} onClick={toggleTicket}>
-                <div className="fab-icon-wrapper">
-                    <Receipt size={24} />
-                    <span className="fab-count">{totalItems}</span>
+                <div className="fab-count-badge">
+                    {totalItems} <small>ART</small>
                 </div>
-                <span className="fab-text">Ver Ticket</span>
-                <span className="fab-total">${total.toLocaleString('es-AR')}</span>
+                <div className="fab-price-badge">
+                    ${total.toLocaleString('es-AR')}
+                </div>
             </button>
 
             {/* Selector de Modo */}
@@ -355,10 +356,16 @@ const Sales = () => {
 
                         {/* Sidebar del Ticket */}
                         <div className={`pos-ticket-sidebar ${isTicketOpen ? 'open' : ''}`}>
-                            <div className="ticket-header" style={{ padding: '8px 12px' }}>
-                                {window.innerWidth <= 992 && <button className="close-ticket-btn" onClick={() => setIsTicketOpen(false)}>×</button>}
-                                <h2 style={{ fontSize: '0.9rem', fontWeight: '900', letterSpacing: '0' }}>{currentSaleId ? `Editando #${currentSaleId}` : "TICKET ACTUAL"}</h2>
-                                <button className="clear-btn" onClick={resetCart} style={{ fontSize: '0.7rem' }}>Cancelar</button>
+                            <div className="ticket-header" style={{ padding: '15px 12px', background: '#333', color: '#fff' }}>
+                                {window.innerWidth <= 992 && (
+                                    <button className="close-ticket-btn" onClick={() => setIsTicketOpen(false)} style={{ color: '#fff' }}>
+                                        <X size={36} strokeWidth={3} />
+                                    </button>
+                                )}
+                                <h2 style={{ fontSize: '1rem', fontWeight: '900', letterSpacing: '1px', flex: 1, textAlign: 'center' }}>
+                                    {currentSaleId ? `EDITANDO #${currentSaleId}` : "TICKET ACTUAL"}
+                                </h2>
+                                <button className="clear-btn" onClick={resetCart} style={{ fontSize: '0.75rem', color: '#ff4d4d' }}>VACIAR</button>
                             </div>
                             
                             <div className="ticket-meta" style={{ padding: '8px', gap: '6px' }}>

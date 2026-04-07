@@ -118,27 +118,27 @@ function Home() {
   const isStoreOpen = () => {
     if (openingHours.length === 0) return true; 
 
-    // Better way to get Argentina time parts
+    const now = new Date();
+    
+    // Day calculation (Monday=1, Sunday=7)
+    const dayDukeMap = { 'Monday': 1, 'Tuesday': 2, 'Wednesday': 3, 'Thursday': 4, 'Friday': 5, 'Saturday': 6, 'Sunday': 7 };
+    const weekdayName = new Intl.DateTimeFormat('en-US', { 
+      timeZone: 'America/Argentina/Buenos_Aires', 
+      weekday: 'long' 
+    }).format(now);
+    const dayDuke = dayDukeMap[weekdayName] || 1;
+
+    // Time calculation
     const argentinianTime = new Intl.DateTimeFormat('en-US', {
       timeZone: 'America/Argentina/Buenos_Aires',
       hour12: false,
-      year: 'numeric', month: 'numeric', day: 'numeric',
-      hour: 'numeric', minute: 'numeric', second: 'numeric',
-      weekday: 'numeric' // 1: Monday, 7: Sunday (usually, but let's check)
+      hour: 'numeric', 
+      minute: 'numeric'
     });
     
-    // In Intl, weekday 1 is Monday in some locales, but let's use a simpler mapping
-    const now = new Date();
     const parts = argentinianTime.formatToParts(now);
     const getPart = (type) => parts.find(p => p.type === type)?.value;
     
-    // Day calculation (Sunday=0 in JS, let's map to Duke days 1-7)
-    // Actually, formatToParts weekday depends on locale, but let's use JS's getDay on the translated string digits
-    // Or even better:
-    const dayDukeMap = { 'Monday': 1, 'Tuesday': 2, 'Wednesday': 3, 'Thursday': 4, 'Friday': 5, 'Saturday': 6, 'Sunday': 7 };
-    const weekdayName = new Intl.DateTimeFormat('en-US', { timeZone: 'America/Argentina/Buenos_Aires', weekday: 'long' }).format(now);
-    const dayDuke = dayDukeMap[weekdayName] || 1;
-
     const hour = parseInt(getPart('hour'));
     const minute = parseInt(getPart('minute'));
     const currentHourMin = hour * 60 + minute;

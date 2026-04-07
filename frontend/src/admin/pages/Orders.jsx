@@ -186,9 +186,14 @@ const Orders = () => {
                 {selectedOrder && (
                     <div className="modal-overlay" onClick={() => setSelectedOrder(null)} style={{ zIndex: 3000 }}>
                         <div className="order-details-card admin-card order-details-modal" onClick={e => e.stopPropagation()}>
-                            <div className="details-header">
-                                <h3>Pedido #{selectedOrder.id}</h3>
-                                <button className="close-details" onClick={() => setSelectedOrder(null)}>×</button>
+                            <div className="details-header" style={{ marginBottom: '1.5rem', borderBottom: '2px solid #333', paddingBottom: '0.8rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                                    <ShoppingBag size={28} />
+                                    <h2 style={{ margin: 0, fontSize: '1.5rem', fontWeight: '800' }}>TICKET #{selectedOrder.id}</h2>
+                                </div>
+                                <button className="close-details" onClick={() => setSelectedOrder(null)}>
+                                    <X size={36} strokeWidth={3} />
+                                </button>
                             </div>
                             
                             <div className="details-content">

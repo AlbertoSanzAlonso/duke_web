@@ -553,6 +553,32 @@ const Accounting = () => {
                                     </div>
                                 )}
                             </div>
+                            
+                            {/* ADICIONALES (ENVIO / DESCUENTO) */}
+                            {detailItem.typeIndicator === 'sal' && (
+                                <div style={{ marginTop: '15px' }}>
+                                    {parseFloat(detailItem.delivery_cost || 0) > 0 && (
+                                        <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.85rem', color: '#ae3ec9', marginBottom: '4px' }}>
+                                            <span>Cargo de Envío:</span>
+                                            <strong>+${parseFloat(detailItem.delivery_cost).toLocaleString('es-AR')}</strong>
+                                        </div>
+                                    )}
+                                    {(() => {
+                                        const subtotalItems = (detailItem.items || []).reduce((acc, it) => acc + (parseFloat(it.price_at_sale || it.price || 0) * it.quantity), 0);
+                                        const expectedTotal = subtotalItems + parseFloat(detailItem.delivery_cost || 0);
+                                        const discount = expectedTotal - parseFloat(detailItem.total_amount || 0);
+                                        if (discount > 1) { 
+                                            return (
+                                                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.85rem', color: '#f03e3e', padding: '4px 0' }}>
+                                                    <span style={{ fontWeight: '600' }}>Descuento aplicado:</span>
+                                                    <strong style={{ fontWeight: '900' }}>−${Math.round(discount).toLocaleString('es-AR')}</strong>
+                                                </div>
+                                            );
+                                        }
+                                        return null;
+                                    })()}
+                                </div>
+                            )}
 
                             <div style={{ marginTop: '25px', paddingTop: '20px', borderTop: '2px solid #333', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                                 <span style={{ fontSize: '1rem', fontWeight: '900', textTransform: 'uppercase' }}>Total {detailItem.typeIndicator === 'sal' ? 'Cobrado' : 'Gasto'}</span>
@@ -572,7 +598,7 @@ const Accounting = () => {
                             {detailItem.typeIndicator === 'sal' && (
                                 <button 
                                     onClick={() => window.open(`/ticket/${detailItem.id}`, '_blank')}
-                                    style={{ flex: 1, padding: '12px', background: '#333', color: '#fff', border: 'none', borderRadius: '8px', fontWeight: 'bold', cursor: 'pointer' }}
+                                    style={{ flex: 1, padding: '12px', background: '#333', color: '#fff !important', border: 'none', borderRadius: '8px', fontWeight: 'bold', cursor: 'pointer' }}
                                 >
                                     VER TICKET COMPLETO
                                 </button>

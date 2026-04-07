@@ -476,118 +476,85 @@
     display: none !important;
 }
 
-@media (max-width: 992px) {
-    .pos-fab {
-        display: flex; /* Show only on mobile */
-        position: fixed;
-        padding: 1rem 1.5rem;
-        border-radius: 50px;
-        bottom: 1.5rem;
-        right: 1.5rem;
-        z-index: 1500;
-        background: #28a745;
-        color: white !important;
-        border: none;
-        align-items: center;
-        justify-content: center;
-        gap: 12px;
-        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
-        cursor: pointer;
-        transition: all 0.3s ease;
-    }
+    @media (max-width: 992px) {
+        .pos-fab {
+            display: flex;
+            position: fixed;
+            bottom: 2rem;
+            right: 1.5rem;
+            z-index: 2000;
+            background: #28a745;
+            color: white !important;
+            border: none;
+            border-radius: 12px;
+            align-items: center;
+            overflow: hidden;
+            box-shadow: 0 10px 25px rgba(40, 167, 69, 0.4);
+            cursor: pointer;
+            padding: 0;
+            transition: transform 0.2s;
+        }
 
-    .fab-text,
-    .fab-total {
-        display: block;
-    }
+        .pos-fab:active {
+            transform: scale(0.95);
+        }
 
-    .fab-count {
-        background: white;
-        color: #28a745;
-        width: 24px;
-        height: 24px;
-        border-radius: 50%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-weight: 800;
-        font-size: 0.8rem;
-    }
+        .fab-count-badge {
+            background: rgba(0,0,0,0.1);
+            padding: 12px 18px;
+            font-weight: 900;
+            font-size: 1.1rem;
+            border-right: 1px solid rgba(255,255,255,0.2);
+        }
+        
+        .fab-count-badge small {
+            font-size: 0.6rem;
+            opacity: 0.8;
+            margin-left: 2px;
+            text-transform: uppercase;
+        }
 
-    .fab-text {
-        font-weight: 600;
-    }
+        .fab-price-badge {
+            padding: 12px 22px;
+            font-weight: 900;
+            font-size: 1.25rem;
+            letter-spacing: 0.5px;
+        }
 
-    .fab-total {
-        font-weight: 800;
-        border-left: 1px solid rgba(255, 255, 255, 0.3);
-        padding-left: 10px;
-    }
+        .pos-ticket-sidebar {
+            position: fixed;
+            top: 0;
+            right: -100%;
+            width: 100%;
+            max-width: 100% !important;
+            height: 100%;
+            z-index: 9999;
+            transition: right 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            border-radius: 0;
+            display: flex;
+            flex-direction: column;
+            background: #fff;
+            box-shadow: none;
+        }
 
-    .pos-container {
-        padding: 0.5rem;
-    }
+        .pos-ticket-sidebar.open {
+            right: 0;
+        }
 
-    .pos-main {
-        flex-direction: column;
-    }
+        .close-ticket-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 5px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
 
-    .pos-fab {
-        bottom: 1.5rem;
-        right: 1.5rem;
-    }
-
-    .pos-ticket-sidebar {
-        position: fixed;
-        top: 0;
-        right: -100%;
-        width: 100%;
-        max-width: 100% !important;
-        height: 100%;
-        z-index: 1001;
-        transition: right 0.3s ease;
-        border-radius: 0;
-        display: flex;
-        flex-direction: column;
-    }
-
-    .pos-ticket-sidebar.open {
-        right: 0;
-    }
-
-    .close-ticket-btn {
-        display: block !important;
-        background: none;
-        border: none;
-        font-size: 2rem;
-        color: #333;
-        cursor: pointer;
-    }
-
-    .ticket-items {
-        flex: 1;
-        overflow-y: auto;
-    }
-
-    .ticket-footer {
-        padding: 1rem;
-        padding-bottom: env(safe-area-inset-bottom, 1.5rem);
-        background: #fff;
-        border-top: 1px solid #eee;
-        position: sticky;
-        bottom: 0;
-    }
-
-    .total-price {
-        font-size: 1.5rem;
-    }
-
-    .pos-product-img-container {
-        height: 100px;
-    }
-
-    .close-ticket-btn {
-        display: none;
+        .pos-products-grid {
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 10px;
+        }
     }
 
     .pos-products-grid::-webkit-scrollbar,

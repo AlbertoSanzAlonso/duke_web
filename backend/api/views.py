@@ -487,9 +487,13 @@ async def OrderStreamView(request):
     # --- CONFIGURACIÓN CRÍTICA PARA COOLIFY / STREAMING / CORS ---
     response['Content-Type'] = 'text/event-stream'
     response['X-Accel-Buffering'] = 'no'      
-    response['Cache-Control'] = 'no-cache'    
+    response['Cache-Control'] = 'no-cache, no-transform'    
     response['Connection'] = 'keep-alive'     
+    # Forcing CORS headers for standard Django views that might bypass middleware
     response['Access-Control-Allow-Origin'] = '*'
+    response['Access-Control-Allow-Methods'] = 'GET, OPTIONS'
+    response['Access-Control-Allow-Headers'] = '*'
+    response['Access-Control-Expose-Headers'] = '*'
     # ------------------------------------------------------------
     
     return response
