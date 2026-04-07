@@ -93,8 +93,6 @@ const AdminLayout = () => {
       {/* AI Assistant Chat - MOVED TO TOP OF CONTAINER */}
       <AIChat />
       
-      {/* TEST INDICATOR */}
-      <div style={{ position: 'fixed', top: '10px', left: '10px', width: '20px', height: '20px', background: 'red', zIndex: 9999, borderRadius: '50%' }}></div>
       {/* Overlay to close sidebar on mobile when clicking outside */}
       <div className={`sidebar-overlay ${isMobileOpen ? 'visible' : ''}`} onClick={() => setIsMobileOpen(false)}></div>
       
