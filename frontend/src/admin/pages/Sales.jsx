@@ -24,6 +24,11 @@ const Sales = () => {
     const [discountType, setDiscountType] = useState('fixed'); // 'fixed' or 'percent'
     const [discountValue, setDiscountValue] = useState(0);
 
+    // Individual Item Price Modal
+    const [priceModal, setPriceModal] = useState({ isOpen: false, item: null });
+    const [modalPriceType, setModalPriceType] = useState('direct'); // 'direct', 'fixed', 'percent'
+    const [modalPriceValue, setModalPriceValue] = useState('');
+
     // List of pending tickets
     const [pendingTickets, setPendingTickets] = useState([]);
     const [deletingTicketId, setDeletingTicketId] = useState(null);
@@ -94,6 +99,33 @@ const Sales = () => {
         setCart(prevCart => prevCart.map(item => 
             item.menu_entry === id ? { ...item, price: parseFloat(newPrice) || 0 } : item
         ));
+    };
+
+    const handleApplyItemPrice = () => {
+        if (!priceModal.item) return;
+        const currentItem = priceModal.item;
+        let finalPrice = parseFloat(modalPriceValue) || 0;
+        
+        if (modalPriceType === 'fixed') {
+            finalPrice = Math.max(0, currentItem.originalPrice - (parseFloat(modalPriceValue) || 0));
+        } else if (modalPriceType === 'percent') {
+            finalPrice = Math.max(0, currentItem.originalPrice * (1 - (parseFloat(modalPriceValue || 0) / 100)));
+        }
+        
+        updatePrice(currentItem.menu_entry, finalPrice);
+        setPriceModal({ isOpen: false, item: null });
+        setModalPriceValue('');
+    };
+
+    const openPriceModal = (item) => {
+        // Find if we already have the original price stored or use current
+        const originalPrice = item.originalPrice || item.price;
+        setPriceModal({ 
+            isOpen: true, 
+            item: { ...item, originalPrice } 
+        });
+        setModalPriceValue(item.price);
+        setModalPriceType('direct');
     };
 
     const subtotal = cart.reduce((acc, item) => acc + (parseFloat(item.price) * item.quantity), 0);
@@ -378,10 +410,7 @@ const Sales = () => {
                                                 
                                                 <div style={{ display: 'flex', gap: '2px', alignItems: 'center' }}>
                                                     <button 
-                                                        onClick={() => {
-                                                            const newP = prompt("Nuevo precio para " + item.name, item.price);
-                                                            if (newP !== null) updatePrice(item.menu_entry, newP);
-                                                        }}
+                                                        onClick={() => openPriceModal(item)}
                                                         style={{ padding: '3px 6px', background: '#333', color: 'white', borderRadius: '4px', border: 'none', cursor: 'pointer', fontSize: '0.6rem'}}
                                                     >
                                                         <Edit2 size={10} />
@@ -564,6 +593,84 @@ const Sales = () => {
                                 >
                                     {isSaving ? 'ELIMINANDO...' : 'SÍ, ELIMINAR'}
                                 </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Price Adjustment Modal */}
+            {priceModal.isOpen && (
+                <div className="modal-overlay" style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.85)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 6000, padding: '20px' }}>
+                    <div className="admin-modal" style={{ background: '#fff', width: '100%', maxWidth: '350px', borderRadius: '15px', overflow: 'hidden' }}>
+                        <div style={{ padding: '20px' }}>
+                            <h3 style={{ margin: '0 0 5px 0', fontSize: '1.2rem' }}>Ajustar Precio</h3>
+                            <p style={{ margin: '0 0 15px 0', color: '#666', fontSize: '0.9rem' }}>{priceModal.item?.name}</p>
+                            
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
+                                <div className="modal-price-selector" style={{ display: 'flex', gap: '5px' }}>
+                                    {[
+                                        { id: 'direct', label: 'PRECIO FIN' },
+                                        { id: 'fixed', label: '$ DESC' },
+                                        { id: 'percent', label: '% DESC' }
+                                    ].map(type => (
+                                        <button 
+                                            key={type.id}
+                                            onClick={() => setModalPriceType(type.id)}
+                                            style={{ 
+                                                flex: 1, padding: '10px 5px', fontSize: '0.75rem', fontWeight: 'bold', 
+                                                borderRadius: '8px', border: 'none', cursor: 'pointer',
+                                                background: modalPriceType === type.id ? '#333' : '#f1f3f5',
+                                                color: modalPriceType === type.id ? '#fff' : '#666',
+                                                transition: 'all 0.2s'
+                                            }}
+                                        >
+                                            {type.label}
+                                        </button>
+                                    ))}
+                                </div>
+
+                                <div style={{ position: 'relative' }}>
+                                    <span style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', fontWeight: 'bold', color: '#333' }}>
+                                        {modalPriceType === 'percent' ? '%' : '$'}
+                                    </span>
+                                    <input 
+                                        type="number" 
+                                        autoFocus
+                                        value={modalPriceValue}
+                                        onChange={e => setModalPriceValue(e.target.value)}
+                                        style={{ width: '100%', padding: '15px 15px 15px 30px', borderRadius: '10px', border: '2px solid #eee', fontSize: '1.2rem', fontWeight: '800' }}
+                                        placeholder="0"
+                                        className="no-arrows-input"
+                                    />
+                                </div>
+
+                                {modalPriceType !== 'direct' && (
+                                    <div style={{ background: '#fff5f5', padding: '10px', borderRadius: '8px', textAlign: 'center' }}>
+                                        <span style={{ fontSize: '0.8rem', color: '#666' }}>Precio resultante: </span>
+                                        <strong style={{ fontSize: '1rem', color: '#f03e3e' }}>
+                                            ${(modalPriceType === 'fixed' 
+                                                ? Math.max(0, priceModal.item.originalPrice - (parseFloat(modalPriceValue) || 0))
+                                                : Math.max(0, priceModal.item.originalPrice * (1 - (parseFloat(modalPriceValue || 0) / 100)))
+                                            ).toLocaleString('es-AR')}
+                                        </strong>
+                                    </div>
+                                )}
+                                
+                                <div style={{ display: 'flex', gap: '10px', marginTop: '10px' }}>
+                                    <button 
+                                        onClick={() => setPriceModal({ isOpen: false, item: null })}
+                                        style={{ flex: 1, padding: '12px', background: '#f8f9fa', border: 'none', borderRadius: '10px', fontWeight: 'bold', cursor: 'pointer' }}
+                                    >
+                                        CANCELAR
+                                    </button>
+                                    <button 
+                                        onClick={handleApplyItemPrice}
+                                        style={{ flex: 1.5, padding: '12px', background: '#28a745', border: 'none', borderRadius: '10px', fontWeight: 'bold', cursor: 'pointer', color: '#fff' }}
+                                    >
+                                        APLICAR
+                                    </button>
+                                </div>
                             </div>
                         </div>
                     </div>
