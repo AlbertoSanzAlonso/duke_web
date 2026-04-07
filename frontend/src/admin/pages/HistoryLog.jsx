@@ -165,7 +165,7 @@ const HistoryLog = () => {
                     <tbody style={{ background: '#fff' }}>
                         {currentLogs.length > 0 ? currentLogs.map((log) => (
                             <tr key={log.id} style={{ borderBottom: '1px solid #f1f1f1' }}>
-                                <td style={{ padding: '15px' }}>
+                                <td data-label="FECHA Y HORA" style={{ padding: '15px' }}>
                                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#666', fontSize: '0.85rem' }}>
                                         <Clock size={14} />
                                         {new Date(log.timestamp).toLocaleString('es-AR', {
@@ -174,7 +174,7 @@ const HistoryLog = () => {
                                         })}
                                     </div>
                                 </td>
-                                <td style={{ padding: '15px' }}>
+                                <td data-label="USUARIO" style={{ padding: '15px' }}>
                                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontWeight: 'bold', color: '#333' }}>
                                         <div style={{ width: '28px', height: '28px', background: '#f0f0f0', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#666' }}>
                                             <User size={14} />
@@ -182,7 +182,7 @@ const HistoryLog = () => {
                                         {log.username}
                                     </div>
                                 </td>
-                                <td style={{ padding: '15px' }}>
+                                <td data-label="MÓDULO" style={{ padding: '15px' }}>
                                     <span style={{ 
                                         display: 'inline-flex', alignItems: 'center', gap: '6px',
                                         padding: '4px 10px', borderRadius: '20px', background: '#f5f7f9',
@@ -193,7 +193,7 @@ const HistoryLog = () => {
                                         {log.module}
                                     </span>
                                 </td>
-                                <td style={{ padding: '15px' }}>
+                                <td data-label="ACCIÓN" style={{ padding: '15px' }}>
                                     <span style={{ 
                                         display: 'inline-block', padding: '4px 10px', borderRadius: '6px',
                                         fontSize: '0.7rem', fontWeight: '900',
@@ -203,7 +203,7 @@ const HistoryLog = () => {
                                         {log.action_type}
                                     </span>
                                 </td>
-                                <td style={{ padding: '15px' }}>
+                                <td data-label="DETALLE" style={{ padding: '15px' }}>
                                     <div style={{ color: '#222', fontSize: '0.9rem', fontWeight: '500' }}>
                                         {log.description}
                                     </div>
