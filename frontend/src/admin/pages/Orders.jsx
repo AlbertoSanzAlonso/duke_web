@@ -12,6 +12,7 @@ const Orders = () => {
     const [searchTerm, setSearchTerm] = useState('');
     const [searchParams] = useSearchParams();
     const [filterType, setFilterType] = useState('all'); // 'all', 'daily', 'weekly', 'monthly'
+    const [showStatsModal, setShowStatsModal] = useState(false);
     const navigate = useNavigate();
 
     // ... (rest of search/memo logic remains same)
@@ -95,7 +96,7 @@ const Orders = () => {
                     </div>
                 </div>
 
-                <div className="orders-summary-group" style={{ display: 'flex', gap: '20px', alignItems: 'center' }}>
+                <div className="orders-summary-group">
                     <div className="filter-group-segmented" style={{ display: 'flex', background: '#f1f3f5', padding: '4px', borderRadius: '10px' }}>
                         {[
                             { id: 'all', label: 'TODO' },
@@ -113,7 +114,7 @@ const Orders = () => {
                             </button>
                         ))}
                     </div>
-                    <div className="orders-stats">
+                    <div className="orders-stats" style={{ cursor: 'pointer' }} onClick={() => setShowStatsModal(true)}>
                         <div className="stat-card">
                             <span>Pedidos</span>
                             <strong>{filteredOrders.length}</strong>
@@ -271,6 +272,84 @@ const Orders = () => {
                     </div>
                 )}
             </div>
+
+            {/* Modal de Estadísticas Detalladas */}
+            {showStatsModal && (
+                <div 
+                    className="modal-overlay" 
+                    onClick={() => setShowStatsModal(false)}
+                    style={{
+                        position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
+                        background: 'rgba(0,0,0,0.9)', display: 'flex',
+                        alignItems: 'center', justifyContent: 'center', zIndex: 4000,
+                        backdropFilter: 'blur(10px)'
+                    }}
+                >
+                    <div 
+                        className="admin-card" 
+                        onClick={e => e.stopPropagation()}
+                        style={{
+                            width: '95%', maxWidth: '500px', padding: '30px',
+                            border: '1px solid #f03e3e', position: 'relative',
+                            textAlign: 'center'
+                        }}
+                    >
+                        <button 
+                            onClick={() => setShowStatsModal(false)}
+                            style={{ 
+                                position: 'absolute', top: '15px', right: '15px',
+                                background: 'none', border: 'none', color: '#888',
+                                cursor: 'pointer', fontSize: '24px'
+                            }}
+                        >
+                            <X size={24} />
+                        </button>
+
+                        <div style={{ marginBottom: '30px' }}>
+                            <div style={{ 
+                                background: '#f03e3e15', width: '60px', height: '60px', 
+                                borderRadius: '50%', display: 'flex', alignItems: 'center', 
+                                justifyContent: 'center', margin: '0 auto 15px', color: '#f03e3e' 
+                            }}>
+                                <LayoutGrid size={32} />
+                            </div>
+                            <h2 style={{ margin: 0, fontSize: '1.2rem', textTransform: 'uppercase', letterSpacing: '1px' }}>
+                                Resumen de Facturación
+                            </h2>
+                            <p style={{ color: '#999', margin: '5px 0 0 0', textTransform: 'uppercase', fontSize: '0.75rem', fontWeight: '800' }}>
+                                Periodo: {filterType === 'all' ? 'Histórico Total' : filterType === 'daily' ? 'Hoy' : filterType === 'weekly' ? 'Última Semana' : 'Último Mes'}
+                            </p>
+                        </div>
+
+                        <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '20px' }}>
+                            <div style={{ background: '#f8f9fa', padding: '25px', borderRadius: '16px', border: '1px solid #eee' }}>
+                                <span style={{ fontSize: '0.8rem', color: '#888', textTransform: 'uppercase', fontWeight: '800' }}>Volumen de Ventas</span>
+                                <h3 style={{ fontSize: '3rem', margin: '5px 0', fontWeight: '900' }}>{filteredOrders.length}</h3>
+                                <p style={{ margin: 0, color: '#666', fontSize: '0.9rem' }}>Pedidos Realizados</p>
+                            </div>
+
+                            <div style={{ background: '#f8f9fa', padding: '25px', borderRadius: '16px', border: '1px solid #eee' }}>
+                                <span style={{ fontSize: '0.8rem', color: '#888', textTransform: 'uppercase', fontWeight: '800' }}>Ingresos Totales</span>
+                                <h3 style={{ fontSize: '3rem', margin: '5px 0', fontWeight: '900', color: '#2b8a3e' }}>
+                                    ${Math.round(totalIncome).toLocaleString('es-AR')}
+                                </h3>
+                                <p style={{ margin: 0, color: '#666', fontSize: '0.9rem' }}>Facturación Bruta</p>
+                            </div>
+                        </div>
+
+                        <button 
+                            onClick={() => setShowStatsModal(false)}
+                            style={{ 
+                                width: '100%', marginTop: '30px', padding: '15px', 
+                                background: '#333', color: 'white', border: 'none', 
+                                borderRadius: '12px', fontWeight: '900', cursor: 'pointer' 
+                            }}
+                        >
+                            ENTENDIDO
+                        </button>
+                    </div>
+                </div>
+            )}
         </div>
     );
 };
