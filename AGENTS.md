@@ -14,10 +14,11 @@ Este proyecto se divide en dos entornos de despliegue claramente separados para 
 - **Ruta principal:** `/backend`
 - **Framework:** Django + DRF (Django REST Framework).
 - **Puerto de Servicio:** El contenedor escucha en el **puerto 3000**.
-- **Motor de Servidor:** Utiliza `gunicorn` con el worker `gthread` (o `uvicorn` si se despliega como ASGI) para manejar concurrencia en streaming.
+- **Motor de Servidor:** Utiliza `gunicorn` con el worker `gthread` (o `uvicorn` si se despliega como ASGI).
 - **Comando de Inicio Recomendado:** `gunicorn -k gthread --threads 12 --workers 2 --bind 0.0.0.0:3000 --timeout 120 config.wsgi:application`.
-- **Infraestructura:** Despliegue en Coolify con base de datos PostgreSQL en Supabase.
-- **Media:** Almacenamiento en Supabase S3 (preferido) o volumen persistente local. Las imágenes se procesan automáticamente a WebP.
+- **Estatícos:** Se utiliza **Whitenoise** (`whitenoise.middleware.WhiteNoiseMiddleware`) para servir archivos estáticos. 
+- **Almacenamiento (Django 4.2+):** ES OBLIGATORIO usar el diccionario `STORAGES` en `settings.py` en lugar de las variables antiguas. Configurar `staticfiles` con `StaticFilesStorage` para mayor estabilidad en Docker.
+- **Diagnóstico:** Ante errores 500 tras un despliegue, visitar `/api/setup-admin-super/` para forzar migraciones en la base de datos de Supabase.
 
 ## 3. Streaming, Concurrencia y Caché (Crítico)
 - **Async Views**: Todos los views de streaming (SSE) como `OrderStreamView` **DEBEN** ser `async def`.
