@@ -482,10 +482,12 @@ async def OrderStreamView(request):
 
     response = StreamingHttpResponse(event_stream(), content_type='text/event-stream')
     
-    # --- CONFIGURACIÓN CRÍTICA PARA COOLIFY / STREAMING ---
+    # --- CONFIGURACIÓN CRÍTICA PARA COOLIFY / STREAMING / CORS ---
+    response['Content-Type'] = 'text/event-stream'
     response['X-Accel-Buffering'] = 'no'      
     response['Cache-Control'] = 'no-cache'    
     response['Connection'] = 'keep-alive'     
+    response['Access-Control-Allow-Origin'] = '*'
     # ------------------------------------------------------------
     
     return response

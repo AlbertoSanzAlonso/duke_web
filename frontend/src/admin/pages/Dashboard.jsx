@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { fetchSales, fetchMenuEntries, fetchOpeningHours, fetchInventory } from '../../services/api';
 import LoadingScreen from '../components/LoadingScreen';
-import { ShoppingBag, Star, Clock, AlertTriangle, TrendingUp, Package, CalendarOff } from 'lucide-react';
+import { ShoppingBag, Star, Clock, AlertTriangle, TrendingUp, Package, CalendarOff, Mail } from 'lucide-react';
 
 const Dashboard = () => {
     const [loading, setLoading] = useState(true);
@@ -123,10 +123,27 @@ const Dashboard = () => {
                     <div>
                         <div style={labelStyle}>Alertas de Stock</div>
                         <div style={{ ...valueStyle, color: data.lowStockItems.length > 0 ? '#e03131' : '#333' }}>
-                            {data.lowStockItems.length} {data.lowStockItems.length === 1 ? 'Ítems' : 'Ítems'}
+                            {data.lowStockItems.length} {data.lowStockItems.length === 1 ? 'Ítem' : 'Ítems'}
                         </div>
                     </div>
                 </div>
+
+                {/* 5. ACCESO WEBMAIL */}
+                <a 
+                    href="https://webmail.dondominio.com/" 
+                    target="_blank" 
+                    rel="noopener noreferrer" 
+                    className="admin-card" 
+                    style={{ ...cardStyle, background: '#e7f5ff', border: '1px solid #a5d8ff', textDecoration: 'none' }}
+                >
+                    <div style={iconBoxStyle('#d0ebff', '#228be6')}>
+                        <Mail size={24} />
+                    </div>
+                    <div>
+                        <div style={labelStyle}>Correo Corporativo</div>
+                        <div style={{ ...valueStyle, fontSize: '1.2rem', color: '#1c7ed6' }}>ACCEDER WEBMAIL ↗</div>
+                    </div>
+                </a>
             </div>
 
             {/* DETALLE DE STOCK BAJO (Si hay) */}
