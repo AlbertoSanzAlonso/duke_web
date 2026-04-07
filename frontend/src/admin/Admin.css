@@ -220,9 +220,10 @@ body, .admin-container, .admin-main, .admin-content {
 }
 .admin-content input::placeholder, 
 .admin-content textarea::placeholder {
-    color: #495057 !important;
-    font-weight: 600 !important;
-    opacity: 0.9 !important;
+    color: #888 !important;
+    font-weight: 400 !important;
+    font-size: 0.85rem !important;
+    opacity: 0.7 !important;
 }
 
 @media (max-width: 768px) {
