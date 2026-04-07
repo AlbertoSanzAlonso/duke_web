@@ -85,10 +85,23 @@ def AdminSetupView(request):
     
     for username, password in users:
         if not User.objects.filter(username=username).exists():
-            User.objects.create_superuser(username, username, password)
+            u = User.objects.create_superuser(username, username, password)
             created.append(username)
         else:
+            u = User.objects.get(username=username)
             skipped.append(username)
+        
+        # Ensure profile exists and has full permissions
+        profile, _ = UserProfile.objects.get_or_create(user=u)
+        profile.can_use_tpv = True
+        profile.can_use_accounting = True
+        profile.can_use_menu = True
+        profile.can_use_inventory = True
+        profile.can_use_promos = True
+        profile.can_use_gallery = True
+        profile.can_use_settings = True
+        profile.is_admin_manager = True
+        profile.save()
 
     # 3. Setup Default Opening Hours
     hours_created = 0
