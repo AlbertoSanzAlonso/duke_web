@@ -13,6 +13,9 @@ from .serializers import (ProductSerializer, MenuEntrySerializer, SaleSerializer
                           GalleryImageSerializer, OpeningHourSerializer, 
                           DeliverySettingSerializer, UserSerializer)
 
+from .permissions import (IsAdminManager, HasTPVPermission, HasAccountingPermission,
+                         HasMenuPermission, HasInventoryPermission, HasGalleryPermission)
+
 from django.utils.decorators import method_decorator
 from django.views.decorators.cache import cache_page
 from django.http import StreamingHttpResponse
@@ -47,17 +50,14 @@ def MeView(request):
     if request.method == 'PATCH':
         serializer = UserSerializer(user, data=request.data, partial=True)
         if serializer.is_valid():
-            serializer.save() # This updates name, email, and password if provided
-            
-            # Update Profile fields (avatar)
-            profile, _ = UserProfile.objects.get_or_create(user=user)
-            if 'avatar' in request.FILES:
-                profile.avatar = request.FILES['avatar']
-                profile.save()
-            
-            # Need to re-serialize after changes
+            serializer.save()
             return Response(UserSerializer(user).data)
         return Response(serializer.errors, status=400)
+
+class UserViewSet(viewsets.ModelViewSet):
+    queryset = User.objects.all().order_by('-date_joined')
+    serializer_class = UserSerializer
+    permission_classes = [IsAdminManager]
 
 @api_view(['GET'])
 @permission_classes([permissions.AllowAny])
@@ -171,7 +171,11 @@ def PasswordResetConfirmView(request):
 class ProductViewSet(viewsets.ModelViewSet):
     queryset = Product.objects.all().order_by('-created_at')
     serializer_class = ProductSerializer
-    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+    
+    def get_permissions(self):
+        if self.action in ['list', 'retrieve']:
+            return [permissions.AllowAny()]
+        return [permissions.IsAuthenticated(), HasMenuPermission()]
 
     def perform_create(self, serializer):
         serializer.save()
@@ -191,7 +195,11 @@ class ProductViewSet(viewsets.ModelViewSet):
 class MenuEntryViewSet(viewsets.ModelViewSet):
     queryset = MenuEntry.objects.all().order_by('product__name')
     serializer_class = MenuEntrySerializer
-    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+    
+    def get_permissions(self):
+        if self.action in ['list', 'retrieve']:
+            return [permissions.AllowAny()]
+        return [permissions.IsAuthenticated(), HasMenuPermission()]
 
     def list(self, request, *args, **kwargs):
         from django.core.cache import cache
@@ -233,7 +241,7 @@ class SaleViewSet(viewsets.ModelViewSet):
     def get_permissions(self):
         if self.action in ['create', 'retrieve']:
             return [permissions.AllowAny()]
-        return [permissions.IsAuthenticated()]
+        return [permissions.IsAuthenticated(), HasTPVPermission()]
 
     @action(detail=False, methods=['post'], url_path='bulk-actions')
     def bulk_actions(self, request):
@@ -257,16 +265,16 @@ class SaleViewSet(viewsets.ModelViewSet):
 class ExpenseViewSet(viewsets.ModelViewSet):
     queryset = Expense.objects.all().order_by('-date')
     serializer_class = ExpenseSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [permissions.IsAuthenticated, HasAccountingPermission]
 
 class InventoryItemViewSet(viewsets.ModelViewSet):
     queryset = InventoryItem.objects.all().order_by('name')
     serializer_class = InventoryItemSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [permissions.IsAuthenticated, HasInventoryPermission]
 
 class SupplierOrderViewSet(viewsets.ModelViewSet):
     queryset = SupplierOrder.objects.all().order_by('-date')
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [permissions.IsAuthenticated, HasInventoryPermission]
     
     def get_serializer_class(self):
         if self.action == 'create':
@@ -277,7 +285,11 @@ class GlobalSettingViewSet(viewsets.ModelViewSet):
     queryset = GlobalSetting.objects.all().order_by('key')
     serializer_class = GlobalSettingSerializer
     lookup_field = 'key'
-    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+    
+    def get_permissions(self):
+        if self.action in ['list', 'retrieve']:
+            return [permissions.AllowAny()]
+        return [IsAdminManager()]
 
     @action(detail=False, methods=['post'], url_path='setup-defaults')
     def setup_defaults(self, request):
@@ -300,12 +312,20 @@ class GlobalSettingViewSet(viewsets.ModelViewSet):
 class OpeningHourViewSet(viewsets.ModelViewSet):
     queryset = OpeningHour.objects.all().order_by('day')
     serializer_class = OpeningHourSerializer
-    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+    
+    def get_permissions(self):
+        if self.action in ['list', 'retrieve']:
+            return [permissions.AllowAny()]
+        return [IsAdminManager()]
 
 class DeliverySettingViewSet(viewsets.ModelViewSet):
     queryset = DeliverySetting.objects.all()
     serializer_class = DeliverySettingSerializer
-    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+    
+    def get_permissions(self):
+        if self.action in ['list', 'retrieve']:
+            return [permissions.AllowAny()]
+        return [IsAdminManager()]
 
     def get_object(self):
         obj, created = DeliverySetting.objects.get_or_create(id=1)
@@ -318,7 +338,11 @@ class DeliverySettingViewSet(viewsets.ModelViewSet):
 
 class GalleryImageViewSet(viewsets.ModelViewSet):
     serializer_class = GalleryImageSerializer
-    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+    
+    def get_permissions(self):
+        if self.action in ['list', 'retrieve']:
+            return [permissions.AllowAny()]
+        return [permissions.IsAuthenticated(), HasGalleryPermission()]
 
     # Solo cacheamos la lista para el público. Los administradores ven tiempo real.
     def list(self, request, *args, **kwargs):

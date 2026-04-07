@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { fetchInventory, createInventoryItem, deleteInventoryItem, updateInventoryItem } from '../../services/api';
 import Toast from '../components/Toast';
-import { Edit2, Save, X, Trash2 } from 'lucide-react';
+import { Edit2, Save, X, Trash2, Search } from 'lucide-react';
 import './Accounting.css';
 
 function Inventory() {
@@ -9,6 +9,7 @@ function Inventory() {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [toast, setToast] = useState(null);
+    const [searchTerm, setSearchTerm] = useState('');
 
     // Edit state
     const [editingItemId, setEditingItemId] = useState(null);
@@ -105,9 +106,19 @@ function Inventory() {
     return (
         <div className="admin-card">
             {toast && <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />}
-            <h2 style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                Inventario de Almacén
-            </h2>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '20px', marginBottom: '20px' }}>
+                <h2 style={{ margin: 0 }}>Inventario de Almacén</h2>
+                <div className="search-bar" style={{ position: 'relative', width: '300px' }}>
+                    <Search size={18} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: '#888' }} />
+                    <input 
+                        type="text" 
+                        placeholder="Buscar artículo..." 
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                        style={{ padding: '10px 15px 10px 40px', borderRadius: '10px', border: '1px solid #ddd', fontSize: '0.9rem', width: '100%', background: '#fff' }}
+                    />
+                </div>
+            </div>
             
             <form onSubmit={handleCreate} style={{ display: 'flex', gap: '15px', marginBottom: '30px', flexWrap: 'wrap', alignItems: 'flex-end', background: '#f8f9fa', padding: '15px', borderRadius: '12px', border: '1px solid #eee' }}>
                 <div style={{ flex: '1 1 200px' }}>
@@ -208,7 +219,10 @@ function Inventory() {
                                     <td colSpan="4" style={{ padding: '20px', textAlign: 'center' }}>No hay registros en el inventario.</td>
                                 </tr>
                             ) : (
-                                items.map(item => {
+                                items.filter(item => 
+                                    (item.name || "").toLowerCase().includes(searchTerm.toLowerCase()) ||
+                                    (item.category || "").toLowerCase().includes(searchTerm.toLowerCase())
+                                ).map(item => {
                                     const outOfStock = parseFloat(item.quantity) <= parseFloat(item.min_stock);
                                     const isEditing = editingItemId === item.id;
                                     

@@ -7,20 +7,44 @@ from django.contrib.auth.models import User
 class UserProfileSerializer(serializers.ModelSerializer):
     class Meta:
         model = UserProfile
-        fields = ['avatar']
+        fields = [
+            'avatar', 'can_use_tpv', 'can_use_accounting', 
+            'can_use_menu', 'can_use_inventory', 'can_use_promos', 
+            'can_use_gallery', 'can_use_settings', 'is_admin_manager'
+        ]
 
 class UserSerializer(serializers.ModelSerializer):
-    profile = UserProfileSerializer(read_only=True)
+    profile = UserProfileSerializer(required=False)
     password = serializers.CharField(write_only=True, required=False)
 
     class Meta:
         model = User
-        fields = ['id', 'username', 'email', 'first_name', 'last_name', 'profile', 'password']
+        fields = ['id', 'username', 'email', 'first_name', 'last_name', 'profile', 'password', 'is_staff', 'is_active', 'date_joined']
+
+    def create(self, validated_data):
+        profile_data = validated_data.pop('profile', {})
+        password = validated_data.pop('password', None)
+        user = User.objects.create(**validated_data)
+        if password:
+            user.set_password(password)
+            user.save()
+        # Create profile with permissions
+        UserProfile.objects.create(user=user, **profile_data)
+        return user
 
     def update(self, instance, validated_data):
+        profile_data = validated_data.pop('profile', {})
         password = validated_data.pop('password', None)
+        
+        # Sync profile
+        profile, _ = UserProfile.objects.get_or_create(user=instance)
+        for attr, value in profile_data.items():
+            setattr(profile, attr, value)
+        profile.save()
+
         if password:
             instance.set_password(password)
+            
         return super().update(instance, validated_data)
 
 class ProductSerializer(serializers.ModelSerializer):

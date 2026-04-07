@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { fetchSales } from '../../services/api';
-import { Printer, Eye, Calendar, User, Hash } from 'lucide-react';
+import { Printer, Eye, Calendar, User, Hash, Search } from 'lucide-react';
 import LoadingScreen from '../components/LoadingScreen';
 import './Orders.css';
 
@@ -8,6 +8,7 @@ const Orders = () => {
     const [orders, setOrders] = useState([]);
     const [loading, setLoading] = useState(true);
     const [selectedOrder, setSelectedOrder] = useState(null);
+    const [searchTerm, setSearchTerm] = useState('');
 
     useEffect(() => {
         loadOrders();
@@ -34,14 +35,26 @@ const Orders = () => {
         <div className="orders-container">
             <div className="orders-header">
                 <h2>Gestión de Pedidos</h2>
-                <div className="orders-stats">
-                    <div className="stat-card">
-                        <span>Total Pedidos</span>
-                        <strong>{orders.length}</strong>
+                <div className="orders-summary-group" style={{ display: 'flex', gap: '20px', alignItems: 'center' }}>
+                    <div className="search-bar" style={{ position: 'relative', width: '300px' }}>
+                        <Search size={18} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: '#888' }} />
+                        <input 
+                            type="text" 
+                            placeholder="Buscar por ID, cliente o entrega..." 
+                            value={searchTerm}
+                            onChange={(e) => setSearchTerm(e.target.value)}
+                            style={{ padding: '10px 15px 10px 40px', borderRadius: '10px', border: '1px solid #ddd', fontSize: '0.9rem', width: '100%', background: '#fff' }}
+                        />
                     </div>
-                    <div className="stat-card">
-                        <span>Ingresos Totales</span>
-                        <strong>${orders.reduce((acc, o) => acc + parseFloat(o.total_amount), 0).toFixed(2)}</strong>
+                    <div className="orders-stats">
+                        <div className="stat-card">
+                            <span>Pedidos</span>
+                            <strong>{orders.length}</strong>
+                        </div>
+                        <div className="stat-card">
+                            <span>Ingresos</span>
+                            <strong>${Math.round(orders.reduce((acc, o) => acc + parseFloat(o.total_amount), 0)).toLocaleString('es-AR')}</strong>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -60,7 +73,11 @@ const Orders = () => {
                             </tr>
                         </thead>
                         <tbody>
-                            {orders.map(order => (
+                            {orders.filter(order => 
+                                (order.id.toString()).includes(searchTerm) ||
+                                (order.customer_name || "").toLowerCase().includes(searchTerm.toLowerCase()) ||
+                                (order.table_number || "").toLowerCase().includes(searchTerm.toLowerCase())
+                            ).map(order => (
                                 <tr key={order.id} className={selectedOrder?.id === order.id ? 'selected' : ''} onClick={() => setSelectedOrder(order)}>
                                     <td data-label="ID">#{order.id}</td>
                                     <td data-label="Fecha">

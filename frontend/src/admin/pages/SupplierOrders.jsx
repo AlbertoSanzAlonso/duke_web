@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { fetchSupplierOrders, createSupplierOrder, fetchInventory } from '../../services/api';
 import LoadingScreen from '../components/LoadingScreen';
 import Toast from '../components/Toast';
-import { Truck, Plus, History, Trash2, ShoppingCart } from 'lucide-react';
+import { Truck, Plus, History, Trash2, ShoppingCart, Search } from 'lucide-react';
 import './Accounting.css';
 
 const SupplierOrders = () => {
@@ -11,6 +11,7 @@ const SupplierOrders = () => {
     const [loading, setLoading] = useState(true);
     const [isSaving, setIsSaving] = useState(false);
     const [toast, setToast] = useState(null);
+    const [searchTerm, setSearchTerm] = useState('');
 
     // Order draft state
     const [supplierName, setSupplierName] = useState('');
@@ -219,9 +220,21 @@ const SupplierOrders = () => {
 
                 {/* Historial */}
                 <div className="admin-card">
-                    <h3 style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '20px' }}>
-                        <History size={20} color="#f03e3e" /> Historial de Compras
-                    </h3>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px', flexWrap: 'wrap', gap: '15px' }}>
+                        <h3 style={{ display: 'flex', alignItems: 'center', gap: '8px', margin: 0 }}>
+                            <History size={20} color="#f03e3e" /> Historial de Compras
+                        </h3>
+                        <div className="search-bar" style={{ position: 'relative', width: '220px' }}>
+                            <Search size={16} style={{ position: 'absolute', left: '10px', top: '50%', transform: 'translateY(-50%)', color: '#888' }} />
+                            <input 
+                                type="text" 
+                                placeholder="Buscar proveedor..." 
+                                value={searchTerm}
+                                onChange={(e) => setSearchTerm(e.target.value)}
+                                style={{ padding: '8px 10px 8px 35px', borderRadius: '8px', border: '1px solid #ddd', fontSize: '0.85rem', width: '100%', background: '#fff' }}
+                            />
+                        </div>
+                    </div>
                     <div className="accounting-table-container">
                         <table className="accounting-table">
                             <thead>
@@ -236,7 +249,10 @@ const SupplierOrders = () => {
                                 {orders.length === 0 ? (
                                     <tr><td colSpan="4" style={{ textAlign: 'center', padding: '20px', color: '#999' }}>No hay pedidos registrados.</td></tr>
                                 ) : (
-                                    orders.map(order => (
+                                    orders.filter(order => 
+                                        (order.supplier_name || "").toLowerCase().includes(searchTerm.toLowerCase()) ||
+                                        (order.id.toString()).includes(searchTerm)
+                                    ).map(order => (
                                         <tr key={order.id}>
                                             <td data-label="Fecha">{new Date(order.date).toLocaleDateString()}</td>
                                             <td data-label="Proveedor">{order.supplier_name}</td>

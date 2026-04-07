@@ -751,6 +751,25 @@ img.nav-logo:hover,
   padding: 1.5rem;
   overflow-y: auto;
   flex-grow: 1;
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-primary) #111;
+}
+
+.modal-body::-webkit-scrollbar {
+  width: 6px;
+}
+
+.modal-body::-webkit-scrollbar-track {
+  background: #0a0a0a;
+}
+
+.modal-body::-webkit-scrollbar-thumb {
+  background: var(--color-primary);
+  border-radius: 10px;
+}
+
+.modal-body::-webkit-scrollbar-thumb:hover {
+  background: #ff1a45;
 }
 
 .cart-item-row {
@@ -917,6 +936,26 @@ img.nav-logo:hover,
   padding: 1.5rem;
   overflow-y: auto;
   flex-grow: 1;
+  /* Custom scrollbar for desktop */
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-primary) #111;
+}
+
+.detail-content::-webkit-scrollbar {
+  width: 6px;
+}
+
+.detail-content::-webkit-scrollbar-track {
+  background: #0a0a0a;
+}
+
+.detail-content::-webkit-scrollbar-thumb {
+  background: var(--color-primary);
+  border-radius: 10px;
+}
+
+.detail-content::-webkit-scrollbar-thumb:hover {
+  background: #ff1a45;
 }
 
 .detail-header {

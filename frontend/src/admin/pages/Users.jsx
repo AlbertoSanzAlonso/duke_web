@@ -1,0 +1,377 @@
+import React, { useState, useEffect } from 'react';
+import { fetchUsers, createUser, updateUser, deleteUsers } from '../../services/api'; // Wait, it's deleteUser
+import { UserPlus, Search, Edit2, Trash2, Shield, Mail, Key, User as UserIcon } from 'lucide-react';
+import LoadingScreen from '../components/LoadingScreen';
+import Toast from '../components/Toast';
+import './Accounting.css'; // Reuse table and layout styles
+
+const Users = () => {
+    const [users, setUsers] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [searchTerm, setSearchTerm] = useState('');
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [editingUser, setEditingUser] = useState(null);
+    const [toast, setToast] = useState(null);
+
+    // Form state
+    const [formData, setFormData] = useState({
+        username: '',
+        password: '',
+        email: '',
+        profile: {
+            can_use_tpv: false,
+            can_use_accounting: false,
+            can_use_menu: false,
+            can_use_inventory: false,
+            can_use_promos: false,
+            can_use_gallery: false,
+            can_use_settings: false,
+            is_admin_manager: false
+        }
+    });
+
+    useEffect(() => {
+        loadUsers();
+    }, []);
+
+    const loadUsers = async () => {
+        setLoading(true);
+        try {
+            const data = await fetchUsers();
+            setUsers(data);
+        } catch (error) {
+            console.error("Error loading users:", error);
+            setToast({ message: "No tienes permiso para ver usuarios", type: 'error' });
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const handleOpenModal = (user = null) => {
+        if (user) {
+            setEditingUser(user);
+            setFormData({
+                username: user.username,
+                email: user.email || '',
+                password: '', // Don't show password
+                profile: user.profile || {
+                    can_use_tpv: false,
+                    can_use_accounting: false,
+                    can_use_menu: false,
+                    can_use_inventory: false,
+                    can_use_promos: false,
+                    can_use_gallery: false,
+                    can_use_settings: false,
+                    is_admin_manager: false
+                }
+            });
+        } else {
+            setEditingUser(null);
+            setFormData({
+                username: '',
+                password: '',
+                email: '',
+                profile: {
+                    can_use_tpv: false,
+                    can_use_accounting: false,
+                    can_use_menu: false,
+                    can_use_inventory: false,
+                    can_use_promos: false,
+                    can_use_gallery: false,
+                    can_use_settings: false,
+                    is_admin_manager: false
+                }
+            });
+        }
+        setIsModalOpen(true);
+    };
+
+    const handleCloseModal = () => {
+        setIsModalOpen(false);
+        setEditingUser(null);
+    };
+
+    const handlePermissionChange = (perm) => {
+        setFormData(prev => ({
+            ...prev,
+            profile: {
+                ...prev.profile,
+                [perm]: !prev.profile[perm]
+            }
+        }));
+    };
+
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        try {
+            if (editingUser) {
+                // Remove password if empty in update
+                const dataToUpdate = { ...formData };
+                if (!dataToUpdate.password) delete dataToUpdate.password;
+                
+                await updateUser(editingUser.id, dataToUpdate);
+                setToast({ message: "Usuario actualizado", type: 'success' });
+            } else {
+                if (!formData.password) {
+                    setToast({ message: "La contraseña es obligatoria", type: 'error' });
+                    return;
+                }
+                await createUser(formData);
+                setToast({ message: "Usuario creado", type: 'success' });
+            }
+            handleCloseModal();
+            loadUsers();
+        } catch (error) {
+            setToast({ message: error.message, type: 'error' });
+        }
+    };
+
+    const handleDelete = async (id) => {
+        if (!window.confirm("¿Estás seguro de que quieres eliminar este usuario?")) return;
+        try {
+            const { deleteUser } = await import('../../services/api');
+            await deleteUser(id);
+            setToast({ message: "Usuario eliminado", type: 'success' });
+            loadUsers();
+        } catch (error) {
+            setToast({ message: error.message, type: 'error' });
+        }
+    };
+
+    const filteredUsers = users.filter(user => 
+        user.username.toLowerCase().includes(searchTerm.toLowerCase()) || 
+        (user.email && user.email.toLowerCase().includes(searchTerm.toLowerCase()))
+    );
+
+    if (loading && users.length === 0) return <LoadingScreen />;
+
+    return (
+        <div className="admin-content">
+            {toast && <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />}
+            
+            <header className="page-header" style={{ marginBottom: '30px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <div>
+                    <h2 style={{ display: 'flex', alignItems: 'center', gap: '12px', margin: 0 }}>
+                        <Shield size={32} color="#f03e3e" /> Gestión de Usuarios
+                    </h2>
+                    <p style={{ color: '#666', margin: '5px 0 0 0' }}>Administra el personal y sus permisos de acceso.</p>
+                </div>
+                <button className="main-button" onClick={() => handleOpenModal()} style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <UserPlus size={20} /> NUEVO USUARIO
+                </button>
+            </header>
+
+            <div className="admin-card">
+                <div className="search-bar" style={{ position: 'relative', width: '100%', maxWidth: '400px', marginBottom: '20px' }}>
+                    <Search size={18} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: '#888' }} />
+                    <input 
+                        type="text" 
+                        placeholder="Buscar por nombre o email..." 
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                        style={{ padding: '12px 15px 12px 40px', borderRadius: '10px', border: '1px solid #ddd', width: '100%', fontSize: '0.9rem' }}
+                    />
+                </div>
+
+                <div className="accounting-table-container">
+                    <table className="accounting-table">
+                        <thead>
+                            <tr>
+                                <th>Usuario</th>
+                                <th>Email</th>
+                                <th>Permisos Activos</th>
+                                <th className="txt-right">Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {filteredUsers.map(user => (
+                                <tr key={user.id}>
+                                    <td data-label="Usuario">
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                                            <div style={{ padding: '8px', background: '#f1f3f5', borderRadius: '50%', width: '32px', height: '32px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                                <UserIcon size={16} color="#495057" />
+                                            </div>
+                                            <strong>{user.username}</strong>
+                                        </div>
+                                    </td>
+                                    <td data-label="Email" style={{ color: '#666' }}>{user.email || 'N/A'}</td>
+                                    <td data-label="Permisos">
+                                        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '5px' }}>
+                                            {user.is_superuser ? <span className="badge-perm primary">SuperUser</span> : (
+                                                <>
+                                                    {user.profile?.can_use_tpv && <span className="badge-perm">TPV</span>}
+                                                    {user.profile?.can_use_accounting && <span className="badge-perm">Conta</span>}
+                                                    {user.profile?.can_use_menu && <span className="badge-perm">Menu</span>}
+                                                    {user.profile?.can_use_inventory && <span className="badge-perm">Almacen</span>}
+                                                    {user.profile?.is_admin_manager && <span className="badge-perm success">Admin</span>}
+                                                </>
+                                            )}
+                                        </div>
+                                    </td>
+                                    <td data-label="Acciones" className="txt-right">
+                                        <div style={{ display: 'flex', gap: '8px', justifyContent: 'flex-end' }}>
+                                            <button className="icon-btn edit" onClick={() => handleOpenModal(user)}><Edit2 size={18} /></button>
+                                            {!user.is_superuser && (
+                                                <button className="icon-btn delete" onClick={() => handleDelete(user.id)}><Trash2 size={18} /></button>
+                                            )}
+                                        </div>
+                                    </td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            {/* Modal for Create/Edit */}
+            {isModalOpen && (
+                <div className="modal-overlay" style={{ background: 'rgba(0,0,0,0.6)' }}>
+                    <div className="modal-content" style={{ maxWidth: '600px', width: '90%' }}>
+                        <h3>{editingUser ? 'Editar Usuario' : 'Crear Nuevo Usuario'}</h3>
+                        <form onSubmit={handleSubmit} style={{ marginTop: '20px' }}>
+                            <div className="form-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px' }}>
+                                <div className="form-group">
+                                    <label><UserIcon size={14} /> Username</label>
+                                    <input 
+                                        type="text" 
+                                        value={formData.username} 
+                                        onChange={e => setFormData({...formData, username: e.target.value})}
+                                        required
+                                        placeholder="ej: juanperez"
+                                    />
+                                </div>
+                                <div className="form-group">
+                                    <label><Mail size={14} /> Email</label>
+                                    <input 
+                                        type="email" 
+                                        value={formData.email} 
+                                        onChange={e => setFormData({...formData, email: e.target.value})}
+                                        placeholder="ej: juan@gmail.com"
+                                    />
+                                </div>
+                                <div className="form-group" style={{ gridColumn: 'span 2' }}>
+                                    <label><Key size={14} /> {editingUser ? 'Nueva Contraseña (dejar vacío para mantener)' : 'Contraseña'}</label>
+                                    <input 
+                                        type="password" 
+                                        value={formData.password} 
+                                        onChange={e => setFormData({...formData, password: e.target.value})}
+                                        required={!editingUser}
+                                        placeholder="********"
+                                    />
+                                </div>
+                            </div>
+
+                            <div style={{ marginTop: '25px' }}>
+                                <h4 style={{ marginBottom: '15px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                    <Shield size={16} /> Permisos de Acceso
+                                </h4>
+                                <div className="permissions-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
+                                    <PermissionToggle 
+                                        label="Uso de TPV" 
+                                        active={formData.profile.can_use_tpv} 
+                                        onChange={() => handlePermissionChange('can_use_tpv')} 
+                                    />
+                                    <PermissionToggle 
+                                        label="Contabilidad" 
+                                        active={formData.profile.can_use_accounting} 
+                                        onChange={() => handlePermissionChange('can_use_accounting')} 
+                                    />
+                                    <PermissionToggle 
+                                        label="Gestión de Carta" 
+                                        active={formData.profile.can_use_menu} 
+                                        onChange={() => handlePermissionChange('can_use_menu')} 
+                                    />
+                                    <PermissionToggle 
+                                        label="Gestión Inventario" 
+                                        active={formData.profile.can_use_inventory} 
+                                        onChange={() => handlePermissionChange('can_use_inventory')} 
+                                    />
+                                    <PermissionToggle 
+                                        label="Galería y Fotos" 
+                                        active={formData.profile.can_use_gallery} 
+                                        onChange={() => handlePermissionChange('can_use_gallery')} 
+                                    />
+                                    <PermissionToggle 
+                                        label="Administrar Usuarios" 
+                                        active={formData.profile.is_admin_manager} 
+                                        onChange={() => handlePermissionChange('is_admin_manager')} 
+                                    />
+                                </div>
+                            </div>
+
+                            <div className="modal-actions" style={{ marginTop: '30px', display: 'flex', gap: '10px' }}>
+                                <button type="button" className="btn-secondary" onClick={handleCloseModal} style={{ flex: 1 }}>CANCELAR</button>
+                                <button type="submit" className="btn-primary" style={{ flex: 1 }}>{editingUser ? 'GUARDAR CAMBIOS' : 'CREAR USUARIO'}</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            )}
+
+            <style>{`
+                .badge-perm {
+                    font-size: 0.7rem;
+                    background: #e9ecef;
+                    padding: 2px 8px;
+                    border-radius: 12px;
+                    font-weight: bold;
+                    color: #495057;
+                }
+                .badge-perm.primary { background: #339af0; color: white; }
+                .badge-perm.success { background: #51cf66; color: white; }
+                
+                .perm-toggle {
+                    display: flex;
+                    align-items: center;
+                    justify-content: space-between;
+                    background: #f8f9fa;
+                    padding: 10px 15px;
+                    border-radius: 8px;
+                    cursor: pointer;
+                    transition: all 0.2s;
+                }
+                .perm-toggle:hover { background: #f1f3f5; }
+                .perm-toggle.active { background: #fff5f5; border: 1px solid #ffc9c9; }
+                
+                .switch {
+                    position: relative;
+                    display: inline-block;
+                    width: 34px;
+                    height: 18px;
+                }
+                .switch input { opacity: 0; width: 0; height: 0; }
+                .slider {
+                    position: absolute;
+                    cursor: pointer;
+                    top: 0; left: 0; right: 0; bottom: 0;
+                    background-color: #ccc;
+                    transition: .4s;
+                    border-radius: 18px;
+                }
+                .slider:before {
+                    position: absolute;
+                    content: "";
+                    height: 14px; width: 14px;
+                    left: 2px; bottom: 2px;
+                    background-color: white;
+                    transition: .4s;
+                    border-radius: 50%;
+                }
+                input:checked + .slider { background-color: #f03e3e; }
+                input:checked + .slider:before { transform: translateX(16px); }
+            `}</style>
+        </div>
+    );
+};
+
+const PermissionToggle = ({ label, active, onChange }) => (
+    <div className={`perm-toggle ${active ? 'active' : ''}`} onClick={onChange}>
+        <span style={{ fontSize: '0.85rem' }}>{label}</span>
+        <label className="switch">
+            <input type="checkbox" checked={active} readOnly />
+            <span className="slider"></span>
+        </label>
+    </div>
+);
+
+export default Users;

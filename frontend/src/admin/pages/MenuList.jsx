@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { Search } from 'lucide-react';
 import { fetchMenuEntries, createMenuEntry, deleteMenuEntry, updateMenuEntry, fetchProducts } from '../../services/api';
 import Toast from '../components/Toast';
 
@@ -12,6 +13,7 @@ function MenuList() {
     const [selectedProductId, setSelectedProductId] = useState('');
     const [price, setPrice] = useState('');
     const [category, setCategory] = useState('Burgers');
+    const [searchTerm, setSearchTerm] = useState('');
 
     const [editingId, setEditingId] = useState(null);
     const [editPrice, setEditPrice] = useState('');
@@ -118,7 +120,20 @@ function MenuList() {
             )}
 
             <h2>Gestión de la Carta Pública</h2>
-            <p style={{ color: '#666', fontSize: '0.9rem', marginBottom: '20px' }}>Elíge productos del catálogo y dales un precio de venta al público para hacerlos visibles en tu menú online.</p>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '20px', marginBottom: '20px' }}>
+                <p style={{ color: '#666', fontSize: '0.9rem', margin: 0 }}>Elíge productos del catálogo y dales un precio de venta al público para hacerlos visibles en tu menú online.</p>
+                
+                <div className="search-bar" style={{ position: 'relative', width: '300px' }}>
+                    <Search size={18} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: '#888' }} />
+                    <input 
+                        type="text" 
+                        placeholder="Buscar en la carta..." 
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                        style={{ padding: '10px 15px 10px 40px', borderRadius: '10px', border: '1px solid #ddd', fontSize: '0.9rem', width: '100%' }}
+                    />
+                </div>
+            </div>
 
             <form onSubmit={handleCreate} style={{ 
                 display: 'flex', 
@@ -203,7 +218,10 @@ function MenuList() {
                         gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))',
                         gap: '20px'
                     }}>
-                        {entries.map(entry => (
+                        {entries.filter(entry => 
+                            (entry.product?.name || "").toLowerCase().includes(searchTerm.toLowerCase()) ||
+                            (entry.category || "").toLowerCase().includes(searchTerm.toLowerCase())
+                        ).map(entry => (
                             <div
                                 key={entry.id}
                                 onMouseEnter={() => setHoveredId(entry.id)}

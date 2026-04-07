@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { fetchProducts, createProduct, deleteProduct, updateProduct } from '../../services/api';
+import { Search } from 'lucide-react';
 import Toast from '../components/Toast';
 import ConfirmModal from '../components/ConfirmModal';
 
@@ -13,6 +14,7 @@ function Products() {
     const [description, setDescription] = useState('');
     const [ingredients, setIngredients] = useState('');
     const [image, setImage] = useState(null);
+    const [searchTerm, setSearchTerm] = useState('');
 
     const [editingId, setEditingId] = useState(null);
     const [editData, setEditData] = useState({ name: '', description: '', ingredients: '', image: null, removeImage: false });
@@ -119,7 +121,20 @@ function Products() {
         <div className="admin-card">
             {toast && <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />}
             <h2>Gestión de Productos (Catálogo Base)</h2>
-            <p style={{ color: '#666', fontSize: '0.9rem', marginBottom: '20px' }}>Aquí das de alta los productos básicos del sistema con su foto. Luego podrás añadirlos a "La Carta" para darles precio de venta.</p>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '20px', marginBottom: '20px' }}>
+                <p style={{ color: '#666', fontSize: '0.9rem', margin: 0 }}>Aquí das de alta los productos básicos del sistema con su foto. Luego podrás añadirlos a "La Carta" para darles precio de venta.</p>
+                
+                <div className="search-bar" style={{ position: 'relative', width: '300px' }}>
+                    <Search size={18} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: '#888' }} />
+                    <input 
+                        type="text" 
+                        placeholder="Buscar producto..." 
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                        style={{ padding: '10px 15px 10px 40px', borderRadius: '10px', border: '1px solid #ddd', fontSize: '0.9rem', width: '100%' }}
+                    />
+                </div>
+            </div>
 
             <form onSubmit={handleCreate} style={{ 
                 display: 'grid', 
@@ -213,7 +228,11 @@ function Products() {
                         gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', 
                         gap: '20px' 
                     }}>
-                        {products.map(prod => (
+                        {products.filter(p => 
+                            p.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
+                            (p.description && p.description.toLowerCase().includes(searchTerm.toLowerCase())) ||
+                            (p.ingredients && p.ingredients.toLowerCase().includes(searchTerm.toLowerCase()))
+                        ).map(prod => (
                             <div key={prod.id} style={{ 
                                 background: '#fff', 
                                 border: '1px solid #ebebeb', 

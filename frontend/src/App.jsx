@@ -24,6 +24,7 @@ const Gallery = lazy(() => import('./admin/pages/Gallery'));
 const Login = lazy(() => import('./admin/pages/Login'));
 const ResetPassword = lazy(() => import('./admin/pages/ResetPassword'));
 const Profile = lazy(() => import('./admin/pages/Profile'));
+const Users = lazy(() => import('./admin/pages/Users'));
 
 const ProtectedRoute = () => {
   if (!isAuthenticated()) {
@@ -59,6 +60,7 @@ function App() {
               <Route path="galeria" element={<Gallery />} />
               <Route path="historial" element={<HistoryLog />} />
               <Route path="config" element={<Settings />} />
+              <Route path="usuarios" element={<Users />} />
               <Route path="perfil" element={<Profile />} />
             </Route>
           </Route>

@@ -225,6 +225,16 @@ from django.contrib.auth.models import User
 class UserProfile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='profile')
     avatar = models.FileField(upload_to='avatars/', null=True, blank=True)
+    
+    # Permissions
+    can_use_tpv = models.BooleanField(default=False)
+    can_use_accounting = models.BooleanField(default=False)
+    can_use_menu = models.BooleanField(default=False)
+    can_use_inventory = models.BooleanField(default=False)
+    can_use_promos = models.BooleanField(default=False)
+    can_use_gallery = models.BooleanField(default=False)
+    can_use_settings = models.BooleanField(default=False)
+    is_admin_manager = models.BooleanField(default=False)
 
     def save(self, *args, **kwargs):
         if self.avatar:

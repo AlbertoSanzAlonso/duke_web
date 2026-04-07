@@ -10,12 +10,24 @@ const API_URL = base_api_url;
 const getHeaders = (contentType = null) => {
     const headers = {};
     if (contentType) headers['Content-Type'] = contentType;
-    const token = localStorage.getItem('duke_admin_token');
+    const token = sessionStorage.getItem('duke_admin_token');
     if (token) headers['Authorization'] = `Token ${token}`;
     return headers;
 };
 
+const handleUnauthorized = () => {
+    sessionStorage.removeItem('duke_admin_token');
+    localStorage.removeItem('duke_admin_token');
+    if (!window.location.pathname.includes('/login')) {
+      window.location.href = '/login';
+    }
+};
+
 const handleResponseError = async (response) => {
+    if (response.status === 401) {
+        handleUnauthorized();
+        throw new Error('Sesión expirada. Por favor, inicia sesión de nuevo.');
+    }
     const errorData = await response.json().catch(() => ({}));
     let message = errorData.detail || 'Error en la operación';
     
@@ -38,24 +50,62 @@ export const login = async (username, password) => {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ username, password })
     });
-    if (!response.ok) throw new Error('Credenciales inválidas');
+    if (!response.ok) return handleResponseError(response); // was: throw new Error('Credenciales inválidas');
     const data = await response.json();
     localStorage.setItem('duke_admin_token', data.token);
+    sessionStorage.setItem('duke_admin_token', data.token); // Store in both to be safe, but session is primary
     return data;
 };
 
 export const logout = () => {
     localStorage.removeItem('duke_admin_token');
+    sessionStorage.removeItem('duke_admin_token');
 };
 
 export const isAuthenticated = () => {
-    return !!localStorage.getItem('duke_admin_token');
+    return !!sessionStorage.getItem('duke_admin_token');
+};
+
+// USERS
+export const fetchUsers = async () => {
+    const response = await fetch(`${API_URL}/users/`, { headers: getHeaders() });
+    if (!response.ok) return handleResponseError(response);
+    return await response.json();
+};
+
+export const createUser = async (userData) => {
+    const response = await fetch(`${API_URL}/users/`, {
+        method: 'POST',
+        headers: getHeaders('application/json'),
+        body: JSON.stringify(userData)
+    });
+    if (!response.ok) return handleResponseError(response);
+    return await response.json();
+};
+
+export const updateUser = async (id, userData) => {
+    const response = await fetch(`${API_URL}/users/${id}/`, {
+        method: 'PATCH',
+        headers: getHeaders('application/json'),
+        body: JSON.stringify(userData)
+    });
+    if (!response.ok) return handleResponseError(response);
+    return await response.json();
+};
+
+export const deleteUser = async (id) => {
+    const response = await fetch(`${API_URL}/users/${id}/`, {
+        method: 'DELETE',
+        headers: getHeaders()
+    });
+    if (!response.ok) return handleResponseError(response);
+    return true;
 };
 
 // PRODUCTS
 export const fetchProducts = async () => {
     const response = await fetch(`${API_URL}/products/`, { headers: getHeaders() });
-    if (!response.ok) throw new Error('Error al cargar los productos');
+    if (!response.ok) return handleResponseError(response); // was: throw new Error('Error al cargar los productos');
     return await response.json();
 };
 
@@ -75,7 +125,7 @@ export const deleteProduct = async (id) => {
         method: 'DELETE',
         headers: getHeaders()
     });
-    if (!response.ok) throw new Error('Error al eliminar el producto');
+    if (!response.ok) return handleResponseError(response); // was: throw new Error('Error al eliminar el producto');
     return true;
 };
 
@@ -93,7 +143,7 @@ export const updateProduct = async (id, productData) => {
 // CARTA (MENU ENTRIES)
 export const fetchMenuEntries = async () => {
     const response = await fetch(`${API_URL}/menu-entries/`, { headers: getHeaders() });
-    if (!response.ok) throw new Error('Error al cargar elementos de la carta');
+    if (!response.ok) return handleResponseError(response); // was: throw new Error('Error al cargar elementos de la carta');
     return await response.json();
 };
 
@@ -103,7 +153,7 @@ export const createMenuEntry = async (data) => {
         headers: getHeaders('application/json'),
         body: JSON.stringify(data)
     });
-    if (!response.ok) throw new Error('Error al añadir producto a la carta');
+    if (!response.ok) return handleResponseError(response); // was: throw new Error('Error al añadir producto a la carta');
     return await response.json();
 };
 
@@ -112,7 +162,7 @@ export const deleteMenuEntry = async (id) => {
         method: 'DELETE',
         headers: getHeaders()
     });
-    if (!response.ok) throw new Error('Error al retirarlo de la carta');
+    if (!response.ok) return handleResponseError(response); // was: throw new Error('Error al retirarlo de la carta');
     return true;
 };
 
@@ -122,14 +172,14 @@ export const updateMenuEntry = async (id, data) => {
         headers: getHeaders('application/json'),
         body: JSON.stringify(data)
     });
-    if (!response.ok) throw new Error('Error al modificar precio de la carta');
+    if (!response.ok) return handleResponseError(response); // was: throw new Error('Error al modificar precio de la carta');
     return await response.json();
 };
 
 // INVENTORY
 export const fetchInventory = async () => {
     const response = await fetch(`${API_URL}/inventory/`, { headers: getHeaders() });
-    if (!response.ok) throw new Error('Error al cargar inventario');
+    if (!response.ok) return handleResponseError(response); // was: throw new Error('Error al cargar inventario');
     return await response.json();
 };
 
@@ -139,7 +189,7 @@ export const createInventoryItem = async (data) => {
         headers: getHeaders('application/json'),
         body: JSON.stringify(data)
     });
-    if (!response.ok) throw new Error('Error al crear elemento de inventario');
+    if (!response.ok) return handleResponseError(response); // was: throw new Error('Error al crear elemento de inventario');
     return await response.json();
 };
 
@@ -148,7 +198,7 @@ export const deleteInventoryItem = async (id) => {
         method: 'DELETE',
         headers: getHeaders()
     });
-    if (!response.ok) throw new Error('Error al eliminar elemento');
+    if (!response.ok) return handleResponseError(response); // was: throw new Error('Error al eliminar elemento');
     return true;
 };
 
@@ -158,7 +208,7 @@ export const updateInventoryItem = async (id, data) => {
         headers: getHeaders('application/json'),
         body: JSON.stringify(data)
     });
-    if (!response.ok) throw new Error('Error al actualizar inventario');
+    if (!response.ok) return handleResponseError(response); // was: throw new Error('Error al actualizar inventario');
     return await response.json();
 };
 
@@ -169,13 +219,13 @@ export const createSale = async (data) => {
         headers: getHeaders('application/json'),
         body: JSON.stringify(data)
     });
-    if (!response.ok) throw new Error('Error al registrar la venta');
+    if (!response.ok) return handleResponseError(response); // was: throw new Error('Error al registrar la venta');
     return await response.json();
 };
 
 export const fetchSales = async () => {
     const response = await fetch(`${API_URL}/sales/`, { headers: getHeaders() });
-    if (!response.ok) throw new Error('Error al obtener ventas');
+    if (!response.ok) return handleResponseError(response); // was: throw new Error('Error al obtener ventas');
     return await response.json();
 };
 
@@ -185,7 +235,7 @@ export const bulkActionSales = async (ids, action) => {
         headers: getHeaders('application/json'),
         body: JSON.stringify({ ids, action })
     });
-    if (!response.ok) throw new Error('Error al procesar acción masiva');
+    if (!response.ok) return handleResponseError(response); // was: throw new Error('Error al procesar acción masiva');
     return await response.json();
 };
 
@@ -195,7 +245,7 @@ export const updateSale = async (id, data) => {
         headers: getHeaders('application/json'),
         body: JSON.stringify(data)
     });
-    if (!response.ok) throw new Error('Error al actualizar venta');
+    if (!response.ok) return handleResponseError(response); // was: throw new Error('Error al actualizar venta');
     return await response.json();
 };
 
@@ -204,14 +254,14 @@ export const deleteSale = async (id) => {
         method: 'DELETE',
         headers: getHeaders()
     });
-    if (!response.ok) throw new Error('Error al eliminar la venta');
+    if (!response.ok) return handleResponseError(response); // was: throw new Error('Error al eliminar la venta');
     return true;
 };
 
 // EXPENSES & ACCOUNTING
 export const fetchExpenses = async () => {
     const response = await fetch(`${API_URL}/expenses/`, { headers: getHeaders() });
-    if (!response.ok) throw new Error('Error al cargar gastos');
+    if (!response.ok) return handleResponseError(response); // was: throw new Error('Error al cargar gastos');
     return await response.json();
 };
 
@@ -221,7 +271,7 @@ export const createExpense = async (data) => {
         headers: getHeaders('application/json'),
         body: JSON.stringify(data)
     });
-    if (!response.ok) throw new Error('Error al registrar gasto');
+    if (!response.ok) return handleResponseError(response); // was: throw new Error('Error al registrar gasto');
     return await response.json();
 };
 
@@ -230,7 +280,7 @@ export const deleteExpense = async (id) => {
         method: 'DELETE',
         headers: getHeaders()
     });
-    if (!response.ok) throw new Error('Error al eliminar gasto');
+    if (!response.ok) return handleResponseError(response); // was: throw new Error('Error al eliminar gasto');
     return true;
 };
 
@@ -240,13 +290,13 @@ export const updateExpense = async (id, data) => {
         headers: getHeaders('application/json'),
         body: JSON.stringify(data)
     });
-    if (!response.ok) throw new Error('Error al actualizar gasto');
+    if (!response.ok) return handleResponseError(response); // was: throw new Error('Error al actualizar gasto');
     return await response.json();
 };
 
 export const fetchSupplierOrders = async () => {
     const response = await fetch(`${API_URL}/supplier-orders/`, { headers: getHeaders() });
-    if (!response.ok) throw new Error('Error al cargar pedidos de proveedores');
+    if (!response.ok) return handleResponseError(response); // was: throw new Error('Error al cargar pedidos de proveedores');
     return await response.json();
 };
 
@@ -256,7 +306,7 @@ export const createSupplierOrder = async (data) => {
         headers: getHeaders('application/json'),
         body: JSON.stringify(data)
     });
-    if (!response.ok) throw new Error('Error al registrar pedido a proveedor');
+    if (!response.ok) return handleResponseError(response); // was: throw new Error('Error al registrar pedido a proveedor');
     return await response.json();
 };
 
@@ -266,7 +316,7 @@ export const updateSupplierOrder = async (id, data) => {
         headers: getHeaders('application/json'),
         body: JSON.stringify(data)
     });
-    if (!response.ok) throw new Error('Error al actualizar pedido');
+    if (!response.ok) return handleResponseError(response); // was: throw new Error('Error al actualizar pedido');
     return await response.json();
 };
 
@@ -275,14 +325,14 @@ export const deleteSupplierOrder = async (id) => {
         method: 'DELETE',
         headers: getHeaders()
     });
-    if (!response.ok) throw new Error('Error al eliminar pedido');
+    if (!response.ok) return handleResponseError(response); // was: throw new Error('Error al eliminar pedido');
     return true;
 };
 
 // SETTINGS
 export const fetchSettings = async () => {
     const response = await fetch(`${API_URL}/settings/`, { headers: getHeaders() });
-    if (!response.ok) throw new Error('Error al cargar configuraciones');
+    if (!response.ok) return handleResponseError(response); // was: throw new Error('Error al cargar configuraciones');
     return await response.json();
 };
 
@@ -292,13 +342,13 @@ export const updateSetting = async (key, value) => {
         headers: getHeaders('application/json'),
         body: JSON.stringify({ value })
     });
-    if (!response.ok) throw new Error('Error al actualizar configuración');
+    if (!response.ok) return handleResponseError(response); // was: throw new Error('Error al actualizar configuración');
     return await response.json();
 };
 
 export const fetchOpeningHours = async () => {
     const response = await fetch(`${API_URL}/opening-hours/`, { headers: getHeaders() });
-    if (!response.ok) throw new Error('Error al cargar horarios');
+    if (!response.ok) return handleResponseError(response); // was: throw new Error('Error al cargar horarios');
     return await response.json();
 };
 
@@ -308,13 +358,13 @@ export const updateOpeningHour = async (id, data) => {
         headers: getHeaders('application/json'),
         body: JSON.stringify(data)
     });
-    if (!response.ok) throw new Error('Error al actualizar horario');
+    if (!response.ok) return handleResponseError(response); // was: throw new Error('Error al actualizar horario');
     return await response.json();
 };
 
 export const fetchDeliveryRates = async () => {
     const response = await fetch(`${API_URL}/delivery-rates/`, { headers: getHeaders() });
-    if (!response.ok) throw new Error('Error al cargar tarifas de envío');
+    if (!response.ok) return handleResponseError(response); // was: throw new Error('Error al cargar tarifas de envío');
     return await response.json();
 };
 
@@ -324,7 +374,7 @@ export const updateDeliveryRates = async (data) => {
         headers: getHeaders('application/json'),
         body: JSON.stringify(data)
     });
-    if (!response.ok) throw new Error('Error al actualizar tarifas de envío');
+    if (!response.ok) return handleResponseError(response); // was: throw new Error('Error al actualizar tarifas de envío');
     return await response.json();
 };
 
@@ -333,14 +383,14 @@ export const setupDefaultSettings = async () => {
         method: 'POST',
         headers: getHeaders()
     });
-    if (!response.ok) throw new Error('Error al inicializar configuraciones');
+    if (!response.ok) return handleResponseError(response); // was: throw new Error('Error al inicializar configuraciones');
     return await response.json();
 };
 
 // GALLERY
 export const fetchGalleryImages = async () => {
     const response = await fetch(`${API_URL}/gallery/`, { headers: getHeaders() });
-    if (!response.ok) throw new Error('Error al cargar la galería');
+    if (!response.ok) return handleResponseError(response); // was: throw new Error('Error al cargar la galería');
     return await response.json();
 };
 
@@ -358,7 +408,7 @@ export const fetchMe = async () => {
     const response = await fetch(`${API_URL}/me/`, {
         headers: getHeaders()
     });
-    if (!response.ok) throw new Error('Error al obtener perfil');
+    if (!response.ok) return handleResponseError(response); // was: throw new Error('Error al obtener perfil');
     return await response.json();
 };
 
@@ -394,7 +444,7 @@ export const resetPasswordConfirm = async (uid, token, newPassword) => {
             body: JSON.stringify({ uid, token, new_password: newPassword })
         });
         const data = await response.json();
-        if (!response.ok) throw new Error(data.error || "Error al cambiar contraseña");
+        if (!response.ok) return handleResponseError(response); // was: throw new Error(data.error || "Error al cambiar contraseña");
         return data;
     } catch (e) {
         throw e;
@@ -406,7 +456,7 @@ export const deleteGalleryImage = async (id) => {
         method: 'DELETE',
         headers: getHeaders()
     });
-    if (!response.ok) throw new Error('Error al eliminar imagen');
+    if (!response.ok) return handleResponseError(response); // was: throw new Error('Error al eliminar imagen');
     return true;
 };
 

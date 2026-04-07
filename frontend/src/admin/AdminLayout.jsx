@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Outlet, NavLink, Link, useNavigate } from 'react-router-dom';
-import { logout } from '../services/api';
+import { logout, fetchMe } from '../services/api';
 import Toast from './components/Toast';
 import {
   LayoutDashboard,
@@ -16,6 +16,7 @@ import {
   Star,
   Image as ImageIcon,
   Settings as SettingsIcon,
+  Users as UsersIcon,
   LogOut
 } from 'lucide-react';
 import './Admin.css';
@@ -25,10 +26,19 @@ import UserDropdown from './components/UserDropdown';
 const AdminLayout = () => {
   const [isMobileOpen, setIsMobileOpen] = useState(false);
   const [notification, setNotification] = useState(null);
+  const [profile, setProfile] = useState(null);
   const esRef = useRef(null);
   const navigate = useNavigate();
 
   useEffect(() => {
+    const loadProfile = async () => {
+      try {
+        const data = await fetchMe();
+        setProfile(data);
+      } catch (e) { console.error("Profile load error", e); }
+    };
+    loadProfile();
+
     const connectSSE = () => {
       const apiUrl = import.meta.env.VITE_API_URL?.replace(/\/$/, '') || 'https://api.dukeburger-sj.com';
       const es = new EventSource(`${apiUrl}/api/orders-stream/`);
@@ -58,19 +68,27 @@ const AdminLayout = () => {
     return () => { if (esRef.current) esRef.current.close(); };
   }, []);
 
-  const menuItems = [
-    { name: 'Dashboard', path: '/admin', icon: <LayoutDashboard size={20} /> },
-    { name: 'Configuración', path: '/admin/config', icon: <SettingsIcon size={20} /> },
-    { name: 'TPV', path: '/admin/tpv', icon: <ShoppingCart size={20} /> },
-    { name: 'Pedidos Clientes', path: '/admin/pedidos-clientes', icon: <TrendingUp size={20} /> },
-    { name: 'Productos', path: '/admin/productos', icon: <Package size={20} /> },
-    { name: 'Carta', path: '/admin/carta', icon: <UtensilsCrossed size={20} /> },
-    { name: 'Promos', path: '/admin/promos', icon: <Star size={20} fill="#fcc419" color="#fcc419" /> },
-    { name: 'Inventario', path: '/admin/inventario', icon: <Boxes size={20} /> },
-    { name: 'Pedidos Proveedor', path: '/admin/pedidos', icon: <Truck size={20} /> },
-    { name: 'Contabilidad', path: '/admin/contabilidad', icon: <TrendingUp size={20} /> },
-    { name: 'Historial', path: '/admin/historial', icon: <History size={20} /> },
+  const allMenuItems = [
+    { name: 'Dashboard', path: '/admin', icon: <LayoutDashboard size={20} />, public: true },
+    { name: 'TPV', path: '/admin/tpv', icon: <ShoppingCart size={20} />, perm: 'can_use_tpv' },
+    { name: 'Pedidos Clientes', path: '/admin/pedidos-clientes', icon: <TrendingUp size={20} />, perm: 'can_use_tpv' },
+    { name: 'Productos', path: '/admin/productos', icon: <Package size={20} />, perm: 'can_use_menu' },
+    { name: 'Carta', path: '/admin/carta', icon: <UtensilsCrossed size={20} />, perm: 'can_use_menu' },
+    { name: 'Promos', path: '/admin/promos', icon: <Star size={20} fill="#fcc419" color="#fcc419" />, perm: 'can_use_promos' },
+    { name: 'Inventario', path: '/admin/inventario', icon: <Boxes size={20} />, perm: 'can_use_inventory' },
+    { name: 'Pedidos Proveedor', path: '/admin/pedidos', icon: <Truck size={20} />, perm: 'can_use_inventory' },
+    { name: 'Contabilidad', path: '/admin/contabilidad', icon: <TrendingUp size={20} />, perm: 'can_use_accounting' },
+    { name: 'Galería', path: '/admin/galeria', icon: <ImageIcon size={20} />, perm: 'can_use_gallery' },
+    { name: 'Historial', path: '/admin/historial', icon: <History size={20} />, perm: 'can_use_accounting' },
+    { name: 'Configuración', path: '/admin/config', icon: <SettingsIcon size={20} />, perm: 'can_use_settings' },
+    { name: 'Usuarios', path: '/admin/usuarios', icon: <UsersIcon size={20} />, perm: 'is_admin_manager' },
   ];
+
+  const menuItems = allMenuItems.filter(item => {
+    if (item.public || !profile) return true;
+    if (profile.is_superuser) return true;
+    return profile.profile?.[item.perm];
+  });
 
   return (
     <div className="admin-container">

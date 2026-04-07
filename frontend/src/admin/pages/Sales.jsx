@@ -19,6 +19,7 @@ const Sales = () => {
     const [saleNotes, setSaleNotes] = useState('');
     const [deliveryCost, setDeliveryCost] = useState(0);
     const [isDelivery, setIsDelivery] = useState(false);
+    const [searchTerm, setSearchTerm] = useState('');
     const [currentSaleId, setCurrentSaleId] = useState(null); // To track if we're editing a pending sale
 
     // List of pending tickets
@@ -160,9 +161,13 @@ const Sales = () => {
         setIsTicketOpen(true);
     };
 
-    const filteredMenu = selectedCategory === "Todas" 
-        ? menuEntries 
-        : menuEntries.filter(e => e.category === selectedCategory);
+    const filteredMenu = menuEntries.filter(e => {
+        const matchesCategory = selectedCategory === "Todas" || e.category === selectedCategory;
+        const matchesSearch = !searchTerm || 
+            (e.product?.name || "").toLowerCase().includes(searchTerm.toLowerCase()) ||
+            (e.category || "").toLowerCase().includes(searchTerm.toLowerCase());
+        return matchesCategory && matchesSearch;
+    });
 
     const handleDeleteTicket = async (id) => {
         setIsSaving(true);
@@ -243,7 +248,7 @@ const Sales = () => {
                     <div className="pos-main">
                         <div className="pos-left-content">
                             <div className="pos-header">
-                                <div className="category-tabs">
+                                <div className="category-tabs" style={{ flex: 1 }}>
                                     {categories.map(cat => (
                                         <button 
                                             key={cat} 
@@ -253,6 +258,16 @@ const Sales = () => {
                                             {cat}
                                         </button>
                                     ))}
+                                </div>
+                                <div className="search-bar" style={{ position: 'relative', width: '250px', marginLeft: '15px' }}>
+                                    <Search size={18} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: '#888' }} />
+                                    <input 
+                                        type="text" 
+                                        placeholder="Buscar..." 
+                                        value={searchTerm}
+                                        onChange={(e) => setSearchTerm(e.target.value)}
+                                        style={{ padding: '10px 15px 10px 40px', borderRadius: '10px', border: '1px solid #ddd', fontSize: '0.9rem', width: '100%', background: '#fff' }}
+                                    />
                                 </div>
                             </div>
 
