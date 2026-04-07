@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { fetchMenuEntries, createMenuEntry, deleteMenuEntry, createProduct, updateProduct, updateMenuEntry } from '../../services/api';
+import { fetchMenuEntries, createMenuEntry, deleteMenuEntry, createProduct, updateProduct, updateMenuEntry, fetchProducts } from '../../services/api';
 import Toast from '../components/Toast';
 import { Star, Upload, Trash2, Edit2, Eye, EyeOff } from 'lucide-react';
 
@@ -22,6 +22,9 @@ function Promos() {
     const [isEditing, setIsEditing] = useState(false);
     const [editingId, setEditingId] = useState(null);
     const [editingProductId, setEditingProductId] = useState(null);
+    const [allProducts, setAllProducts] = useState([]);
+    const [useExistingProduct, setUseExistingProduct] = useState(false);
+    const [selectedProductId, setSelectedProductId] = useState('');
 
     const fileInputRef = useRef(null);
     const category = 'Promos';
@@ -33,9 +36,13 @@ function Promos() {
     const loadData = async () => {
         try {
             setLoading(true);
-            const menuData = await fetchMenuEntries();
+            const [menuData, productsData] = await Promise.all([
+                fetchMenuEntries(),
+                fetchProducts()
+            ]);
             const promoEntries = menuData.filter(e => e.category === 'Promos');
             setEntries(promoEntries);
+            setAllProducts(productsData);
         } catch (err) {
             setError(err.message);
         } finally {
@@ -63,6 +70,8 @@ function Promos() {
         setIsEditing(false);
         setEditingId(null);
         setEditingProductId(null);
+        setUseExistingProduct(false);
+        setSelectedProductId('');
         if (fileInputRef.current) fileInputRef.current.value = '';
     };
 
@@ -76,6 +85,7 @@ function Promos() {
         setIsEditing(true);
         setEditingId(entry.id);
         setEditingProductId(entry.product.id);
+        setUseExistingProduct(false); // When editing, we edit the specific product of the entry
         window.scrollTo({ top: 0, behavior: 'smooth' });
     };
 
@@ -107,16 +117,21 @@ function Promos() {
                 setToast({ message: "¡Promoción actualizada!", type: 'success' });
             } else {
                 // CREATE
-                const formData = new FormData();
-                formData.append('name', name);
-                formData.append('description', description);
-                if (image) {
-                    formData.append('image', image);
+                let productId = selectedProductId;
+
+                if (!useExistingProduct) {
+                    const formData = new FormData();
+                    formData.append('name', name);
+                    formData.append('description', description);
+                    if (image) {
+                        formData.append('image', image);
+                    }
+                    const newProduct = await createProduct(formData);
+                    productId = newProduct.id;
                 }
                 
-                const newProduct = await createProduct(formData);
                 await createMenuEntry({
-                    product_id: newProduct.id,
+                    product_id: productId,
                     price: parseFloat(price),
                     category,
                     is_available: true
@@ -181,17 +196,60 @@ function Promos() {
             }}>
                 <div className="promo-form-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
-                        <div>
-                            <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 'bold', marginBottom: '8px', color: '#444' }}>NOMBRE DE LA PROMO *</label>
-                            <input 
-                                type="text" 
-                                placeholder="Ej: Combo Familiar Duke" 
-                                value={name} 
-                                onChange={e => setName(e.target.value)}
-                                required
-                                style={{ width: '100%', padding: '12px', borderRadius: '8px', border: '1px solid #ddd', fontSize: '1rem' }}
-                            />
-                        </div>
+                        {!isEditing && (
+                            <div style={{ marginBottom: '15px' }}>
+                                <label style={{ display: 'flex', alignItems: 'center', gap: '10px', fontSize: '0.9rem', cursor: 'pointer', background: '#f8f9fa', padding: '12px', borderRadius: '8px', border: '1px solid #eee' }}>
+                                    <input 
+                                        type="checkbox" 
+                                        checked={useExistingProduct} 
+                                        onChange={e => setUseExistingProduct(e.target.checked)} 
+                                        style={{ width: '18px', height: '18px' }}
+                                    />
+                                    <span style={{ fontWeight: 'bold', color: '#555' }}>ELEGIR PRODUCTO EXISTENTE</span>
+                                </label>
+                            </div>
+                        )}
+
+                        {useExistingProduct && !isEditing ? (
+                            <div>
+                                <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 'bold', marginBottom: '8px', color: '#444' }}>SELECCIONAR PRODUCTO *</label>
+                                <select 
+                                    value={selectedProductId}
+                                    onChange={e => {
+                                        const pId = e.target.value;
+                                        setSelectedProductId(pId);
+                                        const prod = allProducts.find(p => p.id === parseInt(pId));
+                                        if (prod) {
+                                            setName(prod.name);
+                                            setDescription(prod.description || '');
+                                            setImagePreview(prod.image || null);
+                                        } else {
+                                            setImagePreview(null);
+                                        }
+                                    }}
+                                    required
+                                    style={{ width: '100%', padding: '12px', borderRadius: '8px', border: '1px solid #ddd', fontSize: '1rem', background: '#fff' }}
+                                >
+                                    <option value="">-- Seleccionar --</option>
+                                    {allProducts.map(p => (
+                                        <option key={p.id} value={p.id}>{p.name}</option>
+                                    ))}
+                                </select>
+                            </div>
+                        ) : (
+                            <div>
+                                <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 'bold', marginBottom: '8px', color: '#444' }}>NOMBRE DE LA PROMO *</label>
+                                <input 
+                                    type="text" 
+                                    placeholder="Ej: Combo Familiar Duke" 
+                                    value={name} 
+                                    onChange={e => setName(e.target.value)}
+                                    required
+                                    style={{ width: '100%', padding: '12px', borderRadius: '8px', border: '1px solid #ddd', fontSize: '1rem' }}
+                                />
+                            </div>
+                        )}
+
                         <div>
                             <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 'bold', marginBottom: '8px', color: '#444' }}>DESCRIPCIÓN (¿Qué incluye?)</label>
                             <textarea 
@@ -199,6 +257,7 @@ function Promos() {
                                 value={description} 
                                 onChange={e => setDescription(e.target.value)}
                                 style={{ width: '100%', padding: '12px', borderRadius: '8px', border: '1px solid #ddd', fontSize: '0.95rem', minHeight: '80px', resize: 'none' }}
+                                disabled={useExistingProduct && !isEditing}
                             />
                         </div>
                         <div style={{ display: 'flex', gap: '15px' }}>
@@ -248,7 +307,10 @@ function Promos() {
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
                         <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 'bold', marginBottom: '8px', color: '#444' }}>FOTO DE LA PROMO</label>
                         <div 
-                            onClick={() => fileInputRef.current?.click()}
+                            onClick={() => {
+                                if (useExistingProduct && !isEditing) return;
+                                fileInputRef.current?.click();
+                            }}
                             style={{ 
                                 flex: 2,
                                 border: '2px dashed #ddd',
@@ -257,11 +319,12 @@ function Promos() {
                                 flexDirection: 'column',
                                 alignItems: 'center',
                                 justifyContent: 'center',
-                                cursor: 'pointer',
+                                cursor: (useExistingProduct && !isEditing) ? 'default' : 'pointer',
                                 overflow: 'hidden',
-                                background: '#fcfcfc',
+                                background: (useExistingProduct && !isEditing) ? '#f0f0f0' : '#fcfcfc',
                                 transition: 'all 0.2s',
-                                minHeight: '180px'
+                                minHeight: '180px',
+                                opacity: (useExistingProduct && !isEditing) ? 0.7 : 1
                             }}
                         >
                             {imagePreview && !removeImage ? (
@@ -269,7 +332,9 @@ function Promos() {
                             ) : (
                                 <>
                                     <Upload size={40} color="#999" />
-                                    <p style={{ color: '#999', marginTop: '10px', fontSize: '0.9rem' }}>{isEditing ? 'Click para cambiar imagen' : 'Click para subir imagen'}</p>
+                                    <p style={{ color: '#999', marginTop: '10px', fontSize: '0.9rem' }}>
+                                        {useExistingProduct && !isEditing ? 'Usando imagen del producto' : (isEditing ? 'Click para cambiar imagen' : 'Click para subir imagen')}
+                                    </p>
                                 </>
                             )}
                             <input 
@@ -292,6 +357,11 @@ function Promos() {
                                 />
                                 Eliminar fotografía actual
                             </label>
+                        )}
+                        {!isEditing && useExistingProduct && (
+                            <p style={{ fontSize: '0.8rem', color: '#666', fontStyle: 'italic' }}>
+                                Nota: Al elegir un producto existente, se usará su nombre descriptivo e imagen.
+                            </p>
                         )}
                     </div>
                 </div>
