@@ -20,7 +20,9 @@ const Sales = () => {
     const [deliveryCost, setDeliveryCost] = useState(0);
     const [isDelivery, setIsDelivery] = useState(false);
     const [searchTerm, setSearchTerm] = useState('');
-    const [currentSaleId, setCurrentSaleId] = useState(null); // To track if we're editing a pending sale
+    const [currentSaleId, setCurrentSaleId] = useState(null);
+    const [discountType, setDiscountType] = useState('fixed'); // 'fixed' or 'percent'
+    const [discountValue, setDiscountValue] = useState(0);
 
     // List of pending tickets
     const [pendingTickets, setPendingTickets] = useState([]);
@@ -88,8 +90,18 @@ const Sales = () => {
         }));
     };
 
-    const totalProducts = cart.reduce((acc, item) => acc + (parseFloat(item.price) * item.quantity), 0);
-    const total = totalProducts + (isDelivery ? parseFloat(deliveryCost || 0) : 0);
+    const updatePrice = (id, newPrice) => {
+        setCart(prevCart => prevCart.map(item => 
+            item.menu_entry === id ? { ...item, price: parseFloat(newPrice) || 0 } : item
+        ));
+    };
+
+    const subtotal = cart.reduce((acc, item) => acc + (parseFloat(item.price) * item.quantity), 0);
+    const calculatedDiscount = discountType === 'percent' 
+        ? (subtotal * (parseFloat(discountValue || 0) / 100))
+        : parseFloat(discountValue || 0);
+
+    const total = Math.max(0, subtotal - calculatedDiscount + (isDelivery ? parseFloat(deliveryCost || 0) : 0));
     const totalItems = cart.reduce((acc, item) => acc + item.quantity, 0);
 
     const [isTicketOpen, setIsTicketOpen] = useState(false);
@@ -103,6 +115,8 @@ const Sales = () => {
         setIsDelivery(false);
         setCurrentSaleId(null);
         setIsTicketOpen(false);
+        setDiscountValue(0);
+        setDiscountType('fixed');
     };
 
     const handleSaveTicket = async (status = 'COMPLETED') => {
@@ -353,11 +367,35 @@ const Sales = () => {
                                                 <span className="item-name">{item.name}</span>
                                                 <span className="item-subtotal">${(parseFloat(item.price) * item.quantity).toLocaleString('es-AR')}</span>
                                             </div>
-                                            <div className="item-controls">
-                                                <button onClick={() => updateQuantity(item.menu_entry, -1)}>−</button>
-                                                <span className="item-qty">{item.quantity}</span>
-                                                <button onClick={() => updateQuantity(item.menu_entry, 1)}>+</button>
-                                                <button className="delete-item-btn" onClick={() => removeFromCart(item.menu_entry)}>×</button>
+                                            <div className="item-controls" style={{ gap: '4px' }}>
+                                                <div style={{ display: 'flex', alignItems: 'center', background: '#f1f3f5', borderRadius: '4px', marginRight: '4px' }}>
+                                                    <button onClick={() => updateQuantity(item.menu_entry, -1)} style={{ background: 'transparent', border: 'none', padding: '2px 8px', fontSize: '1.2rem'}}>−</button>
+                                                    <span className="item-qty" style={{ fontWeight: '800', width: '20px', textAlign: 'center' }}>{item.quantity}</span>
+                                                    <button onClick={() => updateQuantity(item.menu_entry, 1)} style={{ background: 'transparent', border: 'none', padding: '2px 8px', fontSize: '1.2rem'}}>+</button>
+                                                </div>
+                                                
+                                                {/* Price Edit Control */}
+                                                <div style={{ display: 'flex', gap: '2px' }}>
+                                                    <button 
+                                                        className="price-edit-btn" 
+                                                        onClick={() => {
+                                                            const newP = prompt("Nuevo precio para " + item.name, item.price);
+                                                            if (newP !== null) updatePrice(item.menu_entry, newP);
+                                                        }}
+                                                        style={{ padding: '4px 6px', background: '#333', color: 'white', borderRadius: '4px', border: 'none', cursor: 'pointer', fontSize: '0.7rem'}}
+                                                        title="Editar Precio"
+                                                    >
+                                                        <Edit2 size={12} />
+                                                    </button>
+                                                    <button 
+                                                        onClick={() => updatePrice(item.menu_entry, 0)}
+                                                        style={{ padding: '4px 6px', background: '#fa5252', color: 'white', borderRadius: '4px', border: 'none', cursor: 'pointer', fontSize: '0.7rem', fontWeight: 'bold'}}
+                                                        title="Regalar artículo"
+                                                    >
+                                                        🎁
+                                                    </button>
+                                                    <button className="delete-item-btn" onClick={() => removeFromCart(item.menu_entry)} style={{ marginLeft: '4px'}}>×</button>
+                                                </div>
                                             </div>
                                         </div>
                                     ))
@@ -367,7 +405,34 @@ const Sales = () => {
                             <div className="ticket-footer">
                                 <div className="total-row">
                                     <span>SUBTOTAL:</span>
-                                    <span>${totalProducts.toLocaleString('es-AR')}</span>
+                                    <span>${subtotal.toLocaleString('es-AR')}</span>
+                                </div>
+
+                                <div className="discount-controls" style={{ background: '#f8f9fa', padding: '10px', borderRadius: '10px', margin: '10px 0' }}>
+                                    <label style={{ fontSize: '0.75rem', fontWeight: 'bold', display: 'block', marginBottom: '5px', color: '#666' }}>DESCUENTO GLOBAL</label>
+                                    <div style={{ display: 'flex', gap: '5px' }}>
+                                        <select 
+                                            value={discountType} 
+                                            onChange={e => setDiscountType(e.target.value)}
+                                            style={{ padding: '5px', borderRadius: '6px', border: '1px solid #ddd', fontSize: '0.8rem' }}
+                                        >
+                                            <option value="fixed">$ Fijo</option>
+                                            <option value="percent">% Porcentaje</option>
+                                        </select>
+                                        <input 
+                                            type="number" 
+                                            placeholder="Valor..."
+                                            value={discountValue || ''}
+                                            onChange={e => setDiscountValue(e.target.value)}
+                                            className="no-arrows-input"
+                                            style={{ flex: 1, padding: '5px', borderRadius: '6px', border: '1px solid #ddd', fontSize: '0.9rem', fontWeight: 'bold' }}
+                                        />
+                                    </div>
+                                    {calculatedDiscount > 0 && (
+                                        <div style={{ marginTop: '5px', textAlign: 'right', fontSize: '0.8rem', color: '#fa5252', fontWeight: 'bold' }}>
+                                            − ${calculatedDiscount.toLocaleString('es-AR')}
+                                        </div>
+                                    )}
                                 </div>
                                 {isDelivery && (
                                     <div className="total-row" style={{ color: '#f03e3e', fontSize: '0.9rem' }}>
