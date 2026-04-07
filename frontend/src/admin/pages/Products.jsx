@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { fetchProducts, createProduct, deleteProduct, updateProduct } from '../../services/api';
 import Toast from '../components/Toast';
+import ConfirmModal from '../components/ConfirmModal';
 
 function Products() {
     const [products, setProducts] = useState([]);
@@ -10,10 +11,15 @@ function Products() {
 
     const [name, setName] = useState('');
     const [description, setDescription] = useState('');
+    const [ingredients, setIngredients] = useState('');
     const [image, setImage] = useState(null);
 
     const [editingId, setEditingId] = useState(null);
-    const [editData, setEditData] = useState({ name: '', description: '', image: null, removeImage: false });
+    const [editData, setEditData] = useState({ name: '', description: '', ingredients: '', image: null, removeImage: false });
+    
+    // Confirmation context
+    const [isConfirmOpen, setIsConfirmOpen] = useState(false);
+    const [productToDelete, setProductToDelete] = useState(null);
 
     useEffect(() => {
         loadProducts();
@@ -39,6 +45,7 @@ function Products() {
             const formData = new FormData();
             formData.append('name', name);
             formData.append('description', description);
+            formData.append('ingredients', ingredients);
             if (image) {
                 formData.append('image', image);
             }
@@ -46,6 +53,7 @@ function Products() {
             await createProduct(formData);
             setName('');
             setDescription('');
+            setIngredients('');
             setImage(null);
             loadProducts();
             setToast({ message: "Producto creado con éxito", type: 'success' });
@@ -54,10 +62,17 @@ function Products() {
         }
     };
 
-    const handleDelete = async (id) => {
-        if (!window.confirm("¿Seguro que quieres eliminar este producto de la base de datos?")) return;
+    const handleDeleteTrigger = (id) => {
+        setProductToDelete(id);
+        setIsConfirmOpen(true);
+    };
+
+    const handleDelete = async () => {
+        if (!productToDelete) return;
         try {
-            await deleteProduct(id);
+            await deleteProduct(productToDelete);
+            setIsConfirmOpen(false);
+            setProductToDelete(null);
             loadProducts();
             setToast({ message: "Producto eliminado del catálogo", type: 'success' });
         } catch (err) {
@@ -70,6 +85,7 @@ function Products() {
         setEditData({ 
             name: prod.name, 
             description: prod.description || '', 
+            ingredients: prod.ingredients || '', 
             image: null,
             removeImage: false
         });
@@ -81,6 +97,7 @@ function Products() {
             const formData = new FormData();
             formData.append('name', editData.name);
             formData.append('description', editData.description);
+            formData.append('ingredients', editData.ingredients);
             
             if (editData.removeImage) {
                 // To clear a file in DRF via FormData, we usually send an empty string
@@ -134,6 +151,16 @@ function Products() {
                         placeholder="Ej: 200g carne, cheddar..." 
                         value={description} 
                         onChange={e => setDescription(e.target.value)} 
+                        style={{ padding: '12px', width: '100%', borderRadius: '10px', border: '1px solid #ddd', fontSize: '1rem' }}
+                    />
+                </div>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                    <label style={{ fontSize: '0.75rem', fontWeight: '800', color: '#888', textTransform: 'uppercase' }}>Ingredientes (Separados por coma)</label>
+                    <input 
+                        type="text" 
+                        placeholder="Ej: Lechuga, Tomate, Queso..." 
+                        value={ingredients} 
+                        onChange={e => setIngredients(e.target.value)} 
                         style={{ padding: '12px', width: '100%', borderRadius: '10px', border: '1px solid #ddd', fontSize: '1rem' }}
                     />
                 </div>
@@ -217,6 +244,10 @@ function Products() {
                                                 <label style={{ fontSize: '0.75rem', fontWeight: 'bold', color: '#666' }}>DESCRIPCIÓN</label>
                                                 <textarea value={editData.description} onChange={e => setEditData({...editData, description: e.target.value})} style={{ width: '100%', padding: '10px', border: '1px solid #ddd', borderRadius: '8px', resize: 'vertical', minHeight: '60px' }} />
                                             </div>
+                                            <div>
+                                                <label style={{ fontSize: '0.75rem', fontWeight: 'bold', color: '#666' }}>INGREDIENTES</label>
+                                                <textarea value={editData.ingredients} onChange={e => setEditData({...editData, ingredients: e.target.value})} style={{ width: '100%', padding: '10px', border: '1px solid #ddd', borderRadius: '8px', resize: 'vertical', minHeight: '60px' }} />
+                                            </div>
                                             
                                             <div style={{ background: '#f8f9fa', padding: '15px', borderRadius: '12px', border: '1px solid #eee' }}>
                                                 <label style={{ fontSize: '0.75rem', fontWeight: '800', color: '#888', display: 'block', marginBottom: '8px', textTransform: 'uppercase' }}>Cambiar Fotografía</label>
@@ -263,16 +294,18 @@ function Products() {
                                                     onClick={() => handleEditStart(prod)} 
                                                     style={{ 
                                                         flex: 1, padding: '10px 0', background: '#fff', border: '1px solid #ddd', color: '#333', 
-                                                        borderRadius: '8px', cursor: 'pointer', fontWeight: 'bold', transition: 'all 0.2s'
+                                                        borderRadius: '8px', cursor: 'pointer', fontWeight: 'bold', transition: 'all 0.2s',
+                                                        fontSize: '1.1rem'
                                                     }}
                                                 >
                                                     Editar
                                                 </button>
                                                 <button 
-                                                    onClick={() => handleDelete(prod.id)} 
+                                                    onClick={() => handleDeleteTrigger(prod.id)} 
                                                     style={{ 
                                                         padding: '10px 15px', background: '#fff', border: '1px solid #ff4d4d', color: '#ff4d4d', 
-                                                        borderRadius: '8px', cursor: 'pointer', fontWeight: 'bold', transition: 'all 0.2s'
+                                                        borderRadius: '8px', cursor: 'pointer', fontWeight: 'bold', transition: 'all 0.2s',
+                                                        fontSize: '1.1rem'
                                                     }}
                                                 >
                                                     Retirar
@@ -286,6 +319,15 @@ function Products() {
                     </div>
                 )}
             </div>
+            {isConfirmOpen && (
+                <ConfirmModal 
+                    isOpen={isConfirmOpen}
+                    title="ELIMINAR PRODUCTO"
+                    message="¿Estás seguro de que quieres eliminar este producto de la base de datos? Esta acción no se puede deshacer."
+                    onConfirm={handleDelete}
+                    onCancel={() => setIsConfirmOpen(false)}
+                />
+            )}
         </div>
     );
 }

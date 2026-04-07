@@ -944,6 +944,26 @@ img.nav-logo:hover,
   border-bottom: 1px solid #222;
 }
 
+.detail-ingredients {
+  margin-bottom: 1.5rem;
+  padding-bottom: 1.5rem;
+  border-bottom: 1px solid #222;
+}
+
+.detail-ingredients h3 {
+  font-family: var(--font-heading);
+  font-size: 1.1rem;
+  color: var(--color-primary);
+  margin-bottom: 0.5rem;
+  letter-spacing: 1px;
+}
+
+.detail-ingredients p {
+  color: #ccc;
+  font-size: 0.95rem;
+  line-height: 1.5;
+}
+
 .detail-footer {
   display: flex;
   align-items: center;

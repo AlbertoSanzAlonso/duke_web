@@ -149,6 +149,7 @@ function Home() {
           id: entry.id,
           name: entry.product.name,
           description: entry.product.description,
+          ingredients: entry.product.ingredients,
           price: entry.price,
           image: entry.product.image
         });
@@ -735,6 +736,13 @@ function Home() {
                 <span className="detail-cat">{activeCategory}</span>
               </div>
               <p className="detail-desc">{selectedProduct.description || ''}</p>
+              
+              {selectedProduct.ingredients && (
+                <div className="detail-ingredients">
+                  <h3>Ingredientes</h3>
+                  <p>{selectedProduct.ingredients}</p>
+                </div>
+              )}
               
               <div className="detail-footer">
                 <div className="detail-qty-control">
