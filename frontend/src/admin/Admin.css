@@ -200,7 +200,9 @@ body, .admin-container, .admin-main, .admin-content {
 .admin-content .load-btn,
 .admin-content .checkout-btn,
 .admin-content .main-button,
-.admin-content .pending-btn {
+.admin-content .pending-btn,
+.admin-content .print-full-btn,
+.admin-content .icon-btn {
     color: #ffffff !important;
 }
 

@@ -203,22 +203,22 @@ const Orders = () => {
                                 ))}
                             </div>
 
-                            <div className="details-total">
-                                <span>TOTAL</span>
-                                <strong>${parseFloat(selectedOrder.total_amount).toFixed(2)}</strong>
+                            <div className="details-total" style={{ borderTop: '2px solid #333', paddingTop: '10px' }}>
+                                <span style={{ fontWeight: '900', fontSize: '1rem' }}>TOTAL</span>
+                                <strong style={{ fontSize: '1.8rem', fontWeight: '900' }}>${Math.round(parseFloat(selectedOrder.total_amount)).toLocaleString('es-AR')}</strong>
                             </div>
 
-                            <div style={{ display: 'flex', gap: '10px', marginTop: '1rem' }}>
-                                <button className="print-full-btn" style={{ flex: 1 }} onClick={() => handlePrint(selectedOrder)}>
-                                    <Printer size={20} /> IMPRIMIR TICKET
+                            <div style={{ display: 'flex', gap: '10px', marginTop: '1.2rem' }}>
+                                <button className="print-full-btn" style={{ flex: 1, padding: '12px' }} onClick={() => handlePrint(selectedOrder)}>
+                                    <Printer size={18} /> IMPRIMIR TICKET
                                 </button>
                                 {selectedOrder.status === 'PENDING' && (
                                     <button 
                                         className="print-full-btn" 
-                                        style={{ flex: 1, background: '#2b8a3e' }} 
+                                        style={{ flex: 1, background: '#2b8a3e', padding: '12px' }} 
                                         onClick={() => navigate('/admin/tpv')}
                                     >
-                                        <LayoutGrid size={20} /> COBRAR EN TPV
+                                        <LayoutGrid size={18} /> COBRAR EN TPV
                                     </button>
                                 )}
                             </div>
