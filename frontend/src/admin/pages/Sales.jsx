@@ -75,7 +75,8 @@ const Sales = () => {
             return [...prevCart, { 
                 menu_entry: entry.id, 
                 name: entry.product.name, 
-                price: entry.price, 
+                price: parseFloat(entry.price), 
+                originalPrice: parseFloat(entry.price),
                 quantity: 1 
             }];
         });
@@ -128,12 +129,15 @@ const Sales = () => {
         setModalPriceType('direct');
     };
 
-    const subtotal = cart.reduce((acc, item) => acc + (parseFloat(item.price) * item.quantity), 0);
-    const calculatedDiscount = discountType === 'percent' 
-        ? (subtotal * (parseFloat(discountValue || 0) / 100))
+    const totalOriginalPrice = cart.reduce((acc, item) => acc + (parseFloat(item.originalPrice || item.price) * item.quantity), 0);
+    const subtotalWithItemAdjustments = cart.reduce((acc, item) => acc + (parseFloat(item.price) * item.quantity), 0);
+
+    const globalDiscountAmount = discountType === 'percent' 
+        ? (subtotalWithItemAdjustments * (parseFloat(discountValue || 0) / 100))
         : parseFloat(discountValue || 0);
 
-    const total = Math.max(0, subtotal - calculatedDiscount + (isDelivery ? parseFloat(deliveryCost || 0) : 0));
+    const totalSavings = (totalOriginalPrice - subtotalWithItemAdjustments) + globalDiscountAmount;
+    const total = Math.max(0, totalOriginalPrice - totalSavings + (isDelivery ? parseFloat(deliveryCost || 0) : 0));
     const totalItems = cart.reduce((acc, item) => acc + item.quantity, 0);
 
     const [isTicketOpen, setIsTicketOpen] = useState(false);
@@ -195,7 +199,8 @@ const Sales = () => {
         setCart(ticket.items.map(item => ({
             menu_entry: item.menu_entry,
             name: item.entry_name,
-            price: item.price_at_sale,
+            price: parseFloat(item.price_at_sale),
+            originalPrice: parseFloat(item.original_price || item.price_at_sale),
             quantity: item.quantity
         })));
         setCustomerName(ticket.customer_name || '');
@@ -432,13 +437,13 @@ const Sales = () => {
                             <div className="ticket-footer" style={{ padding: '8px 12px', borderTop: '2px solid #333', background: '#fff' }}>
                                 <div className="total-row" style={{ marginBottom: '1px', display: 'flex', justifyContent: 'space-between', fontSize: '0.8rem' }}>
                                     <span style={{ color: '#666', fontWeight: 'bold' }}>SUBTOTAL:</span>
-                                    <span>${subtotal.toLocaleString('es-AR')}</span>
+                                    <span>${totalOriginalPrice.toLocaleString('es-AR')}</span>
                                 </div>
 
-                                {calculatedDiscount > 0 && (
+                                {totalSavings > 0 && (
                                     <div className="total-row" style={{ marginBottom: '4px', display: 'flex', justifyContent: 'space-between', fontSize: '0.8rem', color: '#f03e3e' }}>
                                         <span style={{ fontWeight: 'bold' }}>DESCUENTO:</span>
-                                        <span style={{ fontWeight: '900' }}>− ${calculatedDiscount.toLocaleString('es-AR')}</span>
+                                        <span style={{ fontWeight: '900' }}>− ${totalSavings.toLocaleString('es-AR')}</span>
                                     </div>
                                 )}
 
