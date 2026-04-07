@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 import { fetchMenuEntries, createSale, fetchSales, updateSale, deleteSale, bulkActionSales } from '../../services/api';
-import { Trash2, Edit2, ChevronRight, CheckCircle2, MoreVertical, Plus, Minus, Search, ShoppingCart, Receipt, X } from 'lucide-react';
+import { Trash2, Edit2, ChevronRight, CheckCircle2, MoreVertical, Plus, Minus, Search, ShoppingCart, Receipt, X, MapPin } from 'lucide-react';
 import LoadingScreen from '../components/LoadingScreen';
 import Toast from '../components/Toast';
 import './Sales.css';
@@ -35,6 +35,11 @@ const Sales = () => {
     const [pendingTickets, setPendingTickets] = useState([]);
     const [deletingTicketId, setDeletingTicketId] = useState(null);
     const [selectedTickets, setSelectedTickets] = useState([]);
+
+    // Delivery Calculation State
+    const [isCalculating, setIsCalculating] = useState(false);
+    const [deliveryAddress, setDeliveryAddress] = useState('');
+    const [deliveryRates, setDeliveryRates] = useState({ base: 1000, km: 200, max: 15 });
 
     useEffect(() => {
         loadData();
@@ -93,10 +98,93 @@ const Sales = () => {
             
             const salesData = await fetchSales();
             setPendingTickets(salesData.filter(s => s.status === 'PENDING'));
+
+            // Fetch delivery rates for automated calculation
+            try {
+                const response = await fetch(`${import.meta.env.VITE_API_URL}/api/delivery-rates/`);
+                const dData = await response.json();
+                if (dData) {
+                    const r = Array.isArray(dData) ? dData[0] : dData;
+                    if (r) {
+                        setDeliveryRates({
+                            base: parseFloat(r.base_price || 1000),
+                            km: parseFloat(r.km_price || 200),
+                            max: parseFloat(r.max_km || 15)
+                        });
+                    }
+                }
+            } catch (e) {
+                console.error("Error loading delivery rates:", e);
+            }
         } catch (error) {
             console.error("Error loading data:", error);
         } finally {
             setLoading(false);
+        }
+    };
+
+    const calculateDeliveryCost = async () => {
+        const query = deliveryAddress || customerName;
+        if (!query || query.length < 5) {
+            setToast({ message: "Escribe una dirección en el campo o en el nombre del cliente.", type: 'error' });
+            return;
+        }
+
+        setIsCalculating(true);
+        try {
+            // Search localized in San Juan, Argentina as per AGENTS.md
+            const response = await fetch(
+                `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(query)},+San+Juan,+Argentina&format=json&limit=1`,
+                { headers: { 'User-Agent': 'DukeBurgerApp/1.0' } }
+            );
+            const data = await response.json();
+
+            if (data && data[0]) {
+                const destLat = parseFloat(data[0].lat);
+                const destLon = parseFloat(data[0].lon);
+                const originLat = -31.5375; 
+                const originLon = -68.5364;
+
+                const R = 6371; // Earth radius in KM
+                const dLat = (destLat - originLat) * Math.PI / 180;
+                const dLon = (destLon - originLon) * Math.PI / 180;
+                const a = Math.sin(dLat/2) * Math.sin(dLat/2) + Math.cos(originLat * Math.PI / 180) * Math.cos(destLat * Math.PI / 180) * Math.sin(dLon/2) * Math.sin(dLon/2);
+                const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+                const distance = R * c;
+
+                if (distance > deliveryRates.max) {
+                    setToast({ 
+                        message: `Distancia excedida: ${distance.toFixed(1)}km. El límite es de ${deliveryRates.max}km.`, 
+                        type: 'error' 
+                    });
+                    return;
+                }
+
+                let cost = distance < 1 ? deliveryRates.base : (distance * deliveryRates.km);
+                // Round up to next $100 as per AGENTS.md rule
+                cost = Math.max(deliveryRates.base, Math.ceil(cost / 100) * 100);
+
+                setDeliveryCost(cost);
+                setIsDelivery(true);
+                
+                // If it's a new name, suggest it
+                if (!customerName || (customerName.length < 10 && data[0].display_name.includes(customerName))) {
+                    const cleanName = data[0].display_name.split(',').slice(0, 2).join(', ');
+                    setCustomerName(cleanName);
+                }
+
+                setToast({ 
+                    message: `Envío calculado: $${cost.toLocaleString('es-AR')} (${distance.toFixed(1)}km)`, 
+                    type: 'success' 
+                });
+            } else {
+                setToast({ message: "No se encontró la dirección. Intenta ser más específico (Calle y Nro).", type: 'error' });
+            }
+        } catch (error) {
+            console.error("Nominatim error:", error);
+            setToast({ message: "Error al calcular distancia (Nominatim).", type: 'error' });
+        } finally {
+            setIsCalculating(false);
         }
     };
 
@@ -414,29 +502,66 @@ const Sales = () => {
                                     onChange={e => setSaleNotes(e.target.value)}
                                     style={{ padding: '8px', fontSize: '0.8rem', height: '32px' }}
                                 />
-                                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginTop: '2px' }}>
-                                    <label style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '0.75rem', cursor: 'pointer', fontWeight: 'bold' }}>
-                                        <input 
-                                            type="checkbox" 
-                                            checked={isDelivery} 
-                                            onChange={(e) => setIsDelivery(e.target.checked)} 
-                                        />
-                                        ENVÍO
-                                    </label>
-                                    {isDelivery && (
-                                        <div style={{ flex: 1, position: 'relative' }}>
-                                            <span style={{ position: 'absolute', left: '10px', top: '50%', transform: 'translateY(-50%)', fontSize: '0.8rem', color: '#666', fontWeight: '800' }}>$</span>
+                                <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', marginTop: '4px', padding: '6px', background: '#f8f9fa', borderRadius: '8px', border: '1px solid #eee' }}>
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                        <label style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '0.75rem', cursor: 'pointer', fontWeight: 'bold', color: '#555' }}>
                                             <input 
-                                                type="number" 
-                                                placeholder="Costo"
-                                                step="100"
-                                                min="0"
-                                                className="no-arrows-input"
-                                                value={deliveryCost}
-                                                onChange={e => setDeliveryCost(e.target.value)}
-                                                style={{ paddingLeft: '24px', height: '32px', width: '100%', fontSize: '0.8rem', borderRadius: '8px', border: '1px solid #ddd' }}
+                                                type="checkbox" 
+                                                checked={isDelivery} 
+                                                onChange={(e) => setIsDelivery(e.target.checked)} 
                                             />
-                                        </div>
+                                            ENVÍO
+                                        </label>
+                                        
+                                        {isDelivery && (
+                                            <div style={{ flex: 1, display: 'flex', gap: '4px' }}>
+                                                <div style={{ flex: 1, position: 'relative' }}>
+                                                    <span style={{ position: 'absolute', left: '8px', top: '50%', transform: 'translateY(-50%)', fontSize: '0.75rem', color: '#999' }}>$</span>
+                                                    <input 
+                                                        type="number" 
+                                                        placeholder="Costo"
+                                                        step="100"
+                                                        className="no-arrows-input"
+                                                        value={deliveryCost}
+                                                        onChange={e => setDeliveryCost(e.target.value)}
+                                                        style={{ paddingLeft: '18px', height: '28px', width: '100%', fontSize: '0.75rem', borderRadius: '4px', border: '1px solid #ddd' }}
+                                                    />
+                                                </div>
+                                                <button 
+                                                    type="button"
+                                                    onClick={calculateDeliveryCost}
+                                                    disabled={isCalculating}
+                                                    style={{ 
+                                                        padding: '0 8px', 
+                                                        height: '28px', 
+                                                        background: '#ae3ec9', 
+                                                        color: 'white', 
+                                                        border: 'none', 
+                                                        borderRadius: '4px', 
+                                                        fontSize: '0.65rem', 
+                                                        fontWeight: 'bold',
+                                                        cursor: 'pointer',
+                                                        display: 'flex',
+                                                        alignItems: 'center',
+                                                        gap: '4px'
+                                                    }}
+                                                >
+                                                    {isCalculating ? '...' : <MapPin size={12} />}
+                                                    CALCULAR
+                                                </button>
+                                            </div>
+                                        )}
+                                    </div>
+                                    
+                                    {isDelivery && (
+                                        <input 
+                                            type="text"
+                                            placeholder="Dirección para calcular (Calle y Nro)..."
+                                            value={deliveryAddress}
+                                            onChange={e => setDeliveryAddress(e.target.value)}
+                                            style={{ width: '100%', height: '26px', fontSize: '0.7rem', padding: '0 8px', borderRadius: '4px', border: '1px solid #eee' }}
+                                            onKeyDown={e => e.key === 'Enter' && calculateDeliveryCost()}
+                                        />
                                     )}
                                 </div>
                             </div>
