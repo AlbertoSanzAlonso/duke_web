@@ -49,6 +49,18 @@ class MenuEntry(models.Model):
     price = models.DecimalField(max_digits=10, decimal_places=2)
     category = models.CharField(max_length=100, default='General')
     is_available = models.BooleanField(default=True)
+    
+    # Scheduling
+    active_monday = models.BooleanField(default=True)
+    active_tuesday = models.BooleanField(default=True)
+    active_wednesday = models.BooleanField(default=True)
+    active_thursday = models.BooleanField(default=True)
+    active_friday = models.BooleanField(default=True)
+    active_saturday = models.BooleanField(default=True)
+    active_sunday = models.BooleanField(default=True)
+    
+    start_date = models.DateField(null=True, blank=True)
+    end_date = models.DateField(null=True, blank=True)
 
     def __str__(self):
         return f"{self.product.name} - {self.price}"

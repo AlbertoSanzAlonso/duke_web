@@ -139,9 +139,23 @@ function Home() {
         return;
       }
 
-      // Group by category, prioritizing availability
+      // Group by category, prioritizing availability and scheduling
+      const fechaArg = new Date(new Date().toLocaleString("en-US", {timeZone: "America/Argentina/Buenos_Aires"}));
+      const dayIndex = fechaArg.getDay(); // 0 is Sunday, 1 Monday...
+      const daysMap = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
+      const currentDayField = `active_${daysMap[dayIndex]}`;
+      const todayStr = fechaArg.toISOString().split('T')[0];
+
       const grouped = entries.reduce((acc, entry) => {
+        // 1. Basic availability
         if (!entry.is_available) return acc;
+
+        // 2. Weekly schedule
+        if (entry[currentDayField] === false) return acc;
+
+        // 3. Date range (Seasonal)
+        if (entry.start_date && todayStr < entry.start_date) return acc;
+        if (entry.end_date && todayStr > entry.end_date) return acc;
         
         const cat = entry.category || 'General';
         if (!acc[cat]) acc[cat] = [];

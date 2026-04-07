@@ -25,6 +25,19 @@ function Promos() {
     const [allProducts, setAllProducts] = useState([]);
     const [useExistingProduct, setUseExistingProduct] = useState(false);
     const [selectedProductId, setSelectedProductId] = useState('');
+    
+    // Scheduling state
+    const [schedule, setSchedule] = useState({
+        active_monday: true,
+        active_tuesday: true,
+        active_wednesday: true,
+        active_thursday: true,
+        active_friday: true,
+        active_saturday: true,
+        active_sunday: true,
+        start_date: '',
+        end_date: ''
+    });
 
     const fileInputRef = useRef(null);
     const category = 'Promos';
@@ -72,6 +85,17 @@ function Promos() {
         setEditingProductId(null);
         setUseExistingProduct(false);
         setSelectedProductId('');
+        setSchedule({
+            active_monday: true,
+            active_tuesday: true,
+            active_wednesday: true,
+            active_thursday: true,
+            active_friday: true,
+            active_saturday: true,
+            active_sunday: true,
+            start_date: '',
+            end_date: ''
+        });
         if (fileInputRef.current) fileInputRef.current.value = '';
     };
 
@@ -85,7 +109,20 @@ function Promos() {
         setIsEditing(true);
         setEditingId(entry.id);
         setEditingProductId(entry.product.id);
-        setUseExistingProduct(false); // When editing, we edit the specific product of the entry
+        setUseExistingProduct(false); 
+        
+        setSchedule({
+            active_monday: entry.active_monday ?? true,
+            active_tuesday: entry.active_tuesday ?? true,
+            active_wednesday: entry.active_wednesday ?? true,
+            active_thursday: entry.active_thursday ?? true,
+            active_friday: entry.active_friday ?? true,
+            active_saturday: entry.active_saturday ?? true,
+            active_sunday: entry.active_sunday ?? true,
+            start_date: entry.start_date || '',
+            end_date: entry.end_date || ''
+        });
+
         window.scrollTo({ top: 0, behavior: 'smooth' });
     };
 
@@ -111,7 +148,10 @@ function Promos() {
                 await updateProduct(editingProductId, formData);
                 await updateMenuEntry(editingId, {
                     price: parseFloat(price),
-                    is_available: isAvailable
+                    is_available: isAvailable,
+                    ...schedule,
+                    start_date: schedule.start_date || null,
+                    end_date: schedule.end_date || null
                 });
                 
                 setToast({ message: "¡Promoción actualizada!", type: 'success' });
@@ -134,7 +174,10 @@ function Promos() {
                     product_id: productId,
                     price: parseFloat(price),
                     category,
-                    is_available: true
+                    is_available: true,
+                    ...schedule,
+                    start_date: schedule.start_date || null,
+                    end_date: schedule.end_date || null
                 });
                 
                 setToast({ message: "¡Promoción lanzada con éxito!", type: 'success' });
@@ -487,6 +530,39 @@ function Promos() {
                                 <p style={{ color: '#666', fontSize: '0.85rem', marginBottom: '20px', lineHeight: '1.4', minHeight: '2.8em' }}>
                                     {entry.product?.description || 'Sin descripción detallada.'}
                                 </p>
+                                
+                                <div style={{ marginBottom: '15px', display: 'flex', flexWrap: 'wrap', gap: '5px' }}>
+                                    {['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'].map(day => (
+                                        <span key={day} style={{ 
+                                            fontSize: '0.65rem', 
+                                            padding: '3px 6px', 
+                                            borderRadius: '4px', 
+                                            background: entry[`active_${day}`] ? '#e31837' : '#f1f1f1',
+                                            color: entry[`active_${day}`] ? 'white' : '#bbb',
+                                            fontWeight: 'bold',
+                                            textTransform: 'uppercase'
+                                        }}>
+                                            {day.slice(0, 2)}
+                                        </span>
+                                    ))}
+                                </div>
+
+                                {(entry.start_date || entry.end_date) && (
+                                    <div style={{ 
+                                        fontSize: '0.75rem', 
+                                        color: '#888', 
+                                        marginBottom: '15px', 
+                                        display: 'flex', 
+                                        alignItems: 'center', 
+                                        gap: '5px',
+                                        background: '#f8f9fa',
+                                        padding: '5px 10px',
+                                        borderRadius: '6px',
+                                        border: '1px solid #eee'
+                                    }}>
+                                        📅 {entry.start_date ? new Date(entry.start_date).toLocaleDateString() : '∞'} - {entry.end_date ? new Date(entry.end_date).toLocaleDateString() : '∞'}
+                                    </div>
+                                )}
                                 
                                 <div style={{ display: 'flex', gap: '10px' }}>
                                     <button 

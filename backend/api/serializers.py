@@ -70,7 +70,12 @@ class MenuEntrySerializer(serializers.ModelSerializer):
 
     class Meta:
         model = MenuEntry
-        fields = ['id', 'product', 'product_id', 'price', 'category', 'is_available']
+        fields = [
+            'id', 'product', 'product_id', 'price', 'category', 'is_available',
+            'active_monday', 'active_tuesday', 'active_wednesday', 'active_thursday',
+            'active_friday', 'active_saturday', 'active_sunday',
+            'start_date', 'end_date'
+        ]
 
 class SaleItemSerializer(serializers.ModelSerializer):
     entry_name = serializers.ReadOnlyField(source='menu_entry.product.name')
