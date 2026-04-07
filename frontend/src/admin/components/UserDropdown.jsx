@@ -40,7 +40,7 @@ const UserDropdown = () => {
     const displayName = me?.first_name ? `${me.first_name} ${me.last_name || ''}` : (me?.username || 'Admin');
 
     return (
-        <div className="user-dropdown-container" ref={dropdownRef} style={{ zIndex: 9999 }}>
+        <div className="user-dropdown-container" ref={dropdownRef}>
             <button className="user-profile-btn" onClick={() => setIsOpen(!isOpen)}>
                 <div className="avatar-wrapper">
                     {avatarUrl ? (
@@ -80,6 +80,7 @@ const UserDropdown = () => {
             <style dangerouslySetInnerHTML={{ __html: `
                 .user-dropdown-container {
                     position: relative;
+                    z-index: 2500;
                 }
                 .user-profile-btn {
                     display: flex;

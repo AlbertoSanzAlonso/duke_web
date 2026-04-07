@@ -14,9 +14,28 @@ Este proyecto se divide en dos entornos de despliegue claramente separados para 
 - **Ruta principal:** `/backend`
 - **Framework:** Django + DRF (Django REST Framework).
 - **Puerto de Servicio:** El contenedor escucha en el **puerto 3000**.
+- **Variables de Entorno Críticas:**
+  - `GROQ_API_KEY`: Requerida para el funcionamiento de **Duke Assist** (IA). Obtener en console.groq.com.
 - **Motor de Servidor:** Utiliza `gunicorn` con el worker `gthread` (o `uvicorn` si se despliega como ASGI).
 - **Comando de Inicio Recomendado:** `gunicorn -k gthread --threads 12 --workers 2 --bind 0.0.0.0:3000 --timeout 120 config.wsgi:application`.
 - **Estatícos:** Se utiliza **Whitenoise** (`whitenoise.middleware.WhiteNoiseMiddleware`) para servir archivos estáticos. 
+
+... (rest of backend section)
+
+## 7. Asistente IA y Soporte (Duke Assist)
+- **Modelo:** Llama-3.3-70b-versatile vía **Groq API**.
+- **RAG (Conocimiento):** El asistente lee dinámicamente el archivo `docs/manual_admin.md` y el estado en tiempo real de la base de datos (Stock Crítico, Pedidos Pendientes).
+- **Mantenimiento:** Es OBLIGATORIO actualizar `docs/manual_admin.md` cuando se realicen cambios estructurales en la operativa del negocio (ej. cambios en flujo de cajas, nuevos estados de pedidos) para que la IA no entregue información obsoleta.
+
+## 4. Skills Instaladas
+- `django-rest-best-practices`: Estabilidad y consistencia del backend.
+- `form-design-best-practices`: Formularios premium y usables.
+- `supabase-postgres-best-practices`: Optimización de BBDD.
+- `ai-assistant-context`: Gestión de la base de conocimientos de Duke Assist.
+- `web-design-guidelines`: Estándares de calidad visual de Vercel/Next.
+- `seo-audit`: Auditoría de posicionamiento orgánico.
+- `responsive-design`: Asegurar adaptabilidad total.
+- `delivery-pricing-standards`: Lógica de precios por cercanía y validación GPS.
 - **Almacenamiento (Django 4.2+):** ES OBLIGATORIO usar el diccionario `STORAGES` en `settings.py` en lugar de las variables antiguas. Configurar `staticfiles` con `StaticFilesStorage` para mayor estabilidad en Docker.
 - **Diagnóstico:** Ante errores 500 tras un despliegue, visitar `/api/setup-admin-super/` para forzar migraciones en la base de datos de Supabase.
 

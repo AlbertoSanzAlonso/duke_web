@@ -28,7 +28,7 @@ const AIChat = () => {
         setIsLoading(true);
 
         try {
-            const token = localStorage.getItem('token');
+            const token = sessionStorage.getItem('duke_admin_token');
             const response = await fetch(`${import.meta.env.VITE_API_URL}/api/ai-help/`, {
                 method: 'POST',
                 headers: {
