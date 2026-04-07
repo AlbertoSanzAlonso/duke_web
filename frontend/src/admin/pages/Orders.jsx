@@ -181,47 +181,55 @@ const Orders = () => {
                 </div>
 
                 {selectedOrder && (
-                    <div className="order-details-card admin-card">
-                        <div className="details-header">
-                            <h3>Detalle del Pedido #{selectedOrder.id}</h3>
-                            <button className="close-details" onClick={() => setSelectedOrder(null)}>×</button>
-                        </div>
-                        
-                        <div className="details-content">
-                            <div className="details-meta">
-                                <p><strong>Cliente:</strong> {selectedOrder.customer_name || '-'}</p>
-                                <p><strong>Entrega:</strong> {selectedOrder.table_number || '-'}</p>
-                                <p><strong>Hora:</strong> {new Date(selectedOrder.date).toLocaleString('es-AR', { timeZone: 'America/Argentina/Buenos_Aires' })}</p>
+                    <div className="modal-overlay" onClick={() => setSelectedOrder(null)} style={{ zIndex: 3000 }}>
+                        <div className="order-details-card admin-card order-details-modal" onClick={e => e.stopPropagation()}>
+                            <div className="details-header">
+                                <h3>Pedido #{selectedOrder.id}</h3>
+                                <button className="close-details" onClick={() => setSelectedOrder(null)}>×</button>
                             </div>
+                            
+                            <div className="details-content">
+                                <div className="details-meta">
+                                    <p><span>Cliente:</span> <strong>{selectedOrder.customer_name || '-'}</strong></p>
+                                    <p><span>Entrega:</span> <strong>{selectedOrder.table_number || '-'}</strong></p>
+                                    <p><span>Hora/Fecha:</span> <strong>{new Date(selectedOrder.date).toLocaleString('es-AR', { timeZone: 'America/Argentina/Buenos_Aires' })}</strong></p>
+                                    <p><span>Estado:</span> <span className={`status-badge ${selectedOrder.status.toLowerCase()}`}>{selectedOrder.status}</span></p>
+                                </div>
 
-                            <div className="items-list">
-                                <h4>Productos</h4>
-                                {selectedOrder.items.map(item => (
-                                    <div key={item.id} className="detail-item">
-                                        <span>{item.quantity} x {item.entry_name}</span>
-                                        <span>${(item.quantity * parseFloat(item.price_at_sale)).toFixed(2)}</span>
+                                <div className="items-list">
+                                    <h4>Productos</h4>
+                                    {selectedOrder.items.map(item => (
+                                        <div key={item.id} className="detail-item">
+                                            <span style={{ fontWeight: '700' }}>{item.quantity} x {item.entry_name}</span>
+                                            <span style={{ color: '#666' }}>${(item.quantity * parseFloat(item.price_at_sale)).toFixed(2)}</span>
+                                        </div>
+                                    ))}
+                                </div>
+
+                                <div className="details-total" style={{ borderTop: '2px solid #333', paddingTop: '15px', marginTop: '10px' }}>
+                                    <span style={{ fontWeight: '900', fontSize: '0.9rem', color: '#888' }}>TOTAL</span>
+                                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end' }}>
+                                        {parseFloat(selectedOrder.delivery_cost) > 0 && (
+                                            <small style={{ fontSize: '0.8rem', color: '#666' }}>Envío: ${parseFloat(selectedOrder.delivery_cost).toLocaleString('es-AR')}</small>
+                                        )}
+                                        <strong style={{ fontSize: '2rem', fontWeight: '900', color: '#000' }}>${Math.round(parseFloat(selectedOrder.total_amount)).toLocaleString('es-AR')}</strong>
                                     </div>
-                                ))}
-                            </div>
+                                </div>
 
-                            <div className="details-total" style={{ borderTop: '2px solid #333', paddingTop: '10px' }}>
-                                <span style={{ fontWeight: '900', fontSize: '1rem' }}>TOTAL</span>
-                                <strong style={{ fontSize: '1.8rem', fontWeight: '900' }}>${Math.round(parseFloat(selectedOrder.total_amount)).toLocaleString('es-AR')}</strong>
-                            </div>
-
-                            <div style={{ display: 'flex', gap: '10px', marginTop: '1.2rem' }}>
-                                <button className="print-full-btn" style={{ flex: 1, padding: '12px' }} onClick={() => handlePrint(selectedOrder)}>
-                                    <Printer size={18} /> IMPRIMIR TICKET
-                                </button>
-                                {selectedOrder.status === 'PENDING' && (
-                                    <button 
-                                        className="print-full-btn" 
-                                        style={{ flex: 1, background: '#2b8a3e', padding: '12px' }} 
-                                        onClick={() => navigate('/admin/tpv', { state: { pendingOrder: selectedOrder } })}
-                                    >
-                                        <LayoutGrid size={18} /> COBRAR EN TPV
+                                <div className="modal-actions-footer" style={{ display: 'flex', gap: '10px', marginTop: '1.5rem' }}>
+                                    <button className="print-full-btn" style={{ flex: 1, padding: '12px', fontSize: '0.8rem' }} onClick={() => handlePrint(selectedOrder)}>
+                                        <Printer size={16} /> IMPRIMIR
                                     </button>
-                                )}
+                                    {selectedOrder.status === 'PENDING' && (
+                                        <button 
+                                            className="print-full-btn" 
+                                            style={{ flex: 1, background: '#2b8a3e', padding: '12px', fontSize: '0.8rem' }} 
+                                            onClick={() => navigate('/admin/tpv', { state: { pendingOrder: selectedOrder } })}
+                                        >
+                                            <LayoutGrid size={16} /> COBRAR
+                                        </button>
+                                    )}
+                                </div>
                             </div>
                         </div>
                     </div>

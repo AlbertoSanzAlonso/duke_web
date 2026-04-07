@@ -360,7 +360,9 @@ function Home() {
       let closedMsg = "Lo sentimos, actualmente estamos CERRADOS.";
       if (todaySchedule) {
         if (todaySchedule.is_open) {
-          closedMsg = `Lo sentimos, actualmente estamos CERRADOS. Hoy ${todaySchedule.day_name} atendemos de ${todaySchedule.opening_time.slice(0,5)} a ${todaySchedule.closing_time.slice(0,5)} hs.`;
+          const openStr = todaySchedule.opening_time ? todaySchedule.opening_time.slice(0,5) : "20:00";
+          const closeStr = todaySchedule.closing_time ? todaySchedule.closing_time.slice(0,5) : "00:00";
+          closedMsg = `Lo sentimos, actualmente estamos CERRADOS. Hoy ${todaySchedule.day_name} atendemos de ${openStr} a ${closeStr} hs.`;
         } else {
           closedMsg = `Lo sentimos, actualmente estamos CERRADOS. Hoy ${todaySchedule.day_name} el local permanece cerrado.`;
         }
@@ -683,6 +685,8 @@ function Home() {
                         {isCalculating ? '...' : 'Calcular'}
                       </button>
                     </div>
+                  </div>
+                )}
 
 
                 {errorMessage && (
@@ -690,14 +694,12 @@ function Home() {
                     {errorMessage}
                   </p>
                 )}
-                {deliveryCost > 0 && !errorMessage && (
+                {deliveryMode === 'delivery' && deliveryCost > 0 && !errorMessage && (
                   <p style={{ fontSize: '0.9rem', color: 'var(--color-primary)', marginTop: '10px', fontWeight: 'bold' }}>
                     Costo de envío: ${deliveryCost.toLocaleString('es-AR')}
                   </p>
                 )}
               </div>
-            )}
-          </div>
 
               <div className="customer-info-section">
                 <label>TU NOMBRE *</label>
