@@ -459,15 +459,15 @@ const Sales = () => {
                             </div>
 
                             <div className="ticket-footer" style={{ padding: '8px 12px', borderTop: '2px solid #333', background: '#fff' }}>
-                                <div className="total-row" style={{ marginBottom: '1px', display: 'flex', justifyContent: 'space-between', fontSize: '0.8rem' }}>
-                                    <span style={{ color: '#666', fontWeight: 'bold' }}>SUBTOTAL:</span>
-                                    <span>${totalOriginalPrice.toLocaleString('es-AR')}</span>
+                                <div className="total-row" style={{ marginBottom: '0px', display: 'flex', justifyContent: 'space-between', fontSize: '0.75rem' }}>
+                                    <span style={{ color: '#888', fontWeight: 'bold' }}>SUBTOTAL:</span>
+                                    <span style={{ color: '#444' }}>${totalOriginalPrice.toLocaleString('es-AR')}</span>
                                 </div>
 
                                 {totalSavings > 0 && (
-                                    <div className="total-row" style={{ marginBottom: '4px', display: 'flex', justifyContent: 'space-between', fontSize: '0.8rem', color: '#f03e3e' }}>
+                                    <div className="total-row" style={{ marginBottom: '2px', display: 'flex', justifyContent: 'space-between', fontSize: '0.75rem', color: '#f03e3e' }}>
                                         <span style={{ fontWeight: 'bold' }}>DESCUENTO:</span>
-                                        <span style={{ fontWeight: '900' }}>− ${totalSavings.toLocaleString('es-AR')}</span>
+                                        <span style={{ fontWeight: '800' }}>− ${totalSavings.toLocaleString('es-AR')}</span>
                                     </div>
                                 )}
 
@@ -661,7 +661,16 @@ const Sales = () => {
                                 </div>
 
                                 <div style={{ position: 'relative' }}>
-                                    <span style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', fontWeight: 'bold', color: '#333' }}>
+                                    <span style={{ 
+                                        position: 'absolute', 
+                                        left: '14px', 
+                                        top: '50%', 
+                                        transform: 'translateY(-50%)', 
+                                        fontWeight: '800', 
+                                        color: '#333',
+                                        fontSize: '1.2rem',
+                                        zIndex: 5
+                                    }}>
                                         {modalPriceType === 'percent' ? '%' : '$'}
                                     </span>
                                     <input 
@@ -669,9 +678,17 @@ const Sales = () => {
                                         autoFocus
                                         value={modalPriceValue}
                                         onChange={e => setModalPriceValue(e.target.value)}
-                                        style={{ width: '100%', padding: '15px 15px 15px 30px', borderRadius: '10px', border: '2px solid #eee', fontSize: '1.2rem', fontWeight: '800' }}
+                                        style={{ 
+                                            width: '100%', 
+                                            padding: '15px 15px 15px 35px', 
+                                            borderRadius: '12px', 
+                                            border: '2px solid #eee', 
+                                            fontSize: '1.4rem', 
+                                            fontWeight: '900',
+                                            background: '#f8f9fa'
+                                        }}
                                         placeholder="0"
-                                        className="no-arrows-input"
+                                        className="no-arrows-input modal-price-input"
                                     />
                                 </div>
 
