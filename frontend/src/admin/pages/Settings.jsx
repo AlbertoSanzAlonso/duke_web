@@ -147,9 +147,6 @@ const Settings = () => {
                     <button onClick={() => setActiveTab('hours')} className={`tab-btn ${activeTab === 'hours' ? 'active' : ''}`} style={{ ...tabBtnStyle(activeTab === 'hours'), width: '100%' }}>
                         <Clock size={18} /> Tabla Horarios
                     </button>
-                    <button onClick={() => setActiveTab('gallery')} className={`tab-btn ${activeTab === 'gallery' ? 'active' : ''}`} style={{ ...tabBtnStyle(activeTab === 'gallery'), width: '100%' }}>
-                        <ImageIcon size={18} /> Galería Local
-                    </button>
                     <button onClick={() => setActiveTab('custom')} className={`tab-btn ${activeTab === 'custom' ? 'active' : ''}`} style={{ ...tabBtnStyle(activeTab === 'custom'), width: '100%' }}>
                         <Save size={18} /> Personalizar
                     </button>
@@ -312,67 +309,7 @@ const Settings = () => {
                     </div>
                 )}
 
-                {activeTab === 'gallery' && (
-                    <div className="tab-content">
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '20px', marginBottom: '25px', borderBottom: '1px solid #eee', paddingBottom: '15px' }}>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
-                                <ImageIcon size={32} color="#f03e3e" />
-                                <h2 style={{ margin: 0, fontSize: '1.5rem' }}>Galería del Local</h2>
-                            </div>
-                            <button 
-                                onClick={() => setIsAddingImg(true)} 
-                                style={{
-                                    background: '#f03e3e',
-                                    color: 'white',
-                                    border: 'none',
-                                    padding: '12px 25px',
-                                    borderRadius: '10px',
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    justifyContent: 'center',
-                                    gap: '8px',
-                                    fontWeight: '800',
-                                    fontSize: '0.9rem',
-                                    cursor: 'pointer',
-                                    height: '45px',
-                                    boxShadow: '0 4px 12px rgba(240, 62, 62, 0.2)',
-                                    transition: 'all 0.3s ease'
-                                }}
-                            >
-                                <Plus size={18} /> AÑADIR FOTO
-                            </button>
-                        </div>
 
-                        <div className="gallery-admin-grid" style={galleryGridStyle}>
-                            {gallery.map(img => (
-                                <div key={img.id} style={galleryCardStyle}>
-                                    <div style={galleryImgContainerStyle}>
-                                        <img src={img.image} alt={img.title} style={galleryImgStyle} />
-                                    </div>
-                                    <div style={{ padding: '12px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                                        <input 
-                                            type="text"
-                                            value={img.title || ''}
-                                            placeholder="Sin título"
-                                            onChange={(e) => setGallery(gallery.map(i => i.id === img.id ? {...i, title: e.target.value} : i))}
-                                            onBlur={async (e) => await updateGalleryImage(img.id, { title: e.target.value })}
-                                            style={galleryTitleInputStyle}
-                                        />
-                                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                                            <div style={{ display: 'flex', alignItems: 'center', gap: '5px', fontSize: '0.8rem' }}>
-                                                Orden: 
-                                                <input type="number" value={img.order} onChange={(e) => handleReorderImage(img.id, parseInt(e.target.value) || 0)} style={orderInputStyle} />
-                                            </div>
-                                            <button onClick={() => setConfirmDelete({ type: 'image', id: img.id, title: img.title })} style={deleteBtnStyle}>
-                                                <Trash2 size={16} />
-                                            </button>
-                                        </div>
-                                    </div>
-                                </div>
-                            ))}
-                        </div>
-                    </div>
-                )}
             </div>
 
             {/* Custom Confirms */}

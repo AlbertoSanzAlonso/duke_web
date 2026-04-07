@@ -95,7 +95,7 @@ function About() {
             <p style={{ textAlign: 'center', opacity: 0.7 }}>Cargando imágenes...</p>
           ) : gallery.length > 0 ? (
             <div className="gallery-grid">
-              {gallery.map((img) => (
+              {gallery.filter(img => img.is_active).map((img) => (
                 <div key={img.id} className="gallery-item" onClick={() => setSelectedImage(img.image)}>
                    <img src={img.image} alt={img.title || 'Duke Burger'} className="gallery-img-full" />
                 </div>

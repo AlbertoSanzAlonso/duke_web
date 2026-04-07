@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { fetchGalleryImages, createGalleryImage, deleteGalleryImage, updateGalleryImage } from '../../services/api';
 import LoadingScreen from '../components/LoadingScreen';
 import Toast from '../components/Toast';
-import { Image as ImageIcon, Plus, Trash2, X, AlertTriangle, Save } from 'lucide-react';
+import { Image as ImageIcon, Plus, Trash2, X, AlertTriangle, Save, Eye, EyeOff, Move } from 'lucide-react';
 
 const Gallery = () => {
     const [gallery, setGallery] = useState([]);
@@ -12,6 +12,7 @@ const Gallery = () => {
     const [newImage, setNewImage] = useState({ title: '', image: null, order: 0 });
     const [imgSaving, setImgSaving] = useState(false);
     const [confirmDelete, setConfirmDelete] = useState(null);
+    const [draggedItem, setDraggedItem] = useState(null);
 
     useEffect(() => {
         loadData();
@@ -90,6 +91,42 @@ const Gallery = () => {
         }
     };
 
+    const onDragStart = (e, index) => {
+        setDraggedItem(gallery[index]);
+        e.dataTransfer.effectAllowed = "move";
+        e.dataTransfer.setData("text/html", e.target.parentNode);
+        e.dataTransfer.setDragImage(e.target.parentNode, 20, 20);
+    };
+
+    const onDragOver = (index) => {
+        const draggedOverItem = gallery[index];
+
+        // if the item is dragged over itself, ignore
+        if (draggedItem === draggedOverItem) {
+            return;
+        }
+
+        // filter out the currently dragged item
+        let items = gallery.filter(item => item !== draggedItem);
+
+        // add the dragged item after the dragged over item
+        items.splice(index, 0, draggedItem);
+
+        setGallery(items);
+    };
+
+    const onDragEnd = async () => {
+        setDraggedItem(null);
+        // Save new order to backend
+        try {
+            const updates = gallery.map((item, idx) => ({ id: item.id, order: idx }));
+            await Promise.all(updates.map(u => updateGalleryImage(u.id, { order: u.order })));
+            setToast({ message: "Orden actualizado", type: 'success' });
+        } catch (error) {
+            console.error("Error saving gallery order:", error);
+        }
+    };
+
     if (loading) return <LoadingScreen />;
 
     return (
@@ -136,31 +173,31 @@ const Gallery = () => {
                         No hay fotos en la galería todavía.
                     </div>
                 ) : (
-                    gallery.map(img => (
-                        <div key={img.id} style={{ 
-                            background: '#fff', 
-                            borderRadius: '15px', 
-                            overflow: 'hidden', 
-                            boxShadow: '0 4px 12px rgba(0,0,0,0.05)',
-                            border: '1px solid #eee',
-                            opacity: img.is_active ? 1 : 0.6,
-                            transition: 'opacity 0.2s'
-                        }}>
+                    gallery.map((img, index) => (
+                        <div key={img.id} 
+                            draggable
+                            onDragStart={(e) => onDragStart(e, index)}
+                            onDragOver={() => onDragOver(index)}
+                            onDragEnd={onDragEnd}
+                            style={{ 
+                                background: '#fff', 
+                                borderRadius: '15px', 
+                                overflow: 'hidden', 
+                                boxShadow: draggedItem?.id === img.id ? '0 10px 20px rgba(0,0,0,0.2)' : '0 4px 12px rgba(0,0,0,0.05)',
+                                border: draggedItem?.id === img.id ? '2px solid var(--admin-primary)' : '1px solid #eee',
+                                opacity: !img.is_active ? 0.6 : (draggedItem?.id === img.id ? 0.5 : 1),
+                                transition: 'all 0.2s',
+                                cursor: 'grab',
+                                position: 'relative'
+                            }}>
                             <div style={{ height: '220px', background: '#eee', position: 'relative' }}>
-                                <img src={img.image} alt={img.title} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                                <div style={{ 
-                                    position: 'absolute', top: '10px', left: '10px', 
-                                    background: 'rgba(0,0,0,0.6)', color: 'white', 
-                                    padding: '4px 10px', borderRadius: '6px', fontSize: '0.75rem',
-                                    zIndex: 2
-                                }}>
-                                    Orden: {img.order}
-                                </div>
+                                <img src={img.image} alt={img.title} style={{ width: '100%', height: '100%', objectFit: 'cover', pointerEvents: 'none' }} />
+                                
                                 <div style={{ position: 'absolute', top: '10px', right: '10px', zIndex: 10, display: 'flex', gap: '8px' }}>
                                     <button 
                                         onClick={() => handleToggleActive(img.id, img.is_active)}
                                         style={{
-                                            background: img.is_active ? '#40c057' : '#adb5bd',
+                                            background: img.is_active ? '#40c057' : '#e31837',
                                             color: 'white',
                                             border: 'none',
                                             width: '36px',
@@ -174,45 +211,43 @@ const Gallery = () => {
                                         }}
                                         title={img.is_active ? "Ocultar de la Web" : "Hacer Visible"}
                                     >
-                                        {img.is_active ? <ImageIcon size={18} /> : <X size={18} />}
+                                        {img.is_active ? <Eye size={18} /> : <EyeOff size={18} />}
                                     </button>
                                 </div>
+
+                                <div style={{ 
+                                    position: 'absolute', bottom: '10px', left: '10px', 
+                                    background: 'rgba(0,0,0,0.6)', color: 'white', 
+                                    padding: '5px', borderRadius: '50%', pointerEvents: 'none'
+                                }}>
+                                    <Move size={14} />
+                                </div>
+
                                 {!img.is_active && (
                                     <div style={{ 
                                         position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, 
                                         background: 'rgba(0,0,0,0.4)', color: 'white', 
                                         display: 'flex', alignItems: 'center', justifyContent: 'center',
-                                        fontSize: '0.9rem', fontWeight: 'bold' 
+                                        fontSize: '0.9rem', fontWeight: 'bold', pointerEvents: 'none'
                                     }}>
                                         PAUSADA (OCULTA)
                                     </div>
                                 )}
                             </div>
-                            <div style={{ padding: '20px' }}>
-                                <div style={{ marginBottom: '15px' }}>
-                                    <label style={{ fontSize: '0.7rem', fontWeight: '800', color: '#888', textTransform: 'uppercase', display: 'block', marginBottom: '5px' }}>Título</label>
-                                    <input 
-                                        type="text" 
-                                        defaultValue={img.title} 
-                                        onBlur={(e) => handleUpdateTitle(img.id, e.target.value)}
-                                        placeholder="Sin título"
-                                        style={{ width: '100%', padding: '8px', borderRadius: '6px', border: '1px solid #ddd', fontSize: '0.9rem' }}
-                                    />
-                                </div>
-                                <div style={{ display: 'flex', gap: '10px' }}>
+                            <div style={{ padding: '15px' }}>
+                                <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
                                     <div style={{ flex: 1 }}>
-                                        <label style={{ fontSize: '0.7rem', fontWeight: '800', color: '#888', textTransform: 'uppercase', display: 'block', marginBottom: '5px' }}>Posición</label>
                                         <input 
-                                            type="number" 
-                                            value={img.order} 
-                                            onChange={(e) => setGallery(gallery.map(i => i.id === img.id ? {...i, order: parseInt(e.target.value)} : i))}
-                                            onBlur={(e) => handleUpdateOrder(img.id, parseInt(e.target.value) || 0)}
-                                            style={{ width: '100%', padding: '8px', borderRadius: '6px', border: '1px solid #ddd', fontSize: '0.9rem' }}
+                                            type="text" 
+                                            defaultValue={img.title} 
+                                            onBlur={(e) => handleUpdateTitle(img.id, e.target.value)}
+                                            placeholder="Añadir título..."
+                                            style={{ width: '100%', padding: '8px', borderRadius: '6px', border: '1px solid #ddd', fontSize: '0.9rem', background: '#fcfcfc' }}
                                         />
                                     </div>
                                     <button 
                                         onClick={() => setConfirmDelete({ id: img.id, title: img.title })}
-                                        style={{ alignSelf: 'flex-end', padding: '10px', background: '#fff5f5', color: '#f03e3e', border: '1px solid #ffe3e3', borderRadius: '6px', cursor: 'pointer' }}
+                                        style={{ padding: '8px', background: '#fff5f5', color: '#f03e3e', border: 'none', borderRadius: '6px', cursor: 'pointer' }}
                                     >
                                         <Trash2 size={18} />
                                     </button>
