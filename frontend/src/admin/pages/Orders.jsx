@@ -1,6 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { fetchSales } from '../../services/api';
-import { Printer, Eye, Calendar, User, Hash, Search } from 'lucide-react';
+import { Printer, Eye, Calendar, User, Hash, Search, Filter } from 'lucide-react';
 import LoadingScreen from '../components/LoadingScreen';
 import './Orders.css';
 
@@ -9,10 +10,14 @@ const Orders = () => {
     const [loading, setLoading] = useState(true);
     const [selectedOrder, setSelectedOrder] = useState(null);
     const [searchTerm, setSearchTerm] = useState('');
+    const [searchParams] = useSearchParams();
+    const [filterType, setFilterType] = useState('all'); // 'all', 'daily', 'weekly', 'monthly'
 
     useEffect(() => {
+        const initialFilter = searchParams.get('filter');
+        if (initialFilter === 'today') setFilterType('daily');
         loadOrders();
-    }, []);
+    }, [searchParams]);
 
     const loadOrders = async () => {
         try {
@@ -25,6 +30,42 @@ const Orders = () => {
         }
     };
 
+    const filteredOrders = useMemo(() => {
+        let filtered = [...orders];
+
+        // 1. Time filter
+        const now = new Date();
+        if (filterType === 'daily') {
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            filtered = filtered.filter(o => new Date(o.date) >= today);
+        } else if (filterType === 'weekly') {
+            const lastWeek = new Date();
+            lastWeek.setDate(now.getDate() - 7);
+            filtered = filtered.filter(o => new Date(o.date) >= lastWeek);
+        } else if (filterType === 'monthly') {
+            const lastMonth = new Date();
+            lastMonth.setMonth(now.getMonth() - 1);
+            filtered = filtered.filter(o => new Date(o.date) >= lastMonth);
+        }
+
+        // 2. Search filter
+        if (searchTerm) {
+            const term = searchTerm.toLowerCase();
+            filtered = filtered.filter(o => 
+                o.id.toString().includes(term) ||
+                (o.customer_name || "").toLowerCase().includes(term) ||
+                (o.table_number || "").toLowerCase().includes(term)
+            );
+        }
+
+        return filtered;
+    }, [orders, filterType, searchTerm]);
+
+    const totalIncome = useMemo(() => {
+        return filteredOrders.reduce((acc, o) => acc + parseFloat(o.total_amount), 0);
+    }, [filteredOrders]);
+
     const handlePrint = (order) => {
         window.print();
     };
@@ -34,7 +75,27 @@ const Orders = () => {
     return (
         <div className="orders-container">
             <div className="orders-header">
-                <h2>Gestión de Pedidos</h2>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
+                    <h2 style={{ margin: 0 }}>Gestión de Pedidos</h2>
+                    <div className="filter-group-segmented" style={{ display: 'flex', background: '#f1f3f5', padding: '4px', borderRadius: '10px' }}>
+                        {[
+                            { id: 'all', label: 'TODO' },
+                            { id: 'daily', label: 'DIARIO' },
+                            { id: 'weekly', label: 'SEMANAL' },
+                            { id: 'monthly', label: 'MENSUAL' }
+                        ].map(f => (
+                            <button 
+                                key={f.id}
+                                onClick={() => setFilterType(f.id)}
+                                className={`mode-selector-btn ${filterType === f.id ? 'active' : ''}`}
+                                style={{ padding: '8px 15px', borderRadius: '8px', minWidth: '80px' }}
+                            >
+                                {f.label}
+                            </button>
+                        ))}
+                    </div>
+                </div>
+
                 <div className="orders-summary-group" style={{ display: 'flex', gap: '20px', alignItems: 'center' }}>
                     <div className="search-bar" style={{ position: 'relative', width: '300px' }}>
                         <Search size={18} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: '#888' }} />
@@ -49,11 +110,11 @@ const Orders = () => {
                     <div className="orders-stats">
                         <div className="stat-card">
                             <span>Pedidos</span>
-                            <strong>{orders.length}</strong>
+                            <strong>{filteredOrders.length}</strong>
                         </div>
                         <div className="stat-card">
                             <span>Ingresos</span>
-                            <strong>${Math.round(orders.reduce((acc, o) => acc + parseFloat(o.total_amount), 0)).toLocaleString('es-AR')}</strong>
+                            <strong style={{ color: '#2b8a3e' }}>${Math.round(totalIncome).toLocaleString('es-AR')}</strong>
                         </div>
                     </div>
                 </div>
@@ -73,11 +134,7 @@ const Orders = () => {
                             </tr>
                         </thead>
                         <tbody>
-                            {orders.filter(order => 
-                                (order.id.toString()).includes(searchTerm) ||
-                                (order.customer_name || "").toLowerCase().includes(searchTerm.toLowerCase()) ||
-                                (order.table_number || "").toLowerCase().includes(searchTerm.toLowerCase())
-                            ).map(order => (
+                            {filteredOrders.map(order => (
                                 <tr key={order.id} className={selectedOrder?.id === order.id ? 'selected' : ''} onClick={() => setSelectedOrder(order)}>
                                     <td data-label="ID">#{order.id}</td>
                                     <td data-label="Fecha">

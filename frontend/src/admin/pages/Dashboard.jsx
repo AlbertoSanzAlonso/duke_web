@@ -8,6 +8,8 @@ const Dashboard = () => {
     const [loading, setLoading] = useState(true);
     const [data, setData] = useState({
         todaySalesCount: 0,
+        pendingToday: 0,
+        completedToday: 0,
         activePromos: 0,
         todayHours: null,
         lowStockItems: []
@@ -32,6 +34,8 @@ const Dashboard = () => {
                 const todayStart = new Date();
                 todayStart.setHours(0, 0, 0, 0);
                 const todaysSales = sales.filter(s => new Date(s.date) >= todayStart);
+                const pendingToday = todaysSales.filter(s => s.status === 'PENDING').length;
+                const completedToday = todaysSales.filter(s => s.status === 'COMPLETED').length;
                 
                 // 2. Active Promos
                 const activePromos = menu.filter(e => e.category === 'Promos' && e.is_available).length;
@@ -48,6 +52,8 @@ const Dashboard = () => {
 
                 setData({
                     todaySalesCount: todaysSales.length,
+                    pendingToday,
+                    completedToday,
                     activePromos,
                     todayHours,
                     lowStockItems: lowStock
@@ -76,18 +82,21 @@ const Dashboard = () => {
 
             <div className="dash-grid">
                 {/* 1. PEDIDOS HOY */}
-                <div className="stat-card">
+                <Link to="/admin/pedidos-clientes?filter=today" className="stat-card" style={{ textDecoration: 'none' }}>
                     <div className="stat-icon-box icon-red">
                         <ShoppingBag size={24} />
                     </div>
                     <div className="stat-content">
                         <div className="stat-label">Pedidos de Hoy</div>
                         <div className="stat-value">{data.todaySalesCount}</div>
+                        <div style={{ fontSize: '0.75rem', color: '#666', marginTop: '4px' }}>
+                            <span style={{ color: '#f08c00', fontWeight: 'bold' }}>{data.pendingToday} pendientes</span> / <span style={{ color: '#2b8a3e', fontWeight: 'bold' }}>{data.completedToday} cobrados</span>
+                        </div>
                     </div>
                     <div style={{ color: '#2b8a3e', fontSize: '0.8rem', fontWeight: 'bold' }}>
                         <TrendingUp size={14} style={{ marginRight: '4px' }} /> EN VIVO
                     </div>
-                </div>
+                </Link>
 
                 {/* 2. PROMOS ACTIVAS */}
                 <div className="stat-card">
