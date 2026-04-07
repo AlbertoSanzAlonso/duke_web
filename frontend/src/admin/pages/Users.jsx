@@ -225,47 +225,52 @@ const Users = () => {
 
             {/* Modal for Create/Edit */}
             {isModalOpen && (
-                <div className="modal-overlay" style={{ background: 'rgba(0,0,0,0.6)' }}>
-                    <div className="modal-content" style={{ maxWidth: '600px', width: '90%' }}>
-                        <h3>{editingUser ? 'Editar Usuario' : 'Crear Nuevo Usuario'}</h3>
-                        <form onSubmit={handleSubmit} style={{ marginTop: '20px' }}>
-                            <div className="form-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px' }}>
-                                <div className="form-group">
-                                    <label><UserIcon size={14} /> Username</label>
+                <div className="modal-overlay" style={{ background: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(4px)', zIndex: 9999 }}>
+                    <div className="modal-content" style={{ maxWidth: '600px', width: '90%', background: '#fff', color: '#333', padding: '30px', borderRadius: '16px', boxShadow: '0 20px 40px rgba(0,0,0,0.2)', position: 'relative' }}>
+                        <h3 style={{ margin: '0 0 20px 0', fontSize: '1.5rem', borderBottom: '1px solid #eee', paddingBottom: '15px' }}>
+                            {editingUser ? 'Editar Usuario' : 'Crear Nuevo Usuario'}
+                        </h3>
+                        <form onSubmit={handleSubmit} style={{ marginTop: '0' }}>
+                            <div className="form-grid" style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) minmax(0, 1fr)', gap: '15px' }}>
+                                <div className="form-group" style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
+                                    <label style={{ color: '#666', fontSize: '0.85rem', fontWeight: 'bold' }}><UserIcon size={14} style={{ marginRight: '5px' }} /> USERNAME</label>
                                     <input 
                                         type="text" 
                                         value={formData.username} 
                                         onChange={e => setFormData({...formData, username: e.target.value})}
                                         required
                                         placeholder="ej: juanperez"
+                                        style={{ padding: '12px', borderRadius: '8px', border: '1px solid #ddd' }}
                                     />
                                 </div>
-                                <div className="form-group">
-                                    <label><Mail size={14} /> Email</label>
+                                <div className="form-group" style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
+                                    <label style={{ color: '#666', fontSize: '0.85rem', fontWeight: 'bold' }}><Mail size={14} style={{ marginRight: '5px' }} /> EMAIL</label>
                                     <input 
                                         type="email" 
                                         value={formData.email} 
                                         onChange={e => setFormData({...formData, email: e.target.value})}
                                         placeholder="ej: juan@gmail.com"
+                                        style={{ padding: '12px', borderRadius: '8px', border: '1px solid #ddd' }}
                                     />
                                 </div>
-                                <div className="form-group" style={{ gridColumn: 'span 2' }}>
-                                    <label><Key size={14} /> {editingUser ? 'Nueva Contraseña (dejar vacío para mantener)' : 'Contraseña'}</label>
+                                <div className="form-group" style={{ gridColumn: 'span 2', display: 'flex', flexDirection: 'column', gap: '5px' }}>
+                                    <label style={{ color: '#666', fontSize: '0.85rem', fontWeight: 'bold' }}><Key size={14} style={{ marginRight: '5px' }} /> {editingUser ? 'NUEVA CONTRASEÑA (OPCIONAL)' : 'CONTRASEÑA'}</label>
                                     <input 
                                         type="password" 
                                         value={formData.password} 
                                         onChange={e => setFormData({...formData, password: e.target.value})}
                                         required={!editingUser}
                                         placeholder="********"
+                                        style={{ padding: '12px', borderRadius: '8px', border: '1px solid #ddd' }}
                                     />
                                 </div>
                             </div>
 
                             <div style={{ marginTop: '25px' }}>
-                                <h4 style={{ marginBottom: '15px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                <h4 style={{ marginBottom: '15px', display: 'flex', alignItems: 'center', gap: '8px', color: '#222' }}>
                                     <Shield size={16} /> Permisos de Acceso
                                 </h4>
-                                <div className="permissions-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
+                                <div className="permissions-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(240px, 1fr))', gap: '10px' }}>
                                     <PermissionToggle 
                                         label="Uso de TPV" 
                                         active={formData.profile.can_use_tpv} 
@@ -300,8 +305,8 @@ const Users = () => {
                             </div>
 
                             <div className="modal-actions" style={{ marginTop: '30px', display: 'flex', gap: '10px' }}>
-                                <button type="button" className="btn-secondary" onClick={handleCloseModal} style={{ flex: 1 }}>CANCELAR</button>
-                                <button type="submit" className="btn-primary" style={{ flex: 1 }}>{editingUser ? 'GUARDAR CAMBIOS' : 'CREAR USUARIO'}</button>
+                                <button type="button" className="btn-secondary" onClick={handleCloseModal} style={{ flex: 1, padding: '15px', borderRadius: '8px', border: '1px solid #ddd', background: '#f8f9fa', cursor: 'pointer', fontWeight: 'bold' }}>CANCELAR</button>
+                                <button type="submit" className="btn-primary" style={{ flex: 1, padding: '15px', borderRadius: '8px', border: 'none', background: 'var(--admin-primary)', color: 'white', cursor: 'pointer', fontWeight: 'bold' }}>{editingUser ? 'GUARDAR CAMBIOS' : 'CREAR USUARIO'}</button>
                             </div>
                         </form>
                     </div>
