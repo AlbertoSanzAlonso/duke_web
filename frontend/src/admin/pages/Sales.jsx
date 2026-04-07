@@ -402,11 +402,27 @@ const Sales = () => {
                                 ) : (
                                     cart.map(item => (
                                         <div key={item.menu_entry} className="ticket-item" style={{ padding: '6px 0', borderBottom: '1px solid #eee' }}>
-                                            <div className="item-details" style={{ marginBottom: '2px', display: 'flex', justifyContent: 'space-between' }}>
-                                                <span className="item-name" style={{ fontSize: '0.85rem', fontWeight: '600' }}>{item.name}</span>
-                                                <span className="item-subtotal" style={{ fontSize: '0.85rem', fontWeight: 'bold' }}>${(parseFloat(item.price) * item.quantity).toLocaleString('es-AR')}</span>
+                                            <div className="item-details" style={{ marginBottom: '2px', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                                                <div style={{ display: 'flex', flexDirection: 'column' }}>
+                                                    <span className="item-name" style={{ fontSize: '0.85rem', fontWeight: '600' }}>{item.name}</span>
+                                                    {parseFloat(item.price) < parseFloat(item.originalPrice) && (
+                                                        <span style={{ fontSize: '0.7rem', color: '#f03e3e', fontWeight: 'bold' }}>
+                                                            Desc: −${(parseFloat(item.originalPrice) - parseFloat(item.price)).toLocaleString('es-AR')}
+                                                        </span>
+                                                    )}
+                                                </div>
+                                                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end' }}>
+                                                    <span className="item-subtotal" style={{ fontSize: '0.85rem', fontWeight: '900' }}>
+                                                        ${(parseFloat(item.price) * item.quantity).toLocaleString('es-AR')}
+                                                    </span>
+                                                    {parseFloat(item.price) < parseFloat(item.originalPrice) && (
+                                                        <span style={{ fontSize: '0.7rem', color: '#999', textDecoration: 'line-through' }}>
+                                                            ${(parseFloat(item.originalPrice) * item.quantity).toLocaleString('es-AR')}
+                                                        </span>
+                                                    )}
+                                                </div>
                                             </div>
-                                            <div className="item-controls" style={{ display: 'flex', alignItems: 'center', gap: '4px', justifyContent: 'space-between' }}>
+                                            <div className="item-controls" style={{ display: 'flex', alignItems: 'center', gap: '4px', justifyContent: 'space-between', marginTop: '4px' }}>
                                                 <div style={{ display: 'flex', alignItems: 'center', background: '#f1f3f5', borderRadius: '4px' }}>
                                                     <button onClick={() => updateQuantity(item.menu_entry, -1)} style={{ background: 'transparent', border: 'none', padding: '1px 6px', fontSize: '1rem', cursor: 'pointer' }}>−</button>
                                                     <span className="item-qty" style={{ fontWeight: '800', width: '15px', textAlign: 'center', fontSize: '0.75rem' }}>{item.quantity}</span>
