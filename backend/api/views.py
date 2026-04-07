@@ -633,10 +633,14 @@ def AIHelpView(request):
                 'Authorization': f'Bearer {api_key}'
             }
         )
-        with urllib.request.urlopen(req, timeout=12) as response:
+        with urllib.request.urlopen(req, timeout=15) as response:
             res_data = json.loads(response.read().decode('utf-8'))
             answer = res_data['choices'][0]['message']['content']
             return Response({'answer': answer})
+    except urllib.error.HTTPError as he:
+        err_msg = he.read().decode('utf-8')
+        print(f"Groq HTTP Error: {err_msg}")
+        return Response({'error': f'Error de la API de Groq: {err_msg}'}, status=502)
     except Exception as e:
-        print(f"Groq API Error: {e}")
-        return Response({'error': f'Error de comunicación con la IA: {str(e)}'}, status=502)
+        print(f"Groq General Error: {e}")
+        return Response({'error': f'Ocurrió un error inesperado al hablar con la IA: {str(e)}'}, status=502)
