@@ -157,8 +157,8 @@ const Accounting = () => {
         if (isEditing) {
             return (
                 <div style={{ display: 'flex', gap: '8px', justifyContent: 'flex-end' }}>
-                    <button onClick={() => handleUpdate(type, item.id)} className="save-btn" title="Guardar"><Save size={18} /></button>
-                    <button onClick={() => setEditingId(null)} className="cancel-btn" title="Cancelar"><X size={18} /></button>
+                    <button onClick={(e) => { e.stopPropagation(); handleUpdate(type, item.id); }} className="save-btn" title="Guardar"><Save size={18} /></button>
+                    <button onClick={(e) => { e.stopPropagation(); setEditingId(null); }} className="cancel-btn" title="Cancelar"><X size={18} /></button>
                 </div>
             );
         }
@@ -166,7 +166,7 @@ const Accounting = () => {
             <div style={{ display: 'flex', gap: '8px', justifyContent: 'flex-end' }}>
                 {type === 'sal' && (
                     <button 
-                        onClick={() => window.open(`/ticket/${item.id}`, '_blank')} 
+                        onClick={(e) => { e.stopPropagation(); window.open(`/ticket/${item.id}`, '_blank'); }} 
                         className="edit-btn" 
                         title="Ver Ticket"
                         style={{ color: '#7950f2' }}
@@ -174,8 +174,9 @@ const Accounting = () => {
                         <FileText size={18} />
                     </button>
                 )}
-                <button onClick={() => startEditing(type, item)} className="edit-btn" title="Editar"><Edit2 size={18} /></button>
-                <button onClick={() => {
+                <button onClick={(e) => { e.stopPropagation(); startEditing(type, item); }} className="edit-btn" title="Editar"><Edit2 size={18} /></button>
+                <button onClick={(e) => {
+                    e.stopPropagation();
                     if (type === 'exp') handleDeleteExpense(item.id);
                     else if (type === 'ord') {
                         if(window.confirm(`¿Eliminar pedido de ${item.supplier_name}?`)) {
