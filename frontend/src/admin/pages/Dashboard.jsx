@@ -87,25 +87,22 @@ const Dashboard = () => {
                         <ShoppingBag size={24} />
                     </div>
                     <div className="stat-content">
-                        <div className="stat-label">Pedidos de Hoy</div>
                         <div className="stat-value">{data.todaySalesCount}</div>
+                        <div className="stat-label">Pedidos de Hoy</div>
                         <div style={{ fontSize: '0.75rem', color: '#666', marginTop: '4px' }}>
                             <span style={{ color: '#f08c00', fontWeight: 'bold' }}>{data.pendingToday} pendientes</span> / <span style={{ color: '#2b8a3e', fontWeight: 'bold' }}>{data.completedToday} cobrados</span>
                         </div>
                     </div>
-                    <div style={{ color: '#2b8a3e', fontSize: '0.8rem', fontWeight: 'bold' }}>
-                        <TrendingUp size={14} style={{ marginRight: '4px' }} /> EN VIVO
-                    </div>
                 </Link>
 
                 {/* 2. PROMOS ACTIVAS */}
-                <div className="stat-card">
-                    <div className="stat-icon-box icon-orange">
+                <div className="stat-card" style={{ flexDirection: 'column', textAlign: 'center' }}>
+                    <div className="stat-icon-box icon-orange" style={{ margin: '0 auto 10px' }}>
                         <Star size={24} />
                     </div>
                     <div className="stat-content">
                         <div className="stat-label">Promos en Cartelera</div>
-                        <div className="stat-value">{data.activePromos}</div>
+                        <div className="stat-value" style={{ fontSize: '1.8rem' }}>{data.activePromos}</div>
                     </div>
                 </div>
 

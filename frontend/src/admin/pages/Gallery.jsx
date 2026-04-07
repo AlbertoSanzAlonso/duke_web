@@ -1,8 +1,129 @@
 import React, { useState, useEffect } from 'react';
+import { 
+    DndContext, 
+    closestCenter,
+    KeyboardSensor,
+    PointerSensor,
+    useSensor,
+    useSensors,
+    DragOverlay,
+    defaultDropAnimationSideEffects
+} from '@dnd-kit/core';
+import {
+    arrayMove,
+    SortableContext,
+    sortableKeyboardCoordinates,
+    rectSortingStrategy,
+    useSortable
+} from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
+
 import { fetchGalleryImages, createGalleryImage, deleteGalleryImage, updateGalleryImage } from '../../services/api';
 import LoadingScreen from '../components/LoadingScreen';
 import Toast from '../components/Toast';
-import { Image as ImageIcon, Plus, Trash2, X, AlertTriangle, Save, Eye, EyeOff, Move } from 'lucide-react';
+import { Image as ImageIcon, Plus, Trash2, X, AlertTriangle, Eye, EyeOff, Move } from 'lucide-react';
+
+const SortableItem = ({ img, confirmDelete, handleToggleActive, handleUpdateTitle }) => {
+    const {
+        attributes,
+        listeners,
+        setNodeRef,
+        transform,
+        transition,
+        isDragging
+    } = useSortable({ id: img.id });
+
+    const style = {
+        transform: CSS.Transform.toString(transform),
+        transition,
+        zIndex: isDragging ? 100 : 1,
+        opacity: isDragging ? 0.4 : (!img.is_active ? 0.6 : 1),
+        background: '#fff', 
+        borderRadius: '15px', 
+        overflow: 'hidden', 
+        boxShadow: isDragging ? '0 15px 30px rgba(0,0,0,0.2)' : '0 4px 12px rgba(0,0,0,0.05)',
+        border: isDragging ? '2px solid var(--admin-primary)' : '1px solid #eee',
+        position: 'relative'
+    };
+
+    return (
+        <div ref={setNodeRef} style={style}>
+            <div style={{ height: '220px', background: '#eee', position: 'relative' }}>
+                <img src={img.image} alt={img.title} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                
+                <div style={{ position: 'absolute', top: '10px', right: '10px', zIndex: 10, display: 'flex', gap: '8px' }}>
+                    <button 
+                        onClick={() => handleToggleActive(img.id, img.is_active)}
+                        style={{
+                            background: img.is_active ? '#40c057' : '#e31837',
+                            color: 'white',
+                            border: 'none',
+                            width: '36px',
+                            height: '36px',
+                            borderRadius: '50%',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            cursor: 'pointer',
+                            boxShadow: '0 2px 8px rgba(0,0,0,0.2)'
+                        }}
+                        title={img.is_active ? "Ocultar de la Web" : "Hacer Visible"}
+                    >
+                        {img.is_active ? <Eye size={18} /> : <EyeOff size={18} />}
+                    </button>
+                </div>
+
+                <div 
+                    {...attributes} 
+                    {...listeners} 
+                    style={{ 
+                        position: 'absolute', bottom: '12px', left: '12px', 
+                        background: 'rgba(0,0,0,0.8)', color: 'white', 
+                        width: '36px', height: '36px', 
+                        borderRadius: '50%', display: 'flex', 
+                        alignItems: 'center', justifyContent: 'center',
+                        cursor: 'grab',
+                        boxShadow: '0 4px 12px rgba(0,0,0,0.3)',
+                        border: '1.5px solid rgba(255,255,255,0.4)',
+                        zIndex: 20
+                    }}
+                >
+                    <Move size={18} />
+                </div>
+
+                {!img.is_active && (
+                    <div style={{ 
+                        position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, 
+                        background: 'rgba(0,0,0,0.4)', color: 'white', 
+                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                        fontSize: '0.9rem', fontWeight: 'bold', pointerEvents: 'none'
+                    }}>
+                        PAUSADA (OCULTA)
+                    </div>
+                )}
+            </div>
+            <div style={{ padding: '15px' }}>
+                <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
+                    <div style={{ flex: 1 }}>
+                        <input 
+                            type="text" 
+                            defaultValue={img.title} 
+                            onBlur={(e) => handleUpdateTitle(img.id, e.target.value)}
+                            placeholder="Añadir título..."
+                            style={{ width: '100%', padding: '8px', borderRadius: '6px', border: '1px solid #ddd', fontSize: '0.9rem', background: '#fcfcfc' }}
+                        />
+                    </div>
+                    <button 
+                        onClick={() => confirmDelete({ id: img.id, title: img.title })}
+                        style={{ padding: '8px', background: '#fff5f5', color: '#f03e3e', border: 'none', borderRadius: '6px', cursor: 'pointer' }}
+                    >
+                        <Trash2 size={18} />
+                    </button>
+                </div>
+            </div>
+        </div>
+    );
+};
 
 const Gallery = () => {
     const [gallery, setGallery] = useState([]);
@@ -12,7 +133,17 @@ const Gallery = () => {
     const [newImage, setNewImage] = useState({ title: '', image: null, order: 0 });
     const [imgSaving, setImgSaving] = useState(false);
     const [confirmDelete, setConfirmDelete] = useState(null);
-    const [draggedItem, setDraggedItem] = useState(null);
+    
+    const sensors = useSensors(
+        useSensor(PointerSensor, {
+            activationConstraint: {
+                distance: 8,
+            },
+        }),
+        useSensor(KeyboardSensor, {
+            coordinateGetter: sortableKeyboardCoordinates,
+        })
+    );
 
     useEffect(() => {
         loadData();
@@ -30,6 +161,34 @@ const Gallery = () => {
         }
     };
 
+    const handleDragEnd = async (event) => {
+        const { active, over } = event;
+
+        if (active.id !== over?.id) {
+            setGallery((items) => {
+                const oldIndex = items.findIndex((item) => item.id === active.id);
+                const newIndex = items.findIndex((item) => item.id === over.id);
+
+                const newItems = arrayMove(items, oldIndex, newIndex);
+                
+                // Optimized backend update
+                saveOrder(newItems);
+                
+                return newItems;
+            });
+        }
+    };
+
+    const saveOrder = async (newItems) => {
+        try {
+            const updates = newItems.map((item, idx) => ({ id: item.id, order: idx }));
+            await Promise.all(updates.map(u => updateGalleryImage(u.id, { order: u.order })));
+            setToast({ message: "Orden actualizado", type: 'success' });
+        } catch (error) {
+            console.error("Error saving gallery order:", error);
+        }
+    };
+
     const handleAddImage = async (e) => {
         e.preventDefault();
         if (!newImage.image) return;
@@ -38,7 +197,7 @@ const Gallery = () => {
             const formData = new FormData();
             formData.append('title', newImage.title);
             formData.append('image', newImage.image);
-            formData.append('order', newImage.order);
+            formData.append('order', gallery.length);
             await createGalleryImage(formData);
             setIsAddingImg(false);
             setNewImage({ title: '', image: null, order: 0 });
@@ -72,15 +231,6 @@ const Gallery = () => {
         }
     };
 
-    const handleUpdateOrder = async (id, order) => {
-        try {
-            await updateGalleryImage(id, { order });
-            loadData(); // Reload and sort
-        } catch (error) {
-            console.error(error);
-        }
-    };
-
     const handleToggleActive = async (id, currentStatus) => {
         try {
             await updateGalleryImage(id, { is_active: !currentStatus });
@@ -88,47 +238,6 @@ const Gallery = () => {
             setToast({ message: !currentStatus ? 'Imagen visible en la web' : 'Imagen oculta al público', type: 'success' });
         } catch (error) {
             setToast({ message: 'Error al cambiar visibilidad', type: 'error' });
-        }
-    };
-
-    const onDragStart = (e, index) => {
-        setDraggedItem(gallery[index]);
-        e.dataTransfer.effectAllowed = "move";
-        e.dataTransfer.setData("text/html", e.target.parentNode);
-        e.dataTransfer.setDragImage(e.target.parentNode, 20, 20);
-    };
-
-    const onDragOver = (e, index) => {
-        e.preventDefault(); // Essential for drop to work
-        const draggedOverItem = gallery[index];
-
-        // if the item is dragged over itself, ignore
-        if (draggedItem === draggedOverItem) {
-            return;
-        }
-
-        // Only update if index actually changed to prevent chaotic jumping
-        const currentIdx = gallery.indexOf(draggedItem);
-        if (currentIdx === index) return;
-
-        // filter out the currently dragged item
-        let items = gallery.filter(item => item.id !== draggedItem.id);
-
-        // add the dragged item after the dragged over item
-        items.splice(index, 0, draggedItem);
-
-        setGallery(items);
-    };
-
-    const onDragEnd = async () => {
-        setDraggedItem(null);
-        // Save new order to backend
-        try {
-            const updates = gallery.map((item, idx) => ({ id: item.id, order: idx }));
-            await Promise.all(updates.map(u => updateGalleryImage(u.id, { order: u.order })));
-            setToast({ message: "Orden actualizado", type: 'success' });
-        } catch (error) {
-            console.error("Error saving gallery order:", error);
         }
     };
 
@@ -170,103 +279,36 @@ const Gallery = () => {
                 </button>
             </div>
 
-            <p style={{ color: '#666', marginBottom: '40px' }}>Estas son las fotos que se muestran en el carrusel de la página de inicio (Galería del Local).</p>
+            <p style={{ color: '#666', marginBottom: '40px' }}>Reordena las fotos arrastrando desde el icono de las flechas. El orden se guarda automáticamente.</p>
 
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '25px' }}>
-                {gallery.length === 0 ? (
-                    <div style={{ gridColumn: '1/-1', textAlign: 'center', padding: '60px', background: '#f8f9fa', borderRadius: '15px', color: '#999' }}>
-                        No hay fotos en la galería todavía.
+            <DndContext 
+                sensors={sensors}
+                collisionDetection={closestCenter}
+                onDragEnd={handleDragEnd}
+            >
+                <SortableContext 
+                    items={gallery.map(i => i.id)}
+                    strategy={rectSortingStrategy}
+                >
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '25px' }}>
+                        {gallery.length === 0 ? (
+                            <div style={{ gridColumn: '1/-1', textAlign: 'center', padding: '60px', background: '#f8f9fa', borderRadius: '15px', color: '#999' }}>
+                                No hay fotos en la galería todavía.
+                            </div>
+                        ) : (
+                            gallery.map((img) => (
+                                <SortableItem 
+                                    key={img.id} 
+                                    img={img} 
+                                    confirmDelete={setConfirmDelete}
+                                    handleToggleActive={handleToggleActive}
+                                    handleUpdateTitle={handleUpdateTitle}
+                                />
+                            ))
+                        )}
                     </div>
-                ) : (
-                    gallery.map((img, index) => (
-                        <div key={img.id} 
-                            draggable
-                            onDragStart={(e) => onDragStart(e, index)}
-                            onDragOver={(e) => onDragOver(e, index)}
-                            onDragEnd={onDragEnd}
-                            style={{ 
-                                background: '#fff', 
-                                borderRadius: '15px', 
-                                overflow: 'hidden', 
-                                boxShadow: draggedItem?.id === img.id ? '0 10px 20px rgba(0,0,0,0.2)' : '0 4px 12px rgba(0,0,0,0.05)',
-                                border: draggedItem?.id === img.id ? '2px solid var(--admin-primary)' : '1px solid #eee',
-                                opacity: !img.is_active ? 0.6 : (draggedItem?.id === img.id ? 0.5 : 1),
-                                transition: 'all 0.2s',
-                                cursor: 'grab',
-                                position: 'relative'
-                            }}>
-                            <div style={{ height: '220px', background: '#eee', position: 'relative' }}>
-                                <img src={img.image} alt={img.title} style={{ width: '100%', height: '100%', objectFit: 'cover', pointerEvents: 'none' }} />
-                                
-                                <div style={{ position: 'absolute', top: '10px', right: '10px', zIndex: 10, display: 'flex', gap: '8px' }}>
-                                    <button 
-                                        onClick={() => handleToggleActive(img.id, img.is_active)}
-                                        style={{
-                                            background: img.is_active ? '#40c057' : '#e31837',
-                                            color: 'white',
-                                            border: 'none',
-                                            width: '36px',
-                                            height: '36px',
-                                            borderRadius: '50%',
-                                            display: 'flex',
-                                            alignItems: 'center',
-                                            justifyContent: 'center',
-                                            cursor: 'pointer',
-                                            boxShadow: '0 2px 8px rgba(0,0,0,0.2)'
-                                        }}
-                                        title={img.is_active ? "Ocultar de la Web" : "Hacer Visible"}
-                                    >
-                                        {img.is_active ? <Eye size={18} /> : <EyeOff size={18} />}
-                                    </button>
-                                </div>
-
-                                <div style={{ 
-                                    position: 'absolute', bottom: '12px', left: '12px', 
-                                    background: 'rgba(0,0,0,0.7)', color: 'white', 
-                                    width: '32px', height: '32px', 
-                                    borderRadius: '50%', display: 'flex', 
-                                    alignItems: 'center', justifyContent: 'center',
-                                    pointerEvents: 'none',
-                                    boxShadow: '0 2px 8px rgba(0,0,0,0.3)',
-                                    border: '1.5px solid rgba(255,255,255,0.3)'
-                                }}>
-                                    <Move size={16} />
-                                </div>
-
-                                {!img.is_active && (
-                                    <div style={{ 
-                                        position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, 
-                                        background: 'rgba(0,0,0,0.4)', color: 'white', 
-                                        display: 'flex', alignItems: 'center', justifyContent: 'center',
-                                        fontSize: '0.9rem', fontWeight: 'bold', pointerEvents: 'none'
-                                    }}>
-                                        PAUSADA (OCULTA)
-                                    </div>
-                                )}
-                            </div>
-                            <div style={{ padding: '15px' }}>
-                                <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
-                                    <div style={{ flex: 1 }}>
-                                        <input 
-                                            type="text" 
-                                            defaultValue={img.title} 
-                                            onBlur={(e) => handleUpdateTitle(img.id, e.target.value)}
-                                            placeholder="Añadir título..."
-                                            style={{ width: '100%', padding: '8px', borderRadius: '6px', border: '1px solid #ddd', fontSize: '0.9rem', background: '#fcfcfc' }}
-                                        />
-                                    </div>
-                                    <button 
-                                        onClick={() => setConfirmDelete({ id: img.id, title: img.title })}
-                                        style={{ padding: '8px', background: '#fff5f5', color: '#f03e3e', border: 'none', borderRadius: '6px', cursor: 'pointer' }}
-                                    >
-                                        <Trash2 size={18} />
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                    ))
-                )}
-            </div>
+                </SortableContext>
+            </DndContext>
 
             {/* Modal para añadir imagen */}
             {isAddingImg && (
@@ -297,7 +339,7 @@ const Gallery = () => {
                                         cursor: 'pointer' 
                                     }} 
                                     required 
-                                />
+                                 />
                             </div>
                             <div style={{ display: 'flex', gap: '15px', marginTop: '10px' }}>
                                 <button type="button" onClick={() => setIsAddingImg(false)} style={{ flex: 1, padding: '12px', background: '#f8f9fa', border: 'none', borderRadius: '8px', fontWeight: 'bold', cursor: 'pointer' }}>Cancelar</button>

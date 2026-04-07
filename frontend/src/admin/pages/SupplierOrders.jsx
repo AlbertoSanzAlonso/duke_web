@@ -22,6 +22,10 @@ const SupplierOrders = () => {
     const [itemQty, setItemQty] = useState('');
     const [itemCost, setItemCost] = useState('');
 
+    // New Item Flow
+    const [isAddingNewItem, setIsAddingNewItem] = useState(false);
+    const [newItemData, setNewItemData] = useState({ name: '', unit: 'unidades', category: 'Otros' });
+
     useEffect(() => {
         loadData();
     }, []);
@@ -42,20 +46,52 @@ const SupplierOrders = () => {
         }
     };
 
-    const addItemToOrder = () => {
-        if (!selectedItemId || !itemQty || !itemCost) return;
-        
-        const invItem = inventoryItems.find(i => i.id === parseInt(selectedItemId));
-        if (!invItem) return;
+    const addItemToOrder = async () => {
+        if (isAddingNewItem) {
+            if (!newItemData.name || !itemQty || !itemCost) return;
+            setIsSaving(true);
+            try {
+                // 1. Create the item in inventory first
+                const created = await createInventoryItem({
+                    name: newItemData.name,
+                    unit: newItemData.unit,
+                    category: newItemData.category,
+                    quantity: 0 // Will be updated by the order item save in backend
+                });
+                
+                // 2. Add to order list
+                setOrderItems([...orderItems, {
+                    item: created.id,
+                    name: created.name,
+                    quantity: parseFloat(itemQty),
+                    cost: parseFloat(itemCost)
+                }]);
+                
+                // 3. Reset and refresh inventory for subsequent additions
+                const invData = await fetchInventory();
+                setInventoryItems(invData);
+                setNewItemData({ name: '', unit: 'unidades', category: 'Otros' });
+                setIsAddingNewItem(false);
+            } catch (err) {
+                setToast({ message: "Error al crear producto nuevo", type: 'error' });
+            } finally {
+                setIsSaving(false);
+            }
+        } else {
+            if (!selectedItemId || !itemQty || !itemCost) return;
+            
+            const invItem = inventoryItems.find(i => i.id === parseInt(selectedItemId));
+            if (!invItem) return;
 
-        setOrderItems([...orderItems, {
-            item: invItem.id,
-            name: invItem.name,
-            quantity: parseFloat(itemQty),
-            cost: parseFloat(itemCost)
-        }]);
+            setOrderItems([...orderItems, {
+                item: invItem.id,
+                name: invItem.name,
+                quantity: parseFloat(itemQty),
+                cost: parseFloat(itemCost)
+            }]);
+        }
 
-        // Reset item add form
+        // Reset common fields
         setSelectedItemId('');
         setItemQty('');
         setItemCost('');
@@ -133,22 +169,72 @@ const SupplierOrders = () => {
 
                         {/* Selector de Artículos */}
                         <div style={{ background: '#f8f9fa', padding: '15px', borderRadius: '12px', border: '1px solid #eee' }}>
-                            <h4 style={{ margin: '0 0 15px 0', fontSize: '0.9rem', color: '#555' }}>Añadir Artículos al Ticket</h4>
-                            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                                <select 
-                                    value={selectedItemId} 
-                                    onChange={e => setSelectedItemId(e.target.value)}
-                                    style={{ width: '100%', padding: '10px', borderRadius: '8px' }}
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '15px' }}>
+                                <h4 style={{ margin: 0, fontSize: '0.9rem', color: '#555' }}>
+                                    {isAddingNewItem ? "REGISTRAR PRODUCTO NUEVO" : "Añadir del Inventario"}
+                                </h4>
+                                <button 
+                                    type="button" 
+                                    onClick={() => setIsAddingNewItem(!isAddingNewItem)}
+                                    style={{ background: isAddingNewItem ? '#333' : '#fff', color: isAddingNewItem ? '#fff' : '#333', border: '1px solid #ccc', borderRadius: '6px', padding: '4px 8px', fontSize: '0.7rem', cursor: 'pointer', fontWeight: 'bold' }}
                                 >
-                                    <option value="">Seleccionar del Inventario...</option>
-                                    {inventoryItems.map(i => (
-                                        <option key={i.id} value={i.id}>{i.name} ({i.category})</option>
-                                    ))}
-                                </select>
+                                    {isAddingNewItem ? "CANCELAR" : "+ PRODUCTO NUEVO"}
+                                </button>
+                            </div>
+                            
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                                {isAddingNewItem ? (
+                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                                        <input 
+                                            type="text" 
+                                            placeholder="Nombre del producto nuevo..." 
+                                            value={newItemData.name}
+                                            onChange={e => setNewItemData({...newItemData, name: e.target.value})}
+                                            style={{ width: '100%', padding: '10px', borderRadius: '8px' }}
+                                        />
+                                        <div style={{ display: 'flex', gap: '8px' }}>
+                                            <select 
+                                                value={newItemData.unit}
+                                                onChange={e => setNewItemData({...newItemData, unit: e.target.value})}
+                                                style={{ flex: 1, padding: '10px', borderRadius: '8px' }}
+                                            >
+                                                <option value="unidades">Unidades</option>
+                                                <option value="kg">Kilogramos</option>
+                                                <option value="litros">Litros</option>
+                                                <option value="gramos">Gramos</option>
+                                                <option value="paquetes">Paquetes</option>
+                                            </select>
+                                            <select 
+                                                value={newItemData.category}
+                                                onChange={e => setNewItemData({...newItemData, category: e.target.value})}
+                                                style={{ flex: 1, padding: '10px', borderRadius: '8px' }}
+                                            >
+                                                <option value="Mercadería">Mercadería</option>
+                                                <option value="Materia Prima">Materia Prima</option>
+                                                <option value="Bebidas">Bebidas</option>
+                                                <option value="Limpieza">Limpieza</option>
+                                                <option value="Otros">Otros</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                ) : (
+                                    <select 
+                                        value={selectedItemId} 
+                                        onChange={e => setSelectedItemId(e.target.value)}
+                                        style={{ width: '100%', padding: '10px', borderRadius: '8px' }}
+                                    >
+                                        <option value="">Seleccionar del Inventario...</option>
+                                        {inventoryItems.map(i => (
+                                            <option key={i.id} value={i.id}>{i.name} ({i.category})</option>
+                                        ))}
+                                    </select>
+                                )}
+
                                 <div style={{ display: 'flex', gap: '10px' }}>
                                     <input 
                                         type="number" 
                                         placeholder="Cant." 
+                                        step="0.1"
                                         value={itemQty} 
                                         onChange={e => setItemQty(e.target.value)} 
                                         style={{ flex: 1, padding: '10px', borderRadius: '8px' }}
@@ -164,9 +250,10 @@ const SupplierOrders = () => {
                                 <button 
                                     type="button" 
                                     onClick={addItemToOrder}
+                                    disabled={isSaving}
                                     style={{ background: '#333', color: 'white', border: 'none', padding: '10px', borderRadius: '8px', cursor: 'pointer', fontWeight: 'bold' }}
                                 >
-                                    Añadir al Listado
+                                    {isAddingNewItem ? "CREAR Y AÑADIR" : "AÑADIR AL LISTADO"}
                                 </button>
                             </div>
                         </div>

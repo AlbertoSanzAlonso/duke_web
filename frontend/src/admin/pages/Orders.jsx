@@ -81,8 +81,21 @@ const Orders = () => {
     return (
         <div className="orders-container">
             <div className="orders-header">
-                <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '20px', flex: 1 }}>
                     <h2 style={{ margin: 0 }}>Gestión de Pedidos</h2>
+                    <div className="search-bar" style={{ position: 'relative', maxWidth: '300px', flex: 1 }}>
+                        <Search size={18} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: '#888' }} />
+                        <input 
+                            type="text" 
+                            placeholder="Buscar por ID, nombre o mesa..." 
+                            value={searchTerm}
+                            onChange={(e) => setSearchTerm(e.target.value)}
+                            style={{ padding: '10px 15px 10px 40px', borderRadius: '10px', border: '1px solid #ddd', fontSize: '0.9rem', width: '100%', background: '#fff' }}
+                        />
+                    </div>
+                </div>
+
+                <div className="orders-summary-group" style={{ display: 'flex', gap: '20px', alignItems: 'center' }}>
                     <div className="filter-group-segmented" style={{ display: 'flex', background: '#f1f3f5', padding: '4px', borderRadius: '10px' }}>
                         {[
                             { id: 'all', label: 'TODO' },
@@ -99,19 +112,6 @@ const Orders = () => {
                                 {f.label}
                             </button>
                         ))}
-                    </div>
-                </div>
-
-                <div className="orders-summary-group" style={{ display: 'flex', gap: '20px', alignItems: 'center' }}>
-                    <div className="search-bar" style={{ position: 'relative', width: '300px' }}>
-                        <Search size={18} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: '#888' }} />
-                        <input 
-                            type="text" 
-                            placeholder="Buscar por ID, cliente o entrega..." 
-                            value={searchTerm}
-                            onChange={(e) => setSearchTerm(e.target.value)}
-                            style={{ padding: '10px 15px 10px 40px', borderRadius: '10px', border: '1px solid #ddd', fontSize: '0.9rem', width: '100%', background: '#fff' }}
-                        />
                     </div>
                     <div className="orders-stats">
                         <div className="stat-card">

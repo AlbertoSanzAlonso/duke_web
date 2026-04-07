@@ -28,6 +28,9 @@ const Accounting = () => {
     // Edit states
     const [editingId, setEditingId] = useState(null); // format: 'type-id' e.g. 'exp-1'
     const [editForm, setEditForm] = useState({ description: '', amount: '', category: '' });
+    
+    // Detail Modal state
+    const [detailItem, setDetailItem] = useState(null);
 
     // ... (rest of form states)
     const [desc, setDesc] = useState('');
@@ -248,6 +251,12 @@ const Accounting = () => {
     const totalExpenses = totalSupplierDebt + totalManualExpenses;
     const balance = totalIncome - totalExpenses;
 
+    const mergedItems = [
+        ...filteredExpenses.map(e => ({ ...e, typeIndicator: 'exp' })),
+        ...filteredSupplierOrders.map(o => ({ ...o, typeIndicator: 'ord' })),
+        ...filteredSales.map(s => ({ ...s, typeIndicator: 'sal' }))
+    ].sort((a, b) => new Date(b.date) - new Date(a.date));
+
     if (loading) return <LoadingScreen />;
 
     return (
@@ -409,128 +418,169 @@ const Accounting = () => {
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    {filteredExpenses.map(e => {
-                                        const isEditing = editingId === `exp-${e.id}`;
-                                        return (
-                                            <tr key={`me-${e.id}`}>
-                                                <td data-label="Fecha">{new Date(e.date).toLocaleDateString()}</td>
-                                                <td data-label="Tipo"><span className="badge badge-manual">Gasto</span></td>
-                                                <td data-label="Descripción">
-                                                    {isEditing ? (
-                                                        <input 
-                                                            type="text" 
-                                                            value={editForm.description} 
-                                                            onChange={val => setEditForm({...editForm, description: val.target.value})}
-                                                            className="inline-edit-input"
-                                                        />
-                                                    ) : e.description}
-                                                </td>
-                                                <td data-label="Categoría">
-                                                    {isEditing ? (
-                                                        <select 
-                                                            value={editForm.category} 
-                                                            onChange={val => setEditForm({...editForm, category: val.target.value})}
-                                                            className="inline-edit-input"
-                                                        >
-                                                            <option value="Local">Local / Suministros</option>
-                                                            <option value="Sueldos">Sueldos / Personal</option>
-                                                            <option value="Mercadería">Mercadería</option>
-                                                            <option value="Publicidad">Publicidad</option>
-                                                            <option value="Otros">Otros</option>
-                                                        </select>
-                                                    ) : e.category}
-                                                </td>
-                                                <td data-label="Importe" className="txt-right negative">
-                                                    {isEditing ? (
-                                                        <input 
-                                                            type="number" 
-                                                            value={editForm.amount} 
-                                                            onChange={val => setEditForm({...editForm, amount: val.target.value})}
-                                                            className="inline-edit-input txt-right"
-                                                            style={{ width: '100px' }}
-                                                        />
-                                                    ) : `-$${Math.round(parseFloat(e.amount)).toLocaleString('es-AR')}`}
-                                                </td>
-                                                <td data-label="Acción">
-                                                    {renderActionButtons('exp', e)}
-                                                </td>
-                                            </tr>
-                                        );
-                                    })}
-                                    {filteredSupplierOrders.map(o => {
-                                        const isEditing = editingId === `ord-${o.id}`;
-                                        return (
-                                            <tr key={`so-${o.id}`}>
-                                                <td data-label="Fecha">{new Date(o.date).toLocaleDateString()}</td>
-                                                <td data-label="Tipo"><span className="badge badge-order">Proveedor</span></td>
-                                                <td data-label="Descripción">
-                                                    {isEditing ? (
-                                                        <input 
-                                                            type="text" 
-                                                            value={editForm.description} 
-                                                            onChange={val => setEditForm({...editForm, description: val.target.value})}
-                                                            className="inline-edit-input"
-                                                        />
-                                                    ) : `${o.supplier_name} (Pedido #${o.id})`}
-                                                </td>
-                                                <td data-label="Categoría">Materia Prima</td>
-                                                <td data-label="Importe" className="txt-right negative">
-                                                    {isEditing ? (
-                                                        <input 
-                                                            type="number" 
-                                                            value={editForm.amount} 
-                                                            onChange={val => setEditForm({...editForm, amount: val.target.value})}
-                                                            className="inline-edit-input txt-right"
-                                                            style={{ width: '100px' }}
-                                                        />
-                                                    ) : `-$${Math.round(parseFloat(o.total_cost)).toLocaleString('es-AR')}`}
-                                                </td>
-                                                <td data-label="Acción">
-                                                    {renderActionButtons('ord', o)}
-                                                </td>
-                                            </tr>
-                                        );
-                                    })}
-                                    {filteredSales.slice(0, 50).map(s => {
-                                        const isEditing = editingId === `sal-${s.id}`;
-                                        return (
-                                            <tr key={`s-${s.id}`}>
-                                                <td data-label="Fecha">{new Date(s.date).toLocaleDateString()}</td>
-                                                <td data-label="Tipo"><span className="badge badge-income">Ingreso</span></td>
-                                                <td data-label="Descripción">
-                                                    {isEditing ? (
-                                                        <input 
-                                                            type="text" 
-                                                            value={editForm.description} 
-                                                            onChange={val => setEditForm({...editForm, description: val.target.value})}
-                                                            className="inline-edit-input"
-                                                        />
-                                                    ) : `Venta #${s.id} ${s.customer_name ? `(${s.customer_name})` : ''}`}
-                                                </td>
-                                                <td data-label="Categoría">Venta TPV</td>
-                                                <td data-label="Importe" className="txt-right positive">
-                                                    {isEditing ? (
-                                                        <input 
-                                                            type="number" 
-                                                            value={editForm.amount} 
-                                                            onChange={val => setEditForm({...editForm, amount: val.target.value})}
-                                                            className="inline-edit-input txt-right"
-                                                            style={{ width: '100px' }}
-                                                        />
-                                                    ) : `+$${Math.round(parseFloat(s.total_amount)).toLocaleString('es-AR')}`}
-                                                </td>
-                                                <td data-label="Acción">
-                                                    {renderActionButtons('sal', s)}
-                                                </td>
-                                            </tr>
-                                        );
-                                    })}
+                                {mergedItems.slice(0, 100).map(item => {
+                                    const type = item.typeIndicator;
+                                    const isEditing = editingId === `${type}-${item.id}`;
+                                    const dateObj = new Date(item.date);
+                                    
+                                    // Detect amounts based on type
+                                    const amountVal = type === 'exp' ? item.amount : type === 'ord' ? item.total_cost : item.total_amount;
+                                    const description = type === 'exp' ? item.description : type === 'ord' ? `${item.supplier_name} (Pedido #${item.id})` : `Venta #${item.id} ${item.customer_name ? `(${item.customer_name})` : ''}`;
+                                    const categoryLabel = type === 'exp' ? item.category : type === 'ord' ? 'Materia Prima' : 'Venta TPV';
+                                    const badgeClass = type === 'exp' ? 'badge-manual' : type === 'ord' ? 'badge-order' : 'badge-income';
+                                    const badgeLabel = type === 'exp' ? 'Gasto' : type === 'ord' ? 'Proveedor' : 'Ingreso';
+                                    const isPositive = type === 'sal';
+
+                                    return (
+                                        <tr 
+                                            key={`${type}-${item.id}`} 
+                                            className={`${isPositive ? 'row-income' : 'row-expense'} clickable-row`}
+                                            onClick={() => !editingId && setDetailItem(item)}
+                                            style={{ cursor: 'pointer' }}
+                                        >
+                                            <td data-label="Fecha">
+                                                <div style={{ display: 'flex', flexDirection: 'column', fontSize: '0.85rem' }}>
+                                                    <strong>{dateObj.toLocaleDateString('es-AR')}</strong>
+                                                    <small style={{ color: '#888' }}>{dateObj.toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit' })} hs</small>
+                                                </div>
+                                            </td>
+                                            <td data-label="Tipo"><span className={`badge ${badgeClass}`}>{badgeLabel}</span></td>
+                                            <td data-label="Descripción">
+                                                {isEditing ? (
+                                                    <input 
+                                                        type="text" 
+                                                        value={editForm.description} 
+                                                        onChange={val => setEditForm({...editForm, description: val.target.value})}
+                                                        className="inline-edit-input"
+                                                    />
+                                                ) : description}
+                                            </td>
+                                            <td data-label="Categoría">
+                                                {isEditing ? (
+                                                    <select 
+                                                        value={editForm.category} 
+                                                        onChange={val => setEditForm({...editForm, category: val.target.value})}
+                                                        className="inline-edit-input"
+                                                    >
+                                                        <option value="Local">Local / Suministros</option>
+                                                        <option value="Sueldos">Sueldos / Personal</option>
+                                                        <option value="Mercadería">Mercadería</option>
+                                                        <option value="Publicidad">Publicidad</option>
+                                                        <option value="Venta TPV">Venta TPV</option>
+                                                        <option value="Materia Prima">Materia Prima</option>
+                                                        <option value="Otros">Otros</option>
+                                                    </select>
+                                                ) : categoryLabel}
+                                            </td>
+                                            <td data-label="Importe" className={`txt-right ${isPositive ? 'positive' : 'negative'}`}>
+                                                {isEditing ? (
+                                                    <input 
+                                                        type="number" 
+                                                        value={editForm.amount} 
+                                                        onChange={val => setEditForm({...editForm, amount: val.target.value})}
+                                                        className="inline-edit-input txt-right"
+                                                        style={{ width: '100px' }}
+                                                    />
+                                                ) : `${isPositive ? '+' : '-'}$${Math.round(parseFloat(amountVal)).toLocaleString('es-AR')}`}
+                                            </td>
+                                            <td data-label="Acción">
+                                                {renderActionButtons(type, item)}
+                                            </td>
+                                        </tr>
+                                    );
+                                })}
                                 </tbody>
                             </table>
                         </div>
                     </div>
                 </div>
             </div>
+
+            {/* Transaction Detail Modal */}
+            {detailItem && (
+                <div 
+                    style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.85)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 6000, padding: '20px' }}
+                    onClick={() => setDetailItem(null)}
+                >
+                    <div 
+                        style={{ background: '#fff', width: '100%', maxWidth: '500px', borderRadius: '15px', overflow: 'hidden' }}
+                        onClick={e => e.stopPropagation()}
+                    >
+                        <div style={{ padding: '20px', borderBottom: '1px solid #eee', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: '#f8f9fa' }}>
+                            <div>
+                                <h3 style={{ margin: 0, fontSize: '1.2rem' }}>Detalle de {detailItem.typeIndicator === 'sal' ? 'Venta' : 'Operación'}</h3>
+                                <div style={{ fontSize: '0.8rem', color: '#666', marginTop: '4px' }}>
+                                    {new Date(detailItem.date).toLocaleDateString('es-AR')} - {new Date(detailItem.date).toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit' })} hs
+                                </div>
+                            </div>
+                            <button onClick={() => setDetailItem(null)} style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '1.5rem', color: '#888' }}>×</button>
+                        </div>
+                        
+                        <div style={{ padding: '25px' }}>
+                            <div style={{ marginBottom: '20px' }}>
+                                <label style={{ display: 'block', fontSize: '0.7rem', fontWeight: '800', color: '#888', textTransform: 'uppercase', marginBottom: '5px' }}>
+                                    Descripción / Origen
+                                </label>
+                                <div style={{ fontSize: '1.1rem', fontWeight: 'bold', color: '#333' }}>
+                                    {detailItem.typeIndicator === 'exp' ? detailItem.description : 
+                                     detailItem.typeIndicator === 'ord' ? `${detailItem.supplier_name} (Pedido #${detailItem.id})` : 
+                                     `Venta #${detailItem.id} ${detailItem.customer_name ? `(${detailItem.customer_name})` : ''}`}
+                                </div>
+                            </div>
+
+                            <label style={{ display: 'block', fontSize: '0.7rem', fontWeight: '800', color: '#888', textTransform: 'uppercase', marginBottom: '10px' }}>
+                                {detailItem.items?.length > 0 ? 'Artículos' : 'Notas / Categoría'}
+                            </label>
+                            
+                            <div style={{ maxHeight: '300px', overflowY: 'auto', background: '#fcfcfc', borderRadius: '10px', border: '1px solid #f1f3f5', padding: '10px' }}>
+                                {detailItem.items && detailItem.items.length > 0 ? (
+                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                                        {detailItem.items.map((it, idx) => (
+                                            <div key={idx} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: idx === detailItem.items.length -1 ? 'none' : '1px solid #eee', paddingBottom: '8px' }}>
+                                                <div>
+                                                    <div style={{ fontWeight: '600', fontSize: '0.9rem' }}>{it.entry_name || it.product_name || 'Producto'}</div>
+                                                    <div style={{ fontSize: '0.75rem', color: '#888' }}>{it.quantity} x ${parseFloat(it.price_at_sale || it.price || 0).toLocaleString('es-AR')}</div>
+                                                </div>
+                                                <div style={{ fontWeight: 'bold' }}>
+                                                    ${(parseFloat(it.price_at_sale || it.price || 0) * it.quantity).toLocaleString('es-AR')}
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                ) : (
+                                    <div style={{ padding: '10px', color: '#666', fontStyle: 'italic', fontSize: '0.9rem' }}>
+                                        {detailItem.notes || `Categoría: ${detailItem.category || 'Otros'}`}
+                                    </div>
+                                )}
+                            </div>
+
+                            <div style={{ marginTop: '25px', paddingTop: '20px', borderTop: '2px solid #333', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                <span style={{ fontSize: '1rem', fontWeight: '900', textTransform: 'uppercase' }}>Total {detailItem.typeIndicator === 'sal' ? 'Cobrado' : 'Gasto'}</span>
+                                <span style={{ fontSize: '1.6rem', fontWeight: '900', color: detailItem.typeIndicator === 'sal' ? '#2b8a3e' : '#f03e3e' }}>
+                                    {detailItem.typeIndicator === 'sal' ? '+' : '-'}${Math.round(parseFloat(detailItem.total_amount || detailItem.total_cost || detailItem.amount)).toLocaleString('es-AR')}
+                                </span>
+                            </div>
+                        </div>
+
+                        <div style={{ padding: '15px 20px', background: '#f8f9fa', display: 'flex', gap: '10px' }}>
+                            <button 
+                                onClick={() => setDetailItem(null)} 
+                                style={{ flex: 1, padding: '12px', background: '#fff', border: '1px solid #ddd', borderRadius: '8px', fontWeight: 'bold', cursor: 'pointer' }}
+                            >
+                                CERRAR
+                            </button>
+                            {detailItem.typeIndicator === 'sal' && (
+                                <button 
+                                    onClick={() => window.open(`/ticket/${detailItem.id}`, '_blank')}
+                                    style={{ flex: 1, padding: '12px', background: '#333', color: '#fff', border: 'none', borderRadius: '8px', fontWeight: 'bold', cursor: 'pointer' }}
+                                >
+                                    VER TICKET COMPLETO
+                                </button>
+                            )}
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 };
