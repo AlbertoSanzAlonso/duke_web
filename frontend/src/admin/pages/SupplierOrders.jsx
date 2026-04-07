@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { fetchSupplierOrders, createSupplierOrder, fetchInventory, createInventoryItem } from '../../services/api';
 import LoadingScreen from '../components/LoadingScreen';
 import Toast from '../components/Toast';
-import { Truck, Plus, History, Trash2, ShoppingCart, Search } from 'lucide-react';
+import { Truck, Plus, History, Trash2, ShoppingCart, Search, X } from 'lucide-react';
 import './Accounting.css';
 
 const SupplierOrders = () => {
@@ -25,6 +25,7 @@ const SupplierOrders = () => {
     // New Item Flow
     const [isAddingNewItem, setIsAddingNewItem] = useState(false);
     const [newItemData, setNewItemData] = useState({ name: '', unit: 'unidades', category: 'Otros' });
+    const [selectedOrder, setSelectedOrder] = useState(null);
 
     useEffect(() => {
         loadData();
@@ -340,8 +341,13 @@ const SupplierOrders = () => {
                                         (order.supplier_name || "").toLowerCase().includes(searchTerm.toLowerCase()) ||
                                         (order.id.toString()).includes(searchTerm)
                                     ).map(order => (
-                                        <tr key={order.id}>
-                                            <td data-label="Fecha">{new Date(order.date).toLocaleDateString()}</td>
+                                        <tr 
+                                            key={order.id} 
+                                            onClick={() => setSelectedOrder(order)}
+                                            style={{ cursor: 'pointer' }}
+                                            className="hover-row"
+                                        >
+                                            <td data-label="Fecha">{new Date(order.date).toLocaleDateString('es-AR')}</td>
                                             <td data-label="Proveedor">{order.supplier_name}</td>
                                             <td data-label="Importe" className="txt-right negative">-${parseInt(order.total_cost).toLocaleString('es-AR')}</td>
                                             <td data-label="Detalles" style={{ fontSize: '0.75rem', color: '#888' }}>
@@ -355,6 +361,78 @@ const SupplierOrders = () => {
                     </div>
                 </div>
             </div>
+            {/* Modal para detalle de pedido */}
+            {selectedOrder && (
+                <div 
+                    className="modal-overlay" 
+                    onClick={() => setSelectedOrder(null)}
+                    style={{
+                        position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
+                        background: 'rgba(0,0,0,0.85)', display: 'flex',
+                        alignItems: 'center', justifyContent: 'center', zIndex: 3000
+                    }}
+                >
+                    <div 
+                        className="admin-card" 
+                        onClick={e => e.stopPropagation()}
+                        style={{
+                            width: '90%', maxWidth: '600px', maxHeight: '80vh',
+                            overflowY: 'auto', border: '1px solid #f03e3e',
+                            boxShadow: '0 10px 40px rgba(0,0,0,0.5)'
+                        }}
+                    >
+                        <header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
+                            <div>
+                                <h3 style={{ margin: 0, color: '#f03e3e' }}>TICKET DE COMPRA</h3>
+                                <p style={{ margin: '5px 0 0 0', fontSize: '0.85rem', color: '#888' }}>
+                                    {new Date(selectedOrder.date).toLocaleString('es-AR', { dateStyle: 'long', timeStyle: 'short' })}
+                                </p>
+                            </div>
+                            <button 
+                                onClick={() => setSelectedOrder(null)}
+                                style={{ background: 'none', border: 'none', color: '#888', cursor: 'pointer' }}
+                            >
+                                <X size={24} />
+                            </button>
+                        </header>
+                        
+                        <div style={{ marginBottom: '20px' }}>
+                            <label style={{ fontSize: '0.8rem', color: '#999', textTransform: 'uppercase' }}>Proveedor</label>
+                            <p style={{ margin: '5px 0', fontSize: '1.2rem', fontWeight: 'bold' }}>{selectedOrder.supplier_name}</p>
+                        </div>
+                        
+                        <div className="accounting-table-container">
+                            <table className="accounting-table" style={{ fontSize: '0.85rem' }}>
+                                <thead>
+                                    <tr>
+                                        <th>Artículo</th>
+                                        <th>Cant.</th>
+                                        <th className="txt-right">Subtotal</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {selectedOrder.items?.map(item => (
+                                        <tr key={item.id}>
+                                            <td data-label="Artículo">{item.item_name}</td>
+                                            <td data-label="Cant.">{item.quantity}</td>
+                                            <td data-label="Subtotal" className="txt-right">
+                                                ${parseFloat(item.cost).toLocaleString('es-AR')}
+                                            </td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        </div>
+                        
+                        <div style={{ textAlign: 'right', marginTop: '30px', padding: '20px', background: '#111', borderRadius: '12px' }}>
+                            <p style={{ margin: 0, color: '#888', fontSize: '0.85rem' }}>TOTAL DE COMPRA</p>
+                            <p style={{ margin: 0, fontSize: '2rem', fontWeight: '900', color: '#f03e3e' }}>
+                                ${parseFloat(selectedOrder.total_cost).toLocaleString('es-AR')}
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 };

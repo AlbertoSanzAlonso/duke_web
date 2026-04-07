@@ -9,10 +9,17 @@ const HistoryLog = () => {
     const [loading, setLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState('');
     const [selectedModule, setSelectedModule] = useState('ALL');
+    const [selectedDate, setSelectedDate] = useState('');
+    const [currentPage, setCurrentPage] = useState(1);
+    const itemsPerPage = 10;
 
     useEffect(() => {
         loadLogs();
     }, []);
+
+    useEffect(() => {
+        setCurrentPage(1);
+    }, [searchTerm, selectedModule, selectedDate]);
 
     const loadLogs = async () => {
         setLoading(true);
@@ -43,13 +50,26 @@ const HistoryLog = () => {
     const filteredLogs = logs.filter(log => {
         const matchesModule = selectedModule === 'ALL' || log.module === selectedModule;
         const term = searchTerm.toLowerCase();
+        
+        // Date match (ignoring time)
+        let matchesDate = true;
+        if (selectedDate) {
+            const logDate = new Date(log.timestamp).toISOString().split('T')[0];
+            matchesDate = logDate === selectedDate;
+        }
+
         const matchesSearch = 
             log.description.toLowerCase().includes(term) || 
             log.username.toLowerCase().includes(term) || 
             log.action_type.toLowerCase().includes(term) ||
             log.module.toLowerCase().includes(term);
-        return matchesModule && matchesSearch;
+        return matchesModule && matchesSearch && matchesDate;
     });
+
+    const totalPages = Math.ceil(filteredLogs.length / itemsPerPage);
+    const indexOfLastItem = currentPage * itemsPerPage;
+    const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+    const currentLogs = filteredLogs.slice(indexOfFirstItem, indexOfLastItem);
 
     if (loading) return <LoadingScreen />;
 
@@ -65,7 +85,7 @@ const HistoryLog = () => {
                 </div>
             </div>
 
-            <div className="accounting-filters" style={{ display: 'grid', gridTemplateColumns: 'minmax(200px, 1fr) auto auto', gap: '15px' }}>
+            <div className="accounting-filters" style={{ display: 'grid', gridTemplateColumns: '1fr auto auto auto auto', gap: '15px' }}>
                 <div className="search-box" style={{ background: '#fff', border: '1px solid #ddd', borderRadius: '12px', padding: '0 15px', display: 'flex', alignItems: 'center', gap: '10px' }}>
                     <Search size={18} color="#888" />
                     <input 
@@ -92,6 +112,19 @@ const HistoryLog = () => {
                         <option value="USUARIOS">USUARIOS</option>
                         <option value="GALERIA">GALERÍA</option>
                     </select>
+                </div>
+
+                <div className="filter-box" style={{ background: '#fff', border: '1px solid #ddd', borderRadius: '12px', padding: '0 15px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <Clock size={16} color="#666" />
+                    <input 
+                        type="date" 
+                        value={selectedDate}
+                        onChange={(e) => setSelectedDate(e.target.value)}
+                        style={{ border: 'none', padding: '10px 5px', background: 'transparent', height: '48px', outline: 'none', fontWeight: 'bold' }}
+                    />
+                    {selectedDate && (
+                        <button onClick={() => setSelectedDate('')} style={{ border: 'none', background: 'none', color: '#ff4d4d', cursor: 'pointer', fontWeight: 'bold' }}>×</button>
+                    )}
                 </div>
                 
                 <button 
@@ -130,7 +163,7 @@ const HistoryLog = () => {
                         </tr>
                     </thead>
                     <tbody style={{ background: '#fff' }}>
-                        {filteredLogs.length > 0 ? filteredLogs.map((log) => (
+                        {currentLogs.length > 0 ? currentLogs.map((log) => (
                             <tr key={log.id} style={{ borderBottom: '1px solid #f1f1f1' }}>
                                 <td style={{ padding: '15px' }}>
                                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#666', fontSize: '0.85rem' }}>
@@ -189,6 +222,39 @@ const HistoryLog = () => {
                     </tbody>
                 </table>
             </div>
+
+            {/* Paginación */}
+            {totalPages > 1 && (
+                <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '15px', marginTop: '25px', padding: '10px' }}>
+                    <button 
+                        onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+                        disabled={currentPage === 1}
+                        style={{ 
+                            padding: '8px 16px', background: '#343a40', color: 'white', 
+                            border: 'none', borderRadius: '8px', cursor: currentPage === 1 ? 'not-allowed' : 'pointer',
+                            opacity: currentPage === 1 ? 0.5 : 1, fontWeight: 'bold'
+                        }}
+                    >
+                        ANTERIOR
+                    </button>
+                    
+                    <span style={{ fontWeight: 'bold', color: '#666' }}>
+                        PÁGINA {currentPage} DE {totalPages}
+                    </span>
+
+                    <button 
+                        onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
+                        disabled={currentPage === totalPages}
+                        style={{ 
+                            padding: '8px 16px', background: '#343a40', color: 'white', 
+                            border: 'none', borderRadius: '8px', cursor: currentPage === totalPages ? 'not-allowed' : 'pointer',
+                            opacity: currentPage === totalPages ? 0.5 : 1, fontWeight: 'bold'
+                        }}
+                    >
+                        SIGUIENTE
+                    </button>
+                </div>
+            )}
         </div>
     );
 };

@@ -326,7 +326,7 @@ class ExpenseViewSet(viewsets.ModelViewSet):
         instance.delete()
 
 class InventoryItemViewSet(viewsets.ModelViewSet):
-    queryset = InventoryItem.objects.all().order_by('name')
+    queryset = InventoryItem.objects.all().order_by('-created_at')
     serializer_class = InventoryItemSerializer
     permission_classes = [permissions.IsAuthenticated, HasInventoryPermission]
 
