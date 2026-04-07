@@ -259,3 +259,37 @@ class UserProfile(models.Model):
 
     def __str__(self):
         return f"Perfil de {self.user.username}"
+
+class ActionLog(models.Model):
+    user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, related_name='action_logs')
+    module = models.CharField(max_length=50) # 'CONTABILIDAD', 'TPV', 'PRODUCTOS', etc
+    action_type = models.CharField(max_length=50) # 'CREATE', 'UPDATE', 'DELETE'
+    description = models.TextField()
+    timestamp = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['-timestamp']
+
+    def __str__(self):
+        user_str = self.user.username if self.user else "Sistema"
+        return f"[{self.timestamp.strftime('%d/%m/%Y %H:%M')}] {user_str} - {self.module}: {self.action_type}"
+
+def log_action(user, module, action_type, description):
+    """
+    Helper to log administrative actions.
+    """
+    try:
+        from django.contrib.auth.models import User
+        # Handle cases where user might be ID or None
+        target_user = user
+        if isinstance(user, (int, str)) and not isinstance(user, User):
+            target_user = User.objects.get(id=user)
+        
+        ActionLog.objects.create(
+            user=target_user if isinstance(target_user, User) else None,
+            module=module,
+            action_type=action_type,
+            description=description
+        )
+    except Exception as e:
+        print(f"Error logging action: {e}")

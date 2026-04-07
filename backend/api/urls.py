@@ -4,7 +4,8 @@ from .views import (ProductViewSet, MenuEntryViewSet, SaleViewSet, ExpenseViewSe
                     InventoryItemViewSet, SupplierOrderViewSet, OrderStreamView, 
                     GlobalSettingViewSet, GalleryImageViewSet, OpeningHourViewSet, 
                     DeliverySettingViewSet, AdminSetupView, 
-                    PasswordResetRequestView, PasswordResetConfirmView, MeView, UserViewSet)
+                    PasswordResetRequestView, PasswordResetConfirmView, MeView, UserViewSet,
+                    ActionLogViewSet)
 from rest_framework.authtoken.views import obtain_auth_token
 
 router = DefaultRouter()
@@ -19,6 +20,7 @@ router.register(r'opening-hours', OpeningHourViewSet)
 router.register(r'delivery-rates', DeliverySettingViewSet)
 router.register(r'gallery', GalleryImageViewSet, basename='gallery')
 router.register(r'users', UserViewSet, basename='user')
+router.register(r'action-logs', ActionLogViewSet, basename='action-log')
 
 urlpatterns = [
     path('', include(router.urls)),

@@ -1,3 +1,178 @@
-import React from 'react';
-function HistoryLog() { return <div className="admin-card"><h2>Historial</h2><p>Registro de actividades y movimientos...</p></div>; }
+import React, { useState, useEffect } from 'react';
+import { Search, History, User, Clock, Info, Shield, ShoppingCart, BookOpen, Package, Settings, Camera, Trash2, Filter, AlertCircle, RefreshCw } from 'lucide-react';
+import { fetchActionLogs } from '../../services/api';
+import './Accounting.css';
+import LoadingScreen from '../components/LoadingScreen';
+
+const HistoryLog = () => {
+    const [logs, setLogs] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [searchTerm, setSearchTerm] = useState('');
+    const [selectedModule, setSelectedModule] = useState('ALL');
+
+    useEffect(() => {
+        loadLogs();
+    }, []);
+
+    const loadLogs = async () => {
+        setLoading(true);
+        try {
+            const data = await fetchActionLogs();
+            setLogs(data);
+        } catch (error) {
+            console.error("Error loading logs:", error);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const getModuleIcon = (module) => {
+        switch (module) {
+            case 'TPV': return <ShoppingCart size={14} />;
+            case 'CONTABILIDAD': return <BookOpen size={14} />;
+            case 'PRODUCTOS': return <Package size={14} />;
+            case 'CARTA': return <BookOpen size={14} />;
+            case 'INVENTARIO': return <Package size={14} />;
+            case 'USUARIOS': return <User size={14} />;
+            case 'AJUSTES': return <Settings size={14} />;
+            case 'GALERIA': return <Camera size={14} />;
+            default: return <Info size={14} />;
+        }
+    };
+
+    const filteredLogs = logs.filter(log => {
+        const matchesModule = selectedModule === 'ALL' || log.module === selectedModule;
+        const term = searchTerm.toLowerCase();
+        const matchesSearch = 
+            log.description.toLowerCase().includes(term) || 
+            log.username.toLowerCase().includes(term) || 
+            log.action_type.toLowerCase().includes(term) ||
+            log.module.toLowerCase().includes(term);
+        return matchesModule && matchesSearch;
+    });
+
+    if (loading) return <LoadingScreen />;
+
+    return (
+        <div className="accounting-container" style={{ padding: '20px' }}>
+            <div className="accounting-header">
+                <div className="header-title">
+                    <History size={28} style={{ color: 'var(--admin-primary)' }} />
+                    <div>
+                        <h1>Historial de Acciones</h1>
+                        <p>Registro detallado de actividad y auditoría de usuarios</p>
+                    </div>
+                </div>
+            </div>
+
+            <div className="accounting-filters" style={{ display: 'grid', gridTemplateColumns: '1fr auto auto', gap: '15px' }}>
+                <div className="search-box">
+                    <Search size={18} />
+                    <input 
+                        type="text" 
+                        placeholder="Buscar por usuario, descripción o acción..." 
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                        style={{ height: '45px', border: 'none', background: 'transparent', width: '100%', outline: 'none' }}
+                    />
+                </div>
+
+                <div className="filter-box" style={{ background: '#fff', border: '1px solid #ddd', borderRadius: '8px', padding: '0 15px', display: 'flex', alignItems: 'center', gap: '10px' }}>
+                    <Filter size={18} color="#666" />
+                    <select 
+                        value={selectedModule} 
+                        onChange={(e) => setSelectedModule(e.target.value)}
+                        style={{ border: 'none', padding: '0', background: 'transparent', height: '45px', outline: 'none', fontWeight: 'bold' }}
+                    >
+                        <option value="ALL">Todos los Módulos</option>
+                        <option value="TPV">TPV</option>
+                        <option value="CONTABILIDAD">Contabilidad</option>
+                        <option value="PRODUCTOS">Productos / Carta</option>
+                        <option value="INVENTARIO">Inventario</option>
+                        <option value="USUARIOS">Usuarios</option>
+                        <option value="GALERIA">Galería</option>
+                    </select>
+                </div>
+                
+                <button className="btn-primary" onClick={loadLogs} style={{ height: '47px', display: 'flex', alignItems: 'center', gap: '8px', background: '#333' }}>
+                    <RefreshCw size={18} />
+                    ACTUALIZAR
+                </button>
+            </div>
+
+            <div className="table-container" style={{ marginTop: '25px', background: '#fff', borderRadius: '12px', boxShadow: '0 4px 6px rgba(0,0,0,0.05)', overflow: 'hidden' }}>
+                <table className="accounting-table" style={{ width: '100%', borderCollapse: 'collapse' }}>
+                    <thead style={{ background: '#f8f9fa' }}>
+                        <tr>
+                            <th style={{ padding: '15px', textAlign: 'left', fontSize: '0.75rem', color: '#666', borderBottom: '1px solid #eee' }}>FECHA Y HORA</th>
+                            <th style={{ padding: '15px', textAlign: 'left', fontSize: '0.75rem', color: '#666', borderBottom: '1px solid #eee' }}>USUARIO</th>
+                            <th style={{ padding: '15px', textAlign: 'left', fontSize: '0.75rem', color: '#666', borderBottom: '1px solid #eee' }}>MODULO</th>
+                            <th style={{ padding: '15px', textAlign: 'left', fontSize: '0.75rem', color: '#666', borderBottom: '1px solid #eee' }}>ACCIÓN</th>
+                            <th style={{ padding: '15px', textAlign: 'left', fontSize: '0.75rem', color: '#666', borderBottom: '1px solid #eee' }}>DETALLE DEL MOVIMIENTO</th>
+                        </tr>
+                    </thead>
+                    <tbody style={{ background: '#fff' }}>
+                        {filteredLogs.length > 0 ? filteredLogs.map((log) => (
+                            <tr key={log.id} style={{ borderBottom: '1px solid #f1f1f1' }}>
+                                <td style={{ padding: '15px' }}>
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#666', fontSize: '0.85rem' }}>
+                                        <Clock size={14} />
+                                        {new Date(log.timestamp).toLocaleString('es-AR', {
+                                            day: '2-digit', month: '2-digit', year: '2-digit',
+                                            hour: '2-digit', minute: '2-digit'
+                                        })}
+                                    </div>
+                                </td>
+                                <td style={{ padding: '15px' }}>
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontWeight: 'bold', color: '#333' }}>
+                                        <div style={{ width: '28px', height: '28px', background: '#f0f0f0', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#666' }}>
+                                            <User size={14} />
+                                        </div>
+                                        {log.username}
+                                    </div>
+                                </td>
+                                <td style={{ padding: '15px' }}>
+                                    <span style={{ 
+                                        display: 'inline-flex', alignItems: 'center', gap: '6px',
+                                        padding: '4px 10px', borderRadius: '20px', background: '#f5f7f9',
+                                        fontSize: '0.7rem', fontWeight: '800', color: '#546e7a',
+                                        textTransform: 'uppercase'
+                                    }}>
+                                        {getModuleIcon(log.module)}
+                                        {log.module}
+                                    </span>
+                                </td>
+                                <td style={{ padding: '15px' }}>
+                                    <span style={{ 
+                                        display: 'inline-block', padding: '4px 10px', borderRadius: '6px',
+                                        fontSize: '0.7rem', fontWeight: '900',
+                                        background: log.action_type === 'DELETE' ? '#fff5f5' : (log.action_type === 'CREATE' ? '#f5fff5' : '#f5faff'),
+                                        color: log.action_type === 'DELETE' ? '#fa5252' : (log.action_type === 'CREATE' ? '#40c057' : '#228be6'),
+                                    }}>
+                                        {log.action_type}
+                                    </span>
+                                </td>
+                                <td style={{ padding: '15px' }}>
+                                    <div style={{ color: '#222', fontSize: '0.9rem', fontWeight: '500' }}>
+                                        {log.description}
+                                    </div>
+                                </td>
+                            </tr>
+                        )) : (
+                            <tr>
+                                <td colSpan="5" style={{ textAlign: 'center', padding: '80px 0' }}>
+                                    <div style={{ color: '#999', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '15px' }}>
+                                        <AlertCircle size={48} opacity={0.2} />
+                                        <p style={{ fontSize: '1.1rem' }}>No se encontraron registros de este tipo.</p>
+                                    </div>
+                                </td>
+                            </tr>
+                        )}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    );
+};
+
 export default HistoryLog;

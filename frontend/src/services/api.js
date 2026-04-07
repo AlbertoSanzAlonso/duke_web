@@ -102,6 +102,15 @@ export const deleteUser = async (id) => {
     return true;
 };
 
+// ACTIONS LOG
+export const fetchActionLogs = async () => {
+    const response = await fetch(`${API_URL}/action-logs/`, {
+        headers: getHeaders()
+    });
+    if (!response.ok) return handleResponseError(response);
+    return await response.json();
+};
+
 // PRODUCTS
 export const fetchProducts = async () => {
     const response = await fetch(`${API_URL}/products/`, { headers: getHeaders() });

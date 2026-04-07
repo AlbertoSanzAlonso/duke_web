@@ -1,8 +1,18 @@
 from rest_framework import serializers
 from .models import (Product, MenuEntry, Sale, SaleItem, Expense, InventoryItem, 
                      SupplierOrder, SupplierOrderItem, GlobalSetting, GalleryImage,
-                     OpeningHour, DeliverySetting, UserProfile)
+                     OpeningHour, DeliverySetting, UserProfile, ActionLog)
 from django.contrib.auth.models import User
+
+class ActionLogSerializer(serializers.ModelSerializer):
+    username = serializers.SerializerMethodField()
+    
+    class Meta:
+        model = ActionLog
+        fields = ['id', 'user', 'username', 'module', 'action_type', 'description', 'timestamp']
+
+    def get_username(self, obj):
+        return obj.user.username if obj.user else "Sistema"
 
 class UserProfileSerializer(serializers.ModelSerializer):
     class Meta:

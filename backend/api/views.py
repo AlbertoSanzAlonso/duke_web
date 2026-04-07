@@ -5,13 +5,14 @@ from rest_framework.permissions import AllowAny, IsAuthenticated
 from django.contrib.auth.models import User
 from django.db.models import Q
 from .models import (Product, MenuEntry, Sale, Expense, InventoryItem, 
-                     SupplierOrder, GlobalSetting, GalleryImage, OpeningHour, DeliverySetting, UserProfile)
+                     SupplierOrder, GlobalSetting, GalleryImage, OpeningHour, DeliverySetting, 
+                     UserProfile, ActionLog, log_action)
 from .serializers import (ProductSerializer, MenuEntrySerializer, SaleSerializer, 
                           SaleCreateSerializer, ExpenseSerializer,
                           InventoryItemSerializer, SupplierOrderSerializer, 
                           SupplierOrderCreateSerializer, GlobalSettingSerializer, 
                           GalleryImageSerializer, OpeningHourSerializer, 
-                          DeliverySettingSerializer, UserSerializer)
+                          DeliverySettingSerializer, UserSerializer, ActionLogSerializer)
 
 from .permissions import (IsAdminManager, HasTPVPermission, HasAccountingPermission,
                          HasMenuPermission, HasInventoryPermission, HasGalleryPermission)
@@ -58,6 +59,23 @@ class UserViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all().order_by('-date_joined')
     serializer_class = UserSerializer
     permission_classes = [IsAdminManager]
+
+    def perform_create(self, serializer):
+        user = serializer.save()
+        log_action(self.request.user, 'USUARIOS', 'CREATE', f'Creado nuevo usuario: {user.username}')
+
+    def perform_update(self, serializer):
+        user = serializer.save()
+        log_action(self.request.user, 'USUARIOS', 'UPDATE', f'Editado usuario: {user.username} (ajuste de permisos/datos)')
+
+    def perform_destroy(self, instance):
+        log_action(self.request.user, 'USUARIOS', 'DELETE', f'Eliminado usuario: {instance.username}')
+        instance.delete()
+
+class ActionLogViewSet(viewsets.ReadOnlyModelViewSet):
+    queryset = ActionLog.objects.all().order_by('-timestamp')
+    serializer_class = ActionLogSerializer
+    permission_classes = [permissions.IsAuthenticated] # Maybe strict later
 
 @api_view(['GET'])
 @permission_classes([permissions.AllowAny])
@@ -205,16 +223,19 @@ class ProductViewSet(viewsets.ModelViewSet):
         return [permissions.IsAuthenticated(), HasMenuPermission()]
 
     def perform_create(self, serializer):
-        serializer.save()
+        product = serializer.save()
+        log_action(self.request.user, 'PRODUCTOS', 'CREATE', f'Creado nuevo producto: {product.name}')
         from django.core.cache import cache
         cache.delete("menu_list_public")
 
     def perform_update(self, serializer):
-        serializer.save()
+        product = serializer.save()
+        log_action(self.request.user, 'PRODUCTOS', 'UPDATE', f'Editado producto: {product.name}')
         from django.core.cache import cache
         cache.delete("menu_list_public")
 
     def perform_destroy(self, instance):
+        log_action(self.request.user, 'PRODUCTOS', 'DELETE', f'Eliminado producto: {instance.name}')
         instance.delete()
         from django.core.cache import cache
         cache.delete("menu_list_public")
@@ -282,9 +303,11 @@ class SaleViewSet(viewsets.ModelViewSet):
         
         if action_type == 'COMPLETE':
             count = sales.update(status='COMPLETED')
+            log_action(request.user, 'TPV', 'UPDATE', f'Cobro masivo de {count} tickets')
             return Response({'message': f'{count} tickets cobrados con éxito.'})
         elif action_type == 'DELETE':
             count, _ = sales.delete()
+            log_action(request.user, 'TPV', 'DELETE', f'Eliminación masiva de {count} tickets')
             return Response({'message': f'{count} tickets eliminados.'})
             
         return Response({'error': 'Operación no válida'}, status=400)
@@ -294,10 +317,30 @@ class ExpenseViewSet(viewsets.ModelViewSet):
     serializer_class = ExpenseSerializer
     permission_classes = [permissions.IsAuthenticated, HasAccountingPermission]
 
+    def perform_create(self, serializer):
+        expense = serializer.save()
+        log_action(self.request.user, 'CONTABILIDAD', 'CREATE', f'Nuevo gasto: {expense.description} por ${expense.amount}')
+
+    def perform_destroy(self, instance):
+        log_action(self.request.user, 'CONTABILIDAD', 'DELETE', f'Eliminado gasto: {instance.description} de ${instance.amount}')
+        instance.delete()
+
 class InventoryItemViewSet(viewsets.ModelViewSet):
     queryset = InventoryItem.objects.all().order_by('name')
     serializer_class = InventoryItemSerializer
     permission_classes = [permissions.IsAuthenticated, HasInventoryPermission]
+
+    def perform_create(self, serializer):
+        item = serializer.save()
+        log_action(self.request.user, 'INVENTARIO', 'CREATE', f'Nuevo item de inventario: {item.name} ({item.quantity} {item.unit})')
+
+    def perform_update(self, serializer):
+        item = serializer.save()
+        log_action(self.request.user, 'INVENTARIO', 'UPDATE', f'Editado item inventario: {item.name}. Stock: {item.quantity}')
+
+    def perform_destroy(self, instance):
+        log_action(self.request.user, 'INVENTARIO', 'DELETE', f'Eliminado item inventario: {instance.name}')
+        instance.delete()
 
 class SupplierOrderViewSet(viewsets.ModelViewSet):
     queryset = SupplierOrder.objects.all().order_by('-date')
