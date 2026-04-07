@@ -237,9 +237,7 @@ body, .admin-container, .admin-main, .admin-content {
     margin-left: auto;
   }
   
-  .sidebar-overlay {
-    display: block;
-  }
+
   
   .sidebar {
     position: fixed;
