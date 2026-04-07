@@ -167,7 +167,7 @@ const Orders = () => {
                                                 <Printer size={18} />
                                             </button>
                                             {order.status === 'PENDING' && (
-                                                <button className="icon-btn tpv" title="Ir al TPV" onClick={(e) => { e.stopPropagation(); navigate('/admin/tpv'); }}>
+                                                <button className="icon-btn tpv" title="Ir al TPV" onClick={(e) => { e.stopPropagation(); navigate('/admin/tpv', { state: { pendingOrder: order } }); }}>
                                                     <LayoutGrid size={18} />
                                                 </button>
                                             )}
@@ -216,7 +216,7 @@ const Orders = () => {
                                     <button 
                                         className="print-full-btn" 
                                         style={{ flex: 1, background: '#2b8a3e', padding: '12px' }} 
-                                        onClick={() => navigate('/admin/tpv')}
+                                        onClick={() => navigate('/admin/tpv', { state: { pendingOrder: selectedOrder } })}
                                     >
                                         <LayoutGrid size={18} /> COBRAR EN TPV
                                     </button>

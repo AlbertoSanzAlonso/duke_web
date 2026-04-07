@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useLocation } from 'react-router-dom';
 import { fetchMenuEntries, createSale, fetchSales, updateSale, deleteSale, bulkActionSales } from '../../services/api';
 import { Trash2, Edit2, ChevronRight, CheckCircle2, MoreVertical, Plus, Minus, Search, ShoppingCart, Receipt } from 'lucide-react';
 import LoadingScreen from '../components/LoadingScreen';
@@ -6,6 +7,7 @@ import Toast from '../components/Toast';
 import './Sales.css';
 
 const Sales = () => {
+    const location = useLocation();
     const [viewMode, setViewMode] = useState('tpv'); // 'tpv' or 'pending'
     const [menuEntries, setMenuEntries] = useState([]);
     const [selectedCategory, setSelectedCategory] = useState("Todas");
@@ -43,9 +45,15 @@ const Sales = () => {
             loadData();
         };
 
+        // Handle navigation state from Orders.jsx
+        if (location.state?.pendingOrder) {
+            console.log("Loading order from navigation state:", location.state.pendingOrder);
+            loadPendingSale(location.state.pendingOrder);
+        }
+
         window.addEventListener('new-order-received', handleNewOrder);
         return () => window.removeEventListener('new-order-received', handleNewOrder);
-    }, []);
+    }, [location.state]);
 
     const loadData = async () => {
         setLoading(true);
