@@ -176,12 +176,13 @@ if USE_S3:
     AWS_S3_CUSTOM_DOMAIN = None
     
 # Configuración de Almacenamiento (Django 4.2+)
+# Configuración de Almacenamiento (Django 4.2+)
 STORAGES = {
     "default": {
         "BACKEND": "storages.backends.s3boto3.S3Boto3Storage" if USE_S3 else "django.core.files.storage.FileSystemStorage",
     },
     "staticfiles": {
-        "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
+        "BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage",
     },
 }
 
