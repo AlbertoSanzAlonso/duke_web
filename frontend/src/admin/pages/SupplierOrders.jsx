@@ -424,9 +424,9 @@ const SupplierOrders = () => {
                             </table>
                         </div>
                         
-                        <div style={{ textAlign: 'right', marginTop: '30px', padding: '20px', background: '#111', borderRadius: '12px' }}>
-                            <p style={{ margin: 0, color: '#888', fontSize: '0.85rem' }}>TOTAL DE COMPRA</p>
-                            <p style={{ margin: 0, fontSize: '2rem', fontWeight: '900', color: '#f03e3e' }}>
+                        <div style={{ textAlign: 'right', marginTop: '30px', padding: '20px', background: '#f8f9fa', borderRadius: '12px', borderTop: '2px solid #f03e3e' }}>
+                            <p style={{ margin: 0, color: '#333', fontSize: '0.85rem', fontWeight: '800' }}>TOTAL DE COMPRA</p>
+                            <p style={{ margin: 0, fontSize: '2.2rem', fontWeight: '900', color: '#f03e3e' }}>
                                 ${parseFloat(selectedOrder.total_cost).toLocaleString('es-AR')}
                             </p>
                         </div>

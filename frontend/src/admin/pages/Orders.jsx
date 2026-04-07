@@ -24,6 +24,39 @@ const Orders = () => {
         loadOrders();
     }, [searchParams]);
 
+    // Real-time updates via SSE
+    useEffect(() => {
+        const baseUrl = import.meta.env.VITE_API_URL || '';
+        const streamUrl = `${baseUrl.replace(/\/$/, '')}/api/orders-stream/`;
+        
+        const eventSource = new EventSource(streamUrl);
+
+        eventSource.onmessage = (event) => {
+            try {
+                const data = JSON.parse(event.data);
+                if (data.type === 'new_order') {
+                    loadOrders(); // Refresh list automatically
+                }
+            } catch (err) {
+                console.error("Error parsing SSE data:", err);
+            }
+        };
+
+        eventSource.onerror = (err) => {
+            console.error("SSE Connection Error:", err);
+            eventSource.close();
+            // Optional: Reconnect logic after delay
+            setTimeout(() => {
+                // This will trigger a re-render if we had a state dependency, 
+                // but let's keep it simple for now or use a dedicated ref.
+            }, 5000);
+        };
+
+        return () => {
+            eventSource.close();
+        };
+    }, []);
+
     const loadOrders = async () => {
         try {
             const data = await fetchSales();
