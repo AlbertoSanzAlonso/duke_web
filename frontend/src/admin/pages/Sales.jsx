@@ -431,14 +431,14 @@ const Sales = () => {
 
                             <div className="ticket-footer" style={{ padding: '10px 12px', borderTop: '1px solid #333', background: '#fff' }}>
                                 <div className="total-row" style={{ marginBottom: '2px', display: 'flex', justifyContent: 'space-between', fontSize: '0.85rem' }}>
-                                    <span>SUBTOTAL:</span>
+                                    <span style={{ color: '#666' }}>SUBTOTAL PRODUCTOS:</span>
                                     <span>${subtotal.toLocaleString('es-AR')}</span>
                                 </div>
 
                                 {calculatedDiscount > 0 && (
-                                    <div className="total-row" style={{ marginBottom: '2px', display: 'flex', justifyContent: 'space-between', fontSize: '0.85rem', color: '#f03e3e', fontWeight: 'bold' }}>
-                                        <span>DESCUENTO:</span>
-                                        <span>− ${calculatedDiscount.toLocaleString('es-AR')}</span>
+                                    <div className="total-row" style={{ marginBottom: '4px', display: 'flex', justifyContent: 'space-between', fontSize: '0.85rem', color: '#f03e3e', background: '#fff5f5', padding: '2px 4px', borderRadius: '4px' }}>
+                                        <span style={{ fontWeight: 'bold' }}>DESCUENTO APLICADO:</span>
+                                        <span style={{ fontWeight: '900' }}>− ${calculatedDiscount.toLocaleString('es-AR')}</span>
                                     </div>
                                 )}
 
