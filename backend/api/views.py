@@ -75,23 +75,9 @@ def AdminSetupView(request):
             'suggestion': 'Check DATABASE_URL in Coolify/Supabase and ensure the DB is reachable.'
         }, status=500)
     
-    # 2. Setup Admin Users
-    users = [
-        ('albertosanzdev@gmail.com', 'Albertito_23'),
-        ('dukeburger2025@gmail.com', 'Angeldalma2025')
-    ]
-    created = []
-    skipped = []
-    
-    for username, password in users:
-        if not User.objects.filter(username=username).exists():
-            u = User.objects.create_superuser(username, username, password)
-            created.append(username)
-        else:
-            u = User.objects.get(username=username)
-            skipped.append(username)
-        
-        # Ensure profile exists and has full permissions
+    # 2. Synchronize all superusers profiles (Safety Fix)
+    all_superusers = User.objects.filter(Q(is_superuser=True) | Q(is_staff=True))
+    for u in all_superusers:
         profile, _ = UserProfile.objects.get_or_create(user=u)
         profile.can_use_tpv = True
         profile.can_use_accounting = True
@@ -103,18 +89,46 @@ def AdminSetupView(request):
         profile.is_admin_manager = True
         profile.save()
 
-    # 3. Setup Default Opening Hours
+    # 3. Setup Specific Admin Users
+    users_to_setup = [
+        ('albertosanzdev@gmail.com', 'Albertito_23'),
+        ('dukeburger2025@gmail.com', 'Angeldalma2025')
+    ]
+    created = []
+    skipped = []
+    
+    for username, password in users_to_setup:
+        if not User.objects.filter(username=username).exists():
+            u = User.objects.create_superuser(username, username, password)
+            created.append(username)
+        else:
+            u = User.objects.get(username=username)
+            skipped.append(username)
+        
+        # Super-ensure their permissions are active
+        profile, _ = UserProfile.objects.get_or_create(user=u)
+        profile.can_use_tpv = True
+        profile.can_use_accounting = True
+        profile.can_use_menu = True
+        profile.can_use_inventory = True
+        profile.can_use_promos = True
+        profile.can_use_gallery = True
+        profile.can_use_settings = True
+        profile.is_admin_manager = True
+        profile.save()
+
+    # 4. Setup Opening Hours
     hours_created = 0
     for i in range(1, 8):
-        obj, created = OpeningHour.objects.get_or_create(day=i, defaults={
+        obj, created_h = OpeningHour.objects.get_or_create(day=i, defaults={
             'opening_time': '20:00',
             'closing_time': '00:00',
             'is_open': True
         })
-        if created:
+        if created_h:
             hours_created += 1
 
-    # 4. Setup Default Delivery Rates
+    # 5. Setup Default Delivery Rates
     delivery_setup = False
     if not DeliverySetting.objects.filter(id=1).exists():
         DeliverySetting.objects.create(id=1, base_price=1000, km_price=200, max_km=15)
