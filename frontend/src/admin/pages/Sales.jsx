@@ -459,14 +459,14 @@ const Sales = () => {
                             </div>
 
                             <div className="ticket-footer" style={{ padding: '8px 12px', borderTop: '2px solid #333', background: '#fff' }}>
-                                <div className="total-row" style={{ marginBottom: '0px', display: 'flex', justifyContent: 'space-between', fontSize: '0.75rem' }}>
-                                    <span style={{ color: '#888', fontWeight: 'bold' }}>SUBTOTAL:</span>
-                                    <span style={{ color: '#444' }}>${totalOriginalPrice.toLocaleString('es-AR')}</span>
+                                <div className="total-row" style={{ marginBottom: '0px', display: 'flex', justifyContent: 'space-between', fontSize: '0.72rem' }}>
+                                    <span style={{ color: '#999', fontWeight: 'bold' }}>SUBTOTAL:</span>
+                                    <span style={{ color: '#666' }}>${totalOriginalPrice.toLocaleString('es-AR')}</span>
                                 </div>
 
                                 {totalSavings > 0 && (
-                                    <div className="total-row" style={{ marginBottom: '2px', display: 'flex', justifyContent: 'space-between', fontSize: '0.75rem', color: '#f03e3e' }}>
-                                        <span style={{ fontWeight: 'bold' }}>DESCUENTO:</span>
+                                    <div className="total-row" style={{ marginBottom: '2px', display: 'flex', justifyContent: 'space-between', fontSize: '0.72rem', color: '#f03e3e' }}>
+                                        <span style={{ fontWeight: 'bold' }}>DESCUENTO ({((totalSavings / totalOriginalPrice) * 100).toFixed(1)}%):</span>
                                         <span style={{ fontWeight: '800' }}>− ${totalSavings.toLocaleString('es-AR')}</span>
                                     </div>
                                 )}
