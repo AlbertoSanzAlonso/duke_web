@@ -828,7 +828,9 @@ img.nav-logo:hover,
 .product-detail-modal {
   position: relative;
   width: 100%;
-  max-width: 420px;
+  max-width: 520px; /* Aumentado de 420px */
+  width: 50vw; /* Que ocupe la mitad del viewport */
+  min-width: 320px;
   background: #111;
   border: 1px solid #333;
   border-radius: 16px;
@@ -873,7 +875,7 @@ img.nav-logo:hover,
 .detail-hero {
   position: relative;
   width: 100%;
-  height: 240px;
+  aspect-ratio: 16 / 9; /* Mantiene ratio dinámico */
   overflow: hidden;
   background: #1a1a1a;
 }
