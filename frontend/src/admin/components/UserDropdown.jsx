@@ -80,7 +80,7 @@ const UserDropdown = () => {
             <style dangerouslySetInnerHTML={{ __html: `
                 .user-dropdown-container {
                     position: relative;
-                    z-index: 2500;
+                    z-index: 1500;
                 }
                 .user-profile-btn {
                     display: flex;

@@ -18,6 +18,10 @@ from .permissions import (IsAdminManager, HasTPVPermission, HasAccountingPermiss
                          HasMenuPermission, HasInventoryPermission, HasGalleryPermission)
 
 from django.utils.decorators import method_decorator
+import json
+import os
+import urllib.request
+from django.conf import settings
 from django.views.decorators.cache import cache_page
 from django.http import StreamingHttpResponse
 from django.views.decorators.csrf import csrf_exempt
@@ -629,9 +633,10 @@ def AIHelpView(request):
                 'Authorization': f'Bearer {api_key}'
             }
         )
-        with urllib.request.urlopen(req, timeout=10) as response:
+        with urllib.request.urlopen(req, timeout=12) as response:
             res_data = json.loads(response.read().decode('utf-8'))
             answer = res_data['choices'][0]['message']['content']
             return Response({'answer': answer})
     except Exception as e:
-        return Response({'error': f'Error de comunicación con Groq: {str(e)}'}, status=500)
+        print(f"Groq API Error: {e}")
+        return Response({'error': f'Error de comunicación con la IA: {str(e)}'}, status=502)

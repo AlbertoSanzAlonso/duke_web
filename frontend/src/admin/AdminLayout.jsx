@@ -161,8 +161,6 @@ const AdminLayout = () => {
       {/* AI Assistant Chat */}
       <AIChat />
       
-      {/* TEST INDICATOR - DEBERÍA VERSE UN CUADRITO ROJO ARRIBA A LA IZQUIERDA */}
-      <div style={{ position: 'fixed', top: '10px', left: '10px', width: '20px', height: '20px', background: 'red', zIndex: 9999, borderRadius: '50%' }}></div>
     </div>
   );
 };
