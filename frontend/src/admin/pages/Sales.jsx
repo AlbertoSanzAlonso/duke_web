@@ -429,25 +429,25 @@ const Sales = () => {
                                 )}
                             </div>
 
-                            <div className="ticket-footer" style={{ padding: '10px 12px', borderTop: '1px solid #333', background: '#fff' }}>
-                                <div className="total-row" style={{ marginBottom: '2px', display: 'flex', justifyContent: 'space-between', fontSize: '0.85rem' }}>
-                                    <span style={{ color: '#666' }}>SUBTOTAL PRODUCTOS:</span>
+                            <div className="ticket-footer" style={{ padding: '8px 12px', borderTop: '2px solid #333', background: '#fff' }}>
+                                <div className="total-row" style={{ marginBottom: '1px', display: 'flex', justifyContent: 'space-between', fontSize: '0.8rem' }}>
+                                    <span style={{ color: '#666', fontWeight: 'bold' }}>SUBTOTAL:</span>
                                     <span>${subtotal.toLocaleString('es-AR')}</span>
                                 </div>
 
                                 {calculatedDiscount > 0 && (
-                                    <div className="total-row" style={{ marginBottom: '4px', display: 'flex', justifyContent: 'space-between', fontSize: '0.85rem', color: '#f03e3e', background: '#fff5f5', padding: '2px 4px', borderRadius: '4px' }}>
-                                        <span style={{ fontWeight: 'bold' }}>DESCUENTO APLICADO:</span>
+                                    <div className="total-row" style={{ marginBottom: '4px', display: 'flex', justifyContent: 'space-between', fontSize: '0.8rem', color: '#f03e3e' }}>
+                                        <span style={{ fontWeight: 'bold' }}>DESCUENTO:</span>
                                         <span style={{ fontWeight: '900' }}>− ${calculatedDiscount.toLocaleString('es-AR')}</span>
                                     </div>
                                 )}
 
-                                <div className="discount-controls" style={{ background: '#f1f3f5', padding: '6px', borderRadius: '8px', marginBottom: '8px', marginTop: '4px' }}>
+                                <div className="discount-controls" style={{ background: '#f8f9fa', padding: '4px', borderRadius: '6px', marginBottom: '8px', border: '1px solid #eee' }}>
                                     <div style={{ display: 'flex', gap: '5px' }}>
                                         <select 
                                             value={discountType} 
                                             onChange={e => setDiscountType(e.target.value)}
-                                            style={{ padding: '3px', borderRadius: '4px', border: '1px solid #ccc', fontSize: '0.75rem' }}
+                                            style={{ padding: '2px', borderRadius: '4px', border: '1px solid #ddd', fontSize: '0.75rem' }}
                                         >
                                             <option value="fixed">$ DESC</option>
                                             <option value="percent">% DESC</option>
@@ -458,19 +458,19 @@ const Sales = () => {
                                             value={discountValue || ''}
                                             onChange={e => setDiscountValue(e.target.value)}
                                             className="no-arrows-input"
-                                            style={{ flex: 1, padding: '3px', borderRadius: '4px', border: '1px solid #ccc', fontSize: '0.85rem', fontWeight: 'bold' }}
+                                            style={{ flex: 1, padding: '2px', borderRadius: '4px', border: '1px solid #ddd', fontSize: '0.8rem', fontWeight: 'bold' }}
                                         />
                                     </div>
                                 </div>
 
                                 {isDelivery && (
-                                    <div className="total-row" style={{ color: '#ae3ec9', fontSize: '0.8rem', marginBottom: '4px', borderTop: '1px dashed #eee', paddingTop: '4px' }}>
+                                    <div className="total-row" style={{ color: '#ae3ec9', fontSize: '0.8rem', marginBottom: '4px' }}>
                                         <span>ENVÍO:</span>
                                         <span>+ ${parseFloat(deliveryCost || 0).toLocaleString('es-AR')}</span>
                                     </div>
                                 )}
                                 
-                                <div className="total-row" style={{ borderTop: '2px solid #333', paddingTop: '6px', marginTop: '4px', marginBottom: '8px' }}>
+                                <div className="total-row" style={{ borderTop: '2.5px solid #333', paddingTop: '6px', marginTop: '4px', marginBottom: '8px' }}>
                                     <span style={{ fontSize: '1rem', fontWeight: '900' }}>TOTAL:</span>
                                     <span className="total-price" style={{ fontSize: '1.4rem', fontWeight: '900' }}>${total.toLocaleString('es-AR')}</span>
                                 </div>
@@ -480,7 +480,7 @@ const Sales = () => {
                                         className="pending-btn" 
                                         disabled={cart.length === 0 || isSaving}
                                         onClick={() => handleSaveTicket('PENDING')}
-                                        style={{ padding: '8px', fontSize: '0.8rem', background: '#495057' }}
+                                        style={{ padding: '8px', fontSize: '0.75rem', background: '#495057' }}
                                     >
                                         PENDIENTE
                                     </button>
