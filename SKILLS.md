@@ -29,12 +29,14 @@ Este repositorio utiliza el motor de agentes *Antigravity* y se apoya en las sig
 ## 4. Gestión de Infraestructura (Coolify + Vercel)
 **Estrategia:** 
 - Despliegue continuo en Vercel (Front) y Coolify (Back).
-- Persistencia de archivos locales mediante volúmenes en Coolify.
-- Conexión cifrada a base de datos externa (Supabase).
+- **Backend Stability:** Uso obligatorio de `WhiteNoiseMiddleware` y el diccionario `STORAGES` (Django 4.2+).
+- **Static Storage:** Para máxima estabilidad en Docker, usar `StaticFilesStorage` en lugar de backends comprimidos si `collectstatic` es incierto.
+- **Diagnostics:** Ante errores 500, usar `/api/setup-admin-super/` para sincronizar base de datos Supabase con el código.
 
 ## 5. delivery-pricing-standards (Lógica de Negocio)
-**Descripción:** Control de tarifas dinámicas por distancia.
-- **Model:** `GlobalSetting` (base, km, max).
-- **Logic:** `(dist < 1) ? base : (dist * km)`. Round up to 100.
-- **Límites:** Bloquear pedidos si el GPS detecta una distancia superior a `max_km`.
-- **Admin:** Gestión centralizada en `/admin/config`.
+... (anterior contenido)
+
+## 6. UX de Datos y Presentación (Nuevo)
+**Reglas:**
+- **Multiline:** Siempre usar `white-space: pre-line` en React para campos `ingredients` y `description`.
+- **Proporciones:** Modales desktop a `50vw` con imágenes en `aspect-ratio: 16/9`.
