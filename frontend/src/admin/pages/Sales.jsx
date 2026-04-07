@@ -388,7 +388,7 @@ const Sales = () => {
                                     </label>
                                     {isDelivery && (
                                         <div style={{ flex: 1, position: 'relative' }}>
-                                            <span style={{ position: 'absolute', left: '8px', top: '50%', transform: 'translateY(-50%)', fontSize: '0.7rem', color: '#666' }}>$</span>
+                                            <span style={{ position: 'absolute', left: '10px', top: '50%', transform: 'translateY(-50%)', fontSize: '0.8rem', color: '#666', fontWeight: '800' }}>$</span>
                                             <input 
                                                 type="number" 
                                                 placeholder="Costo"
@@ -397,7 +397,7 @@ const Sales = () => {
                                                 className="no-arrows-input"
                                                 value={deliveryCost}
                                                 onChange={e => setDeliveryCost(e.target.value)}
-                                                style={{ paddingLeft: '15px', height: '28px', width: '100%', fontWeight: 'bold', fontSize: '0.8rem' }}
+                                                style={{ paddingLeft: '24px', height: '32px', width: '100%', fontSize: '0.8rem', borderRadius: '8px', border: '1px solid #ddd' }}
                                             />
                                         </div>
                                     )}
