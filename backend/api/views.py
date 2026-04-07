@@ -581,22 +581,28 @@ def AIHelpView(request):
     # 2. Fetch Dynamic Live Context from DB
     live_context = ""
     try:
-        # Stock Crítico
+        # Toda la data de Inventario para precisión
+        all_inventory = InventoryItem.objects.all().order_by('name')
+        inventory_summary = "\n".join([f"- {i.name}: {i.quantity} {i.unit} (Stock min: {i.min_stock})" for i in all_inventory])
+        
+        # Stock Crítico (Solo los que faltan para destacar)
         critical_items = InventoryItem.objects.filter(quantity__lte=F('min_stock'))
-        stock_info = ", ".join([f"{i.name} ({i.quantity} {i.unit})" for i in critical_items]) if critical_items.exists() else "Todo en orden."
+        stock_critical_info = ", ".join([f"{i.name}" for i in critical_items]) if critical_items.exists() else "Ninguno"
         
         # Pedidos Pendientes
         pending_orders = Sale.objects.filter(status='PENDING').count()
         
-        # Resumen Menu
+        # Categorías
         categories = MenuEntry.objects.values_list('category', flat=True).distinct()
         cats_info = ", ".join(categories)
 
         live_context = (
             f"DATOS EN TIEMPO REAL DEL PANEL:\n"
-            f"- Artículos con bajo stock/críticos: {stock_info}\n"
-            f"- Pedidos pendientes de procesar: {pending_orders}\n"
-            f"- Categorías activas en el menú: {cats_info}\n"
+            f"- Artículos con bajo stock/FALTA COMPRAR: {stock_critical_info}\n"
+            f"- Pedidos pendientes: {pending_orders}\n"
+            f"- Categorías activas: {cats_info}\n\n"
+            f"--- INVENTARIO COMPLETO (STOCK ACTUAL) ---\n"
+            f"{inventory_summary}\n"
         )
     except Exception as e:
         live_context = "No se pudo obtener el contexto en tiempo real."
