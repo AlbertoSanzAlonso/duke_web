@@ -183,7 +183,10 @@ if USE_S3:
         },
     }
 
-DEBUG = True
+STATIC_ROOT = BASE_DIR / "staticfiles"
+
+# SECURITY WARNING: don't run with debug turned on in production!
+DEBUG = env.bool('DEBUG', default=False)
 ALLOWED_HOSTS = ['api.dukeburger-sj.com', 'dukeburger-sj.com', '*']
 
 # CORS simplified for production (Token auth doesn't require credentials)
