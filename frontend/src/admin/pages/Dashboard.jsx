@@ -66,28 +66,23 @@ const Dashboard = () => {
     if (loading) return <LoadingScreen />;
 
     return (
-        <div style={{ padding: '10px' }}>
-            <div style={{ marginBottom: '30px' }}>
-                <h1 style={{ margin: 0, fontSize: '2.4rem', fontWeight: '900', color: '#1a1b1e', letterSpacing: '-1px' }}>
-                    DUKE <span style={{ color: '#f03e3e' }}>INSIGHTS</span>
+        <div className="dash-container">
+            <div className="dash-header">
+                <h1 className="dash-title">
+                    DUKE <span style={{ color: 'var(--admin-primary)' }}>INSIGHTS</span>
                 </h1>
-                <p style={{ color: '#666', margin: '5px 0' }}>Estado operativo de la sucursal en tiempo real</p>
+                <p className="dash-subtitle">Estado operativo de la sucursal en tiempo real</p>
             </div>
 
-            <div style={{ 
-                display: 'grid', 
-                gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 280px), 1fr))', 
-                gap: '20px',
-                marginBottom: '40px'
-            }}>
+            <div className="dash-grid">
                 {/* 1. PEDIDOS HOY */}
-                <div className="admin-card" style={cardStyle}>
-                    <div style={iconBoxStyle('#fff5f5', '#f03e3e')}>
+                <div className="stat-card">
+                    <div className="stat-icon-box icon-red">
                         <ShoppingBag size={24} />
                     </div>
-                    <div style={{ flex: 1 }}>
-                        <div style={labelStyle}>Pedidos de Hoy</div>
-                        <div style={valueStyle}>{data.todaySalesCount}</div>
+                    <div className="stat-content">
+                        <div className="stat-label">Pedidos de Hoy</div>
+                        <div className="stat-value">{data.todaySalesCount}</div>
                     </div>
                     <div style={{ color: '#2b8a3e', fontSize: '0.8rem', fontWeight: 'bold' }}>
                         <TrendingUp size={14} style={{ marginRight: '4px' }} /> EN VIVO
@@ -95,24 +90,24 @@ const Dashboard = () => {
                 </div>
 
                 {/* 2. PROMOS ACTIVAS */}
-                <div className="admin-card" style={cardStyle}>
-                    <div style={iconBoxStyle('#fff9db', '#f08c00')}>
+                <div className="stat-card">
+                    <div className="stat-icon-box icon-orange">
                         <Star size={24} />
                     </div>
-                    <div>
-                        <div style={labelStyle}>Promos en Cartelera</div>
-                        <div style={valueStyle}>{data.activePromos}</div>
+                    <div className="stat-content">
+                        <div className="stat-label">Promos en Cartelera</div>
+                        <div className="stat-value">{data.activePromos}</div>
                     </div>
                 </div>
 
                 {/* 3. HORARIO HOY */}
-                <div className="admin-card" style={cardStyle}>
-                    <div style={iconBoxStyle('#f3f0ff', '#7950f2')}>
+                <div className="stat-card">
+                    <div className="stat-icon-box icon-purple">
                         <Clock size={24} />
                     </div>
-                    <div>
-                        <div style={labelStyle}>Horario de Hoy</div>
-                        <div style={valueStyle}>
+                    <div className="stat-content">
+                        <div className="stat-label">Horario de Hoy</div>
+                        <div className="stat-value">
                             {data.todayHours?.is_open 
                                 ? `${data.todayHours.opening_time.slice(0,5)} - ${data.todayHours.closing_time.slice(0,5)}` 
                                 : 'CERRADO'}
@@ -121,13 +116,13 @@ const Dashboard = () => {
                 </div>
 
                 {/* 4. STOCK CRÍTICO */}
-                <div className="admin-card" style={{ ...cardStyle, borderLeft: data.lowStockItems.length > 0 ? '4px solid #e03131' : '1px solid #eee' }}>
-                    <div style={iconBoxStyle(data.lowStockItems.length > 0 ? '#fff5f5' : '#f8f9fa', data.lowStockItems.length > 0 ? '#e03131' : '#adb5bd')}>
+                <div className={`stat-card ${data.lowStockItems.length > 0 ? 'critical-border' : ''}`} style={{ borderLeft: data.lowStockItems.length > 0 ? '4px solid #e03131' : '' }}>
+                    <div className={`stat-icon-box ${data.lowStockItems.length > 0 ? 'icon-red' : 'icon-gray'}`}>
                         <AlertTriangle size={24} />
                     </div>
-                    <div>
-                        <div style={labelStyle}>Alertas de Stock</div>
-                        <div style={{ ...valueStyle, color: data.lowStockItems.length > 0 ? '#e03131' : '#333' }}>
+                    <div className="stat-content">
+                        <div className="stat-label">Alertas de Stock</div>
+                        <div className="stat-value" style={{ color: data.lowStockItems.length > 0 ? '#e03131' : '' }}>
                             {data.lowStockItems.length} {data.lowStockItems.length === 1 ? 'Ítem' : 'Ítems'}
                         </div>
                     </div>
@@ -139,57 +134,57 @@ const Dashboard = () => {
                         href="https://webmail.dondominio.com/" 
                         target="_blank" 
                         rel="noopener noreferrer" 
-                        className="admin-card" 
-                        style={{ ...cardStyle, background: '#e7f5ff', border: '1px solid #a5d8ff', textDecoration: 'none' }}
+                        className="stat-card icon-blue"
                     >
-                        <div style={iconBoxStyle('#d0ebff', '#228be6')}>
+                        <div className="stat-icon-box icon-blue" style={{ background: '#d0ebff' }}>
                             <Mail size={24} />
                         </div>
-                        <div>
-                            <div style={labelStyle}>Correo Corporativo</div>
-                            <div style={{ ...valueStyle, fontSize: '1.2rem', color: '#1c7ed6' }}>ACCEDER WEBMAIL ↗</div>
+                        <div className="stat-content">
+                            <div className="stat-label">Correo Corporativo</div>
+                            <div className="stat-value" style={{ fontSize: '1.2rem', color: '#1c7ed6' }}>ACCEDER WEBMAIL ↗</div>
                         </div>
                     </a>
                 )}
-                {/* 6. HISTORIAL (Moved from Sidebar) */}
+
+                {/* 6. HISTORIAL */}
                 {(profile?.is_superuser || profile?.profile?.can_use_accounting) && (
-                    <Link to="/admin/historial" className="admin-card" style={{ ...cardStyle, textDecoration: 'none' }}>
-                        <div style={iconBoxStyle('#f8f9fa', '#495057')}>
+                    <Link to="/admin/historial" className="stat-card">
+                        <div className="stat-icon-box icon-gray">
                             <History size={24} />
                         </div>
-                        <div>
-                            <div style={labelStyle}>Auditoría</div>
-                            <div style={valueStyle}>HISTORIAL</div>
+                        <div className="stat-content">
+                            <div className="stat-label">Auditoría</div>
+                            <div className="stat-value">HISTORIAL</div>
                         </div>
                     </Link>
                 )}
 
-                {/* 7. CONFIGURACIÓN (Moved from Sidebar) */}
+                {/* 7. CONFIGURACIÓN */}
                 {(profile?.is_superuser || profile?.profile?.can_use_settings) && (
-                    <Link to="/admin/config" className="admin-card" style={{ ...cardStyle, textDecoration: 'none' }}>
-                        <div style={iconBoxStyle('#e9ecef', '#212529')}>
+                    <Link to="/admin/config" className="stat-card">
+                        <div className="stat-icon-box icon-dark">
                             <SettingsIcon size={24} />
                         </div>
-                        <div>
-                            <div style={labelStyle}>Sistema</div>
-                            <div style={valueStyle}>CONFIGURACIÓN</div>
+                        <div className="stat-content">
+                            <div className="stat-label">Sistema</div>
+                            <div className="stat-value">CONFIGURACIÓN</div>
                         </div>
                     </Link>
                 )}
             </div>
 
-            {/* DETALLE DE STOCK BAJO (Si hay) */}
+            {/* DETALLE DE STOCK BAJO */}
             {data.lowStockItems.length > 0 && (
-                <div className="admin-card" style={{ padding: '25px', background: '#fff5f5', border: '1px solid #ffc9c9' }}>
-                    <h3 style={{ margin: '0 0 20px 0', display: 'flex', alignItems: 'center', gap: '10px', color: '#c92a2a' }}>
+                <div className="critical-section">
+                    <h3 className="critical-title">
                         <Package size={22} /> Insumos con Stock Crítico
                     </h3>
-                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '15px' }}>
+                    <div className="critical-grid">
                         {data.lowStockItems.map(item => (
-                            <div key={item.id} style={{ background: '#fff', padding: '12px', borderRadius: '8px', border: '1px solid #ffa8a8', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                            <div key={item.id} className="critical-item">
                                 <div>
-                                    <div style={{ fontWeight: 'bold', fontSize: '0.9rem' }}>{item.name}</div>
-                                    <div style={{ fontSize: '0.8rem', color: '#e03131' }}>Quedan: {item.quantity} {item.unit}</div>
+                                    <div className="critical-item-name">{item.name}</div>
+                                    <div className="critical-item-qty">Quedan: {item.quantity} {item.unit}</div>
                                 </div>
                                 <AlertTriangle size={16} color="#e03131" />
                             </div>
@@ -199,41 +194,6 @@ const Dashboard = () => {
             )}
         </div>
     );
-};
-
-const cardStyle = {
-    display: 'flex',
-    alignItems: 'center',
-    gap: '20px',
-    padding: '25px',
-    transition: 'transform 0.2s ease',
-    cursor: 'default'
-};
-
-const iconBoxStyle = (bg, color) => ({
-    width: '56px',
-    height: '56px',
-    borderRadius: '16px',
-    background: bg,
-    color: color,
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center'
-});
-
-const labelStyle = {
-    fontSize: '0.85rem',
-    color: '#868e96',
-    fontWeight: '600',
-    textTransform: 'uppercase',
-    letterSpacing: '0.5px',
-    marginBottom: '4px'
-};
-
-const valueStyle = {
-    fontSize: '1.6rem',
-    fontWeight: '800',
-    color: '#212529'
 };
 
 export default Dashboard;
