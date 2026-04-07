@@ -98,7 +98,8 @@ const Gallery = () => {
         e.dataTransfer.setDragImage(e.target.parentNode, 20, 20);
     };
 
-    const onDragOver = (index) => {
+    const onDragOver = (e, index) => {
+        e.preventDefault(); // Essential for drop to work
         const draggedOverItem = gallery[index];
 
         // if the item is dragged over itself, ignore
@@ -106,8 +107,12 @@ const Gallery = () => {
             return;
         }
 
+        // Only update if index actually changed to prevent chaotic jumping
+        const currentIdx = gallery.indexOf(draggedItem);
+        if (currentIdx === index) return;
+
         // filter out the currently dragged item
-        let items = gallery.filter(item => item !== draggedItem);
+        let items = gallery.filter(item => item.id !== draggedItem.id);
 
         // add the dragged item after the dragged over item
         items.splice(index, 0, draggedItem);
@@ -177,7 +182,7 @@ const Gallery = () => {
                         <div key={img.id} 
                             draggable
                             onDragStart={(e) => onDragStart(e, index)}
-                            onDragOver={() => onDragOver(index)}
+                            onDragOver={(e) => onDragOver(e, index)}
                             onDragEnd={onDragEnd}
                             style={{ 
                                 background: '#fff', 
@@ -216,11 +221,16 @@ const Gallery = () => {
                                 </div>
 
                                 <div style={{ 
-                                    position: 'absolute', bottom: '10px', left: '10px', 
-                                    background: 'rgba(0,0,0,0.6)', color: 'white', 
-                                    padding: '5px', borderRadius: '50%', pointerEvents: 'none'
+                                    position: 'absolute', bottom: '12px', left: '12px', 
+                                    background: 'rgba(0,0,0,0.7)', color: 'white', 
+                                    width: '32px', height: '32px', 
+                                    borderRadius: '50%', display: 'flex', 
+                                    alignItems: 'center', justifyContent: 'center',
+                                    pointerEvents: 'none',
+                                    boxShadow: '0 2px 8px rgba(0,0,0,0.3)',
+                                    border: '1.5px solid rgba(255,255,255,0.3)'
                                 }}>
-                                    <Move size={14} />
+                                    <Move size={16} />
                                 </div>
 
                                 {!img.is_active && (
