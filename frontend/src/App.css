@@ -1045,29 +1045,19 @@ img.nav-logo:hover,
 
 @media (max-width: 480px) {
   .product-detail-modal {
-    max-width: 100%;
-    border-radius: 16px 16px 0 0;
-    position: fixed;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    max-height: 85vh;
-    animation: modalSlideUpMobile 0.3s ease;
-  }
-
-  @keyframes modalSlideUpMobile {
-    from {
-      opacity: 0;
-      transform: translateY(100%);
-    }
-    to {
-      opacity: 1;
-      transform: translateY(0);
-    }
+    width: 94vw;
+    max-width: 500px;
+    max-height: 92vh;
+    border-radius: 16px;
+    position: relative;
+    bottom: auto;
+    left: auto;
+    right: auto;
+    animation: modalSlideUp 0.3s ease;
   }
 
   .detail-hero {
-    height: 200px;
+    height: 220px;
   }
 
   .detail-footer {
@@ -1077,17 +1067,17 @@ img.nav-logo:hover,
 
   .detail-add-button {
     max-width: 100%;
-    width: 92%; /* Air on the sides on mobile */
-    margin: 0 auto; /* Centered */
+    width: 92%; 
+    margin: 0 auto;
   }
-}
+
   .cart-fab {
     bottom: 1.5rem;
     right: 1.5rem;
     width: 3.5rem;
     height: 3.5rem;
   }
-
+}
 
 @media (max-width: 480px) {
   .hero-title {
