@@ -6,22 +6,17 @@ import {
 } from '../../services/api';
 import LoadingScreen from '../components/LoadingScreen';
 import Toast from '../components/Toast';
-import { Settings as SettingsIcon, Save, Truck, Clock, Image as ImageIcon, Plus, Trash2, X, AlertTriangle } from 'lucide-react';
+import { Settings as SettingsIcon, Save, Truck, Clock, Image as ImageIcon, Plus, Trash2, X, AlertTriangle, Users as UsersIcon, History } from 'lucide-react';
+import Gallery from './Gallery';
+import Users from './Users';
 
 const Settings = () => {
     const [activeTab, setActiveTab] = useState('delivery');
     const [openingHours, setOpeningHours] = useState([]);
     const [deliveryRates, setDeliveryRates] = useState({ base_price: 0, km_price: 0, max_km: 0 });
-    const [gallery, setGallery] = useState([]);
     const [loading, setLoading] = useState(true);
     const [isSaving, setIsSaving] = useState(false);
     const [toast, setToast] = useState(null);
-    const [confirmDelete, setConfirmDelete] = useState(null); // { type, id, title }
-
-    // Gallery state
-    const [isAddingImg, setIsAddingImg] = useState(false);
-    const [newImage, setNewImage] = useState({ title: '', image: null, order: 0 });
-    const [imgSaving, setImgSaving] = useState(false);
 
     useEffect(() => {
         loadAllData();
@@ -30,14 +25,12 @@ const Settings = () => {
     const loadAllData = async () => {
         setLoading(true);
         try {
-            const [hoursData, ratesData, galleryData] = await Promise.all([
+            const [hoursData, ratesData] = await Promise.all([
                 fetchOpeningHours(),
-                fetchDeliveryRates(),
-                fetchGalleryImages()
+                fetchDeliveryRates()
             ]);
             setOpeningHours(hoursData);
             setDeliveryRates(ratesData);
-            setGallery(galleryData);
         } catch (error) {
             console.error("Error loading settings:", error);
             setToast({ message: 'Error al cargar los datos', type: 'error' });
@@ -78,51 +71,6 @@ const Settings = () => {
         }
     };
 
-    const handleAddImage = async (e) => {
-        e.preventDefault();
-        if (!newImage.image) return;
-        setImgSaving(true);
-        try {
-            const formData = new FormData();
-            formData.append('title', newImage.title);
-            formData.append('image', newImage.image);
-            formData.append('order', newImage.order);
-            await createGalleryImage(formData);
-            setIsAddingImg(false);
-            setNewImage({ title: '', image: null, order: 0 });
-            setGallery(await fetchGalleryImages());
-            setToast({ message: 'Imagen añadida con éxito', type: 'success' });
-        } catch (error) {
-            setToast({ message: 'Error al subir imagen', type: 'error' });
-        } finally {
-            setImgSaving(false);
-        }
-    };
-
-    const executeDelete = async () => {
-        if (!confirmDelete) return;
-        try {
-            if (confirmDelete.type === 'image') {
-                await deleteGalleryImage(confirmDelete.id);
-                setGallery(gallery.filter(i => i.id !== confirmDelete.id));
-                setToast({ message: 'Imagen eliminada', type: 'success' });
-            }
-        } catch (error) {
-            setToast({ message: 'Error al eliminar', type: 'error' });
-        } finally {
-            setConfirmDelete(null);
-        }
-    };
-
-    const handleReorderImage = async (id, newOrder) => {
-        try {
-            await updateGalleryImage(id, { order: newOrder });
-            setGallery(prev => prev.map(i => i.id === id ? { ...i, order: newOrder } : i).sort((a,b) => a.order - b.order));
-        } catch (error) {
-            console.error("Error updating order:", error);
-        }
-    };
-
     if (loading) return <LoadingScreen />;
 
     return (
@@ -137,18 +85,24 @@ const Settings = () => {
             <div className="settings-tabs-container" style={{ marginBottom: '30px', width: '100%' }}>
                 <div className="settings-tabs" style={{ 
                     display: 'grid', 
-                    gridTemplateColumns: 'repeat(4, 1fr)', 
+                    gridTemplateColumns: 'repeat(5, 1fr)', 
                     gap: '12px', 
                     width: '100%' 
                 }}>
                     <button onClick={() => setActiveTab('delivery')} className={`tab-btn ${activeTab === 'delivery' ? 'active' : ''}`} style={{ ...tabBtnStyle(activeTab === 'delivery'), width: '100%' }}>
-                        <Truck size={18} /> Tarifas Envío
+                        <Truck size={18} /> Tarifas
                     </button>
                     <button onClick={() => setActiveTab('hours')} className={`tab-btn ${activeTab === 'hours' ? 'active' : ''}`} style={{ ...tabBtnStyle(activeTab === 'hours'), width: '100%' }}>
-                        <Clock size={18} /> Tabla Horarios
+                        <Clock size={18} /> Horarios
+                    </button>
+                    <button onClick={() => setActiveTab('gallery')} className={`tab-btn ${activeTab === 'gallery' ? 'active' : ''}`} style={{ ...tabBtnStyle(activeTab === 'gallery'), width: '100%' }}>
+                        <ImageIcon size={18} /> Galería
+                    </button>
+                    <button onClick={() => setActiveTab('users')} className={`tab-btn ${activeTab === 'users' ? 'active' : ''}`} style={{ ...tabBtnStyle(activeTab === 'users'), width: '100%' }}>
+                        <UsersIcon size={18} /> Personal
                     </button>
                     <button onClick={() => setActiveTab('custom')} className={`tab-btn ${activeTab === 'custom' ? 'active' : ''}`} style={{ ...tabBtnStyle(activeTab === 'custom'), width: '100%' }}>
-                        <Save size={18} /> Personalizar
+                        <Save size={18} /> Otros
                     </button>
                 </div>
             </div>
@@ -309,65 +263,19 @@ const Settings = () => {
                     </div>
                 )}
 
+                {activeTab === 'gallery' && (
+                    <div className="tab-content" style={{ padding: '0' }}>
+                        <Gallery />
+                    </div>
+                )}
+
+                {activeTab === 'users' && (
+                    <div className="tab-content" style={{ padding: '0' }}>
+                        <Users />
+                    </div>
+                )}
 
             </div>
-
-            {/* Custom Confirms */}
-            {confirmDelete && (
-                <div className="modal-overlay" style={modalOverlayStyle}>
-                    <div className="admin-modal" style={{ ...modalStyle, maxWidth: '400px', textAlign: 'center' }}>
-                        <div style={{ padding: '30px' }}>
-                            <div style={{ color: '#f03e3e', marginBottom: '15px' }}><AlertTriangle size={48} style={{ margin: '0 auto' }} /></div>
-                            <h3>¿Estás seguro?</h3>
-                            <p style={{ color: '#666' }}>Vas a eliminar la imagen <strong>{confirmDelete.title || 'sin título'}</strong>. Esta acción no se puede deshacer.</p>
-                            <div style={{ display: 'flex', gap: '15px', marginTop: '25px' }}>
-                                <button onClick={() => setConfirmDelete(null)} style={cancelBtnStyle}>CANCELAR</button>
-                                <button onClick={executeDelete} style={{ ...saveImgBtnStyle, background: '#f03e3e' }}>SÍ, ELIMINAR</button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            )}
-
-            {/* Modal para añadir imagen */}
-            {isAddingImg && (
-                <div className="modal-overlay" style={modalOverlayStyle}>
-                    <div className="admin-modal" style={modalStyle}>
-                        <div className="modal-header" style={modalHeaderStyle}>
-                            <h3>Nueva Imagen del Local</h3>
-                            <button onClick={() => setIsAddingImg(false)} style={closeBtnStyle}><X size={24} /></button>
-                        </div>
-                        <form onSubmit={handleAddImage} style={{ padding: '20px', display: 'flex', flexDirection: 'column', gap: '20px' }}>
-                            <div>
-                                <label style={modalLabelStyle}>Título (Opcional)</label>
-                                <input type="text" value={newImage.title} placeholder="Ej: Salón Principal" onChange={e => setNewImage({...newImage, title: e.target.value})} style={modalInputStyle} />
-                            </div>
-                            <div>
-                                <label style={{ display: 'block', fontWeight: '800', marginBottom: '8px', fontSize: '0.75rem', color: '#888', textTransform: 'uppercase' }}>Archivo de Imagen *</label>
-                                <input 
-                                    type="file" 
-                                    accept="image/*" 
-                                    onChange={e => setNewImage({...newImage, image: e.target.files[0]})} 
-                                    style={{ 
-                                        width: '100%', 
-                                        padding: '10px', 
-                                        border: '1px solid #ddd', 
-                                        borderRadius: '8px', 
-                                        fontSize: '0.9rem',
-                                        background: '#f8f9fa',
-                                        cursor: 'pointer' 
-                                    }} 
-                                    required 
-                                />
-                            </div>
-                            <div style={{ display: 'flex', gap: '15px', marginTop: '10px' }}>
-                                <button type="button" onClick={() => setIsAddingImg(false)} style={cancelBtnStyle}>Cancelar</button>
-                                <button type="submit" disabled={imgSaving} style={saveImgBtnStyle}>{imgSaving ? 'Subiendo...' : 'Publicar Imagen'}</button>
-                            </div>
-                        </form>
-                    </div>
-                </div>
-            )}
         </div>
     );
 };

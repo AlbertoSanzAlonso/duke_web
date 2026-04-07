@@ -79,10 +79,6 @@ const AdminLayout = () => {
     { name: 'Inventario', path: '/admin/inventario', icon: <Boxes size={20} />, perm: 'can_use_inventory' },
     { name: 'Pedidos Proveedor', path: '/admin/pedidos', icon: <Truck size={20} />, perm: 'can_use_inventory' },
     { name: 'Contabilidad', path: '/admin/contabilidad', icon: <TrendingUp size={20} />, perm: 'can_use_accounting' },
-    { name: 'Galería', path: '/admin/galeria', icon: <ImageIcon size={20} />, perm: 'can_use_gallery' },
-    { name: 'Historial', path: '/admin/historial', icon: <History size={20} />, perm: 'can_use_accounting' },
-    { name: 'Configuración', path: '/admin/config', icon: <SettingsIcon size={20} />, perm: 'can_use_settings' },
-    { name: 'Usuarios', path: '/admin/usuarios', icon: <UsersIcon size={20} />, perm: 'is_admin_manager' },
   ];
 
   const menuItems = allMenuItems.filter(item => {

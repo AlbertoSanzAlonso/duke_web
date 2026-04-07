@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import { fetchSales, fetchMenuEntries, fetchOpeningHours, fetchInventory, fetchMe } from '../../services/api';
 import LoadingScreen from '../components/LoadingScreen';
-import { ShoppingBag, Star, Clock, AlertTriangle, TrendingUp, Package, CalendarOff, Mail } from 'lucide-react';
+import { ShoppingBag, Star, Clock, AlertTriangle, TrendingUp, Package, CalendarOff, Mail, History, Settings as SettingsIcon } from 'lucide-react';
 
 const Dashboard = () => {
     const [loading, setLoading] = useState(true);
@@ -149,6 +150,31 @@ const Dashboard = () => {
                             <div style={{ ...valueStyle, fontSize: '1.2rem', color: '#1c7ed6' }}>ACCEDER WEBMAIL ↗</div>
                         </div>
                     </a>
+                )}
+                {/* 6. HISTORIAL (Moved from Sidebar) */}
+                {(profile?.is_superuser || profile?.profile?.can_use_accounting) && (
+                    <Link to="/admin/historial" className="admin-card" style={{ ...cardStyle, textDecoration: 'none' }}>
+                        <div style={iconBoxStyle('#f8f9fa', '#495057')}>
+                            <History size={24} />
+                        </div>
+                        <div>
+                            <div style={labelStyle}>Auditoría</div>
+                            <div style={valueStyle}>HISTORIAL</div>
+                        </div>
+                    </Link>
+                )}
+
+                {/* 7. CONFIGURACIÓN (Moved from Sidebar) */}
+                {(profile?.is_superuser || profile?.profile?.can_use_settings) && (
+                    <Link to="/admin/config" className="admin-card" style={{ ...cardStyle, textDecoration: 'none' }}>
+                        <div style={iconBoxStyle('#e9ecef', '#212529')}>
+                            <SettingsIcon size={24} />
+                        </div>
+                        <div>
+                            <div style={labelStyle}>Sistema</div>
+                            <div style={valueStyle}>CONFIGURACIÓN</div>
+                        </div>
+                    </Link>
                 )}
             </div>
 
