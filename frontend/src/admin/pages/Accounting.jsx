@@ -8,7 +8,7 @@ import {
 import './Accounting.css';
 import LoadingScreen from '../components/LoadingScreen';
 import Toast from '../components/Toast';
-import { Save, X, Trash2, Edit2, Search, Filter, Calendar as CalendarIcon, ChevronDown, ChevronUp, FileText } from 'lucide-react';
+import { Save, X, Trash2, Edit2, Search, Filter, Calendar as CalendarIcon, ChevronDown, ChevronUp, FileText, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight } from 'lucide-react';
 
 const Accounting = () => {
     const [sales, setSales] = useState([]);
@@ -24,6 +24,10 @@ const Accounting = () => {
     const [toast, setToast] = useState(null); 
     
     const [isSaving, setIsSaving] = useState(false);
+    
+    // Pagination
+    const [currentPage, setCurrentPage] = useState(1);
+    const itemsPerPage = 10;
 
     // Edit states
     const [editingId, setEditingId] = useState(null); // format: 'type-id' e.g. 'exp-1'
@@ -258,6 +262,33 @@ const Accounting = () => {
         ...filteredSales.map(s => ({ ...s, typeIndicator: 'sal' }))
     ].sort((a, b) => new Date(b.date) - new Date(a.date));
 
+    // Pagination logic
+    const totalPages = Math.ceil(mergedItems.length / itemsPerPage);
+    const paginatedItems = mergedItems.slice(
+        (currentPage - 1) * itemsPerPage,
+        currentPage * itemsPerPage
+    );
+
+    // Reset pagination when filters change
+    useEffect(() => {
+        setCurrentPage(1);
+    }, [searchTerm, startDate, endDate, selectedCategory, selectedType, viewMode]);
+
+    const getPageNumbers = () => {
+        const pages = [];
+        let startPage = Math.max(1, currentPage - 2);
+        let endPage = Math.min(totalPages, startPage + 4);
+        
+        if (endPage - startPage < 4) {
+            startPage = Math.max(1, endPage - 4);
+        }
+
+        for (let i = startPage; i <= endPage; i++) {
+            pages.push(i);
+        }
+        return pages;
+    };
+
     if (loading) return <LoadingScreen />;
 
     return (
@@ -419,7 +450,7 @@ const Accounting = () => {
                                     </tr>
                                 </thead>
                                 <tbody>
-                                {mergedItems.slice(0, 100).map(item => {
+                                {paginatedItems.map(item => {
                                     const type = item.typeIndicator;
                                     const isEditing = editingId === `${type}-${item.id}`;
                                     const dateObj = new Date(item.date);
@@ -453,6 +484,7 @@ const Accounting = () => {
                                                         value={editForm.description} 
                                                         onChange={val => setEditForm({...editForm, description: val.target.value})}
                                                         className="inline-edit-input"
+                                                        onClick={e => e.stopPropagation()}
                                                     />
                                                 ) : description}
                                             </td>
@@ -462,6 +494,7 @@ const Accounting = () => {
                                                         value={editForm.category} 
                                                         onChange={val => setEditForm({...editForm, category: val.target.value})}
                                                         className="inline-edit-input"
+                                                        onClick={e => e.stopPropagation()}
                                                     >
                                                         <option value="Local">Local / Suministros</option>
                                                         <option value="Sueldos">Sueldos / Personal</option>
@@ -481,6 +514,7 @@ const Accounting = () => {
                                                         onChange={val => setEditForm({...editForm, amount: val.target.value})}
                                                         className="inline-edit-input txt-right"
                                                         style={{ width: '100px' }}
+                                                        onClick={e => e.stopPropagation()}
                                                     />
                                                 ) : `${isPositive ? '+' : '-'}$${Math.round(parseFloat(amountVal)).toLocaleString('es-AR')}`}
                                             </td>
@@ -493,6 +527,62 @@ const Accounting = () => {
                                 </tbody>
                             </table>
                         </div>
+
+                        {/* Pagination UI */}
+                        {totalPages > 1 && (
+                            <div className="pagination-container" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '8px', marginTop: '25px', padding: '10px' }}>
+                                <button 
+                                    onClick={() => setCurrentPage(1)} 
+                                    disabled={currentPage === 1}
+                                    style={{ background: 'none', border: '1px solid #ddd', borderRadius: '8px', padding: '8px', cursor: currentPage === 1 ? 'default' : 'pointer', color: currentPage === 1 ? '#ccc' : '#333' }}
+                                >
+                                    <ChevronsLeft size={16} />
+                                </button>
+                                <button 
+                                    onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))} 
+                                    disabled={currentPage === 1}
+                                    style={{ background: 'none', border: '1px solid #ddd', borderRadius: '8px', padding: '8px', cursor: currentPage === 1 ? 'default' : 'pointer', color: currentPage === 1 ? '#ccc' : '#333' }}
+                                >
+                                    <ChevronLeft size={16} />
+                                </button>
+                                
+                                <div style={{ display: 'flex', gap: '5px' }}>
+                                    {getPageNumbers().map(num => (
+                                        <button 
+                                            key={num} 
+                                            onClick={() => setCurrentPage(num)}
+                                            style={{
+                                                padding: '8px 12px',
+                                                borderRadius: '8px',
+                                                border: '1px solid #ddd',
+                                                background: currentPage === num ? '#333' : '#fff',
+                                                color: currentPage === num ? '#fff' : '#333',
+                                                fontWeight: 'bold',
+                                                cursor: 'pointer',
+                                                minWidth: '40px'
+                                            }}
+                                        >
+                                            {num}
+                                        </button>
+                                    ))}
+                                </div>
+
+                                <button 
+                                    onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))} 
+                                    disabled={currentPage === totalPages}
+                                    style={{ background: 'none', border: '1px solid #ddd', borderRadius: '8px', padding: '8px', cursor: currentPage === totalPages ? 'default' : 'pointer', color: currentPage === totalPages ? '#ccc' : '#333' }}
+                                >
+                                    <ChevronRight size={16} />
+                                </button>
+                                <button 
+                                    onClick={() => setCurrentPage(totalPages)} 
+                                    disabled={currentPage === totalPages}
+                                    style={{ background: 'none', border: '1px solid #ddd', borderRadius: '8px', padding: '8px', cursor: currentPage === totalPages ? 'default' : 'pointer', color: currentPage === totalPages ? '#ccc' : '#333' }}
+                                >
+                                    <ChevronsRight size={16} />
+                                </button>
+                            </div>
+                        )}
                     </div>
                 </div>
             </div>

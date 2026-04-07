@@ -26,6 +26,8 @@ const SupplierOrders = () => {
     const [isAddingNewItem, setIsAddingNewItem] = useState(false);
     const [newItemData, setNewItemData] = useState({ name: '', unit: 'unidades', category: 'Otros' });
     const [selectedOrder, setSelectedOrder] = useState(null);
+    const [showMinStockModal, setShowMinStockModal] = useState(false);
+    const [minStockValue, setMinStockValue] = useState('0');
 
     useEffect(() => {
         loadData();
@@ -50,34 +52,8 @@ const SupplierOrders = () => {
     const addItemToOrder = async () => {
         if (isAddingNewItem) {
             if (!newItemData.name || !itemQty || !itemCost) return;
-            setIsSaving(true);
-            try {
-                // 1. Create the item in inventory first
-                const created = await createInventoryItem({
-                    name: newItemData.name,
-                    unit: newItemData.unit,
-                    category: newItemData.category,
-                    quantity: 0 // Will be updated by the order item save in backend
-                });
-                
-                // 2. Add to order list
-                setOrderItems([...orderItems, {
-                    item: created.id,
-                    name: created.name,
-                    quantity: parseFloat(itemQty),
-                    cost: parseFloat(itemCost)
-                }]);
-                
-                // 3. Reset and refresh inventory for subsequent additions
-                const invData = await fetchInventory();
-                setInventoryItems(invData);
-                setNewItemData({ name: '', unit: 'unidades', category: 'Otros' });
-                setIsAddingNewItem(false);
-            } catch (err) {
-                setToast({ message: `Error: ${err.message}`, type: 'error' });
-            } finally {
-                setIsSaving(false);
-            }
+            setShowMinStockModal(true);
+            return;
         } else {
             if (!selectedItemId || !itemQty || !itemCost) return;
             
@@ -131,6 +107,45 @@ const SupplierOrders = () => {
             loadData();
         } catch (error) {
             setToast({ message: "Error al registrar pedido", type: 'error' });
+        } finally {
+            setIsSaving(false);
+        }
+    };
+
+    const confirmNewItem = async () => {
+        setIsSaving(true);
+        try {
+            // 1. Create the item in inventory with min_stock
+            const created = await createInventoryItem({
+                name: newItemData.name,
+                unit: newItemData.unit,
+                category: newItemData.category,
+                quantity: 0,
+                min_stock: parseFloat(minStockValue) || 0
+            });
+            
+            // 2. Add to order list
+            setOrderItems([...orderItems, {
+                item: created.id,
+                name: created.name,
+                quantity: parseFloat(itemQty),
+                cost: parseFloat(itemCost)
+            }]);
+            
+            // 3. Reset and refresh
+            const invData = await fetchInventory();
+            setInventoryItems(invData);
+            setNewItemData({ name: '', unit: 'unidades', category: 'Otros' });
+            setIsAddingNewItem(false);
+            setShowMinStockModal(false);
+            setMinStockValue('0');
+            
+            // Clear current input fields
+            setSelectedItemId('');
+            setItemQty('');
+            setItemCost('');
+        } catch (err) {
+            setToast({ message: `Error: ${err.message}`, type: 'error' });
         } finally {
             setIsSaving(false);
         }
@@ -429,6 +444,60 @@ const SupplierOrders = () => {
                             <p style={{ margin: 0, fontSize: '2.2rem', fontWeight: '900', color: '#f03e3e' }}>
                                 ${parseFloat(selectedOrder.total_cost).toLocaleString('es-AR')}
                             </p>
+                        </div>
+                    </div>
+                </div>
+            )}
+            {/* Modal para Límite Mínimo de Almacén */}
+            {showMinStockModal && (
+                <div 
+                    className="modal-overlay" 
+                    style={{
+                        position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
+                        background: 'rgba(0,0,0,0.85)', display: 'flex',
+                        alignItems: 'center', justifyContent: 'center', zIndex: 6000
+                    }}
+                >
+                    <div 
+                        className="admin-card" 
+                        style={{
+                            width: '100%', maxWidth: '400px', padding: '30px',
+                            textAlign: 'center', border: '1px solid var(--admin-primary)'
+                        }}
+                    >
+                        <ShoppingCart size={40} color="var(--admin-primary)" style={{ marginBottom: '15px' }} />
+                        <h3 style={{ margin: '0 0 10px 0' }}>Límite de Stock Mínimo</h3>
+                        <p style={{ color: '#666', fontSize: '0.9rem', marginBottom: '20px' }}>
+                            ¿Cuál es la cantidad mínima de <strong>{newItemData.name}</strong> que deberías tener siempre en almacén?
+                        </p>
+                        
+                        <div className="form-group" style={{ marginBottom: '25px' }}>
+                            <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 'bold', marginBottom: '8px', textAlign: 'left' }}>
+                                STOCK MÍNIMO ({newItemData.unit})
+                            </label>
+                            <input 
+                                type="number" 
+                                step="any"
+                                value={minStockValue} 
+                                onChange={e => setMinStockValue(e.target.value)} 
+                                autoFocus
+                                style={{ width: '100%', padding: '12px', borderRadius: '8px', border: '2px solid #ddd', fontSize: '1.2rem', textAlign: 'center' }}
+                            />
+                        </div>
+
+                        <div style={{ display: 'flex', gap: '10px' }}>
+                            <button 
+                                onClick={() => setShowMinStockModal(false)}
+                                style={{ flex: 1, padding: '12px', background: '#eee', border: 'none', borderRadius: '8px', cursor: 'pointer', fontWeight: 'bold' }}
+                            >
+                                CANCELAR
+                            </button>
+                            <button 
+                                onClick={confirmNewItem}
+                                style={{ flex: 1, padding: '12px', background: 'var(--admin-primary)', color: 'white', border: 'none', borderRadius: '8px', cursor: 'pointer', fontWeight: 'bold' }}
+                            >
+                                DEFINIR Y CREAR
+                            </button>
                         </div>
                     </div>
                 </div>

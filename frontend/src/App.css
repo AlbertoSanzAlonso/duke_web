@@ -1544,6 +1544,86 @@ img.nav-logo:hover,
   }
 }
 
+/* Hours Modal Styling */
+.hours-modal-main {
+  max-width: 550px !important;
+  width: 90%;
+}
+
+.hours-modal-title {
+  font-size: 1.8rem;
+}
+
+.hours-modal-body {
+  text-align: center;
+  padding: 30px 20px;
+}
+
+.hours-container-inner h3 {
+  font-size: 1.3rem;
+  margin-bottom: 8px;
+}
+
+.hours-container-inner p {
+  color: #888;
+  font-size: 0.95rem;
+  margin-bottom: 15px;
+}
+
+.hours-icon {
+  color: var(--color-primary);
+  margin-bottom: 12px;
+}
+
+.hours-list-box {
+  background: #1a1a1a;
+  padding: 15px;
+  border-radius: 12px;
+  border: 1px solid #333;
+}
+
+.hours-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 8px 0;
+  border-bottom: 1px solid #222;
+  font-size: 1rem;
+}
+
+.hours-row:last-child {
+  border-bottom: none;
+}
+
+.hours-row .day-name {
+  font-weight: 600;
+  color: white;
+}
+
+.hours-row .time-range {
+  color: var(--color-primary);
+  font-weight: 500;
+}
+
+.closed-label {
+  color: var(--color-primary);
+  font-weight: bold;
+}
+
+@media (max-width: 768px) {
+  .hours-modal-main {
+    max-width: 95% !important;
+  }
+  
+  .hours-modal-title {
+    font-size: 1.5rem;
+  }
+  
+  .hours-row {
+    font-size: 0.9rem;
+    padding: 6px 0;
+  }
+}
+
 /* Print Styles for Tickets */
 @media print {
   @page { margin: 1cm; }

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Menu, X, ShoppingCart, Minus, Plus, MessageCircle, MapPin } from 'lucide-react';
 import { fetchMenuEntries, createSale, fetchOpeningHours } from '../services/api';
+import Toast from '../admin/components/Toast';
 
 function Home() {
   const [activeCategory, setActiveCategory] = useState('Burgers');
@@ -27,6 +28,7 @@ function Home() {
   const [deliverySettings, setDeliverySettings] = useState({});
   const [openingHours, setOpeningHours] = useState([]);
   const [isHoursModalOpen, setIsHoursModalOpen] = useState(false);
+  const [toast, setToast] = useState(null);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -175,31 +177,35 @@ function Home() {
       const todayStr = fechaArg.toISOString().split('T')[0];
 
       const grouped = entries.reduce((acc, entry) => {
-        // 1. Basic availability
         if (!entry.is_available) return acc;
-
-        // 2. Weekly schedule
-        if (entry[currentDayField] === false) return acc;
-
-        // 3. Date range (Seasonal)
-        if (entry.start_date && todayStr < entry.start_date) return acc;
-        if (entry.end_date && todayStr > entry.end_date) return acc;
         
+        const isScheduledToday = entry[currentDayField] !== false;
+        const isWithinDateRange = (!entry.start_date || todayStr >= entry.start_date) && 
+                                  (!entry.end_date || todayStr <= entry.end_date);
+        const isAvailableToday = isScheduledToday && isWithinDateRange;
+        const isPromo = entry.category === 'Promos';
+
+        if (!isPromo && !isAvailableToday) return acc;
+
         const cat = entry.category || 'General';
         if (!acc[cat]) acc[cat] = [];
         
+        const daysMapRef = { 'monday': 'Lunes', 'tuesday': 'Martes', 'wednesday': 'Miércoles', 'thursday': 'Jueves', 'friday': 'Viernes', 'saturday': 'Sábado', 'sunday': 'Domingo' };
+        const activeDaysList = Object.keys(daysMapRef).filter(d => entry[`active_${d}`] !== false).map(d => daysMapRef[d]);
+
         const itemObj = {
           id: entry.id,
           name: entry.product?.name || 'Producto sin nombre',
           description: entry.product?.description || '',
           ingredients: entry.product?.ingredients || '',
           price: entry.price,
-          image: entry.product?.image || null
+          image: entry.product?.image || null,
+          category: cat,
+          isAvailableToday,
+          activeDays: activeDaysList
         };
         
         acc[cat].push(itemObj);
-        
-        // Also add to 'Todas' category
         if (!acc['Todas']) acc['Todas'] = [];
         acc['Todas'].push(itemObj);
 
@@ -229,6 +235,13 @@ function Home() {
   };
 
   const addToCart = (item) => {
+    if (item.category === 'Promos' && !item.isAvailableToday) {
+      setToast({ 
+        message: `Esta promo no está disponible hoy. Días: ${item.activeDays.join(', ')}`, 
+        type: 'error' 
+      });
+      return;
+    }
     setCart(prev => ({
       ...prev,
       [item.id]: {
@@ -557,7 +570,11 @@ function Home() {
                   </div>
                   <div className="card-footer">
                     <span className="price">${parseFloat(item.price).toLocaleString('es-AR')}</span>
-                    <button className="add-btn" onClick={(e) => { e.stopPropagation(); addToCart(item); }}>+</button>
+                    {item.category === 'Promos' && !item.isAvailableToday ? (
+                      <span className="promo-unavailable-badge">NO DISPONIBLE</span>
+                    ) : (
+                      <button className="add-btn" onClick={(e) => { e.stopPropagation(); addToCart(item); }}>+</button>
+                    )}
                   </div>
                 </div>
               ))
@@ -879,13 +896,17 @@ function Home() {
                         <div className="promo-footer">
                           <span className="price">${parseFloat(promo.price).toLocaleString('es-AR')}</span>
                           <button 
-                            className="add-btn" 
+                            className={`add-btn ${!promo.isAvailableToday ? 'disabled' : ''}`}
                             onClick={() => {
+                              if (!promo.isAvailableToday) {
+                                addToCart(promo);
+                                return;
+                              }
                               addToCart(promo);
                               setIsPromosOpen(false);
                             }}
                           >
-                            + AGREGAR
+                            {!promo.isAvailableToday ? 'NO DISP.' : '+ AGREGAR'}
                           </button>
                         </div>
                       </div>
@@ -899,36 +920,36 @@ function Home() {
           </div>
         </div>
       )}
-      {/* Modal Horarios */}
+    {/* Modal Horarios */}
       {isHoursModalOpen && (
         <div className="modal-overlay" style={{ zIndex: 4000 }}>
-          <div className="cart-modal" style={{ maxWidth: '400px' }}>
+          <div className="cart-modal hours-modal-main">
             <div className="modal-header">
-              <h2 style={{ fontSize: '1.8rem' }}>HORARIOS</h2>
-              <button className="close-btn" onClick={() => setIsHoursModalOpen(false)} style={{ background: 'none', border: 'none', color: 'white', fontSize: '2rem', cursor: 'pointer' }}>×</button>
+              <h2 className="hours-modal-title">HORARIOS</h2>
+              <button className="close-btn" onClick={() => setIsHoursModalOpen(false)}>×</button>
             </div>
-            <div className="modal-body" style={{ textAlign: 'center', padding: '40px 20px' }}>
-              <div style={{ marginBottom: '30px' }}>
-                <MessageCircle size={48} color="var(--color-primary)" style={{ marginBottom: '15px' }} />
-                <h3 style={{ fontSize: '1.5rem', marginBottom: '10px' }}>Estamos para servirte</h3>
-                <p style={{ color: '#888', fontSize: '1.1rem' }}>Nuestro local y delivery operan en:</p>
-                <div style={{ background: '#1a1a1a', padding: '15px', borderRadius: '12px', border: '1px solid #333' }}>
+            <div className="modal-body hours-modal-body">
+              <div className="hours-container-inner">
+                <MessageCircle size={40} className="hours-icon" />
+                <h3>Estamos para servirte</h3>
+                <p>Nuestro local y delivery operan en:</p>
+                <div className="hours-list-box">
                   {openingHours.filter(h => h.is_open).length > 0 ? (
                     openingHours.filter(h => h.is_open).map(h => (
-                      <div key={h.id} style={{ display: 'flex', justifyContent: 'space-between', padding: '8px 0', borderBottom: '1px solid #222' }}>
-                        <span style={{ fontWeight: 'bold', color: 'white' }}>{h.day_name}</span>
-                        <span style={{ color: 'var(--color-primary)' }}>{h.opening_time.slice(0,5)} a {h.closing_time.slice(0,5)} hs</span>
+                      <div key={h.id} className="hours-row">
+                        <span className="day-name">{h.day_name}</span>
+                        <span className="time-range">{h.opening_time.slice(0,5)} a {h.closing_time.slice(0,5)} hs</span>
                       </div>
                     ))
                   ) : (
-                    <p style={{ color: 'var(--color-primary)', fontWeight: 'bold' }}>CERRADO</p>
+                    <p className="closed-label">CERRADO</p>
                   )}
                 </div>
               </div>
               
               <button 
                 className="confirm-order-btn" 
-                style={{ marginTop: '30px' }}
+                style={{ marginTop: '20px' }}
                 onClick={() => setIsHoursModalOpen(false)}
               >
                 ENTENDIDO
@@ -937,6 +958,7 @@ function Home() {
           </div>
         </div>
       )}
+      {toast && <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />}
     </div>
   );
 }

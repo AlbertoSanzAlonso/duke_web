@@ -97,7 +97,7 @@ const AdminLayout = () => {
           <Link to="/" title="Ir a la Web principal" onClick={() => setIsMobileOpen(false)}>
             <img src="/brand/duke burger 1 negativo.png" alt="Duke Admin Logo" style={{ height: '60px', objectFit: 'contain', cursor: 'pointer' }} />
           </Link>
-          <button className="close-sidebar-btn" onClick={() => setIsMobileOpen(false)} style={{ display: 'block' }}>
+          <button className="close-sidebar-btn" onClick={() => setIsMobileOpen(false)}>
             <X size={24} color="#fff" />
           </button>
         </div>

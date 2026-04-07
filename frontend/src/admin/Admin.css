@@ -140,7 +140,7 @@ body, .admin-container, .admin-main, .admin-content {
 }
 
 .close-sidebar-btn {
-  display: block !important;
+  display: none;
   background: none;
   border: none;
   cursor: pointer;

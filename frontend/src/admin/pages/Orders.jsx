@@ -3,6 +3,7 @@ import { useSearchParams, useNavigate } from 'react-router-dom';
 import { fetchSales } from '../../services/api';
 import { Printer, Eye, Calendar, User, Hash, Search, Filter, LayoutGrid } from 'lucide-react';
 import LoadingScreen from '../components/LoadingScreen';
+import Toast from '../components/Toast';
 import './Orders.css';
 
 const Orders = () => {
@@ -13,6 +14,7 @@ const Orders = () => {
     const [searchParams] = useSearchParams();
     const [filterType, setFilterType] = useState('all'); // 'all', 'daily', 'weekly', 'monthly'
     const [showStatsModal, setShowStatsModal] = useState(false);
+    const [toast, setToast] = useState(null);
     const navigate = useNavigate();
 
     // ... (rest of search/memo logic remains same)
@@ -35,7 +37,12 @@ const Orders = () => {
             try {
                 const data = JSON.parse(event.data);
                 if (data.type === 'new_order') {
+                    console.log("SSE: Nuevo pedido recibido", data);
+                    setToast({ message: "¡NUEVO PEDIDO RECIBIDO!", type: 'success' });
                     loadOrders(); // Refresh list automatically
+                    
+                    // Dispatch custom event for other components (like TPV/Sales)
+                    window.dispatchEvent(new CustomEvent('new-order-received', { detail: data }));
                 }
             } catch (err) {
                 console.error("Error parsing SSE data:", err);
@@ -417,6 +424,10 @@ const Orders = () => {
                     </div>
                 </div>
             )}
+            {/* Modal de Estadísticas Detalladas */}
+            {/* ... stats modal code ... */}
+
+            {toast && <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />}
         </div>
     );
 };

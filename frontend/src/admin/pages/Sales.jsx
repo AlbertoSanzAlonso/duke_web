@@ -40,8 +40,9 @@ const Sales = () => {
         loadData();
 
         // Real-time support
-        const handleNewOrder = () => {
+        const handleNewOrder = (event) => {
             console.log("Real-time: New order detected, refreshing pending tickets...");
+            setToast({ message: "¡NUEVO PEDIDO RECIBIDO!", type: 'success' });
             loadData();
         };
 
@@ -54,6 +55,35 @@ const Sales = () => {
         window.addEventListener('new-order-received', handleNewOrder);
         return () => window.removeEventListener('new-order-received', handleNewOrder);
     }, [location.state]);
+
+    // Dedicated SSE Listener for Sales (TPV)
+    useEffect(() => {
+        const baseUrl = import.meta.env.VITE_API_URL || '';
+        const streamUrl = `${baseUrl.replace(/\/$/, '')}/api/orders-stream/`;
+        
+        const eventSource = new EventSource(streamUrl);
+
+        eventSource.onmessage = (event) => {
+            try {
+                const data = JSON.parse(event.data);
+                if (data.type === 'new_order') {
+                    console.log("SSE (TPV): Nuevo pedido recibido");
+                    // We dispatch a record so other listeners (if any) catch it,
+                    // but we also trigger the local logic.
+                    window.dispatchEvent(new CustomEvent('new-order-received', { detail: data }));
+                }
+            } catch (err) {
+                console.error("Error parsing SSE data in TPV:", err);
+            }
+        };
+
+        eventSource.onerror = (err) => {
+            console.error("SSE Connection Error in TPV:", err);
+            eventSource.close();
+        };
+
+        return () => eventSource.close();
+    }, []);
 
     const loadData = async () => {
         setLoading(true);
@@ -731,6 +761,7 @@ const Sales = () => {
                     </div>
                 </div>
             )}
+            {toast && <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />}
         </div>
     );
 };
