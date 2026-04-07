@@ -5,7 +5,7 @@ from .views import (ProductViewSet, MenuEntryViewSet, SaleViewSet, ExpenseViewSe
                     GlobalSettingViewSet, GalleryImageViewSet, OpeningHourViewSet, 
                     DeliverySettingViewSet, AdminSetupView, 
                     PasswordResetRequestView, PasswordResetConfirmView, MeView, UserViewSet,
-                    ActionLogViewSet)
+                    ActionLogViewSet, AIHelpView)
 from rest_framework.authtoken.views import obtain_auth_token
 
 router = DefaultRouter()
@@ -30,4 +30,5 @@ urlpatterns = [
     path('password-reset/', PasswordResetRequestView, name='password_reset_request'),
     path('password-reset-confirm/', PasswordResetConfirmView, name='password_reset_confirm'),
     path('me/', MeView, name='me'),
+    path('ai-help/', AIHelpView, name='ai_help'),
 ]

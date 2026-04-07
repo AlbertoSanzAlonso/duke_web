@@ -3,7 +3,7 @@ from rest_framework.response import Response
 from rest_framework.decorators import api_view, permission_classes, parser_classes, action
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from django.contrib.auth.models import User
-from django.db.models import Q
+from django.db.models import Q, F
 from .models import (Product, MenuEntry, Sale, Expense, InventoryItem, 
                      SupplierOrder, GlobalSetting, GalleryImage, OpeningHour, DeliverySetting, 
                      UserProfile, ActionLog, log_action)
@@ -548,3 +548,90 @@ def PasswordResetConfirmView(request):
         return Response({"message": "Contraseña actualizada con éxito. Ya puedes iniciar sesión."})
     else:
         return Response({"error": "El enlace es inválido o ha expirado."}, status=status.HTTP_400_BAD_REQUEST)
+
+import urllib.request
+@api_view(['POST'])
+@permission_classes([permissions.IsAuthenticated])
+def AIHelpView(request):
+    question = request.data.get('question')
+    if not question:
+        return Response({'error': 'Pregunta requerida'}, status=400)
+    
+    api_key = os.environ.get('GROQ_API_KEY')
+    if not api_key:
+        return Response({
+            'answer': 'Lo siento, el asistente de IA no está configurado (falta GROQ_API_KEY en el servidor). '
+                      'Soy un experto en Duke Burger: puedo enseñarte a usar el TPV, el Inventario, la Contabilidad y los Pedidos.'
+        })
+
+    # 1. Read static Manual context
+    manual_content = ""
+    try:
+        manual_path = os.path.join(settings.BASE_DIR, '..', 'docs', 'manual_admin.md')
+        if os.path.exists(manual_path):
+            with open(manual_path, 'r', encoding='utf-8') as f:
+                manual_content = f.read()
+    except Exception as e:
+        print(f"Error reading manual: {e}")
+
+    # 2. Fetch Dynamic Live Context from DB
+    live_context = ""
+    try:
+        # Stock Crítico
+        critical_items = InventoryItem.objects.filter(quantity__lte=F('min_stock'))
+        stock_info = ", ".join([f"{i.name} ({i.quantity} {i.unit})" for i in critical_items]) if critical_items.exists() else "Todo en orden."
+        
+        # Pedidos Pendientes
+        pending_orders = Sale.objects.filter(status='PENDING').count()
+        
+        # Resumen Menu
+        categories = MenuEntry.objects.values_list('category', flat=True).distinct()
+        cats_info = ", ".join(categories)
+
+        live_context = (
+            f"DATOS EN TIEMPO REAL DEL PANEL:\n"
+            f"- Artículos con bajo stock/críticos: {stock_info}\n"
+            f"- Pedidos pendientes de procesar: {pending_orders}\n"
+            f"- Categorías activas en el menú: {cats_info}\n"
+        )
+    except Exception as e:
+        live_context = "No se pudo obtener el contexto en tiempo real."
+
+    # 3. Build Final System Instruction
+    system_instruction = (
+        "Eres el asistente virtual oficial de Duke Burger (San Juan, Argentina). "
+        "Tu misión es ayudar al administrador con dudas sobre el funcionamiento y ESTADO ACTUAL del panel. "
+        f"\n\n--- MANUAL DE OPERACIÓN ---\n{manual_content}\n"
+        f"\n\n--- ESTADO DEL SISTEMA AHORA MISMO ---\n{live_context}\n"
+        "\nREGLAS: "
+        "1. Responde de forma concisa y directa. "
+        "2. Usa los datos del ESTADO DEL SISTEMA para responder preguntas sobre stock o pedidos. "
+        "3. Usa pesos argentinos ($). "
+        "4. Si te preguntan '¿qué falta?' o '¿qué tengo que comprar?', revisa el stock crítico."
+    )
+
+    url = "https://api.groq.com/openai/v1/chat/completions"
+    payload = {
+        "model": "llama-3.3-70b-versatile",
+        "messages": [
+            {"role": "system", "content": system_instruction},
+            {"role": "user", "content": question}
+        ],
+        "temperature": 0.4 # Lower temperature for more factual responses
+    }
+
+    try:
+        req = urllib.request.Request(
+            url, 
+            data=json.dumps(payload).encode('utf-8'), 
+            headers={
+                'Content-Type': 'application/json',
+                'Authorization': f'Bearer {api_key}'
+            }
+        )
+        with urllib.request.urlopen(req, timeout=10) as response:
+            res_data = json.loads(response.read().decode('utf-8'))
+            answer = res_data['choices'][0]['message']['content']
+            return Response({'answer': answer})
+    except Exception as e:
+        return Response({'error': f'Error de comunicación con Groq: {str(e)}'}, status=500)

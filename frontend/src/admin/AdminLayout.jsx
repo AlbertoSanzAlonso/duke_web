@@ -23,6 +23,7 @@ import {
 import './Admin.css';
 
 import UserDropdown from './components/UserDropdown';
+import AIChat from './components/AIChat';
 
 const AdminLayout = () => {
   const [isMobileOpen, setIsMobileOpen] = useState(false);
@@ -89,6 +90,11 @@ const AdminLayout = () => {
 
   return (
     <div className="admin-container">
+      {/* AI Assistant Chat - MOVED TO TOP OF CONTAINER */}
+      <AIChat />
+      
+      {/* TEST INDICATOR */}
+      <div style={{ position: 'fixed', top: '10px', left: '10px', width: '20px', height: '20px', background: 'red', zIndex: 9999, borderRadius: '50%' }}></div>
       {/* Overlay to close sidebar on mobile when clicking outside */}
       <div className={`sidebar-overlay ${isMobileOpen ? 'visible' : ''}`} onClick={() => setIsMobileOpen(false)}></div>
       
@@ -153,6 +159,12 @@ const AdminLayout = () => {
           onClose={() => setNotification(null)} 
         />
       )}
+
+      {/* AI Assistant Chat */}
+      <AIChat />
+      
+      {/* TEST INDICATOR - DEBERÍA VERSE UN CUADRITO ROJO ARRIBA A LA IZQUIERDA */}
+      <div style={{ position: 'fixed', top: '10px', left: '10px', width: '20px', height: '20px', background: 'red', zIndex: 9999, borderRadius: '50%' }}></div>
     </div>
   );
 };
