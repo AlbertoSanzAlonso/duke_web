@@ -166,7 +166,25 @@ const Users = () => {
                     </h2>
                     <p style={{ color: '#666', margin: '5px 0 0 0' }}>Administra el personal y sus permisos de acceso.</p>
                 </div>
-                <button className="main-button" onClick={() => handleOpenModal()} style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <button 
+                    className="new-user-btn" 
+                    onClick={() => handleOpenModal()} 
+                    style={{ 
+                        display: 'flex', 
+                        alignItems: 'center', 
+                        gap: '8px',
+                        background: '#e31837',
+                        color: 'white',
+                        border: '2px solid #e31837',
+                        padding: '12px 20px',
+                        borderRadius: '12px',
+                        fontWeight: 'bold',
+                        cursor: 'pointer',
+                        transition: 'all 0.3s ease',
+                        textTransform: 'uppercase',
+                        letterSpacing: '1px'
+                    }}
+                >
                     <UserPlus size={20} /> NUEVO USUARIO
                 </button>
             </header>
@@ -339,6 +357,14 @@ const Users = () => {
             )}
 
             <style>{`
+                .new-user-btn:hover {
+                    background: white !important;
+                    color: black !important;
+                    border-color: black !important;
+                    transform: translateY(-2px);
+                    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+                }
+
                 .badge-perm {
                     font-size: 0.7rem;
                     background: #e9ecef;
@@ -359,9 +385,19 @@ const Users = () => {
                     border-radius: 8px;
                     cursor: pointer;
                     transition: all 0.2s;
+                    border: 1px solid transparent;
                 }
                 .perm-toggle:hover { background: #f1f3f5; }
                 .perm-toggle.active { background: #fff5f5; border: 1px solid #ffc9c9; }
+                
+                .perm-toggle span {
+                    font-weight: 600;
+                    color: #888; /* Grey when inactive */
+                    transition: color 0.3s;
+                }
+                .perm-toggle.active span {
+                    color: #222; /* Black when active */
+                }
 
                 .styled-modal-input:focus {
                     border-color: var(--admin-primary) !important;
@@ -394,7 +430,7 @@ const Users = () => {
                     transition: .4s;
                     border-radius: 50%;
                 }
-                input:checked + .slider { background-color: #f03e3e; }
+                input:checked + .slider { background-color: #e31837; }
                 input:checked + .slider:before { transform: translateX(16px); }
             `}</style>
         </div>

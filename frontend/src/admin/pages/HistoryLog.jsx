@@ -65,38 +65,56 @@ const HistoryLog = () => {
                 </div>
             </div>
 
-            <div className="accounting-filters" style={{ display: 'grid', gridTemplateColumns: '1fr auto auto', gap: '15px' }}>
-                <div className="search-box">
-                    <Search size={18} />
+            <div className="accounting-filters" style={{ display: 'grid', gridTemplateColumns: 'minmax(200px, 1fr) auto auto', gap: '15px' }}>
+                <div className="search-box" style={{ background: '#fff', border: '1px solid #ddd', borderRadius: '12px', padding: '0 15px', display: 'flex', alignItems: 'center', gap: '10px' }}>
+                    <Search size={18} color="#888" />
                     <input 
                         type="text" 
-                        placeholder="Buscar por usuario, descripción o acción..." 
+                        placeholder="Buscar por usuario, detalle o acción..." 
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
-                        style={{ height: '45px', border: 'none', background: 'transparent', width: '100%', outline: 'none' }}
+                        style={{ height: '48px', border: 'none', background: 'transparent', width: '100%', outline: 'none', fontSize: '0.95rem' }}
                     />
                 </div>
 
-                <div className="filter-box" style={{ background: '#fff', border: '1px solid #ddd', borderRadius: '8px', padding: '0 15px', display: 'flex', alignItems: 'center', gap: '10px' }}>
-                    <Filter size={18} color="#666" />
+                <div className="filter-box" style={{ background: '#fff', border: '1px solid #ddd', borderRadius: '12px', padding: '0 15px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <Filter size={16} color="#666" />
                     <select 
                         value={selectedModule} 
                         onChange={(e) => setSelectedModule(e.target.value)}
-                        style={{ border: 'none', padding: '0', background: 'transparent', height: '45px', outline: 'none', fontWeight: 'bold' }}
+                        style={{ border: 'none', padding: '0 5px', background: 'transparent', height: '48px', outline: 'none', fontWeight: '800', fontSize: '0.8rem', textTransform: 'uppercase', color: '#333' }}
                     >
-                        <option value="ALL">Todos los Módulos</option>
+                        <option value="ALL">TODOS</option>
                         <option value="TPV">TPV</option>
-                        <option value="CONTABILIDAD">Contabilidad</option>
-                        <option value="PRODUCTOS">Productos / Carta</option>
-                        <option value="INVENTARIO">Inventario</option>
-                        <option value="USUARIOS">Usuarios</option>
-                        <option value="GALERIA">Galería</option>
+                        <option value="CONTABILIDAD">CONTABILIDAD</option>
+                        <option value="PRODUCTOS">PRODUCTOS</option>
+                        <option value="INVENTARIO">INVENTARIO</option>
+                        <option value="USUARIOS">USUARIOS</option>
+                        <option value="GALERIA">GALERÍA</option>
                     </select>
                 </div>
                 
-                <button className="btn-primary" onClick={loadLogs} style={{ height: '47px', display: 'flex', alignItems: 'center', gap: '8px', background: '#333' }}>
-                    <RefreshCw size={18} />
-                    ACTUALIZAR
+                <button 
+                    onClick={loadLogs} 
+                    title="Recargar historial"
+                    style={{ 
+                        height: '48px', 
+                        width: '48px',
+                        display: 'flex', 
+                        alignItems: 'center', 
+                        justifyContent: 'center',
+                        background: '#343a40', 
+                        color: 'white',
+                        border: 'none',
+                        borderRadius: '12px',
+                        cursor: 'pointer',
+                        transition: 'all 0.2s',
+                        boxShadow: '0 4px 6px rgba(0,0,0,0.1)'
+                    }}
+                    onMouseOver={e => e.currentTarget.style.background = '#000'}
+                    onMouseOut={e => e.currentTarget.style.background = '#343a40'}
+                >
+                    <RefreshCw size={20} className={loading ? 'animate-spin' : ''} />
                 </button>
             </div>
 

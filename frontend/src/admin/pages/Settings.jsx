@@ -270,9 +270,9 @@ const Settings = () => {
                                             style={{
                                                 padding: '8px 15px',
                                                 borderRadius: '8px',
-                                                border: 'none',
-                                                background: hour.is_open ? '#ebfbee' : '#fff5f5',
-                                                color: hour.is_open ? '#2b8a3e' : '#f03e3e',
+                                                border: '1px solid #ddd',
+                                                background: hour.is_open ? '#ebfbee' : '#f1f3f5',
+                                                color: hour.is_open ? '#2b8a3e' : '#888',
                                                 fontWeight: 'bold',
                                                 cursor: 'pointer',
                                                 fontSize: '0.85rem'
