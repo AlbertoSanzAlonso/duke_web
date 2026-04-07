@@ -22,7 +22,7 @@ const Sales = () => {
     const [searchTerm, setSearchTerm] = useState('');
     const [currentSaleId, setCurrentSaleId] = useState(null);
     const [discountType, setDiscountType] = useState('fixed'); // 'fixed' or 'percent'
-    const [discountValue, setDiscountValue] = useState(0);
+    const [discountValue, setDiscountValue] = useState('');
 
     // Individual Item Price Modal
     const [priceModal, setPriceModal] = useState({ isOpen: false, item: null });
@@ -125,7 +125,7 @@ const Sales = () => {
             isOpen: true, 
             item: { ...item, originalPrice } 
         });
-        setModalPriceValue(item.price);
+        setModalPriceValue(''); // Clear it as requested
         setModalPriceType('direct');
     };
 
@@ -151,7 +151,7 @@ const Sales = () => {
         setIsDelivery(false);
         setCurrentSaleId(null);
         setIsTicketOpen(false);
-        setDiscountValue(0);
+        setDiscountValue('');
         setDiscountType('fixed');
     };
 
