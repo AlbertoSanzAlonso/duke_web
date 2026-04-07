@@ -828,9 +828,11 @@ img.nav-logo:hover,
 .product-detail-modal {
   position: relative;
   width: 100%;
-  max-width: 520px; /* Aumentado de 420px */
-  width: 50vw; /* Que ocupe la mitad del viewport */
-  min-width: 320px;
+  max-width: 1000px; /* Aumentado sustancialmente */
+  width: 75vw; /* Más ancha para formato panorámico */
+  max-height: 90vh; 
+  display: flex;
+  flex-direction: column;
   background: #111;
   border: 1px solid #333;
   border-radius: 16px;
@@ -853,12 +855,12 @@ img.nav-logo:hover,
 .close-modal-detail {
   position: absolute;
   top: 1rem;
-  right: 1rem;
+  right: 2rem; /* Más aire al botón */
   background: var(--color-primary);
   border: 2px solid white;
   border-radius: 50%;
-  width: 40px;
-  height: 40px;
+  width: 44px;
+  height: 44px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -875,9 +877,11 @@ img.nav-logo:hover,
 .detail-hero {
   position: relative;
   width: 100%;
-  aspect-ratio: 16 / 9; /* Mantiene ratio dinámico */
+  aspect-ratio: 21 / 9; /* Más panorámico aún en desktop */
+  max-height: 45vh; /* Evita que la imagen coma toda la pantalla */
   overflow: hidden;
   background: #1a1a1a;
+  flex-shrink: 0;
 }
 
 .detail-hero img {
@@ -911,6 +915,8 @@ img.nav-logo:hover,
 
 .detail-content {
   padding: 1.5rem;
+  overflow-y: auto;
+  flex-grow: 1;
 }
 
 .detail-header {
