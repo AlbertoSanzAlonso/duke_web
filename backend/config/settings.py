@@ -175,6 +175,8 @@ if USE_S3:
     # Si usamos firmado de URLs, mejor no forzar un dominio custom que oculte los parámetros de firma
     AWS_S3_CUSTOM_DOMAIN = None
     
+
+
 # Configuración de Almacenamiento (Django 4.2+)
 STORAGES = {
     "default": {
@@ -205,11 +207,10 @@ CSRF_TRUSTED_ORIGINS = [
 CORS_PREFLIGHT_MAX_AGE = 86400
 
 # Email Configuration
-EMAIL_BACKEND = env('EMAIL_BACKEND', default='django.core.mail.backends.console.EmailBackend')
-if EMAIL_BACKEND == 'django.core.mail.backends.smtp.EmailBackend':
-    EMAIL_HOST = env('EMAIL_HOST')
-    EMAIL_PORT = env('EMAIL_PORT', default=587)
-    EMAIL_USE_TLS = env('EMAIL_USE_TLS', default=True)
-    EMAIL_HOST_USER = env('EMAIL_HOST_USER')
-    EMAIL_HOST_PASSWORD = env('EMAIL_HOST_PASSWORD')
-    DEFAULT_FROM_EMAIL = env('DEFAULT_FROM_EMAIL', default='Duke Burger <noreply@dukeburger-sj.com>')
+EMAIL_BACKEND = env('EMAIL_BACKEND', default='django.core.mail.backends.smtp.EmailBackend')
+EMAIL_HOST = env('EMAIL_HOST', default='smtp.hostinger.com')
+EMAIL_PORT = env.int('EMAIL_PORT', default=587)
+EMAIL_USE_TLS = env.bool('EMAIL_USE_TLS', default=True)
+EMAIL_HOST_USER = env('EMAIL_HOST_USER', default='contacto@dukeburger-sj.com')
+EMAIL_HOST_PASSWORD = env('EMAIL_HOST_PASSWORD', default='') 
+DEFAULT_FROM_EMAIL = env('DEFAULT_FROM_EMAIL', default='Duke Burger <contacto@dukeburger-sj.com>')
