@@ -337,7 +337,7 @@ function MenuList() {
                                         </div>
                                     )}
 
-                                    <div style={{ position: 'absolute', top: '10px', left: '10px', background: '#333', color: '#ffffff', padding: '4px 10px', borderRadius: '4px', fontSize: '0.8rem', zIndex: 2, fontWeight: 'bold' }}>
+                                    <div className="badge-text-white" style={{ position: 'absolute', top: '10px', left: '10px', background: '#333', color: '#ffffff', padding: '4px 10px', borderRadius: '4px', fontSize: '0.8rem', zIndex: 2, fontWeight: 'bold' }}>
                                         {entry.category}
                                     </div>
                                 </div>

@@ -186,13 +186,7 @@ body, .admin-container, .admin-main, .admin-content {
 .admin-content h2,
 .admin-content h3,
 .admin-content h4,
-.admin-content p,
-.admin-content span,
 .admin-content label,
-.admin-content div,
-.admin-content table,
-.admin-content td,
-.admin-content th,
 .admin-content button {
     color: #333 !important;
 }
