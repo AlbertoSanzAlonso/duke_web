@@ -202,7 +202,11 @@ body, .admin-container, .admin-main, .admin-content {
 .admin-content [style*="color: white"],
 .admin-content .badge-text-white,
 .admin-content .tab-btn.active,
-.admin-content .tab-btn.active svg {
+.admin-content .tab-btn.active svg,
+.admin-content .load-btn,
+.admin-content .checkout-btn,
+.admin-content .main-button,
+.admin-content .pending-btn {
     color: #ffffff !important;
 }
 
