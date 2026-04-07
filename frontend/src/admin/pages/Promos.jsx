@@ -205,6 +205,16 @@ function Promos() {
         }
     };
 
+    const handleToggleDay = async (entry, day) => {
+        try {
+            const field = `active_${day}`;
+            await updateMenuEntry(entry.id, { [field]: !entry[field] });
+            loadData();
+        } catch (err) {
+            setToast({ message: err.message, type: 'error' });
+        }
+    };
+
     const handleDelete = async (id) => {
         if (!window.confirm("¿Seguro que quieres ELIMINAR esta promoción PERMANENTEMENTE?")) return;
         try {
@@ -273,9 +283,9 @@ function Promos() {
                                     required
                                     style={{ width: '100%', padding: '12px', borderRadius: '8px', border: '1px solid #ddd', fontSize: '1rem', background: '#fff' }}
                                 >
-                                    <option value="">-- Seleccionar --</option>
+                                    <option value="" style={{ color: '#000' }}>-- Seleccionar --</option>
                                     {allProducts.map(p => (
-                                        <option key={p.id} value={p.id}>{p.name}</option>
+                                        <option key={p.id} value={p.id} style={{ color: '#000' }}>{p.name}</option>
                                     ))}
                                 </select>
                             </div>
@@ -533,15 +543,25 @@ function Promos() {
                                 
                                 <div style={{ marginBottom: '15px', display: 'flex', flexWrap: 'wrap', gap: '5px' }}>
                                     {['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'].map(day => (
-                                        <span key={day} style={{ 
-                                            fontSize: '0.65rem', 
-                                            padding: '3px 6px', 
-                                            borderRadius: '4px', 
-                                            background: entry[`active_${day}`] ? '#e31837' : '#f1f1f1',
-                                            color: entry[`active_${day}`] ? 'white' : '#bbb',
-                                            fontWeight: 'bold',
-                                            textTransform: 'uppercase'
-                                        }}>
+                                        <span 
+                                            key={day} 
+                                            onClick={() => handleToggleDay(entry, day)}
+                                            style={{ 
+                                                fontSize: '0.65rem', 
+                                                padding: '3px 6px', 
+                                                borderRadius: '4px', 
+                                                background: entry[`active_${day}`] ? '#e31837' : '#f1f1f1',
+                                                color: entry[`active_${day}`] ? 'white' : '#bbb',
+                                                fontWeight: 'bold',
+                                                textTransform: 'uppercase',
+                                                cursor: 'pointer',
+                                                transition: 'all 0.2s',
+                                                border: '1px solid transparent'
+                                            }}
+                                            onMouseOver={(e) => { e.target.style.transform = 'scale(1.1)'; e.target.style.borderColor = 'rgba(0,0,0,0.1)'; }}
+                                            onMouseOut={(e) => { e.target.style.transform = 'scale(1)'; e.target.style.borderColor = 'transparent'; }}
+                                            title={`Alternar ${day}`}
+                                        >
                                             {day.slice(0, 2)}
                                         </span>
                                     ))}

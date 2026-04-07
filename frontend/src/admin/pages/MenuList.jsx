@@ -14,6 +14,7 @@ function MenuList() {
     const [price, setPrice] = useState('');
     const [category, setCategory] = useState('Burgers');
     const [searchTerm, setSearchTerm] = useState('');
+    const [filterCategory, setFilterCategory] = useState('Todas');
 
     const [editingId, setEditingId] = useState(null);
     const [editPrice, setEditPrice] = useState('');
@@ -152,9 +153,9 @@ function MenuList() {
                     required
                     style={{ ...formFieldStyle, flex: 2, minWidth: '220px' }}
                 >
-                    <option value="">-- Seleccionar producto del catálogo --</option>
+                    <option value="" style={{ color: '#000' }}>-- Seleccionar producto del catálogo --</option>
                     {products.map(p => (
-                        <option key={p.id} value={p.id}>{p.name}</option>
+                        <option key={p.id} value={p.id} style={{ color: '#000' }}>{p.name}</option>
                     ))}
                 </select>
                 <select
@@ -163,10 +164,11 @@ function MenuList() {
                     required
                     style={{ ...formFieldStyle, flex: 1, minWidth: '130px' }}
                 >
-                    <option value="Burgers">Burgers</option>
-                    <option value="Pachatas">Pachatas</option>
-                    <option value="Pizzas">Pizzas</option>
-                    <option value="Bebidas">Bebidas</option>
+                    <option value="Burgers" style={{ color: '#000' }}>Burgers</option>
+                    <option value="Pachatas" style={{ color: '#000' }}>Pachatas</option>
+                    <option value="Pizzas" style={{ color: '#000' }}>Pizzas</option>
+                    <option value="Bebidas" style={{ color: '#000' }}>Bebidas</option>
+                    <option value="Promos" style={{ color: '#000' }}>Promos</option>
                 </select>
                 <div style={{ position: 'relative', width: '130px' }}>
                     <span style={{ 
@@ -207,7 +209,42 @@ function MenuList() {
                 </button>
             </form>
 
-            <div style={{ marginTop: '30px' }}>
+            <div style={{ marginTop: '30px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '20px', marginBottom: '20px' }}>
+                <div style={{ display: 'flex', gap: '10px', overflowX: 'auto', paddingBottom: '5px' }}>
+                    {["Todas", "Burgers", "Pachatas", "Pizzas", "Bebidas", "Promos"].map(cat => (
+                        <button 
+                            key={cat}
+                            onClick={() => setFilterCategory(cat)}
+                            style={{
+                                padding: '8px 16px',
+                                borderRadius: '20px',
+                                border: 'none',
+                                background: filterCategory === cat ? 'var(--admin-primary)' : '#f1f3f5',
+                                color: filterCategory === cat ? 'white' : '#495057',
+                                fontWeight: 'bold',
+                                cursor: 'pointer',
+                                fontSize: '0.85rem',
+                                transition: 'all 0.2s',
+                                whiteSpace: 'nowrap'
+                            }}
+                        >
+                            {cat.toUpperCase()}
+                        </button>
+                    ))}
+                </div>
+                <div style={{ position: 'relative', width: '300px' }}>
+                    <Search size={18} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: '#999' }} />
+                    <input 
+                        type="text" 
+                        placeholder="Buscar en la carta..." 
+                        value={searchTerm}
+                        onChange={e => setSearchTerm(e.target.value)}
+                        style={{ ...formFieldStyle, width: '100%', paddingLeft: '40px' }}
+                    />
+                </div>
+            </div>
+
+            <div style={{ marginTop: '10px' }}>
                 {loading ? <p>Cargando menú...</p> : error ? <p style={{ color: 'red' }}>{error}</p> : entries.length === 0 ? (
                     <div style={{ padding: '40px', textAlign: 'center', background: '#f9f9f9', borderRadius: '8px', color: '#888' }}>
                         No hay platos en la carta a la vista del público.
@@ -218,10 +255,12 @@ function MenuList() {
                         gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))',
                         gap: '20px'
                     }}>
-                        {entries.filter(entry => 
-                            (entry.product?.name || "").toLowerCase().includes(searchTerm.toLowerCase()) ||
-                            (entry.category || "").toLowerCase().includes(searchTerm.toLowerCase())
-                        ).map(entry => (
+                        {entries.filter(entry => {
+                            const matchesSearch = (entry.product?.name || "").toLowerCase().includes(searchTerm.toLowerCase()) ||
+                                                  (entry.category || "").toLowerCase().includes(searchTerm.toLowerCase());
+                            const matchesCategory = filterCategory === 'Todas' || entry.category === filterCategory;
+                            return matchesSearch && matchesCategory;
+                        }).map(entry => (
                             <div
                                 key={entry.id}
                                 onMouseEnter={() => setHoveredId(entry.id)}
