@@ -349,13 +349,13 @@ const Accounting = () => {
         <div className="admin-content accounting-page">
             {toast && <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />}
             <header className="accounting-header">
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '20px' }}>
-                    <div>
+                <div className="accounting-header-main">
+                    <div className="header-info">
                         <h2>Contabilidad Duke</h2>
                         <p>Análisis financiero detallado</p>
                     </div>
-                    <div style={{ display: 'flex', gap: '15px', flexWrap: 'wrap', alignItems: 'center' }}>
-                        <div style={{ display: 'flex', gap: '10px' }}>
+                    <div className="header-controls">
+                        <div className="controls-row">
                             <div className="search-bar" style={{ position: 'relative', flex: 1 }}>
                                 <Search size={18} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: '#888' }} />
                                 <input 
@@ -363,26 +363,26 @@ const Accounting = () => {
                                     placeholder="Buscar..." 
                                     value={searchTerm}
                                     onChange={(e) => setSearchTerm(e.target.value)}
-                                    style={{ padding: '10px 15px 10px 40px', borderRadius: '10px', border: '1px solid #ddd', minWidth: '180px', fontSize: '0.9rem', width: '100%' }}
+                                    style={{ padding: '10px 15px 10px 40px', borderRadius: '10px', border: '1px solid #ddd', minWidth: '150px', fontSize: '0.9rem', width: '100%' }}
                                 />
                             </div>
                             <button 
                                 onClick={() => setShowAdvancedFilters(!showAdvancedFilters)}
+                                className="filter-toggle-btn"
                                 style={{ padding: '10px', borderRadius: '10px', border: '1px solid #ddd', background: showAdvancedFilters ? '#333' : '#fff', color: showAdvancedFilters ? '#ffffff' : '#333', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '5px' }}
                             >
                                 <Filter size={18} style={{ color: showAdvancedFilters ? '#ffffff' : '#333' }} />
                                 <span className="hide-mobile" style={{ color: showAdvancedFilters ? '#ffffff' : '#333' }}>Filtros</span>
                             </button>
-                            <div style={{ display: 'flex', gap: '5px' }}>
-                                <button onClick={handleExportExcel} title="Exportar Excel" style={{ padding: '10px', borderRadius: '10px', border: '1px solid #ddd', background: '#2b8a3e', color: 'white', cursor: 'pointer' }}><Download size={18} /></button>
-                                <button onClick={handleExportPDF} title="Exportar PDF" style={{ padding: '10px', borderRadius: '10px', border: '1px solid #ddd', background: '#f03e3e', color: 'white', cursor: 'pointer' }}><FileText size={18} /></button>
+                            <div className="export-actions">
+                                <button onClick={handleExportExcel} className="export-btn excel" title="Excel"><Download size={18} /></button>
+                                <button onClick={handleExportPDF} className="export-btn pdf" title="PDF"><FileText size={18} /></button>
                             </div>
                             <button 
                                 onClick={() => { setMovementType('EXPENSE'); setIsAddModalOpen(true); }}
-                                className="main-button" 
-                                style={{ padding: '10px 20px', borderRadius: '10px', background: '#333', color: '#fff', border: 'none', fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', boxShadow: '0 4px 10px rgba(0,0,0,0.1)' }}
+                                className="add-movement-btn"
                             >
-                                <Plus size={18} /> NUEVO MOVIMIENTO
+                                <Plus size={18} /> <span className="btn-text">NUEVO MOVIMIENTO</span>
                             </button>
                         </div>
                         <div className="period-toggle">

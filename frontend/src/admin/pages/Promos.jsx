@@ -571,7 +571,7 @@ function Promos() {
             )}
 
             <h3 style={{ marginBottom: '20px' }}>Promociones Actuales</h3>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: '20px' }}>
+            <div className="promos-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(min(100%, 320px), 1fr))', gap: '20px' }}>
                 {entries.length === 0 ? (
                     <p style={{ gridColumn: '1/-1', textAlign: 'center', padding: '40px', color: '#999', background: '#f9f9f9', borderRadius: '12px' }}>
                         No hay promociones. ¡Crea la primera arriba!

@@ -141,21 +141,25 @@ function Inventory() {
     return (
         <div className="admin-card">
             {toast && <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />}
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '20px', marginBottom: '20px' }}>
+            <div className="accounting-header-main" style={{ marginBottom: '20px' }}>
                 <h2 style={{ margin: 0 }}>Inventario de Almacén</h2>
-                <div className="search-bar" style={{ position: 'relative', width: '300px' }}>
-                    <Search size={18} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: '#888' }} />
-                    <input 
-                        type="text" 
-                        placeholder="Buscar artículo..." 
-                        value={searchTerm}
-                        onChange={(e) => setSearchTerm(e.target.value)}
-                        style={{ padding: '10px 15px 10px 40px', borderRadius: '10px', border: '1px solid #ddd', fontSize: '0.9rem', width: '100%', background: '#fff' }}
-                    />
-                </div>
-                <div style={{ display: 'flex', gap: '8px' }}>
-                    <button onClick={handleExportExcel} className="icon-btn" title="Excel" style={{ padding: '8px', background: '#2b8a3e', color: 'white', border: 'none', borderRadius: '8px', cursor: 'pointer' }}><Download size={20} /></button>
-                    <button onClick={handleExportPDF} className="icon-btn" title="PDF" style={{ padding: '8px', background: '#f03e3e', color: 'white', border: 'none', borderRadius: '8px', cursor: 'pointer' }}><FileText size={20} /></button>
+                <div className="header-controls">
+                    <div className="controls-row">
+                        <div className="search-bar" style={{ position: 'relative', flex: 1 }}>
+                            <Search size={18} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: '#888' }} />
+                            <input 
+                                type="text" 
+                                placeholder="Buscar artículo..." 
+                                value={searchTerm}
+                                onChange={(e) => setSearchTerm(e.target.value)}
+                                style={{ padding: '10px 15px 10px 40px', borderRadius: '10px', border: '1px solid #ddd', fontSize: '0.9rem', width: '100%', background: '#fff' }}
+                            />
+                        </div>
+                        <div className="export-actions">
+                            <button onClick={handleExportExcel} className="export-btn excel" title="Excel"><Download size={20} /></button>
+                            <button onClick={handleExportPDF} className="export-btn pdf" title="PDF"><FileText size={20} /></button>
+                        </div>
+                    </div>
                 </div>
             </div>
             
