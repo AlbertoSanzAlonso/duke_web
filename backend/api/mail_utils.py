@@ -19,7 +19,7 @@ def get_unread_mail_count(server, user, password, port=993):
         # Use SSL for security
         mail = imaplib.IMAP4_SSL(server, port, timeout=10)
         mail.login(user, password)
-        mail.select("inbox", readonly=True)
+        mail.select("INBOX", readonly=True)
         status, response = mail.search(None, 'UNSEEN')
         
         unread_count = 0
