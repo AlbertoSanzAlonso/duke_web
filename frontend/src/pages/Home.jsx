@@ -532,8 +532,10 @@ function Home() {
               className="scroll-indicator-container" 
               onClick={() => {
                 const tabs = document.querySelector('.menu-tabs');
+                const navbar = document.querySelector('.navbar');
                 if (tabs) {
-                  const yOffset = -80; // Adjusted for navbar height
+                  const navHeight = navbar ? navbar.offsetHeight : 80;
+                  const yOffset = -(navHeight + 20); // Dynamic height + extra safety gap
                   const y = tabs.getBoundingClientRect().top + window.pageYOffset + yOffset;
                   window.scrollTo({ top: y, behavior: 'smooth' });
                 }
