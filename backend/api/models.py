@@ -12,6 +12,7 @@ class Product(models.Model):
     name = models.CharField(max_length=200, db_index=True)
     description = models.TextField(blank=True, null=True)
     ingredients = models.TextField(blank=True, null=True)
+    category = models.CharField(max_length=100, default='General', db_index=True)
     image = models.FileField(upload_to='products/', blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
 

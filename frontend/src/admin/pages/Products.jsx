@@ -13,11 +13,13 @@ function Products() {
     const [name, setName] = useState('');
     const [description, setDescription] = useState('');
     const [ingredients, setIngredients] = useState('');
+    const [category, setCategory] = useState('General');
     const [image, setImage] = useState(null);
     const [searchTerm, setSearchTerm] = useState('');
+    const [filterCategory, setFilterCategory] = useState('Todas');
 
     const [editingId, setEditingId] = useState(null);
-    const [editData, setEditData] = useState({ name: '', description: '', ingredients: '', image: null, removeImage: false });
+    const [editData, setEditData] = useState({ name: '', description: '', ingredients: '', category: 'General', image: null, removeImage: false });
     const [isModalOpen, setIsModalOpen] = useState(false);
     
     // Confirmation context
@@ -49,6 +51,7 @@ function Products() {
             formData.append('name', name);
             formData.append('description', description);
             formData.append('ingredients', ingredients);
+            formData.append('category', category);
             if (image) {
                 formData.append('image', image);
             }
@@ -57,6 +60,7 @@ function Products() {
             setName('');
             setDescription('');
             setIngredients('');
+            setCategory('General');
             setImage(null);
             loadProducts();
             setToast({ message: "Producto creado con éxito", type: 'success' });
@@ -90,6 +94,7 @@ function Products() {
             name: prod.name, 
             description: prod.description || '', 
             ingredients: prod.ingredients || '', 
+            category: prod.category || 'General',
             image: null,
             removeImage: false
         });
@@ -103,6 +108,7 @@ function Products() {
             formData.append('name', editData.name);
             formData.append('description', editData.description);
             formData.append('ingredients', editData.ingredients);
+            formData.append('category', editData.category);
             
             if (editData.removeImage) {
                 // To clear a file in DRF via FormData, we usually send an empty string
@@ -137,16 +143,40 @@ function Products() {
                     + NUEVO PRODUCTO
                 </button>
             </div>
-                <div className="search-bar" style={{ position: 'relative', width: '320px', marginLeft: 'auto' }}>
+            <div style={{ display: 'flex', gap: '15px', marginBottom: '25px', flexWrap: 'wrap', alignItems: 'center' }}>
+                <div className="category-filters" style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', flex: 1 }}>
+                    {['Todas', ...new Set(products.map(p => p.category))].map(cat => (
+                        <button
+                            key={cat}
+                            onClick={() => setFilterCategory(cat)}
+                            style={{
+                                padding: '8px 16px',
+                                borderRadius: '20px',
+                                border: '1px solid',
+                                borderColor: filterCategory === cat ? 'var(--admin-primary)' : '#ddd',
+                                background: filterCategory === cat ? 'var(--admin-primary)' : 'white',
+                                color: filterCategory === cat ? 'white' : '#666',
+                                fontSize: '0.85rem',
+                                fontWeight: 'bold',
+                                cursor: 'pointer',
+                                transition: 'all 0.2s'
+                            }}
+                        >
+                            {cat.toUpperCase()}
+                        </button>
+                    ))}
+                </div>
+                <div className="search-bar" style={{ position: 'relative', width: '320px' }}>
                     <Search size={18} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: '#888' }} />
                     <input 
                         type="text" 
-                        placeholder="Filtrar por nombre o ingredientes..." 
+                        placeholder="Buscar en catálogo..." 
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
                         style={{ padding: '12px 15px 12px 40px', borderRadius: '12px', border: '1px solid #ddd', fontSize: '0.95rem', width: '100%' }}
                     />
                 </div>
+            </div>
 
             {isModalOpen && (
                 <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.8)', backdropFilter: 'blur(8px)', zIndex: 10000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px' }}>
@@ -165,6 +195,16 @@ function Products() {
                                         value={editingId ? editData.name : name} 
                                         onChange={e => editingId ? setEditData({...editData, name: e.target.value}) : setName(e.target.value)} 
                                         required 
+                                        style={{ padding: '14px', width: '100%', borderRadius: '12px', border: '1px solid #ddd', fontSize: '1rem' }}
+                                    />
+                                </div>
+                                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                                    <label style={{ fontSize: '0.75rem', fontWeight: '800', color: '#888', textTransform: 'uppercase' }}>Categoría</label>
+                                    <input 
+                                        type="text" 
+                                        value={editingId ? editData.category : category} 
+                                        onChange={e => editingId ? setEditData({...editData, category: e.target.value}) : setCategory(e.target.value)} 
+                                        placeholder="ej: Burgers, Bebidas..."
                                         style={{ padding: '14px', width: '100%', borderRadius: '12px', border: '1px solid #ddd', fontSize: '1rem' }}
                                     />
                                 </div>
@@ -232,11 +272,13 @@ function Products() {
                         gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', 
                         gap: '20px' 
                     }}>
-                        {products.filter(p => 
-                            p.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
-                            (p.description && p.description.toLowerCase().includes(searchTerm.toLowerCase())) ||
-                            (p.ingredients && p.ingredients.toLowerCase().includes(searchTerm.toLowerCase()))
-                        ).map(prod => (
+                        {products.filter(p => {
+                            const matchesSearch = p.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
+                                (p.description && p.description.toLowerCase().includes(searchTerm.toLowerCase())) ||
+                                (p.ingredients && p.ingredients.toLowerCase().includes(searchTerm.toLowerCase()));
+                            const matchesCategory = filterCategory === 'Todas' || p.category === filterCategory;
+                            return matchesSearch && matchesCategory;
+                        }).map(prod => (
                             <div key={prod.id} style={{ 
                                 background: '#fff', 
                                 border: '1px solid #ebebeb', 
@@ -247,6 +289,9 @@ function Products() {
                                 flexDirection: 'column'
                             }}>
                                 <div style={{ width: '100%', height: '220px', backgroundColor: '#f0f0f0', display: 'flex', justifyContent: 'center', alignItems: 'center', position: 'relative' }}>
+                                        <div style={{ position: 'absolute', top: '15px', right: '15px', background: 'rgba(0,0,0,0.6)', color: 'white', padding: '5px 12px', borderRadius: '20px', fontSize: '0.75rem', fontWeight: 'bold' }}>
+                                            {prod.category?.toUpperCase()}
+                                        </div>
                                     {prod.image ? (
                                         <img src={prod.image} alt={prod.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                                     ) : (
