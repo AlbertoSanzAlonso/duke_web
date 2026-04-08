@@ -4,6 +4,7 @@ import { Menu, X } from 'lucide-react';
 import InstagramFeed from '../components/InstagramFeed.tsx';
 import { fetchGalleryImages, fetchSettings, fetchOpeningHours } from '../services/api';
 import Footer from '../components/Footer';
+import FloatingContact from '../components/FloatingContact';
 
 function About() {
   const [gallery, setGallery] = useState([]);
@@ -195,6 +196,7 @@ function About() {
         </div>
       </section>
 
+      <FloatingContact />
       <Footer />
     </div>
   );

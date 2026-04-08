@@ -130,6 +130,7 @@
     .accounting-header-main {
         flex-direction: column;
         align-items: flex-start;
+        gap: 15px;
     }
 
     .header-controls {
@@ -138,13 +139,38 @@
     }
 
     .controls-row {
-        flex-wrap: wrap;
+        display: grid !important;
+        grid-template-columns: 1fr 1fr;
+        gap: 10px;
+        width: 100%;
+    }
+
+    .search-bar {
+        grid-column: span 2;
+        width: 100%;
+    }
+
+    .filter-toggle-btn {
+        width: 100%;
+        justify-content: center;
+    }
+
+    .export-actions {
+        width: 100%;
+        display: grid !important;
+        grid-template-columns: 1fr 1fr;
+        gap: 10px;
+    }
+
+    .export-btn {
+        width: 100%;
     }
 
     .add-movement-btn {
+        grid-column: span 2;
         width: 100%;
         justify-content: center;
-        order: -1; /* Mover arriba en móvil */
+        order: -1; 
     }
     
     .btn-text {
@@ -154,12 +180,26 @@
     .period-toggle {
         width: 100%;
         justify-content: space-between;
+        order: 10;
+        margin-top: 5px;
     }
 
     .period-toggle button {
         flex: 1;
         padding: 10px 5px;
         font-size: 0.75rem;
+    }
+
+    /* Summary Grid fixes */
+    .accounting-summary-grid {
+        grid-template-columns: 1fr !important;
+        gap: 15px;
+    }
+
+    .summary-card {
+        padding: 20px;
+        width: 100%;
+        box-sizing: border-box;
     }
 }
 

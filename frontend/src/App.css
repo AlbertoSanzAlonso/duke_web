@@ -825,6 +825,22 @@ img.nav-logo:hover,
   align-items: center;
 }
 
+.close-modal {
+  background: none;
+  border: none;
+  color: white;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: var(--transition-smooth);
+}
+
+.close-modal:hover {
+  transform: rotate(90deg);
+  color: var(--color-primary);
+}
+
 .modal-body {
   padding: 1.5rem;
   overflow-y: auto;
