@@ -62,6 +62,34 @@ def MeView(request):
             return Response(UserSerializer(user).data)
         return Response(serializer.errors, status=400)
 
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def MailTestView(request):
+    """
+    Test IMAP connection with provided credentials.
+    """
+    from .mail_utils import get_unread_mail_count
+    server = request.data.get('server')
+    user = request.data.get('user')
+    password = request.data.get('password')
+    
+    if not all([server, user, password]):
+        return Response({'error': 'Todos los campos son obligatorios para la prueba'}, status=400)
+    
+    # We pass use_cache=False to force a real check
+    # Let's modify mail_utils first or just use it as is (it caches by user)
+    # Actually, we can just call it.
+    count = get_unread_mail_count(server, user, password)
+    
+    if count == -1:
+        return Response({'success': False, 'message': 'Fallo la conexión. Revisa servidor, usuario y contraseña.'}, status=400)
+    
+    return Response({
+        'success': True, 
+        'message': f'¡Conexión exitosa! Tienes {count} correos sin leer.',
+        'unread_count': count
+    })
+
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def MailCheckView(request):

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { 
     fetchGalleryImages, createGalleryImage, deleteGalleryImage, updateGalleryImage,
-    fetchSettings, updateSetting
+    fetchSettings, updateSetting, testMail
 } from '../../services/api';
 import { useSearchParams } from 'react-router-dom';
 import LoadingScreen from '../components/LoadingScreen';
@@ -23,6 +23,8 @@ const Settings = () => {
         imap_user: '', 
         imap_password: '' 
     });
+    const [isSaving, setIsSaving] = useState(false);
+    const [isTesting, setIsTesting] = useState(false);
 
     useEffect(() => {
         const tab = searchParams.get('tab');
@@ -107,6 +109,26 @@ const Settings = () => {
             setToast({ message: 'Error al guardar configuración de correo', type: 'error' });
         } finally {
             setIsSaving(false);
+        }
+    };
+
+    const handleTestMail = async () => {
+        if (!mailSettings.imap_server || !mailSettings.imap_user || !mailSettings.imap_password) {
+            setToast({ message: 'Completa todos los campos para probar', type: 'error' });
+            return;
+        }
+        setIsTesting(true);
+        try {
+            const data = await testMail(
+                mailSettings.imap_server,
+                mailSettings.imap_user,
+                mailSettings.imap_password
+            );
+            setToast({ message: data.message, type: 'success' });
+        } catch (err) {
+            setToast({ message: err.message, type: 'error' });
+        } finally {
+            setIsTesting(false);
         }
     };
 
@@ -357,9 +379,14 @@ const Settings = () => {
                             </div>
                         </div>
 
-                        <button onClick={saveMailSettings} style={saveButtonStyle} disabled={isSaving}>
-                            <Save size={20} /> {isSaving ? 'GUARDANDO...' : 'GUARDAR CONFIGURACIÓN DE CORREO'}
-                        </button>
+                        <div style={{ display: 'flex', gap: '15px' }}>
+                            <button onClick={handleTestMail} style={{ ...saveButtonStyle, background: '#333', marginTop: '30px' }} disabled={isTesting || isSaving}>
+                                <AlertTriangle size={20} /> {isTesting ? 'PROBANDO...' : 'PROBAR CONEXIÓN'}
+                            </button>
+                            <button onClick={saveMailSettings} style={saveButtonStyle} disabled={isSaving || isTesting}>
+                                <Save size={20} /> {isSaving ? 'GUARDANDO...' : 'GUARDAR CONFIGURACIÓN'}
+                            </button>
+                        </div>
                     </div>
                 )}
 

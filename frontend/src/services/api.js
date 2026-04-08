@@ -485,3 +485,13 @@ export const checkMail = async () => {
     if (!response.ok) return handleResponseError(response);
     return await response.json();
 };
+
+export const testMail = async (server, user, password) => {
+    const response = await fetch(`${API_URL}/mail-test/`, { 
+        method: 'POST',
+        headers: getHeaders('application/json'),
+        body: JSON.stringify({ server, user, password })
+    });
+    if (!response.ok) return handleResponseError(response);
+    return await response.json();
+};
