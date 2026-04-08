@@ -3,6 +3,7 @@ import { fetchProducts, createProduct, deleteProduct, updateProduct } from '../.
 import { Search } from 'lucide-react';
 import Toast from '../components/Toast';
 import ConfirmModal from '../components/ConfirmModal';
+import ImageCropper from '../components/ImageCropper';
 
 function Products() {
     const [products, setProducts] = useState([]);
@@ -24,7 +25,10 @@ function Products() {
     
     // Confirmation context
     const [isConfirmOpen, setIsConfirmOpen] = useState(false);
-    const [productToDelete, setProductToDelete] = useState(null);
+    // Crop state
+    const [imageToCrop, setImageToCrop] = useState(null);
+    const [isCropping, setIsCropping] = useState(false);
+    const [originalFileName, setOriginalFileName] = useState("");
 
     useEffect(() => {
         loadProducts();
@@ -127,8 +131,41 @@ function Products() {
         }
     };
 
+    const onFileChange = (e) => {
+        if (e.target.files && e.target.files.length > 0) {
+            const file = e.target.files[0];
+            setOriginalFileName(file.name);
+            const reader = new FileReader();
+            reader.addEventListener('load', () => {
+                setImageToCrop(reader.result);
+                setIsCropping(true);
+            });
+            reader.readAsDataURL(file);
+        }
+    };
+
+    const handleCropComplete = async (croppedBlob) => {
+        // Convert blob to File to maintain logic
+        const file = new File([croppedBlob], originalFileName.replace(/\.[^/.]+$/, ".webp"), { type: 'image/webp' });
+        
+        if (editingId) {
+            setEditData({ ...editData, image: file, removeImage: false });
+        } else {
+            setImage(file);
+        }
+        setIsCropping(false);
+        setImageToCrop(null);
+    };
+
     return (
         <div className="admin-card">
+            {isCropping && (
+                <ImageCropper 
+                    image={imageToCrop} 
+                    onCropComplete={handleCropComplete} 
+                    onCancel={() => { setIsCropping(false); setImageToCrop(null); }} 
+                />
+            )}
             {toast && <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />}
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px', flexWrap: 'wrap', gap: '20px' }}>
                 <div>
@@ -212,13 +249,14 @@ function Products() {
                                     </select>
                                 </div>
                                 <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                                    <label style={{ fontSize: '0.75rem', fontWeight: '800', color: '#888', textTransform: 'uppercase' }}>Fotografía</label>
+                                    <label style={{ fontSize: '0.85rem', fontWeight: 'bold' }}>Imagen del Producto (Aprox. 1:1)</label>
                                     <input 
                                         type="file" 
                                         accept="image/*"
-                                        onChange={e => editingId ? setEditData({...editData, image: e.target.files[0], removeImage: false}) : setImage(e.target.files[0])} 
+                                        onChange={onFileChange} 
                                         style={{ padding: '10px', fontSize: '0.85rem', width: '100%', borderRadius: '12px', border: '1px solid #ddd', background: '#f8f9fa' }}
                                     />
+                                    {(image || (editingId && editData.image)) && <p style={{ fontSize: '0.8rem', color: 'green', margin: 0 }}>✓ Imagen lista</p>}
                                 </div>
                             </div>
 

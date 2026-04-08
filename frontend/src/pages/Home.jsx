@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { Menu, X, ShoppingCart, Minus, Plus, MessageCircle, MapPin, Instagram, Facebook } from 'lucide-react';
+import { Menu, X, ShoppingCart, Minus, Plus, MessageCircle, MapPin, Instagram, Facebook, ChevronDown } from 'lucide-react';
 import { fetchMenuEntries, createSale, fetchOpeningHours } from '../services/api';
 import Toast from '../admin/components/Toast';
 import Footer from '../components/Footer';
@@ -474,7 +474,7 @@ function Home() {
               <Link to="/nosotros">NOSOTROS</Link>
             </div>
             <button className="cta-button" onClick={() => setIsPromosOpen(true)}>
-              PROMOS
+              % PROMOS
             </button>
           </div>
         </div>
@@ -528,6 +528,20 @@ function Home() {
         <div className="container">
           <div className="menu-header">
             <h2 className="section-title">NUESTRA CARTA</h2>
+            <div 
+              className="scroll-indicator-container" 
+              onClick={() => {
+                const tabs = document.querySelector('.menu-tabs');
+                if (tabs) {
+                  const yOffset = -80; // Adjusted for navbar height
+                  const y = tabs.getBoundingClientRect().top + window.pageYOffset + yOffset;
+                  window.scrollTo({ top: y, behavior: 'smooth' });
+                }
+              }}
+              style={{ textAlign: 'center', marginBottom: '30px', cursor: 'pointer' }}
+            >
+              <ChevronDown className="floating-arrow-red" size={40} color="var(--color-primary)" />
+            </div>
             <div className="menu-tabs">
               {categories.map(cat => (
                 <button
@@ -682,8 +696,8 @@ function Home() {
                         <MapPin size={18} color="white" />
                       </button>
                       <button 
-                        onClick={() => {
-                          setShowSuggestions(false);
+                        onClick={(e) => {
+                          e.preventDefault();
                           calculateDistance(deliveryAddress);
                         }}
                         disabled={isCalculating}
