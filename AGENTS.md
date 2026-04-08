@@ -61,7 +61,7 @@ Este proyecto se divide en dos entornos de despliegue claramente separados para 
 ---
 *Mantener la coherencia visual con la marca Duke Burger (Negros profundos, Rojos vibrantes, Tipografía Bebas Neue).*
 - **Moneda:** Todos los precios deben mostrarse en **Pesos Argentinos** utilizando el locale `es-AR` (ej. `$12.900`). Evitar el formato `12900.00`.
-- **Notificaciones:** PROHIBIDO usar `alert()` del navegador. Usar el componente `<Toast />` personalizado.
+- **Notificaciones y Avisos:** PROHIBIDO usar `alert()` o `confirm()` del navegador. Todos los avisos, errores y confirmaciones deben gestionarse a través del componente `<Toast />` personalizado o modales integrados en la app para mantener la experiencia de usuario dentro de la marca.
 - **Loading:** Usar el componente `<LoadingScreen />` que incluye el logo de la marca en lugar de mensajes de texto planos.
 - **Accesibilidad Admin:** Forzar color de texto oscuro (`#333 !important`) en contenedores claros para evitar conflictos con el modo oscuro del navegador.
 - **Responsividad:** 

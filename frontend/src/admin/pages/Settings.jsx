@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { 
     fetchGalleryImages, createGalleryImage, deleteGalleryImage, updateGalleryImage,
-    fetchSettings, updateSetting, testMail
+    fetchSettings, updateSetting, testMail, fetchOpeningHours, fetchDeliveryRates,
+    updateOpeningHour, updateDeliveryRates
 } from '../../services/api';
 import { useSearchParams } from 'react-router-dom';
 import LoadingScreen from '../components/LoadingScreen';
