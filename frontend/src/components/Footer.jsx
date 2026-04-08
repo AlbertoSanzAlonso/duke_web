@@ -1,5 +1,5 @@
 import React from 'react';
-import { Instagram, Facebook } from 'lucide-react';
+import { Instagram, Facebook, MessageCircle } from 'lucide-react';
 
 const Footer = () => {
   return (
@@ -19,8 +19,10 @@ const Footer = () => {
               <a href="https://www.facebook.com/people/Duke-Burger/61586470112663/" target="_blank" rel="noopener noreferrer">
                 <Facebook size={24} />
               </a>
+              <a href="https://wa.me/5492645095054" target="_blank" rel="noopener noreferrer">
+                <MessageCircle size={24} />
+              </a>
             </div>
-            <p className="footer-wsp">WSP: 264 5095054</p>
           </div>
           <div className="footer-info">
             <h3>UBICACIÓN</h3>
