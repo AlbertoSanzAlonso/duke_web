@@ -64,7 +64,9 @@ const AdminLayout = () => {
         baseUrl += '/api';
       }
 
-      const es = new EventSource(`${baseUrl}/orders-stream/?token=${token.trim()}`);
+      const sseUrl = `${baseUrl}/orders-stream/?token=${token.trim()}`;
+      console.log("SSE: Initializing connection to", sseUrl);
+      const es = new EventSource(sseUrl, { withCredentials: true });
       esRef.current = es;
 
       es.onopen = () => {
@@ -79,12 +81,16 @@ const AdminLayout = () => {
       es.onmessage = (event) => {
         try {
           const data = JSON.parse(event.data);
+          console.log("SSE: Incoming message", data);
+          
           if (data.type === 'new_order') {
             setNotification({
               message: `🍔 ¡NUEVO PEDIDO! de ${data.customer} ($${data.total})`,
               type: 'success'
             });
             window.dispatchEvent(new CustomEvent('new-order-received', { detail: data }));
+          } else if (data.type === 'connection_ready') {
+            setNotification({ message: "🔗 Enlace de pedidos activo", type: 'success' });
           }
         } catch (e) {
           console.error("SSE: Parse error", e);
