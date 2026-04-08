@@ -628,17 +628,27 @@ const Accounting = () => {
                                     <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
                                         {detailItem.items.map((it, idx) => {
                                             const itemName = it.item_name || it.entry_name || it.product_name || 'Producto';
-                                            const itemPrice = parseFloat(it.cost || it.price_at_sale || it.price || 0);
-                                            const itemTotal = itemPrice * it.quantity;
+                                            const isOrder = it.cost !== undefined;
+                                            
+                                            let lineTotal, unitPrice;
+                                            if (isOrder) {
+                                                lineTotal = parseFloat(it.cost || 0);
+                                                unitPrice = it.quantity > 0 ? lineTotal / it.quantity : 0;
+                                            } else {
+                                                unitPrice = parseFloat(it.price_at_sale || it.price || 0);
+                                                lineTotal = unitPrice * it.quantity;
+                                            }
 
                                             return (
                                                 <div key={idx} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: idx === detailItem.items.length -1 ? 'none' : '1px solid #eee', paddingBottom: '8px' }}>
                                                     <div>
                                                         <div style={{ fontWeight: '600', fontSize: '0.9rem' }}>{itemName}</div>
-                                                        <div style={{ fontSize: '0.75rem', color: '#888' }}>{it.quantity} x ${itemPrice.toLocaleString('es-AR')}</div>
+                                                        <div style={{ fontSize: '0.75rem', color: '#888' }}>
+                                                            {parseFloat(it.quantity).toLocaleString('es-AR')} x ${Math.round(unitPrice).toLocaleString('es-AR')}
+                                                        </div>
                                                     </div>
                                                     <div style={{ fontWeight: 'bold' }}>
-                                                        ${itemTotal.toLocaleString('es-AR')}
+                                                        ${Math.round(lineTotal).toLocaleString('es-AR')}
                                                     </div>
                                                 </div>
                                             );
