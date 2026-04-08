@@ -3,13 +3,13 @@ import { Bot, Send, X, MessageSquare, Terminal } from 'lucide-react';
 
 const AIChat = () => {
     const [isOpen, setIsOpen] = useState(() => {
-        const saved = localStorage.getItem('duke_chat_open') === 'true';
+        const saved = sessionStorage.getItem('duke_chat_open') === 'true';
         // Evitar apertura automática en móviles para no bloquear la UX inicial
         if (typeof window !== 'undefined' && window.innerWidth <= 768) return false;
         return saved;
     });
     const [messages, setMessages] = useState(() => {
-        const saved = localStorage.getItem('duke_chat_history');
+        const saved = sessionStorage.getItem('duke_chat_history');
         return saved ? JSON.parse(saved) : [
             { role: 'assistant', content: '¡Hola! Soy Duke Assist. ¿En qué puedo ayudarte hoy con el panel?' }
         ];
@@ -23,12 +23,12 @@ const AIChat = () => {
     };
 
     useEffect(() => {
-        localStorage.setItem('duke_chat_history', JSON.stringify(messages));
+        sessionStorage.setItem('duke_chat_history', JSON.stringify(messages));
         scrollToBottom();
     }, [messages]);
 
     useEffect(() => {
-        localStorage.setItem('duke_chat_open', isOpen);
+        sessionStorage.setItem('duke_chat_open', isOpen);
     }, [isOpen]);
 
     const handleSend = async (e) => {
