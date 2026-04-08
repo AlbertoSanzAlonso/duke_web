@@ -114,19 +114,18 @@ def MailCheckView(request):
     final_user = s_user
     final_pass = s_pass
 
-    # If database settings exist and are not the dummy ones, they take priority
+    # Database settings take priority ONLY IF they are specifically set and not dummy ones
     if db_server and db_server.value and db_server.value != 'imap.dondominio.com':
         final_host = db_server.value
-    if db_user and db_user.value and db_user.value != 'admin@dukeburger-sj.com' and db_user.value != 'hola@dukeburger-sj.com':
+    if db_user and db_user.value and db_user.value != 'admin@dukeburger-sj.com':
         final_user = db_user.value
     if db_pass and db_pass.value and db_pass.value != 'password_aqui' and db_pass.value != '':
         final_pass = db_pass.value
 
-    # Validate if it's actually configured with real data
+    # More permissive validation: If we have a password that isn't the dummy one, assume it's configured
     is_configured = (
-        final_host and final_host != 'imap.dondominio.com' and
-        final_user and final_user != 'admin@dukeburger-sj.com' and final_user != 'hola@dukeburger-sj.com' and
-        final_pass and final_pass != 'password_aqui' and final_pass != ''
+        final_host and final_user and final_pass and 
+        final_pass != 'password_aqui' and final_pass != ''
     )
     
     if not is_configured:
