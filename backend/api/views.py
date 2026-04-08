@@ -677,7 +677,7 @@ def OrderStreamView(request):
                     # Keep-alive
                     yield ": ping\n\n"
                     yield f"data: {json.dumps({'type': 'heartbeat'})}\n\n"
-                    time.sleep(5)
+                    time.sleep(15) # Balancing real-time vs DB load
             except Exception as e:
                 yield f"data: {json.dumps({'type': 'error', 'message': str(e)})}\n\n"
 

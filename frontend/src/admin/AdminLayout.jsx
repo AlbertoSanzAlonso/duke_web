@@ -81,19 +81,15 @@ const AdminLayout = () => {
       es.onmessage = (event) => {
         try {
           const data = JSON.parse(event.data);
-          console.log("SSE: Incoming message", data);
-          
           if (data.type === 'new_order') {
             setNotification({
               message: `🍔 ¡NUEVO PEDIDO! de ${data.customer} ($${data.total})`,
               type: 'success'
             });
             window.dispatchEvent(new CustomEvent('new-order-received', { detail: data }));
-          } else if (data.type === 'connection_ready') {
-            setNotification({ message: "🔗 Enlace de pedidos activo", type: 'success' });
           }
         } catch (e) {
-          console.error("SSE: Parse error", e);
+          // Silent for heatbeats
         }
       };
 
