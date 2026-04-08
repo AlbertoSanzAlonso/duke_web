@@ -59,4 +59,40 @@ El asistente de Duke tiene acceso en tiempo real a la base de datos para ayudart
     - "¿Cuántas unidades de papas fritas quedan?"
 
 ---
+## 10. MAPA DE INTERFAZ Y UTILIDADES (REFERENCIA PARA IA)
+
+Esta sección detalla la ubicación exacta de cada control para que el Asistente Duke pueda guiarte.
+
+### 🏠 DASHBOARD (PANEL PRINCIPAL)
+- **Stock Crítico (Centro):** Listado de insumos que están por debajo del mínimo (Color Rojo).
+- **Resumen Financiero (Derecha):** Tarjetas con Ventas de Hoy, Gastos y Balance.
+- **NUEVO MOVIMIENTO (Botón Negro):** Abre directamente el modal de contabilidad.
+- **Últimos Pedidos (Abajo):** Acceso rápido a las ventas más recientes.
+
+### 🛒 TPV (VENTAS)
+- **Pestaña TPV (Superior):** Muestra la carta para añadir productos al ticket.
+- **Pestaña PENDIENTES (Superior):** Listado de tickets que aún no se han cobrado.
+- **Selector de Categorías (Bajo pestañas):** Botones para filtrar la carta (Burgers, Pizzas, etc).
+- **Barra de Búsqueda (Arriba a la derecha):** Filtro rápido por nombre de producto.
+- **Sidebar de Ticket (Derecha):** 
+    - **Campos:** Nombre de Cliente, Notas de Pedido.
+    - **Botón Ubicación (Pin):** Abre el calculador de distancia por GPS para envíos.
+    - **Botón CONFIRMAR (Abajo Derecha):** Guarda la venta y genera el ticket.
+
+### 📦 INVENTARIO
+- **Buscador (Arriba Izquierda):** Localiza insumos rápidamente.
+- **Botones Exportar (Arriba Derecha):** Iconos de Excel (Verde) y PDF (Rojo) para descargar el stock actual.
+- **Formulario de Registro (Franja Gris):** 5 campos alineados para crear nuevos artículos.
+- **Control de Stock (Tabla):** El ícono del lápiz permite editar la cantidad actual y el stock mínimo.
+
+### 💰 CONTABILIDAD
+- **DIARIO/SEMANAL/MENSUAL (Selector):** Cambia el periodo de tiempo de los reportes.
+- **Botón NUEVO MOVIMIENTO (Botón Negro):** Activa el modal para registrar un Ingreso o Gasto Manual.
+- **Filtros Avanzados (Botón Filtro):** Permite filtrar por fechas exactas (Desde/Hasta).
+- **Reportes (Excel/PDF):** Ubicados junto a los filtros para bajar el historial filtrado.
+
+### 🤖 DUKE ASSIST (BOTÓN FLOTANTE)
+- **Ubicación:** Círculo con logo de Duke en la **Esquina Inferior Derecha** de toda la aplicación. Siempre visible.
+
+---
 **CONSEJO DUKE:** Revisa siempre la sección "Stock Crítico" en el Dashboard para no quedarte sin insumos en medio del servicio.
