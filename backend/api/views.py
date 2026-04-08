@@ -102,7 +102,14 @@ def MailCheckView(request):
     user = GlobalSetting.objects.filter(key='imap_user').first()
     password = GlobalSetting.objects.filter(key='imap_password').first()
     
-    if not server or not user or not password:
+    # Check if settings exist and have real values
+    is_configured = (
+        server and server.value and server.value != 'imap.dondominio.com' and
+        user and user.value and user.value != 'admin@dukeburger-sj.com' and
+        password and password.value and password.value != 'password_aqui'
+    )
+    
+    if not is_configured:
         return Response({'unread_count': 0, 'configured': False})
         
     count = get_unread_mail_count(server.value, user.value, password.value)
