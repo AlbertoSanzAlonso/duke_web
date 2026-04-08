@@ -33,7 +33,8 @@ const Orders = () => {
     // Real-time updates via SSE
     useEffect(() => {
         const baseUrl = import.meta.env.VITE_API_URL || '';
-        const streamUrl = `${baseUrl.replace(/\/$/, '')}/api/orders-stream/`;
+        const token = localStorage.getItem('token');
+        const streamUrl = `${baseUrl.replace(/\/$/, '')}/api/orders-stream/${token ? '?token=' + token : ''}`;
         
         const eventSource = new EventSource(streamUrl);
 

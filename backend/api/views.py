@@ -549,6 +549,11 @@ class GalleryImageViewSet(viewsets.ModelViewSet):
 
 @csrf_exempt
 async def OrderStreamView(request):
+    """
+    Server-Sent Events (SSE) for real-time order notifications.
+    Optimized for Django 4.2+ and concurrent gthread workers.
+    """
+    # 1. CORS Preflight
     if request.method == 'OPTIONS':
         response = StreamingHttpResponse(status=200)
         response['Access-Control-Allow-Origin'] = '*'
@@ -557,18 +562,42 @@ async def OrderStreamView(request):
         response['Access-Control-Max-Age'] = '86400'
         return response
 
+    # 2. Authentication (Manual check for EventSource compatibility)
+    from rest_framework.authtoken.models import Token
+    from asgiref.sync import sync_to_async
+
+    # Check header or query param
+    token_key = request.GET.get('token')
+    if not token_key and 'Authorization' in request.headers:
+        auth_header = request.headers['Authorization']
+        if auth_header.startswith('Token '):
+            token_key = auth_header.split('Token ')[1]
+
+    if not token_key:
+        return StreamingHttpResponse(json.dumps({'error': 'Unauthorized'}), status=401, content_type='application/json')
+
+    # Async check if token exists
+    @sync_to_async
+    def check_token(key):
+        return Token.objects.filter(key=key).exists()
+
+    if not await check_token(token_key):
+        return StreamingHttpResponse(json.dumps({'error': 'Invalid token'}), status=401, content_type='application/json')
+
+    # 3. Stream Generator
     async def event_stream():
         # Consultamos el último ID actual de forma asíncrona
         last_seen_id = 0
         if await Sale.objects.aexists():
             last_sale = await Sale.objects.order_by('-id').afirst()
-            last_seen_id = last_sale.id
+            if last_sale:
+                last_seen_id = last_sale.id
 
         while True:
             # Consultamos ventas nuevas de forma eficiente usando el motor asíncrono
             new_sales_qs = Sale.objects.filter(id__gt=last_seen_id).order_by('id')
             
-            async for sale in new_sales_qs:
+            async for sale in new_sales_qs.aiter():
                 data = {
                     'type': 'new_order',
                     'id': sale.id,
