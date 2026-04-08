@@ -665,10 +665,10 @@ a.stat-card { text-decoration: none; cursor: pointer; }
     }
 
     .ai-chat-wrapper {
-        bottom: 0;
-        left: 0;
-        right: 0;
-        width: 100%;
+        bottom: 15px;
+        left: 15px;
+        right: auto;
+        width: auto;
     }
 
     .ai-chat-messages {
