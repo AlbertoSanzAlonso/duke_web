@@ -19,9 +19,9 @@ const Dashboard = () => {
     const [profile, setProfile] = useState(null);
 
     useEffect(() => {
-        const loadDashboardData = async () => {
+        const loadDashboardData = async (silent = false) => {
             try {
-                setLoading(true);
+                if (!silent) setLoading(true);
                 const insights = await fetchDashboardInsights();
                 
                 setProfile(insights.profile);
@@ -39,22 +39,23 @@ const Dashboard = () => {
             } catch (err) {
                 console.error("Error loading dashboard:", err);
             } finally {
-                setLoading(false);
+                if (!silent) setLoading(false);
             }
         };
 
-        loadDashboardData();
+        // Initial full load with loading screen
+        loadDashboardData(false);
         
-        // Listen for real-time updates and manual config changes
+        // Listen for real-time updates and manual config changes (SILENT)
         const handleRefresh = () => {
-            loadDashboardData();
+            loadDashboardData(true);
         };
 
         window.addEventListener('new-order-received', handleRefresh);
         window.addEventListener('config-updated', handleRefresh);
 
-        // Refresh every 10 seconds
-        const interval = setInterval(loadDashboardData, 10000);
+        // Fallback refresh every 10 minutes (SILENT)
+        const interval = setInterval(() => loadDashboardData(true), 600000);
         return () => {
             clearInterval(interval);
             window.removeEventListener('new-order-received', handleRefresh);

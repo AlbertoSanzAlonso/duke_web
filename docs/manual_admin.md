@@ -1,6 +1,13 @@
 # MANUAL DE USUARIO - DUKE BURGER ADMIN
 
-¡Bienvenido al cerebro de Duke Burger! Este panel te permite controlar toda la operación de tu negocio.
+¡Bienvenido al cerebro de Duke- **Heartbeat**: Envío obligatorio de `: ping` y heartbeats JSON cada 15s o menos para evitar timeouts de proxies.
+- **Sync Workers**: En servidores Gunicorn `gthread`, se prefiere la vista SSE síncrona (`def` en lugar de `async def`) para evitar deadlocks con el ORM de Django, manejando la concurrencia mediante hilos del worker.
+- **Polling Interval**: El backend debe realizar un `time.sleep(15)` entre comprobaciones de base de datos para equilibrar la inmediatez y el consumo de recursos de Supabase.
+- **Frontend Lazy Loading**: Toda la navegación del frontend DEBE implementarse con `React.lazy` y `Suspense` utilizando el componente `<LoadingScreen />` de la marca como fallback.
+
+## 4. Acciones Masivas y TPV
+- **Floating Buttons (Móvil)**: Todos los botones flotantes (FAB) como el del TPV o el Duke Assist deben estar alineados a **20px** del borde inferior en versiones móviles para mantener la simetría visual.
+- **Git Mandatory:** Para cualquier cambio en producción (Coolify), DEBES realizar un `push` a la rama `main` de GitHub. Coolify ignora los archivos locales que no se han empujado al repositorio.
 
 ## 1. TPV (Terminal Punto de Venta)
 Es la herramienta para cobrar pedidos locales o de mostrador.
@@ -93,6 +100,15 @@ Esta sección detalla la ubicación exacta de cada control para que el Asistente
 
 ### 🤖 DUKE ASSIST (BOTÓN FLOTANTE)
 - **Ubicación:** Círculo con logo de Duke en la **Esquina Inferior Derecha** de toda la aplicación. Siempre visible.
+
+---
+## 11. SISTEMA DE TIEMPO REAL (SSE)
+- **Monitoreo Continuo:** El sistema utiliza una conexión persistente (Server-Sent Events) para recibir pedidos de la web sin recargar. 
+- **Frecuencia:** El servidor comprueba nuevos pedidos cada 15 segundos para optimizar el rendimiento.
+- **Indicador de Salud:** En la barra lateral (Sidebar), verás un pequeño punto junto al nombre de Duke:
+    - **Verde:** Conexión activa y recibiendo pedidos.
+    - **Rojo/Amarillo:** Intentando reconectar automáticamente.
+- **Notificaciones:** Los pedidos nuevos activan un mensaje emergente (Toast) en la parte superior de color verde.
 
 ---
 **CONSEJO DUKE:** Revisa siempre la sección "Stock Crítico" en el Dashboard para no quedarte sin insumos en medio del servicio.
