@@ -42,8 +42,17 @@ const AdminLayout = () => {
     loadProfile();
 
     const connectSSE = () => {
+      const token = sessionStorage.getItem('duke_admin_token');
+      if (!token) {
+        console.warn("SSE: No token available in AdminLayout. Retrying in 30s...");
+        setTimeout(connectSSE, 30000);
+        return;
+      }
+
       const apiUrl = import.meta.env.VITE_API_URL?.replace(/\/$/, '') || 'https://api.dukeburger-sj.com';
-      const es = new EventSource(`${apiUrl}/api/orders-stream/`);
+      // Pass token in URL sanitized
+      const sanitizedToken = token.trim();
+      const es = new EventSource(`${apiUrl}/api/orders-stream/?token=${sanitizedToken}`);
       esRef.current = es;
 
       es.onmessage = (event) => {
@@ -54,13 +63,13 @@ const AdminLayout = () => {
               message: `🍔 ¡NUEVO PEDIDO! de ${data.customer} ($${data.total})`,
               type: 'success'
             });
-            // Dispatch event for sub-pages (Dashboard, TPV) to refresh
             window.dispatchEvent(new CustomEvent('new-order-received', { detail: data }));
           }
         } catch (e) { console.error("SSE parse error", e); }
       };
 
-      es.onerror = () => {
+      es.onerror = (err) => {
+        console.error("SSE Global Connection Error:", err);
         es.close();
         setTimeout(connectSSE, 10000); // Retry after 10s
       };

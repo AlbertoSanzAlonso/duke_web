@@ -24,8 +24,8 @@ Este proyecto se divide en dos entornos de despliegue claramente separados para 
 
 ## 7. Asistente IA y Soporte (Duke Assist)
 - **Modelo:** Llama-3.3-70b-versatile vía **Groq API**.
-- **RAG (Conocimiento):** El asistente lee dinámicamente el archivo `docs/manual_admin.md` y el estado en tiempo real de la base de datos (Stock Crítico, Pedidos Pendientes).
-- **Mantenimiento:** Es OBLIGATORIO actualizar `docs/manual_admin.md` cuando se realicen cambios estructurales en la operativa del negocio (ej. cambios en flujo de cajas, nuevos estados de pedidos) para que la IA no entregue información obsoleta.
+- **RAG (Conocimiento):** El asistente lee dinámicamente el archivo `docs/manual_admin.md` y el estado en tiempo real de la base de datos (Inventario, Finanzas, Logs, Pedidos).
+- **Mantenimiento:** Es OBLIGATORIO actualizar `docs/manual_admin.md` cuando se realicen cambios estructurales.
 
 ## 4. Skills Instaladas
 - `django-rest-best-practices`: Estabilidad y consistencia del backend.
@@ -40,11 +40,10 @@ Este proyecto se divide en dos entornos de despliegue claramente separados para 
 - **Diagnóstico:** Ante errores 500 tras un despliegue, visitar `/api/setup-admin-super/` para forzar migraciones en la base de datos de Supabase.
 
 ## 3. Streaming, Concurrencia y Caché (Crítico)
+- **SSE Resilience**: Las conexiones `EventSource` deben incluir validación de token preventiva en frontend y retorno de `HttpResponse(status=401)` en backend para evitar bucles.
 - **Async Views**: Todos los views de streaming (SSE) como `OrderStreamView` **DEBEN** ser `async def`.
-- **Iteradores Asíncronos**: Usar `async for obj in queryset` directamente (Django 4.2+) o `.aiter()` en versiones anteriores para evitar bloqueos.
-- **Redis Caching**: Decorar vistas de lectura intensas (ej. Carta, Galería) con `@method_decorator(cache_page(...))`.
-- **Resiliencia**: La configuración de caché **SIEMPRE** debe llevar `IGNORE_EXCEPTIONS: True` para que el sistema no falle si Redis cae (Error 111).
-- **Workers**: Desplegar con `gthread` workers en Gunicorn (`--threads 12`) para permitir conexiones concurrentes de streaming.
+- **Iteradores Asíncronos**: Usar `async for obj in queryset` directamente (Django 4.2+) o `.aiter()` en versiones anteriores.
+- **Workers**: Desplegar con `gthread` workers en Gunicorn (`--threads 12`) para permitir conexiones persistentes de streaming.
 - **Buffering**: Establecer el header `X-Accel-Buffering: no` en respuestas de streaming.
 - **Frontend Lazy Loading**: Toda la navegación del frontend DEBE implementarse con `React.lazy` y `Suspense` utilizando el componente `<LoadingScreen />` de la marca como fallback.
 
@@ -67,6 +66,7 @@ Este proyecto se divide en dos entornos de despliegue claramente separados para 
 - **Responsividad:** 
   - La sección de Contabilidad e Inventario debe usar layouts verticales apilados en móviles.
   - El grid de la carta pública debe usar `minmax(min(100%, 320px), 1fr)` para evitar scroll horizontal.
+  - **AI Assist**: El chat nunca debe auto-abrirse en móviles por defecto. Debe soportar `white-space: pre-wrap`.
 
 ## 4. Skills Instaladas
 - `django-rest-best-practices`: Estabilidad y consistencia del backend.
