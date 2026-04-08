@@ -2,10 +2,15 @@ import React, { useState, useRef, useEffect } from 'react';
 import { Bot, Send, X, MessageSquare, Terminal } from 'lucide-react';
 
 const AIChat = () => {
-    const [isOpen, setIsOpen] = useState(false);
-    const [messages, setMessages] = useState([
-        { role: 'assistant', content: '¡Hola! Soy Duke Assist. ¿En qué puedo ayudarte hoy con el panel?' }
-    ]);
+    const [isOpen, setIsOpen] = useState(() => {
+        return localStorage.getItem('duke_chat_open') === 'true';
+    });
+    const [messages, setMessages] = useState(() => {
+        const saved = localStorage.getItem('duke_chat_history');
+        return saved ? JSON.parse(saved) : [
+            { role: 'assistant', content: '¡Hola! Soy Duke Assist. ¿En qué puedo ayudarte hoy con el panel?' }
+        ];
+    });
     const [input, setInput] = useState('');
     const [isLoading, setIsLoading] = useState(false);
     const messagesEndRef = useRef(null);
@@ -15,8 +20,13 @@ const AIChat = () => {
     };
 
     useEffect(() => {
+        localStorage.setItem('duke_chat_history', JSON.stringify(messages));
         scrollToBottom();
     }, [messages]);
+
+    useEffect(() => {
+        localStorage.setItem('duke_chat_open', isOpen);
+    }, [isOpen]);
 
     const handleSend = async (e) => {
         e.preventDefault();

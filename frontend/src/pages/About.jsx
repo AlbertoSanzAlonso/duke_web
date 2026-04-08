@@ -90,7 +90,6 @@ function About() {
 
       <section className="gallery-section">
         <div className="container">
-          <h2 className="section-title">NUESTRO LOCAL</h2>
           {loading ? (
             <p style={{ textAlign: 'center', opacity: 0.7 }}>Cargando imágenes...</p>
           ) : gallery.length > 0 ? (

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { fetchUsers, createUser, updateUser, deleteUsers } from '../../services/api'; // Wait, it's deleteUser
+import { fetchUsers, createUser, updateUser, deleteUser } from '../../services/api'; 
 import { UserPlus, Search, Edit2, Trash2, Shield, Mail, Key, User as UserIcon } from 'lucide-react';
 import LoadingScreen from '../components/LoadingScreen';
 import Toast from '../components/Toast';

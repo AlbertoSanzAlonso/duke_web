@@ -90,9 +90,6 @@ const AdminLayout = () => {
 
   return (
     <div className="admin-container">
-      {/* AI Assistant Chat - MOVED TO TOP OF CONTAINER */}
-      <AIChat />
-      
       {/* Overlay to close sidebar on mobile when clicking outside */}
       <div className={`sidebar-overlay ${isMobileOpen ? 'visible' : ''}`} onClick={() => setIsMobileOpen(false)}></div>
       
