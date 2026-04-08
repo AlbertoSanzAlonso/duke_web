@@ -73,14 +73,6 @@ Este proyecto se divide en dos entornos de despliegue claramente separados para 
   - El grid de la carta pública debe usar `minmax(min(100%, 320px), 1fr)` para evitar scroll horizontal.
   - **AI Assist**: El chat nunca debe auto-abrirse en móviles por defecto. Debe soportar `white-space: pre-wrap`.
 
-## 4. Skills Instaladas
-- `django-rest-best-practices`: Estabilidad y consistencia del backend.
-- `form-design-best-practices`: Formularios premium y usables.
-- `supabase-postgres-best-practices`: Optimización de BBDD.
-- `web-design-guidelines`: Estándares de calidad visual de Vercel/Next.
-- `seo-audit`: Auditoría de posicionamiento orgánico.
-- `responsive-design`: Asegurar adaptabilidad total.
-- `delivery-pricing-standards`: Lógica de precios por cercanía y validación GPS.
 
 ## 5. Logística y Seguridad (Nuevas Reglas)
 - **Cálculo de Envío:** 
@@ -96,6 +88,11 @@ Este proyecto se divide en dos entornos de despliegue claramente separados para 
 - **Contabilidad:** El formulario de compra/gastos debe usar incrementos de `$100`.
 - **Base de Datos:** El proyecto usa Supabase en producción. Para crear usuarios u operativos de mantenimiento sobre la BD, se debe asegurar que se ejecuten contra la instancia de Supabase (PostgreSQL) y no la base de datos local de desarrollo.
 - **Cierre de Sesión:** El sidebar incluye un botón de "Cerrar Sesión" que limpia el `localStorage` y redirige al login.
+
+## 7. Nuevas Funcionalidades UI/UX
+- **Scroll Indicator**: El menú incluye un indicador visual (flecha flotante) en "Nuestra Carta" con desplazamiento suave para mejorar el descubrimiento de categorías.
+- **Botón de Contacto Dinámico**: Se implementó un FAB de contacto (WhatsApp/Llamada) que solo aparece cuando el carrito está vacío, alternándose con el botón del carrito según el estado del pedido.
+- **Edición de Imágenes**: El administrador permite recortar imágenes ya existentes en el catálogo mediante `ImageCropper` con soporte Cross-Origin para S3/Supabase.
 
 ---
 *Mantener la coherencia visual con la marca Duke Burger (Negros profundos, Rojos vibrantes, Tipografía Bebas Neue).*

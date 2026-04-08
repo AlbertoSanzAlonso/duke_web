@@ -34,6 +34,7 @@ Es la forma principal de cargar stock.
 
 ## 5. CARTA Y PRODUCTOS
 - **Productos:** Es la base de datos de lo que vendes (ej: Hamburguesa Duke). Aquí subes la foto y pones la descripción.
+    - **Recorte de Imágenes:** Al editar un producto con foto, puedes usar el botón **"Recortar imagen actual"** para ajustar el encuadre de la fotografía existente sin tener que subirla de nuevo.
 - **Carta:** Es lo que el cliente ve en la web. Aquí defines el PRECIO y la CATEGORÍA.
 - **Promos:** Secciones especiales. Puedes elegir qué días de la semana está activa una oferta (ej: Martes 2x1).
 
