@@ -127,7 +127,7 @@ function Inventory() {
                         value={name} 
                         onChange={e => setName(e.target.value)} 
                         required 
-                        style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid #ddd', boxSizing: 'border-box' }}
+                        style={{ width: '100%', padding: '12px 15px', borderRadius: '8px', border: '1px solid #ddd', boxSizing: 'border-box', fontSize: '1rem' }}
                     />
                 </div>
                 
@@ -138,7 +138,7 @@ function Inventory() {
                         placeholder="Elegir o escribir..."
                         value={category} 
                         onChange={e => setCategory(e.target.value)}
-                        style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid #ddd', boxSizing: 'border-box' }}
+                        style={{ width: '100%', padding: '12px 15px', borderRadius: '8px', border: '1px solid #ddd', boxSizing: 'border-box', fontSize: '1rem' }}
                     />
                     <datalist id="inventory-categories">
                         {categories.map(cat => (
@@ -155,13 +155,13 @@ function Inventory() {
                         placeholder="Cantidad" 
                         value={quantity} 
                         onChange={e => setQuantity(e.target.value)} 
-                        style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid #ddd', boxSizing: 'border-box' }}
+                        style={{ width: '100%', padding: '12px 15px', borderRadius: '8px', border: '1px solid #ddd', boxSizing: 'border-box', fontSize: '1rem' }}
                     />
                 </div>
 
                 <div style={{ flex: '1 1 100px' }}>
                     <label style={{ fontSize: '0.75rem', fontWeight: 'bold', display: 'block', marginBottom: '4px' }}>UNIDAD</label>
-                    <select value={unit} onChange={e => setUnit(e.target.value)} style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid #ddd', boxSizing: 'border-box' }}>
+                    <select value={unit} onChange={e => setUnit(e.target.value)} style={{ width: '100%', padding: '12px 15px', borderRadius: '8px', border: '1px solid #ddd', boxSizing: 'border-box', fontSize: '1rem' }}>
                         <option value="unidades">Unidades</option>
                         <option value="kg">KG</option>
                         <option value="litros">Litros</option>
@@ -177,7 +177,7 @@ function Inventory() {
                         step="any" 
                         value={minStock} 
                         onChange={e => setMinStock(e.target.value)} 
-                        style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid #ddd', boxSizing: 'border-box' }}
+                        style={{ width: '100%', padding: '12px 15px', borderRadius: '8px', border: '1px solid #ddd', boxSizing: 'border-box', fontSize: '1rem' }}
                     />
                 </div>
 
@@ -242,7 +242,7 @@ function Inventory() {
                                                             step="any"
                                                             value={editQuantity} 
                                                             onChange={e => setEditQuantity(e.target.value)} 
-                                                            style={{ width: '80px', padding: '5px', borderRadius: '4px', border: '1px solid #ddd' }}
+                                                            style={{ width: '100px', padding: '8px 10px', borderRadius: '8px', border: '1px solid var(--admin-primary)', outline: 'none', fontWeight: 'bold' }}
                                                             autoFocus
                                                         />
                                                         <span style={{ fontSize: '0.8rem' }}>{item.unit}</span>
@@ -258,7 +258,7 @@ function Inventory() {
                                                         step="any"
                                                         value={editMinStock} 
                                                         onChange={e => setEditMinStock(e.target.value)} 
-                                                        style={{ width: '80px', padding: '5px', borderRadius: '4px', border: '1px solid #ddd' }}
+                                                        style={{ width: '100px', padding: '8px 10px', borderRadius: '8px', border: '1px solid var(--admin-primary)', outline: 'none', fontWeight: 'bold' }}
                                                     />
                                                 ) : (
                                                     <span style={{ color: '#888' }}>{item.min_stock} {item.unit}</span>
