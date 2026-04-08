@@ -168,7 +168,6 @@ function MenuList() {
                     <option value="Pachatas" style={{ color: '#000' }}>Pachatas</option>
                     <option value="Pizzas" style={{ color: '#000' }}>Pizzas</option>
                     <option value="Bebidas" style={{ color: '#000' }}>Bebidas</option>
-                    <option value="Promos" style={{ color: '#000' }}>Promos</option>
                     <option value="Otros" style={{ color: '#000' }}>Otros</option>
                 </select>
                 <div style={{ position: 'relative', width: '130px' }}>
@@ -212,7 +211,7 @@ function MenuList() {
 
             <div style={{ marginTop: '30px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '20px', marginBottom: '20px' }}>
                 <div style={{ display: 'flex', gap: '10px', overflowX: 'auto', paddingBottom: '5px' }}>
-                    {["Todas", "Burgers", "Pachatas", "Pizzas", "Bebidas", "Promos", "Otros"].map(cat => (
+                    {["Todas", "Burgers", "Pachatas", "Pizzas", "Bebidas", "Otros"].map(cat => (
                         <button 
                             key={cat}
                             onClick={() => setFilterCategory(cat)}

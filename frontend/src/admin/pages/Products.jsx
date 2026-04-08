@@ -13,13 +13,13 @@ function Products() {
     const [name, setName] = useState('');
     const [description, setDescription] = useState('');
     const [ingredients, setIngredients] = useState('');
-    const [category, setCategory] = useState('General');
+    const [category, setCategory] = useState('Burgers');
     const [image, setImage] = useState(null);
     const [searchTerm, setSearchTerm] = useState('');
     const [filterCategory, setFilterCategory] = useState('Todas');
 
     const [editingId, setEditingId] = useState(null);
-    const [editData, setEditData] = useState({ name: '', description: '', ingredients: '', category: 'General', image: null, removeImage: false });
+    const [editData, setEditData] = useState({ name: '', description: '', ingredients: '', category: 'Burgers', image: null, removeImage: false });
     const [isModalOpen, setIsModalOpen] = useState(false);
     
     // Confirmation context
@@ -60,7 +60,7 @@ function Products() {
             setName('');
             setDescription('');
             setIngredients('');
-            setCategory('General');
+            setCategory('Burgers');
             setImage(null);
             loadProducts();
             setToast({ message: "Producto creado con éxito", type: 'success' });
@@ -94,7 +94,7 @@ function Products() {
             name: prod.name, 
             description: prod.description || '', 
             ingredients: prod.ingredients || '', 
-            category: prod.category || 'General',
+            category: prod.category || 'Burgers',
             image: null,
             removeImage: false
         });
@@ -145,7 +145,7 @@ function Products() {
             </div>
             <div style={{ display: 'flex', gap: '15px', marginBottom: '25px', flexWrap: 'wrap', alignItems: 'center' }}>
                 <div className="category-filters" style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', flex: 1 }}>
-                    {['Todas', ...new Set(products.map(p => p.category))].map(cat => (
+                    {["Todas", "Burgers", "Pachatas", "Pizzas", "Bebidas"].map(cat => (
                         <button
                             key={cat}
                             onClick={() => setFilterCategory(cat)}
@@ -205,13 +205,10 @@ function Products() {
                                         onChange={e => editingId ? setEditData({...editData, category: e.target.value}) : setCategory(e.target.value)} 
                                         style={{ padding: '14px', width: '100%', borderRadius: '12px', border: '1px solid #ddd', fontSize: '1rem', background: 'white' }}
                                     >
-                                        <option value="General">General</option>
-                                        <option value="Burgers">Burgers</option>
-                                        <option value="Pachatas">Pachatas</option>
-                                        <option value="Pizzas">Pizzas</option>
-                                        <option value="Bebidas">Bebidas</option>
-                                        <option value="Promos">Promos</option>
-                                        <option value="Otros">Otros</option>
+                                        <option value="Burgers" style={{ color: '#000' }}>Burgers</option>
+                                        <option value="Pachatas" style={{ color: '#000' }}>Pachatas</option>
+                                        <option value="Pizzas" style={{ color: '#000' }}>Pizzas</option>
+                                        <option value="Bebidas" style={{ color: '#000' }}>Bebidas</option>
                                     </select>
                                 </div>
                                 <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>

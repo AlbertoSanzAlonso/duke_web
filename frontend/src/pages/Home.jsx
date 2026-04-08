@@ -184,11 +184,9 @@ function Home() {
         const isWithinDateRange = (!entry.start_date || todayStr >= entry.start_date) && 
                                   (!entry.end_date || todayStr <= entry.end_date);
         const isAvailableToday = isScheduledToday && isWithinDateRange;
-        const isPromo = entry.category === 'Promos';
+        if (!isAvailableToday) return acc;
 
-        if (!isPromo && !isAvailableToday) return acc;
-
-        const cat = entry.category || 'General';
+        const cat = entry.category || 'Burgers';
         if (!acc[cat]) acc[cat] = [];
         
         const daysMapRef = { 'monday': 'Lunes', 'tuesday': 'Martes', 'wednesday': 'Miércoles', 'thursday': 'Jueves', 'friday': 'Viernes', 'saturday': 'Sábado', 'sunday': 'Domingo' };
@@ -571,11 +569,7 @@ function Home() {
                   </div>
                   <div className="card-footer">
                     <span className="price">${parseFloat(item.price).toLocaleString('es-AR')}</span>
-                    {item.category === 'Promos' && !item.isAvailableToday ? (
-                      <span className="promo-unavailable-badge">NO DISPONIBLE</span>
-                    ) : (
-                      <button className="add-btn" onClick={(e) => { e.stopPropagation(); addToCart(item); }}>+</button>
-                    )}
+                    <button className="add-btn" onClick={(e) => { e.stopPropagation(); addToCart(item); }}>+</button>
                   </div>
                 </div>
               ))
