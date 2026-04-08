@@ -1,5 +1,5 @@
 import { jsPDF } from 'jspdf';
-import 'jspdf-autotable';
+import autoTable from 'jspdf-autotable';
 import * as XLSX from 'xlsx';
 
 /**
@@ -23,7 +23,7 @@ export const exportToExcel = (data, fileName) => {
  * @param {Object} summary - Optional summary data { label: string, value: string }
  */
 export const exportToPDF = (data, columns, fileName, title, summary = null) => {
-    const doc = jsPDF({ orientation: columns.length > 5 ? 'landscape' : 'portrait' });
+    const doc = new jsPDF({ orientation: columns.length > 5 ? 'landscape' : 'portrait' });
     
     // Header
     doc.setFontSize(22);
@@ -44,7 +44,7 @@ export const exportToPDF = (data, columns, fileName, title, summary = null) => {
     }
 
     // Table
-    doc.autoTable({
+    autoTable(doc, {
         startY: summary ? 52 : 44,
         head: [columns.map(col => col.header)],
         body: data.map(item => columns.map(col => {

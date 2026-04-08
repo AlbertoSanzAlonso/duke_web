@@ -231,7 +231,7 @@ const Settings = () => {
                                 <button onClick={() => setActiveTab('hours')} className="restore-btn" style={{ color: '#f03e3e', fontWeight: 'bold' }}>Haz click en Restaurar Tabla arriba</button>
                             </div>
                         ) : (
-                            <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '15px', maxWidth: '800px' }}>
                                 {openingHours.map(hour => (
                                     <div key={hour.id} style={{ 
                                         display: 'flex', 
@@ -255,13 +255,13 @@ const Settings = () => {
                                             <span style={{ fontWeight: 'bold', fontSize: '1.1rem' }}>{hour.day_name}</span>
                                         </div>
 
-                                        <div style={{ display: 'flex', alignItems: 'center', gap: '15px', flex: 1, minWidth: '250px' }}>
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: '15px', width: 'auto' }}>
                                             <input 
                                                 type="time" 
                                                 value={hour.opening_time} 
                                                 disabled={!hour.is_open}
                                                 onChange={e => handleHourChange(hour.id, 'opening_time', e.target.value)}
-                                                style={{ ...timeInputStyle, opacity: hour.is_open ? 1 : 0.5, border: '1px solid #ddd', fontSize: '1rem', padding: '8px' }}
+                                                style={{ ...timeInputStyle, opacity: hour.is_open ? 1 : 0.5, border: '1px solid #ddd', fontSize: '1rem', padding: '8px', width: '100px' }}
                                             />
                                             <span style={{ color: '#888' }}>a</span>
                                             <input 
@@ -269,7 +269,7 @@ const Settings = () => {
                                                 value={hour.closing_time} 
                                                 disabled={!hour.is_open}
                                                 onChange={e => handleHourChange(hour.id, 'closing_time', e.target.value)}
-                                                style={{ ...timeInputStyle, opacity: hour.is_open ? 1 : 0.5, border: '1px solid #ddd', fontSize: '1rem', padding: '8px' }}
+                                                style={{ ...timeInputStyle, opacity: hour.is_open ? 1 : 0.5, border: '1px solid #ddd', fontSize: '1rem', padding: '8px', width: '100px' }}
                                             />
                                         </div>
 
