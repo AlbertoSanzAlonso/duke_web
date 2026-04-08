@@ -97,7 +97,8 @@ const Sales = () => {
             setMenuEntries(menuData.filter(e => e.is_available));
             
             const salesData = await fetchSales();
-            setPendingTickets(salesData.filter(s => s.status === 'PENDING'));
+            const todayStr = new Date().toISOString().split('T')[0];
+            setPendingTickets(salesData.filter(s => s.status === 'PENDING' && s.date.includes(todayStr)));
 
             // Fetch delivery rates for automated calculation
             try {

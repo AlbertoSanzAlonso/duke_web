@@ -151,9 +151,8 @@
 }
 
 .ticket-header h2 {
+    color: white !important;
     margin: 0;
-    font-size: 1.2rem;
-    color: #333 !important;
 }
 
 /* Selector de Modo */

@@ -197,7 +197,7 @@ body, .admin-container, .admin-main, .admin-content {
 .admin-content h3,
 .admin-content h4,
 .admin-content label {
-    color: #333 !important;
+    color: #333;
 }
 
 /* Solo forzar color oscuro en botones que no tengan un fondo explícito o sean de acción principal */
