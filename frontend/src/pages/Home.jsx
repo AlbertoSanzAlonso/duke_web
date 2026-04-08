@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { Menu, X, ShoppingCart, Minus, Plus, MessageCircle, MapPin, Instagram, Facebook } from 'lucide-react';
 import { fetchMenuEntries, createSale, fetchOpeningHours } from '../services/api';
 import Toast from '../admin/components/Toast';
+import Footer from '../components/Footer';
 
 function Home() {
   const [activeCategory, setActiveCategory] = useState('Burgers');
@@ -584,41 +585,7 @@ function Home() {
       </section>
 
       {/* Footer */}
-      <footer className="footer">
-        <div className="container">
-          <div className="footer-grid">
-            <div className="footer-brand">
-              <img src="/brand/duke burger 1 negativo.png" alt="Duke Logo" className="footer-logo" />
-              <p>© 2025 DUKE BURGER. SAN JUAN, ARGENTINA.</p>
-            </div>
-            <div className="footer-links">
-              <h3>SOCIAL</h3>
-              <div style={{ display: 'flex', gap: '15px', marginTop: '10px' }}>
-                <a href="https://www.instagram.com/dukeburger.sj" target="_blank" rel="noopener noreferrer" style={{ color: 'white' }}>
-                  <Instagram size={24} />
-                </a>
-                <a href="https://www.facebook.com/people/Duke-Burger/61586470112663/" target="_blank" rel="noopener noreferrer" style={{ color: 'white' }}>
-                  <Facebook size={24} />
-                </a>
-              </div>
-              <p style={{ marginTop: '15px' }}>WSP: 264 5095054</p>
-            </div>
-            <div className="footer-info">
-              <h3>UBICACIÓN</h3>
-              <p>Laprida y José Avelín N</p>
-              <p>San Juan, Argentina</p>
-              <a 
-                href="https://www.google.com/maps/place/Laprida+y+Jos%C3%A9+Avel%C3%ADn+N/@-31.51325,-68.578093,17z/" 
-                target="_blank" 
-                rel="noopener noreferrer"
-                style={{ color: 'var(--color-primary)', fontSize: '0.8rem', fontWeight: 'bold', textDecoration: 'none', display: 'block', marginTop: '5px' }}
-              >
-                VER EN MAPA ↗
-              </a>
-            </div>
-          </div>
-        </div>
-      </footer>
+      <Footer />
 
       {/* Floating Cart Button */}
       {totalItems > 0 && (

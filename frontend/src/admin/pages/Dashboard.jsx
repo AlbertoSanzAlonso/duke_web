@@ -27,7 +27,7 @@ const Dashboard = () => {
                     fetchOpeningHours(),
                     fetchInventory(),
                     fetchMe(),
-                    checkMail().catch(() => ({ unread_count: 0 }))
+                    checkMail().catch(() => ({ unread_count: -1 }))
                 ]);
 
                 setProfile(profileData);

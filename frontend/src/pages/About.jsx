@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { Menu, X } from 'lucide-react';
 import InstagramFeed from '../components/InstagramFeed.tsx';
 import { fetchGalleryImages, fetchSettings, fetchOpeningHours } from '../services/api';
+import Footer from '../components/Footer';
 
 function About() {
   const [gallery, setGallery] = useState([]);
@@ -187,27 +188,7 @@ function About() {
         </div>
       </section>
 
-      <footer className="footer">
-        <div className="container">
-          <div className="footer-grid">
-            <div className="footer-brand">
-              <img src="/brand/duke burger 1 negativo.png" alt="Duke Logo" className="footer-logo" />
-              <p>© 2025 DUKE BURGER. SAN JUAN, ARGENTINA.</p>
-            </div>
-            <div className="footer-links">
-              <h3>SOCIAL</h3>
-              <a href="https://www.instagram.com/dukeburger.sj" target="_blank" rel="noopener noreferrer">@DUKEBURGER.SJ</a>
-              <p>WSP: 264 5142897</p>
-            </div>
-            <div className="footer-info">
-              <h3>UBICACIÓN</h3>
-              <p>Bº Frondizi - Rivadavia</p>
-              <p>(Laprida y Avelín)</p>
-              <p>San Juan, Argentina</p>
-            </div>
-          </div>
-        </div>
-      </footer>
+      <Footer />
     </div>
   );
 }

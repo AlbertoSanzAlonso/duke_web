@@ -443,6 +443,39 @@ img.nav-logo:hover,
   color: white;
 }
 
+.social-icons-footer {
+  display: flex;
+  gap: 15px;
+  margin-top: 10px;
+}
+
+.social-icons-footer a {
+  color: white;
+  transition: transform 0.2s ease;
+}
+
+.social-icons-footer a:hover {
+  color: var(--color-primary);
+  transform: translateY(-3px);
+}
+
+.footer-wsp {
+  margin-top: 15px !important;
+}
+
+.footer-map-link {
+  color: var(--color-primary) !important;
+  font-size: 0.8rem !important;
+  font-weight: bold !important;
+  text-decoration: none !important;
+  display: block !important;
+  margin-top: 5px !important;
+}
+
+.footer-map-link:hover {
+  text-decoration: underline !important;
+}
+
 .customer-info-section div {
   position: relative;
 }
@@ -609,6 +642,16 @@ img.nav-logo:hover,
     display: flex;
     flex-direction: column;
     align-items: center;
+  }
+
+  .footer-links {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .social-icons-footer {
+    justify-content: center;
   }
 }
 
@@ -1273,7 +1316,8 @@ img.nav-logo:hover,
   display: flex;
   justify-content: center;
   align-items: center;
-  margin-top: -30px; /* Lowered from -60px */
+  margin-top: 60px; /* Increased from 20px to center it better between slogan and history */
+  margin-bottom: 60px;
   position: relative;
   z-index: 10;
   max-width: 300px;
