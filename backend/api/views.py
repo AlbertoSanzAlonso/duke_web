@@ -95,24 +95,44 @@ def MailTestView(request):
 def MailCheckView(request):
     """
     Endpoint to check corporate mail unread count.
+    Prioritizes settings.py (Environment) then GlobalSetting (DB).
     """
     from .mail_utils import get_unread_mail_count
     
-    server = GlobalSetting.objects.filter(key='imap_server').first()
-    user = GlobalSetting.objects.filter(key='imap_user').first()
-    password = GlobalSetting.objects.filter(key='imap_password').first()
-    
-    # Check if settings exist and have real values
+    # 1. Try from Settings (Environment)
+    s_host = getattr(settings, 'IMAP_SERVER', None)
+    s_user = getattr(settings, 'IMAP_USER', None)
+    s_pass = getattr(settings, 'IMAP_PASSWORD', None)
+
+    # 2. Try from Database
+    db_server = GlobalSetting.objects.filter(key='imap_server').first()
+    db_user = GlobalSetting.objects.filter(key='imap_user').first()
+    db_pass = GlobalSetting.objects.filter(key='imap_password').first()
+
+    # Determine final values
+    final_host = s_host
+    final_user = s_user
+    final_pass = s_pass
+
+    # If database settings exist and are not the dummy ones, they take priority
+    if db_server and db_server.value and db_server.value != 'imap.dondominio.com':
+        final_host = db_server.value
+    if db_user and db_user.value and db_user.value != 'admin@dukeburger-sj.com' and db_user.value != 'hola@dukeburger-sj.com':
+        final_user = db_user.value
+    if db_pass and db_pass.value and db_pass.value != 'password_aqui' and db_pass.value != '':
+        final_pass = db_pass.value
+
+    # Validate if it's actually configured with real data
     is_configured = (
-        server and server.value and server.value != 'imap.dondominio.com' and
-        user and user.value and user.value != 'admin@dukeburger-sj.com' and
-        password and password.value and password.value != 'password_aqui'
+        final_host and final_host != 'imap.dondominio.com' and
+        final_user and final_user != 'admin@dukeburger-sj.com' and final_user != 'hola@dukeburger-sj.com' and
+        final_pass and final_pass != 'password_aqui' and final_pass != ''
     )
     
     if not is_configured:
         return Response({'unread_count': 0, 'configured': False})
         
-    count = get_unread_mail_count(server.value, user.value, password.value)
+    count = get_unread_mail_count(final_host, final_user, final_pass)
     return Response({
         'unread_count': count, 
         'configured': True,

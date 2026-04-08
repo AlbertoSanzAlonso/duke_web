@@ -218,3 +218,8 @@ EMAIL_USE_TLS = env.bool('EMAIL_USE_TLS', default=True)
 EMAIL_HOST_USER = env('EMAIL_HOST_USER', default='hola@dukeburger-sj.com')
 EMAIL_HOST_PASSWORD = env('EMAIL_HOST_PASSWORD', default='') 
 DEFAULT_FROM_EMAIL = env('DEFAULT_FROM_EMAIL', default='Duke Burger <hola@dukeburger-sj.com>')
+
+# IMAP Configuration (for notifications)
+IMAP_SERVER = env('IMAP_SERVER', default='imap.dondominio.com')
+IMAP_USER = env('IMAP_USER', default=EMAIL_HOST_USER)
+IMAP_PASSWORD = env('IMAP_PASSWORD', default=EMAIL_HOST_PASSWORD)
