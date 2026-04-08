@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { 
     fetchSales, fetchSupplierOrders, createSupplierOrder, 
     fetchExpenses, createExpense, deleteExpense, 
@@ -12,6 +13,9 @@ import { Save, X, Trash2, Edit2, Search, Filter, Calendar as CalendarIcon, Chevr
 import { exportToExcel, exportToPDF } from '../../utils/exportUtils';
 
 const Accounting = () => {
+    const location = useLocation();
+    const navigate = useNavigate();
+    
     const [sales, setSales] = useState([]);
     const [supplierOrders, setSupplierOrders] = useState([]);
     const [manualExpenses, setManualExpenses] = useState([]);
@@ -30,17 +34,26 @@ const Accounting = () => {
     const [currentPage, setCurrentPage] = useState(1);
     const itemsPerPage = 10;
 
+    // Form and Modal states for NEW movements
+    const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+    const [movementType, setMovementType] = useState('EXPENSE'); // 'EXPENSE' or 'INCOME'
+    const [desc, setDesc] = useState('');
+    const [amount, setAmount] = useState('');
+    const [category, setCategory] = useState('Otros');
+
+    useEffect(() => {
+        const params = new URLSearchParams(location.search);
+        if (params.get('action') === 'new') {
+            setIsAddModalOpen(true);
+        }
+    }, [location]);
+
     // Edit states
     const [editingId, setEditingId] = useState(null); // format: 'type-id' e.g. 'exp-1'
     const [editForm, setEditForm] = useState({ description: '', amount: '', category: '' });
     
     // Detail Modal state
     const [detailItem, setDetailItem] = useState(null);
-
-    // ... (rest of form states)
-    const [desc, setDesc] = useState('');
-    const [amount, setAmount] = useState('');
-    const [category, setCategory] = useState('Otros');
 
     useEffect(() => {
         loadData();
@@ -67,22 +80,27 @@ const Accounting = () => {
         }
     };
 
-    const handleAddExpense = async (e) => {
+    const handleAddMovement = async (e) => {
         e.preventDefault();
         if (!desc || !amount) return;
         setIsSaving(true);
         try {
+            // For Income, we use a specific category or flag
+            const finalCategory = movementType === 'INCOME' ? 'Ingreso Manual' : category;
+            
             await createExpense({
                 description: desc,
                 amount: parseFloat(amount),
-                category: category
+                category: finalCategory
             });
+            
             setDesc('');
             setAmount('');
-            setToast({ message: "Gasto registrado correctamente", type: 'success' });
+            setIsAddModalOpen(false);
+            setToast({ message: `${movementType === 'INCOME' ? 'Ingreso' : 'Gasto'} registrado correctamente`, type: 'success' });
             loadData();
         } catch (error) {
-            setToast({ message: "Error al registrar el gasto", type: 'error' });
+            setToast({ message: "Error al registrar el movimiento", type: 'error' });
         } finally {
             setIsSaving(false);
         }
@@ -359,6 +377,13 @@ const Accounting = () => {
                                 <button onClick={handleExportExcel} title="Exportar Excel" style={{ padding: '10px', borderRadius: '10px', border: '1px solid #ddd', background: '#2b8a3e', color: 'white', cursor: 'pointer' }}><Download size={18} /></button>
                                 <button onClick={handleExportPDF} title="Exportar PDF" style={{ padding: '10px', borderRadius: '10px', border: '1px solid #ddd', background: '#f03e3e', color: 'white', cursor: 'pointer' }}><FileText size={18} /></button>
                             </div>
+                            <button 
+                                onClick={() => { setMovementType('EXPENSE'); setIsAddModalOpen(true); }}
+                                className="main-button" 
+                                style={{ padding: '10px 20px', borderRadius: '10px', background: '#333', color: '#fff', border: 'none', fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', boxShadow: '0 4px 10px rgba(0,0,0,0.1)' }}
+                            >
+                                <Plus size={18} /> NUEVO MOVIMIENTO
+                            </button>
                         </div>
                         <div className="period-toggle">
                             <button className={viewMode === 'daily' && !startDate && !endDate ? 'active' : ''} onClick={() => { setViewMode('daily'); setStartDate(''); setEndDate(''); }}>DIARIO</button>
@@ -431,50 +456,8 @@ const Accounting = () => {
                 </div>
             </div>
 
-            <div className="accounting-main-layout">
-                <div className="accounting-forms">
-                    <div className="admin-card">
-                        <h3>Gasto Fijo / Varios</h3>
-                        <form onSubmit={handleAddExpense} className="accounting-form">
-                            <div className="form-group">
-                                <label>Descripción del Gasto</label>
-                                <input 
-                                    type="text" 
-                                    value={desc} 
-                                    onChange={e => setDesc(e.target.value)} 
-                                    placeholder="Ej: Luz, Alquiler, Sueldos..."
-                                    required/ >
-                            </div>
-                            <div className="form-row">
-                                <div className="form-group">
-                                    <label>Importe ($)</label>
-                                    <input 
-                                        type="number"
-                                        step="100" 
-                                        value={amount} 
-                                        onChange={e => setAmount(e.target.value)} 
-                                        placeholder="0"
-                                        required/ >
-                                </div>
-                                <div className="form-group">
-                                    <label>Categoría</label>
-                                    <select value={category} onChange={e => setCategory(e.target.value)}>
-                                        <option value="Local">Local / Suministros</option>
-                                        <option value="Sueldos">Sueldos / Personal</option>
-                                        <option value="Mercadería">Mercadería</option>
-                                        <option value="Publicidad">Publicidad</option>
-                                        <option value="Otros">Otros</option>
-                                    </select>
-                                </div>
-                            </div>
-                            <button type="submit" className="main-button" disabled={isSaving}>
-                                {isSaving ? "Guardando..." : "Registrar Gasto"}
-                            </button>
-                        </form>
-                    </div>
-                </div>
-
-                <div className="accounting-history">
+            <div className="accounting-main-layout" style={{ gridTemplateColumns: '1fr' }}>
+                <div className="accounting-history" style={{ gridColumn: '1 / -1' }}>
                     <div className="admin-card">
                         <h3>Historial de Movimientos</h3>
                         <div className="accounting-table-container">
@@ -750,6 +733,106 @@ const Accounting = () => {
                                     VER TICKET COMPLETO
                                 </button>
                             )}
+                        </div>
+                    </div>
+                </div>
+            )}
+            {/* Add Movement Modal */}
+            {isAddModalOpen && (
+                <div 
+                    style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.85)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 6500, padding: '20px', backdropFilter: 'blur(5px)' }}
+                    onClick={() => setIsAddModalOpen(false)}
+                >
+                    <div 
+                        style={{ background: '#fff', width: '100%', maxWidth: '500px', borderRadius: '25px', overflow: 'hidden', boxShadow: '0 30px 60px rgba(0,0,0,0.5)', animation: 'modalFadeUp 0.3s ease-out' }}
+                        onClick={e => e.stopPropagation()}
+                    >
+                        <div style={{ padding: '25px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: '#fcfcfc', borderBottom: '1px solid #eee' }}>
+                            <h3 style={{ margin: 0, fontWeight: '900', fontSize: '1.2rem', textTransform: 'uppercase' }}>Registrar Movimiento</h3>
+                            <button onClick={() => setIsAddModalOpen(false)} style={{ background: 'none', border: 'none', fontSize: '1.8rem', cursor: 'pointer', color: '#888' }}>×</button>
+                        </div>
+                        
+                        <div style={{ padding: '30px' }}>
+                            {/* Toggle Type */}
+                            <div style={{ display: 'flex', background: '#f1f3f5', borderRadius: '15px', padding: '6px', marginBottom: '30px', border: '1px solid #e9ecef' }}>
+                                <button 
+                                    onClick={() => setMovementType('EXPENSE')}
+                                    style={{ flex: 1, padding: '12px 10px', borderRadius: '10px', border: 'none', fontWeight: 'bold', cursor: 'pointer', background: movementType === 'EXPENSE' ? '#f03e3e' : 'transparent', color: movementType === 'EXPENSE' ? '#fff' : '#495057', transition: 'all 0.2s', fontSize: '0.85rem' }}
+                                >
+                                    GASTO (EGRESO)
+                                </button>
+                                <button 
+                                    onClick={() => setMovementType('INCOME')}
+                                    style={{ flex: 1, padding: '12px 10px', borderRadius: '10px', border: 'none', fontWeight: 'bold', cursor: 'pointer', background: movementType === 'INCOME' ? '#2b8a3e' : 'transparent', color: movementType === 'INCOME' ? '#fff' : '#495057', transition: 'all 0.2s', fontSize: '0.85rem' }}
+                                >
+                                    INGRESO MANUAL
+                                </button>
+                            </div>
+
+                            <form onSubmit={handleAddMovement} style={{ display: 'flex', flexDirection: 'column', gap: '22px' }}>
+                                <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                                    <label style={{ fontSize: '0.75rem', fontWeight: '800', color: '#888', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Descripción</label>
+                                    <input 
+                                        type="text" 
+                                        value={desc} 
+                                        onChange={e => setDesc(e.target.value)} 
+                                        placeholder={movementType === 'EXPENSE' ? "Ej: Pago de Luz Abril" : "Ej: Cobro evento privado"}
+                                        required 
+                                        className="modal-input-premium"
+                                        style={{ padding: '16px', borderRadius: '14px', border: '1px solid #ddd', fontSize: '1rem', outline: 'none', background: '#fdfdfd' }}
+                                    />
+                                </div>
+                                
+                                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
+                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                                        <label style={{ fontSize: '0.75rem', fontWeight: '800', color: '#888', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Importe ($)</label>
+                                        <input 
+                                            type="number" 
+                                            step="100"
+                                            value={amount} 
+                                            onChange={e => setAmount(e.target.value)} 
+                                            placeholder="0"
+                                            required 
+                                            style={{ padding: '16px', borderRadius: '14px', border: '1px solid #ddd', fontSize: '1.2rem', fontWeight: '900', outline: 'none', background: '#fdfdfd' }}
+                                        />
+                                    </div>
+                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                                        <label style={{ fontSize: '0.75rem', fontWeight: '800', color: '#888', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Categoría</label>
+                                        {movementType === 'EXPENSE' ? (
+                                            <select 
+                                                value={category} 
+                                                onChange={e => setCategory(e.target.value)}
+                                                style={{ padding: '16px', borderRadius: '14px', border: '1px solid #ddd', fontSize: '1rem', outline: 'none', cursor: 'pointer', background: 'white' }}
+                                            >
+                                                <option value="Local">Local / Suministros</option>
+                                                <option value="Sueldos">Sueldos / Personal</option>
+                                                <option value="Mercadería">Mercadería</option>
+                                                <option value="Publicidad">Publicidad</option>
+                                                <option value="Varios">Varios</option>
+                                                <option value="Otros">Otros</option>
+                                            </select>
+                                        ) : (
+                                            <div style={{ padding: '16px', borderRadius: '14px', border: '1px solid #e1f0e5', background: '#f1f8f3', color: '#2b8a3e', fontWeight: '900', fontSize: '0.9rem', textAlign: 'center', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                                Ingreso Extra
+                                            </div>
+                                        )}
+                                    </div>
+                                </div>
+
+                                <button 
+                                    type="submit" 
+                                    disabled={isSaving}
+                                    style={{ 
+                                        marginTop: '15px', padding: '18px', borderRadius: '14px', border: 'none', 
+                                        background: movementType === 'EXPENSE' ? '#f03e3e' : '#2b8a3e', 
+                                        color: 'white', fontWeight: '900', fontSize: '1.05rem', cursor: 'pointer',
+                                        boxShadow: `0 10px 25px ${movementType === 'EXPENSE' ? 'rgba(240, 62, 62, 0.4)' : 'rgba(43, 138, 62, 0.4)'}`,
+                                        transition: 'all 0.3s'
+                                    }}
+                                >
+                                    {isSaving ? "PROCESANDO..." : `CONFIRMAR ${movementType === 'EXPENSE' ? 'EGRESO' : 'INGRESO'}`}
+                                </button>
+                            </form>
                         </div>
                     </div>
                 </div>

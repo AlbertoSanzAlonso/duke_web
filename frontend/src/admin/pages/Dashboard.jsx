@@ -222,6 +222,23 @@ const Dashboard = () => {
                         </div>
                     </Link>
                 )}
+
+                {/* 8. AÑADIR GASTO/INGRESO - ACCIÓN RÁPIDA */}
+                {(profile?.is_superuser || profile?.profile?.can_use_accounting) && (
+                    <Link 
+                        to="/admin/contabilidad?action=new" 
+                        className="stat-card action-card-highlight"
+                        style={{ background: 'linear-gradient(135deg, #121212 0%, #1a1a1a 100%)', border: '1px solid #333', textDecoration: 'none' }}
+                    >
+                        <div className="stat-icon-box" style={{ background: '#2b8a3e', color: 'white' }}>
+                            <Plus size={24} />
+                        </div>
+                        <div className="stat-content">
+                            <div className="stat-label" style={{ color: '#aaa' }}>Gestión Financiera</div>
+                            <div className="stat-value" style={{ color: '#fff', fontSize: '1.2rem' }}>AÑADIR MOVIMIENTO</div>
+                        </div>
+                    </Link>
+                )}
             </div>
 
             {/* DETALLE DE STOCK BAJO */}

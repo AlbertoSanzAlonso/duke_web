@@ -565,24 +565,30 @@ async def OrderStreamView(request):
     # 2. Authentication (Manual check for EventSource compatibility)
     from rest_framework.authtoken.models import Token
     from asgiref.sync import sync_to_async
+    from django.http import HttpResponse
 
-    # Check header or query param
+    # Check query param
     token_key = request.GET.get('token')
+    
+    # Check header
     if not token_key and 'Authorization' in request.headers:
         auth_header = request.headers['Authorization']
         if auth_header.startswith('Token '):
             token_key = auth_header.split('Token ')[1]
 
     if not token_key:
-        return StreamingHttpResponse(json.dumps({'error': 'Unauthorized'}), status=401, content_type='application/json')
+        return HttpResponse(json.dumps({'error': 'No token'}), status=401, content_type='application/json')
 
     # Async check if token exists
     @sync_to_async
     def check_token(key):
-        return Token.objects.filter(key=key).exists()
+        try:
+            return Token.objects.filter(key=key.strip()).exists()
+        except:
+            return False
 
     if not await check_token(token_key):
-        return StreamingHttpResponse(json.dumps({'error': 'Invalid token'}), status=401, content_type='application/json')
+        return HttpResponse(json.dumps({'error': 'Invalid token'}), status=401, content_type='application/json')
 
     # 3. Stream Generator
     async def event_stream():
@@ -781,6 +787,10 @@ def AIHelpView(request):
 
         m_sales, m_exp = get_month_stats(this_month_start, now)
         lm_sales, lm_exp = get_month_stats(last_month_start, last_month_end)
+        
+        # --- RESUMEN SEMANAL (Últimos 7 días) ---
+        week_start = today_start - timedelta(days=7)
+        w_sales, w_exp = get_month_stats(week_start, now)
 
         live_context = (
             f"ESTADO DEL SISTEMA ({now.strftime('%d/%m/%y %H:%M')}):\n\n"
@@ -788,6 +798,8 @@ def AIHelpView(request):
             f"- Ventas Cobradas: ${total_sales} ({count_sales} tickets)\n"
             f"- Gastos: ${total_expenses}\n"
             f"- Balance: ${total_sales - total_expenses}\n\n"
+            f"--- RESUMEN SEMANAL (7 días) ---\n"
+            f"- Ventas: ${w_sales}, Gastos: ${w_exp}, Neto: ${w_sales - w_exp}\n\n"
             f"--- RESUMEN MENSUAL ---\n"
             f"- ESTE MES: Ventas ${m_sales}, Gastos ${m_exp}, Neto ${m_sales - m_exp}\n"
             f"- MES PASADO: Ventas ${lm_sales}, Gastos ${lm_exp}, Neto ${lm_sales - lm_exp}\n\n"
@@ -814,11 +826,13 @@ def AIHelpView(request):
         "Tu misión es ayudar al administrador con dudas sobre el funcionamiento y ESTADO ACTUAL del panel. "
         f"\n\n--- MANUAL DE OPERACIÓN ---\n{manual_content}\n"
         f"\n\n--- ESTADO DEL SISTEMA AHORA MISMO ---\n{live_context}\n"
-        "\nREGLAS: "
-        "1. Responde de forma concisa y directa. "
-        "2. Usa los datos del ESTADO DEL SISTEMA para responder preguntas sobre stock o pedidos. "
-        "3. Usa pesos argentinos ($). "
-        "4. Si te preguntan '¿qué falta?' o '¿qué tengo que comprar?', revisa el stock crítico."
+        "\nREGLAS DE RESPUESTA: "
+        "1. Usa FORMATO MARKDOWN ENRIQUECIDO (negritas, listas con puntos, tablas si aplica). "
+        "2. Usa SALTOS DE LÍNEA constantes para no crear bloques densos de texto. "
+        "3. Responde de forma profesional, clara y concisa. "
+        "4. Usa los datos precisos del ESTADO DEL SISTEMA para responder. "
+        "5. Usa pesos argentinos ($) formateados (ej: $12.900). "
+        "6. Si te preguntan '¿qué falta?' o '¿qué tengo que comprar?', prioriza el stock crítico."
     )
 
     url = "https://api.groq.com/openai/v1/chat/completions"

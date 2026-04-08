@@ -34,8 +34,13 @@ const Orders = () => {
     useEffect(() => {
         const baseUrl = import.meta.env.VITE_API_URL || '';
         const token = localStorage.getItem('token');
-        const streamUrl = `${baseUrl.replace(/\/$/, '')}/api/orders-stream/${token ? '?token=' + token : ''}`;
-        
+
+        if (!token) {
+            console.warn("SSE: No hay token disponible, abortando conexión.");
+            return;
+        }
+
+        const streamUrl = `${baseUrl.replace(/\/$/, '')}/api/orders-stream/?token=${token}`;
         const eventSource = new EventSource(streamUrl);
 
         eventSource.onmessage = (event) => {
@@ -57,11 +62,6 @@ const Orders = () => {
         eventSource.onerror = (err) => {
             console.error("SSE Connection Error:", err);
             eventSource.close();
-            // Optional: Reconnect logic after delay
-            setTimeout(() => {
-                // This will trigger a re-render if we had a state dependency, 
-                // but let's keep it simple for now or use a dedicated ref.
-            }, 5000);
         };
 
         return () => {

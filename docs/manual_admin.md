@@ -32,7 +32,7 @@ Es la forma principal de cargar stock.
 
 ## 6. CONTABILIDAD
 - **Balance:** El sistema suma todas las VENTAS y resta todos los GASTOS y COMPRAS DE PROVEEDOR.
-- **Gastos:** Registra aquí facturas de luz, sueldos, alquiler, etc.
+- **Movimientos:** Usa el botón **"NUEVO MOVIMIENTO"** en el Dashboard o Contabilidad para registrar ingresos extra o gastos (Luz, Sueldos, etc.) de forma rápida mediante el modal unificado.
 
 ## 7. CONFIGURACIÓN
 - **Horarios:** Define a qué hora abre y cierra el local cada día. Si está marcado como CERRADO, la web no permitirá pedidos.
@@ -48,12 +48,12 @@ Arrastra y suelta para ordenar las fotos que aparecen en el carrusel de la pági
 ## 9. DUKE ASSIST (ASISTENTE IA)
 El asistente de Duke tiene acceso en tiempo real a la base de datos para ayudarte a tomar decisiones inteligentes.
 - **Qué puede ver:**
-    - Ventas y Gastos del día (Balance financiero).
+    - Resúmenes financieros **Diarios, Semanales y Mensuales**.
     - Artículos con bajo stock (Stock Crítico) y niveles de inventario completo.
     - Pedidos pendientes en TPV y Proveedores.
     - Movimientos recientes realizados por el staff (Auditoría).
 - **Ejemplos de preguntas:** 
-    - "¿Cuánto vendimos hoy y cuál es el balance?"
+    - "¿Cómo viene el balance de la semana?"
     - "¿Qué insumos tengo que comprar urgente?"
     - "¿Quién borró el producto X o cargó el último gasto?"
     - "¿Cuántas unidades de papas fritas quedan?"

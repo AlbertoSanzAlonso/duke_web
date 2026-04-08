@@ -200,13 +200,19 @@ function Products() {
                                 </div>
                                 <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                                     <label style={{ fontSize: '0.75rem', fontWeight: '800', color: '#888', textTransform: 'uppercase' }}>Categoría</label>
-                                    <input 
-                                        type="text" 
+                                    <select 
                                         value={editingId ? editData.category : category} 
                                         onChange={e => editingId ? setEditData({...editData, category: e.target.value}) : setCategory(e.target.value)} 
-                                        placeholder="ej: Burgers, Bebidas..."
-                                        style={{ padding: '14px', width: '100%', borderRadius: '12px', border: '1px solid #ddd', fontSize: '1rem' }}
-                                    />
+                                        style={{ padding: '14px', width: '100%', borderRadius: '12px', border: '1px solid #ddd', fontSize: '1rem', background: 'white' }}
+                                    >
+                                        <option value="General">General</option>
+                                        <option value="Burgers">Burgers</option>
+                                        <option value="Pachatas">Pachatas</option>
+                                        <option value="Pizzas">Pizzas</option>
+                                        <option value="Bebidas">Bebidas</option>
+                                        <option value="Promos">Promos</option>
+                                        <option value="Otros">Otros</option>
+                                    </select>
                                 </div>
                                 <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                                     <label style={{ fontSize: '0.75rem', fontWeight: '800', color: '#888', textTransform: 'uppercase' }}>Fotografía</label>
