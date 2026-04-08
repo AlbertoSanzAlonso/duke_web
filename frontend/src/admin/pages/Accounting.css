@@ -253,6 +253,17 @@
     outline: none;
 }
 
+/* Unificar fuentes de placeholders y texto */
+.accounting-form input::placeholder {
+    font-family: 'Montserrat', sans-serif !important;
+    opacity: 0.7;
+}
+
+.accounting-form input, 
+.accounting-form select {
+    font-family: 'Montserrat', sans-serif !important;
+}
+
 .form-row {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));

@@ -29,7 +29,9 @@ const AdminLayout = () => {
   const [isMobileOpen, setIsMobileOpen] = useState(false);
   const [notification, setNotification] = useState(null);
   const [profile, setProfile] = useState(null);
+  const [sseStatus, setSseStatus] = useState('connecting'); // 'connecting', 'connected', 'error'
   const esRef = useRef(null);
+  const reconnectDelay = useRef(5000); // Backoff exponencial
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -42,19 +44,36 @@ const AdminLayout = () => {
     loadProfile();
 
     const connectSSE = () => {
+      setSseStatus('connecting');
+      if (esRef.current) {
+        esRef.current.close();
+        esRef.current = null;
+      }
+
       const token = sessionStorage.getItem('duke_admin_token');
       if (!token) {
-        console.warn("SSE: No token available. Retrying in 10s...");
+        setSseStatus('error');
         setTimeout(connectSSE, 10000);
         return;
       }
 
-      const apiUrl = import.meta.env.VITE_API_URL?.replace(/\/$/, '') || 'https://api.dukeburger-sj.com';
-      const es = new EventSource(`${apiUrl}/api/orders-stream/?token=${token.trim()}`);
+      // Robust URL building
+      let baseUrl = import.meta.env.VITE_API_URL || 'https://api.dukeburger-sj.com';
+      baseUrl = baseUrl.replace(/\/$/, "");
+      if (!baseUrl.toLowerCase().endsWith('/api')) {
+        baseUrl += '/api';
+      }
+
+      const es = new EventSource(`${baseUrl}/orders-stream/?token=${token.trim()}`);
       esRef.current = es;
 
       es.onopen = () => {
-        console.log("SSE Connection established");
+        setSseStatus('connected');
+        reconnectDelay.current = 5000; // Reset al reconectar bien
+        
+        if (import.meta.env.DEV) {
+          setNotification({ message: "Conexión en tiempo real activa", type: 'success' });
+        }
       };
 
       es.onmessage = (event) => {
@@ -67,15 +86,20 @@ const AdminLayout = () => {
             });
             window.dispatchEvent(new CustomEvent('new-order-received', { detail: data }));
           }
-        } catch (e) { console.error("SSE parse error", e); }
+        } catch (e) {
+          console.error("SSE: Parse error", e);
+        }
       };
 
       es.onerror = (err) => {
-        console.error("SSE Connection Error. Attempting to reconnect in 5s...", err);
-        es.close();
-        // Clear current ref to avoid duplicate closures
-        esRef.current = null;
-        setTimeout(connectSSE, 5000);
+        setSseStatus('error');
+        if (esRef.current) {
+          esRef.current.close();
+          esRef.current = null;
+        }
+        // Espera más tiempo en cada reintento (máx 30s)
+        setTimeout(connectSSE, reconnectDelay.current);
+        reconnectDelay.current = Math.min(reconnectDelay.current * 2, 30000);
       };
     };
 
@@ -105,11 +129,22 @@ const AdminLayout = () => {
     <div className="admin-container">
       {/* Overlay to close sidebar on mobile when clicking outside */}
       <div className={`sidebar-overlay ${isMobileOpen ? 'visible' : ''}`} onClick={() => setIsMobileOpen(false)}></div>
-      
+
       <aside className={`sidebar ${isMobileOpen ? 'open' : ''}`}>
         <div className="sidebar-header">
-          <Link to="/" title="Ir a la Web principal" onClick={() => setIsMobileOpen(false)}>
+          <Link to="/" title="Ir a la Web principal" onClick={() => setIsMobileOpen(false)} style={{ position: 'relative' }}>
             <img src="/brand/duke burger 1 negativo.png" alt="Duke Admin Logo" style={{ height: '60px', objectFit: 'contain', cursor: 'pointer' }} />
+            {/* SSE Status Indicator */}
+            <div
+              title={sseStatus === 'connected' ? "En tiempo real activo" : sseStatus === 'connecting' ? "Conectando..." : "Error de conexión"}
+              style={{
+                position: 'absolute', top: '5px', right: '-12px', width: '10px', height: '10px',
+                borderRadius: '50%',
+                background: sseStatus === 'connected' ? '#40c057' : sseStatus === 'connecting' ? '#fab005' : '#f03e3e',
+                boxShadow: `0 0 10px ${sseStatus === 'connected' ? 'rgba(64,192,87,0.5)' : sseStatus === 'connecting' ? 'rgba(250,176,5,0.5)' : 'rgba(240,62,62,0.5)'}`,
+                transition: 'all 0.3s ease'
+              }}
+            />
           </Link>
           <button className="close-sidebar-btn" onClick={() => setIsMobileOpen(false)}>
             <X size={24} color="#fff" />
@@ -128,11 +163,11 @@ const AdminLayout = () => {
               <span>{item.name}</span>
             </NavLink>
           ))}
-          
+
           {(profile?.is_superuser || profile?.profile?.can_use_webmail) && (
-            <a 
-              href="https://webmail.dondominio.com/" 
-              target="_blank" 
+            <a
+              href="https://webmail.dondominio.com/"
+              target="_blank"
               rel="noopener noreferrer"
               className="nav-item"
               style={{ marginTop: '20px', borderTop: '1px solid rgba(255,255,255,0.1)', paddingTop: '20px' }}
@@ -143,7 +178,7 @@ const AdminLayout = () => {
           )}
         </nav>
       </aside>
-      
+
       <main className="admin-main">
         <header className="admin-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '10px 20px' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
@@ -152,7 +187,7 @@ const AdminLayout = () => {
             </button>
             <h3 style={{ margin: 0, fontSize: '1.4rem', fontWeight: '800', letterSpacing: '1px' }}>DUKE BURGER PANEL</h3>
           </div>
-          
+
           <UserDropdown />
         </header>
         <div className="admin-content">
@@ -161,16 +196,16 @@ const AdminLayout = () => {
       </main>
 
       {notification && (
-        <Toast 
-          message={notification.message} 
-          type={notification.type} 
-          onClose={() => setNotification(null)} 
+        <Toast
+          message={notification.message}
+          type={notification.type}
+          onClose={() => setNotification(null)}
         />
       )}
 
       {/* AI Assistant Chat */}
       <AIChat />
-      
+
     </div>
   );
 };

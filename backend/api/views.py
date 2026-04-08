@@ -658,15 +658,23 @@ async def OrderStreamView(request):
         # 3. Stream Generator
         async def event_stream():
             try:
-                last_seen_id = 0
-                if await Sale.objects.aexists():
-                    last_sale = await Sale.objects.order_by('-id').afirst()
-                    if last_sale:
-                        last_seen_id = last_sale.id
+                # Immediate ready message to confirm connection
+                yield f"data: {json.dumps({'type': 'connection_ready', 'status': 'connected'})}\n\n"
+                
+                @sync_to_async
+                def get_last_id():
+                    last = Sale.objects.order_by('-id').first()
+                    return last.id if last else 0
+
+                @sync_to_async
+                def get_new_sales(since_id):
+                    return list(Sale.objects.filter(id__gt=since_id).order_by('id'))
+
+                last_seen_id = await get_last_id()
 
                 while True:
-                    # Use standard async for (Django 4.2+)
-                    async for sale in Sale.objects.filter(id__gt=last_seen_id).order_by('id'):
+                    new_sales = await get_new_sales(last_seen_id)
+                    for sale in new_sales:
                         data = {
                             'type': 'new_order',
                             'id': sale.id,
@@ -676,19 +684,23 @@ async def OrderStreamView(request):
                         yield f"data: {json.dumps(data)}\n\n"
                         last_seen_id = sale.id
 
-                    # Heartbeat
+                    # Periodic Heartbeat for proxy stability (ping)
+                    yield ": ping\n\n"
+                    # Also send structured heartbeat
                     yield f"data: {json.dumps({'type': 'heartbeat'})}\n\n"
                     await asyncio.sleep(5)
             except asyncio.CancelledError:
+                # Client disconnected - normal behavior
                 pass
             except Exception as e:
+                # Log or yield the error for visibility
                 yield f"data: {json.dumps({'type': 'error', 'message': str(e)})}\n\n"
 
         response = StreamingHttpResponse(event_stream(), content_type='text/event-stream')
         
-        # SSE Headers
-        response['Cache-Control'] = 'no-cache, no-transform'
-        response['X-Accel-Buffering'] = 'no'      
+        # SSE Headers (Quirúrgicos para este endpoint)
+        response['X-Accel-Buffering'] = 'no'
+        response['Cache-Control'] = 'no-cache'
         response['Connection'] = 'keep-alive'     
         
         # CORS Headers
@@ -699,10 +711,12 @@ async def OrderStreamView(request):
         return response
 
     except Exception as e:
-        # Fallback for startup errors
+        # CORS even on errors
         response = HttpResponse(json.dumps({'error': str(e)}), status=500, content_type='application/json')
         response['Access-Control-Allow-Origin'] = origin
         response['Access-Control-Allow-Credentials'] = 'true'
+        response['X-Accel-Buffering'] = 'no'
+        response['Cache-Control'] = 'no-cache'
         return response
 
 @api_view(['POST'])

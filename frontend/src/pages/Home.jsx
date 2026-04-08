@@ -426,7 +426,7 @@ function Home() {
       const phone = "5492645095054";
       const ticketUrl = `${window.location.origin}/ticket/${createdSale.id}`;
       
-      let message = `¡Hola Duke Burger! Soy *${customerName}*.\n`;
+      let message = `¡Hola Duke Burger! Soy *${customerName.trim()}*.\n`;
       message += `He realizado un nuevo Pedido Web:\n\n`;
       message += `TICKET #${createdSale.id}\n`;
       message += `ENTREGA: ${deliveryMode === 'delivery' ? '📍 A DOMICILIO' : '🏪 RETIRO EN LOCAL'}\n`;
