@@ -1,7 +1,8 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { fetchSales } from '../../services/api';
-import { Printer, Eye, Calendar, User, Hash, Search, Filter, LayoutGrid, X, ShoppingBag } from 'lucide-react';
+import { Printer, Eye, Calendar, User, Hash, Search, Filter, LayoutGrid, X, ShoppingBag, Download, FileText } from 'lucide-react';
+import { exportToExcel, exportToPDF } from '../../utils/exportUtils';
 import LoadingScreen from '../components/LoadingScreen';
 import Toast from '../components/Toast';
 import './Orders.css';
@@ -138,6 +139,38 @@ const Orders = () => {
         window.print();
     };
 
+    const handleExportExcel = () => {
+        const data = filteredOrders.map(o => ({
+            ID: o.id,
+            Fecha: new Date(o.date).toLocaleString('es-AR'),
+            Cliente: o.customer_name || 'Particular',
+            Mesa_Entrega: o.table_number || '-',
+            Total: `$${parseFloat(o.total_amount).toLocaleString('es-AR')}`,
+            Estado: o.status
+        }));
+        exportToExcel(data, `Pedidos_Clientes_${new Date().toISOString().split('T')[0]}`);
+    };
+
+    const handleExportPDF = () => {
+        const columns = [
+            { header: 'ID', dataKey: 'ID' },
+            { header: 'Fecha', dataKey: 'Fecha' },
+            { header: 'Cliente', dataKey: 'Cliente' },
+            { header: 'Mesa/Entrega', dataKey: 'Mesa' },
+            { header: 'Total', dataKey: 'Total' },
+            { header: 'Estado', dataKey: 'Estado' }
+        ];
+        const data = filteredOrders.map(o => ({
+            ID: `#${o.id}`,
+            Fecha: new Date(o.date).toLocaleString('es-AR'),
+            Cliente: o.customer_name || 'Particular',
+            Mesa: o.table_number || '-',
+            Total: `$${parseFloat(o.total_amount).toLocaleString('es-AR')}`,
+            Estado: o.status === 'PENDING' ? 'Pendiente' : o.status === 'COMPLETED' ? 'Completado' : 'Cancelado'
+        }));
+        exportToPDF(data, columns, `Pedidos_Clientes_${new Date().toISOString().split('T')[0]}`, 'Reporte de Pedidos de Clientes', { label: 'Total Facturado', value: `$${totalIncome.toLocaleString('es-AR')}` });
+    };
+
     if (loading) return <LoadingScreen />;
 
     // ... header JSX ...
@@ -156,6 +189,14 @@ const Orders = () => {
                             onChange={(e) => setSearchTerm(e.target.value)}
                             style={{ padding: '10px 15px 10px 40px', borderRadius: '10px', border: '1px solid #ddd', fontSize: '0.9rem', width: '100%', background: '#fff' }}
                         />
+                    </div>
+                    <div style={{ display: 'flex', gap: '8px' }}>
+                        <button onClick={handleExportExcel} className="icon-btn" title="Exportar Excel" style={{ background: '#2b8a3e', color: 'white', border: 'none', padding: '8px', borderRadius: '8px' }}>
+                            <Download size={20} />
+                        </button>
+                        <button onClick={handleExportPDF} className="icon-btn" title="Exportar PDF" style={{ background: '#f03e3e', color: 'white', border: 'none', padding: '8px', borderRadius: '8px' }}>
+                            <FileText size={20} />
+                        </button>
                     </div>
                 </div>
 

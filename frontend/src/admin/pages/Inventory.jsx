@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { fetchInventory, createInventoryItem, deleteInventoryItem, updateInventoryItem } from '../../services/api';
 import Toast from '../components/Toast';
-import { Edit2, Save, X, Trash2, Search } from 'lucide-react';
+import { Edit2, Save, X, Trash2, Search, Download, FileText } from 'lucide-react';
+import { exportToExcel, exportToPDF } from '../../utils/exportUtils';
 import './Accounting.css';
 
 function Inventory() {
@@ -101,6 +102,42 @@ function Inventory() {
         }
     };
 
+    const handleExportExcel = () => {
+        const filtered = items.filter(item => 
+            (item.name || "").toLowerCase().includes(searchTerm.toLowerCase()) ||
+            (item.category || "").toLowerCase().includes(searchTerm.toLowerCase())
+        );
+        const data = filtered.map(item => ({
+            Artículo: item.name,
+            Categoría: item.category || '-',
+            Stock: `${item.quantity} ${item.unit}`,
+            Stock_Mínimo: `${item.min_stock} ${item.unit}`,
+            Estado: parseFloat(item.quantity) <= parseFloat(item.min_stock) ? 'BAJO STOCK' : 'OK'
+        }));
+        exportToExcel(data, `Inventario_${new Date().toISOString().split('T')[0]}`);
+    };
+
+    const handleExportPDF = () => {
+        const filtered = items.filter(item => 
+            (item.name || "").toLowerCase().includes(searchTerm.toLowerCase()) ||
+            (item.category || "").toLowerCase().includes(searchTerm.toLowerCase())
+        );
+        const columns = [
+            { header: 'Artículo', dataKey: 'Art' },
+            { header: 'Categoría', dataKey: 'Cat' },
+            { header: 'Stock Actual', dataKey: 'Stock' },
+            { header: 'Stock Mínimo', dataKey: 'Min' }
+        ];
+        const data = filtered.map(item => ({
+            Art: item.name,
+            Cat: item.category || '-',
+            Stock: `${item.quantity} ${item.unit}`,
+            Min: `${item.min_stock} ${item.unit}`
+        }));
+        const lowStockCount = filtered.filter(i => parseFloat(i.quantity) <= parseFloat(i.min_stock)).length;
+        exportToPDF(data, columns, `Inventario_${new Date().toISOString().split('T')[0]}`, 'Reporte de Inventario de Almacén', { label: 'Artículos con Bajo Stock', value: lowStockCount });
+    };
+
     return (
         <div className="admin-card">
             {toast && <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />}
@@ -115,6 +152,10 @@ function Inventory() {
                         onChange={(e) => setSearchTerm(e.target.value)}
                         style={{ padding: '10px 15px 10px 40px', borderRadius: '10px', border: '1px solid #ddd', fontSize: '0.9rem', width: '100%', background: '#fff' }}
                     />
+                </div>
+                <div style={{ display: 'flex', gap: '8px' }}>
+                    <button onClick={handleExportExcel} className="icon-btn" title="Excel" style={{ padding: '8px', background: '#2b8a3e', color: 'white', border: 'none', borderRadius: '8px', cursor: 'pointer' }}><Download size={20} /></button>
+                    <button onClick={handleExportPDF} className="icon-btn" title="PDF" style={{ padding: '8px', background: '#f03e3e', color: 'white', border: 'none', borderRadius: '8px', cursor: 'pointer' }}><FileText size={20} /></button>
                 </div>
             </div>
             

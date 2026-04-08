@@ -8,7 +8,8 @@ import {
 import './Accounting.css';
 import LoadingScreen from '../components/LoadingScreen';
 import Toast from '../components/Toast';
-import { Save, X, Trash2, Edit2, Search, Filter, Calendar as CalendarIcon, ChevronDown, ChevronUp, FileText, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight } from 'lucide-react';
+import { Save, X, Trash2, Edit2, Search, Filter, Calendar as CalendarIcon, ChevronDown, ChevronUp, FileText, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight, Download } from 'lucide-react';
+import { exportToExcel, exportToPDF } from '../../utils/exportUtils';
 
 const Accounting = () => {
     const [sales, setSales] = useState([]);
@@ -289,6 +290,41 @@ const Accounting = () => {
         return pages;
     };
 
+    const handleExportExcel = () => {
+        const data = mergedItems.map(item => ({
+            Fecha: new Date(item.date).toLocaleString('es-AR'),
+            Tipo: item.typeIndicator === 'sal' ? 'Ingreso' : 'Egreso',
+            Descripción: item.typeIndicator === 'exp' ? item.description : 
+                        item.typeIndicator === 'ord' ? item.supplier_name : 
+                        item.customer_name || `Venta #${item.id}`,
+            Categoría: item.typeIndicator === 'exp' ? item.category : 
+                       item.typeIndicator === 'ord' ? 'Materia Prima' : 'Venta TPV',
+            Importe: parseFloat(item.total_amount || item.total_cost || item.amount) * (item.typeIndicator === 'sal' ? 1 : -1)
+        }));
+        exportToExcel(data, `Contabilidad_${new Date().toISOString().split('T')[0]}`);
+    };
+
+    const handleExportPDF = () => {
+        const columns = [
+            { header: 'Fecha', dataKey: 'Fecha' },
+            { header: 'Tipo', dataKey: 'Tipo' },
+            { header: 'Descripción', dataKey: 'Desc' },
+            { header: 'Categoría', dataKey: 'Cat' },
+            { header: 'Importe', dataKey: 'Imp' }
+        ];
+        const data = mergedItems.map(item => ({
+            Fecha: new Date(item.date).toLocaleDateString('es-AR'),
+            Tipo: item.typeIndicator === 'sal' ? 'Ingreso' : 'Egreso',
+            Desc: item.typeIndicator === 'exp' ? item.description : 
+                  item.typeIndicator === 'ord' ? item.supplier_name : 
+                  item.customer_name || `Venta #${item.id}`,
+            Cat: item.typeIndicator === 'exp' ? item.category : 
+                 item.typeIndicator === 'ord' ? 'Materia Prima' : 'Venta TPV',
+            Imp: `${item.typeIndicator === 'sal' ? '+' : '-'}$${Math.round(parseFloat(item.total_amount || item.total_cost || item.amount)).toLocaleString('es-AR')}`
+        }));
+        exportToPDF(data, columns, `Contabilidad_${new Date().toISOString().split('T')[0]}`, 'Reporte Contable Duke', { label: 'Balance de Periodo', value: `$${Math.round(balance).toLocaleString('es-AR')}` });
+    };
+
     if (loading) return <LoadingScreen />;
 
     return (
@@ -319,6 +355,10 @@ const Accounting = () => {
                                 <Filter size={18} style={{ color: showAdvancedFilters ? '#ffffff' : '#333' }} />
                                 <span className="hide-mobile" style={{ color: showAdvancedFilters ? '#ffffff' : '#333' }}>Filtros</span>
                             </button>
+                            <div style={{ display: 'flex', gap: '5px' }}>
+                                <button onClick={handleExportExcel} title="Exportar Excel" style={{ padding: '10px', borderRadius: '10px', border: '1px solid #ddd', background: '#2b8a3e', color: 'white', cursor: 'pointer' }}><Download size={18} /></button>
+                                <button onClick={handleExportPDF} title="Exportar PDF" style={{ padding: '10px', borderRadius: '10px', border: '1px solid #ddd', background: '#f03e3e', color: 'white', cursor: 'pointer' }}><FileText size={18} /></button>
+                            </div>
                         </div>
                         <div className="period-toggle">
                             <button className={viewMode === 'daily' && !startDate && !endDate ? 'active' : ''} onClick={() => { setViewMode('daily'); setStartDate(''); setEndDate(''); }}>DIARIO</button>

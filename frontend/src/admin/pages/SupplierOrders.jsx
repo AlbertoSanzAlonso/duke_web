@@ -2,7 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { fetchSupplierOrders, createSupplierOrder, fetchInventory, createInventoryItem } from '../../services/api';
 import LoadingScreen from '../components/LoadingScreen';
 import Toast from '../components/Toast';
-import { Truck, Plus, History, Trash2, ShoppingCart, Search, X } from 'lucide-react';
+import { Truck, Plus, History, Trash2, ShoppingCart, Search, X, Download, FileText } from 'lucide-react';
+import { exportToExcel, exportToPDF } from '../../utils/exportUtils';
 import './Accounting.css';
 
 const SupplierOrders = () => {
@@ -149,6 +150,44 @@ const SupplierOrders = () => {
         } finally {
             setIsSaving(false);
         }
+    };
+
+    const handleExportExcel = () => {
+        const filtered = orders.filter(order => 
+            (order.supplier_name || "").toLowerCase().includes(searchTerm.toLowerCase()) ||
+            (order.id.toString()).includes(searchTerm)
+        );
+        const data = filtered.map(o => ({
+            ID: o.id,
+            Fecha: new Date(o.date).toLocaleString('es-AR'),
+            Proveedor: o.supplier_name,
+            Total: `$${parseFloat(o.total_cost).toLocaleString('es-AR')}`,
+            Productos: o.items?.length || 0
+        }));
+        exportToExcel(data, `Compras_Proveedores_${new Date().toISOString().split('T')[0]}`);
+    };
+
+    const handleExportPDF = () => {
+        const filtered = orders.filter(order => 
+            (order.supplier_name || "").toLowerCase().includes(searchTerm.toLowerCase()) ||
+            (order.id.toString()).includes(searchTerm)
+        );
+        const columns = [
+            { header: 'ID', dataKey: 'ID' },
+            { header: 'Fecha', dataKey: 'Fecha' },
+            { header: 'Proveedor', dataKey: 'Proveedor' },
+            { header: 'Total', dataKey: 'Total' },
+            { header: 'Productos', dataKey: 'Productos' }
+        ];
+        const data = filtered.map(o => ({
+            ID: `#${o.id}`,
+            Fecha: new Date(o.date).toLocaleString('es-AR'),
+            Proveedor: o.supplier_name,
+            Total: `$${parseFloat(o.total_cost).toLocaleString('es-AR')}`,
+            Productos: o.items?.length || 0
+        }));
+        const total = filtered.reduce((acc, o) => acc + parseFloat(o.total_cost), 0);
+        exportToPDF(data, columns, `Compras_Proveedores_${new Date().toISOString().split('T')[0]}`, 'Reporte de Compras a Proveedores', { label: 'Inversión Total', value: `$${total.toLocaleString('es-AR')}` });
     };
 
     if (loading) return <LoadingScreen />;
@@ -336,6 +375,10 @@ const SupplierOrders = () => {
                                 onChange={(e) => setSearchTerm(e.target.value)}
                                 style={{ padding: '8px 10px 8px 35px', borderRadius: '8px', border: '1px solid #ddd', fontSize: '0.85rem', width: '100%', background: '#fff' }}
                             />
+                        </div>
+                        <div style={{ display: 'flex', gap: '5px' }}>
+                            <button onClick={handleExportExcel} className="icon-btn" title="Excel" style={{ padding: '6px', background: '#2b8a3e', color: 'white', border: 'none', borderRadius: '6px' }}><Download size={14} /></button>
+                            <button onClick={handleExportPDF} className="icon-btn" title="PDF" style={{ padding: '6px', background: '#f03e3e', color: 'white', border: 'none', borderRadius: '6px' }}><FileText size={14} /></button>
                         </div>
                     </div>
                     <div className="accounting-table-container">
