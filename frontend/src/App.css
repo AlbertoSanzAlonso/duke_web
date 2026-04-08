@@ -1739,15 +1739,15 @@ img.nav-logo:hover,
   right: 2rem;
   width: 4.5rem;
   height: 4.5rem;
-  background: #111;
+  background: #333; /* Gray background requested */
   color: white;
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
   z-index: 2000;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
-  border: 2px solid #222;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+  border: 2px solid #444;
   transition: var(--transition-smooth);
   cursor: pointer;
 }
