@@ -26,7 +26,7 @@ import os
 import urllib.request
 from django.conf import settings
 from django.views.decorators.cache import cache_page
-from django.http import StreamingHttpResponse
+from django.http import StreamingHttpResponse, HttpResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.core import management
 from django.conf import settings
@@ -616,95 +616,94 @@ class GalleryImageViewSet(viewsets.ModelViewSet):
 async def OrderStreamView(request):
     """
     Server-Sent Events (SSE) for real-time order notifications.
-    Optimized for Django 4.2+ and concurrent gthread workers.
+    Optimized for concurrent gthread workers and high resilience.
     """
-    # 1. CORS Preflight & Handshake
-    if request.method == 'OPTIONS':
-        response = HttpResponse(status=200)
-        response['Access-Control-Allow-Origin'] = '*'
-        response['Access-Control-Allow-Methods'] = 'GET, OPTIONS'
-        response['Access-Control-Allow-Headers'] = 'Authorization, Content-Type, X-Requested-With'
-        response['Access-Control-Max-Age'] = '86400'
+    origin = request.headers.get('Origin') or 'https://dukeburger-sj.com'
+    
+    try:
+        # 1. CORS Preflight & Handshake
+        if request.method == 'OPTIONS':
+            response = HttpResponse()
+            response['Access-Control-Allow-Origin'] = origin
+            response['Access-Control-Allow-Methods'] = 'GET, OPTIONS'
+            response['Access-Control-Allow-Headers'] = 'Authorization, Content-Type, X-Requested-With'
+            response['Access-Control-Allow-Credentials'] = 'true'
+            response['Access-Control-Max-Age'] = '86400'
+            return response
+
+        # 2. Authentication
+        from rest_framework.authtoken.models import Token
+        from asgiref.sync import sync_to_async
+        
+        token_key = request.GET.get('token')
+        if not token_key and 'Authorization' in request.headers:
+            auth_header = request.headers['Authorization']
+            if auth_header.startswith('Token '):
+                token_key = auth_header.split('Token ')[1]
+
+        @sync_to_async
+        def check_token(key):
+            try:
+                if not key: return False
+                return Token.objects.filter(key=key.strip()).exists()
+            except:
+                return False
+
+        if not token_key or not await check_token(token_key):
+            response = HttpResponse(json.dumps({'error': 'Invalid or missing token'}), status=401, content_type='application/json')
+            response['Access-Control-Allow-Origin'] = origin
+            response['Access-Control-Allow-Credentials'] = 'true'
+            return response
+
+        # 3. Stream Generator
+        async def event_stream():
+            try:
+                last_seen_id = 0
+                if await Sale.objects.aexists():
+                    last_sale = await Sale.objects.order_by('-id').afirst()
+                    if last_sale:
+                        last_seen_id = last_sale.id
+
+                while True:
+                    # Use standard async for (Django 4.2+)
+                    async for sale in Sale.objects.filter(id__gt=last_seen_id).order_by('id'):
+                        data = {
+                            'type': 'new_order',
+                            'id': sale.id,
+                            'customer': sale.customer_name or 'Cliente Anónimo',
+                            'total': str(sale.total_amount)
+                        }
+                        yield f"data: {json.dumps(data)}\n\n"
+                        last_seen_id = sale.id
+
+                    # Heartbeat
+                    yield f"data: {json.dumps({'type': 'heartbeat'})}\n\n"
+                    await asyncio.sleep(5)
+            except asyncio.CancelledError:
+                pass
+            except Exception as e:
+                yield f"data: {json.dumps({'type': 'error', 'message': str(e)})}\n\n"
+
+        response = StreamingHttpResponse(event_stream(), content_type='text/event-stream')
+        
+        # SSE Headers
+        response['Cache-Control'] = 'no-cache, no-transform'
+        response['X-Accel-Buffering'] = 'no'      
+        response['Connection'] = 'keep-alive'     
+        
+        # CORS Headers
+        response['Access-Control-Allow-Origin'] = origin
+        response['Access-Control-Allow-Credentials'] = 'true'
+        response['Access-Control-Expose-Headers'] = '*'
+        
         return response
 
-    # 2. Authentication (Manual check for EventSource compatibility)
-    from rest_framework.authtoken.models import Token
-    from asgiref.sync import sync_to_async
-    from django.http import HttpResponse
-
-    token_key = request.GET.get('token')
-    if not token_key and 'Authorization' in request.headers:
-        auth_header = request.headers['Authorization']
-        if auth_header.startswith('Token '):
-            token_key = auth_header.split('Token ')[1]
-
-    if not token_key:
-        response = HttpResponse(json.dumps({'error': 'No token'}), status=401, content_type='application/json')
-        response['Access-Control-Allow-Origin'] = '*'
+    except Exception as e:
+        # Fallback for startup errors
+        response = HttpResponse(json.dumps({'error': str(e)}), status=500, content_type='application/json')
+        response['Access-Control-Allow-Origin'] = origin
+        response['Access-Control-Allow-Credentials'] = 'true'
         return response
-
-    # Async check if token exists
-    @sync_to_async
-    def check_token(key):
-        try:
-            return Token.objects.filter(key=key.strip()).exists()
-        except:
-            return False
-
-    if not await check_token(token_key):
-        response = HttpResponse(json.dumps({'error': 'Invalid token'}), status=401, content_type='application/json')
-        response['Access-Control-Allow-Origin'] = '*'
-        return response
-
-    # 3. Stream Generator
-    async def event_stream():
-        # Consultamos el último ID actual de forma asíncrona
-        last_seen_id = 0
-        if await Sale.objects.aexists():
-            last_sale = await Sale.objects.order_by('-id').afirst()
-            if last_sale:
-                last_seen_id = last_sale.id
-
-        while True:
-            # Consultamos ventas nuevas de forma eficiente usando el motor asíncrono
-            new_sales_qs = Sale.objects.filter(id__gt=last_seen_id).order_by('id')
-            
-            async for sale in new_sales_qs.aiter():
-                data = {
-                    'type': 'new_order',
-                    'id': sale.id,
-                    'customer': sale.customer_name or 'Cliente Anónimo',
-                    'total': str(sale.total_amount)
-                }
-                yield f"data: {json.dumps(data)}\n\n"
-                last_seen_id = sale.id
-
-            # Heartbeat para mantener conexión abierta sin saturar logs
-            yield f"data: {json.dumps({'type': 'heartbeat'})}\n\n"
-            
-            # Pausa asíncrona obligatoria para ceder el control del worker
-            await asyncio.sleep(3) 
-
-    response = StreamingHttpResponse(event_stream(), content_type='text/event-stream')
-    
-    # --- CONFIGURACIÓN CRÍTICA PARA COOLIFY / STREAMING / CORS ---
-    # Obtenemos el origin real para evitar problemas con CORS_ALLOW_CREDENTIALS
-    origin = request.headers.get('Origin') or '*'
-    
-    response['Content-Type'] = 'text/event-stream'
-    response['X-Accel-Buffering'] = 'no'      
-    response['Cache-Control'] = 'no-cache, no-transform'    
-    response['Connection'] = 'keep-alive'     
-    
-    # Forcing CORS headers for standard Django views that might bypass middleware
-    response['Access-Control-Allow-Origin'] = origin
-    response['Access-Control-Allow-Methods'] = 'GET, OPTIONS'
-    response['Access-Control-Allow-Headers'] = 'Authorization, Content-Type, X-Requested-With'
-    response['Access-Control-Allow-Credentials'] = 'true'
-    response['Access-Control-Expose-Headers'] = '*'
-    # ------------------------------------------------------------
-    
-    return response
 
 @api_view(['POST'])
 @permission_classes([permissions.IsAuthenticated])

@@ -210,6 +210,9 @@ CSRF_TRUSTED_ORIGINS = [
 
 CORS_PREFLIGHT_MAX_AGE = 86400
 
+# ⚠️ Forzar CORS incluso en errores 500
+CORS_URLS_REGEX = r'^/api/.*$'
+
 # Email Configuration
 EMAIL_BACKEND = env('EMAIL_BACKEND', default='django.core.mail.backends.smtp.EmailBackend')
 EMAIL_HOST = env('EMAIL_HOST', default='smtp.dondominio.com')

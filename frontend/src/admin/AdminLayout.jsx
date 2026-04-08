@@ -44,16 +44,18 @@ const AdminLayout = () => {
     const connectSSE = () => {
       const token = sessionStorage.getItem('duke_admin_token');
       if (!token) {
-        console.warn("SSE: No token available in AdminLayout. Retrying in 30s...");
-        setTimeout(connectSSE, 30000);
+        console.warn("SSE: No token available. Retrying in 10s...");
+        setTimeout(connectSSE, 10000);
         return;
       }
 
       const apiUrl = import.meta.env.VITE_API_URL?.replace(/\/$/, '') || 'https://api.dukeburger-sj.com';
-      // Pass token in URL sanitized
-      const sanitizedToken = token.trim();
-      const es = new EventSource(`${apiUrl}/api/orders-stream/?token=${sanitizedToken}`);
+      const es = new EventSource(`${apiUrl}/api/orders-stream/?token=${token.trim()}`);
       esRef.current = es;
+
+      es.onopen = () => {
+        console.log("SSE Connection established");
+      };
 
       es.onmessage = (event) => {
         try {
@@ -69,9 +71,11 @@ const AdminLayout = () => {
       };
 
       es.onerror = (err) => {
-        console.error("SSE Global Connection Error:", err);
+        console.error("SSE Connection Error. Attempting to reconnect in 5s...", err);
         es.close();
-        setTimeout(connectSSE, 10000); // Retry after 10s
+        // Clear current ref to avoid duplicate closures
+        esRef.current = null;
+        setTimeout(connectSSE, 5000);
       };
     };
 
