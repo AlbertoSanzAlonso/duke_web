@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { Menu, X, ShoppingCart, Minus, Plus, MessageCircle, MapPin } from 'lucide-react';
+import { Menu, X, ShoppingCart, Minus, Plus, MessageCircle, MapPin, Instagram, Facebook } from 'lucide-react';
 import { fetchMenuEntries, createSale, fetchOpeningHours } from '../services/api';
 import Toast from '../admin/components/Toast';
 
@@ -422,7 +422,7 @@ function Home() {
       const createdSale = await createSale(saleData);
 
       // 2. Format WhatsApp Message
-      const phone = "5492645142897";
+      const phone = "5492645095054";
       const ticketUrl = `${window.location.origin}/ticket/${createdSale.id}`;
       
       let message = `¡Hola Duke Burger! Soy *${customerName}*.\n`;
@@ -593,14 +593,28 @@ function Home() {
             </div>
             <div className="footer-links">
               <h3>SOCIAL</h3>
-              <a href="https://www.instagram.com/dukeburger.sj" target="_blank" rel="noopener noreferrer">@DUKEBURGER.SJ</a>
-              <p>WSP: 264 5142897</p>
+              <div style={{ display: 'flex', gap: '15px', marginTop: '10px' }}>
+                <a href="https://www.instagram.com/dukeburger.sj" target="_blank" rel="noopener noreferrer" style={{ color: 'white' }}>
+                  <Instagram size={24} />
+                </a>
+                <a href="https://www.facebook.com/people/Duke-Burger/61586470112663/" target="_blank" rel="noopener noreferrer" style={{ color: 'white' }}>
+                  <Facebook size={24} />
+                </a>
+              </div>
+              <p style={{ marginTop: '15px' }}>WSP: 264 5095054</p>
             </div>
             <div className="footer-info">
               <h3>UBICACIÓN</h3>
-              <p>Bº Frondizi - Rivadavia</p>
-              <p>(Laprida y Avelín)</p>
+              <p>Laprida y José Avelín N</p>
               <p>San Juan, Argentina</p>
+              <a 
+                href="https://www.google.com/maps/place/Laprida+y+Jos%C3%A9+Avel%C3%ADn+N/@-31.51325,-68.578093,17z/" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                style={{ color: 'var(--color-primary)', fontSize: '0.8rem', fontWeight: 'bold', textDecoration: 'none', display: 'block', marginTop: '5px' }}
+              >
+                VER EN MAPA ↗
+              </a>
             </div>
           </div>
         </div>
