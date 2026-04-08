@@ -301,6 +301,33 @@ img.nav-logo:hover,
   margin-bottom: 4rem;
 }
 
+.menu-header .section-title {
+  margin-bottom: 1rem;
+}
+
+.scroll-indicator-container {
+  margin-bottom: 2.5rem;
+  display: flex;
+  justify-content: center;
+}
+
+.floating-arrow-red {
+  animation: arrowFloat 2s ease-in-out infinite;
+  display: inline-block;
+  cursor: pointer;
+  transition: var(--transition-smooth);
+}
+
+.floating-arrow-red:hover {
+  transform: scale(1.2);
+  filter: brightness(1.2);
+}
+
+@keyframes arrowFloat {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(10px); }
+}
+
 .menu-tabs {
   display: flex;
   justify-content: center;

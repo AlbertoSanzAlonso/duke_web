@@ -100,7 +100,8 @@ function Products() {
             ingredients: prod.ingredients || '', 
             category: prod.category || 'Burgers',
             image: null,
-            removeImage: false
+            removeImage: false,
+            currentImageUrl: prod.image
         });
         setIsModalOpen(true);
     };
@@ -256,7 +257,35 @@ function Products() {
                                         onChange={onFileChange} 
                                         style={{ padding: '10px', fontSize: '0.85rem', width: '100%', borderRadius: '12px', border: '1px solid #ddd', background: '#f8f9fa' }}
                                     />
-                                    {(image || (editingId && editData.image)) && <p style={{ fontSize: '0.8rem', color: 'green', margin: 0 }}>✓ Imagen lista</p>}
+                                    {(image || (editingId && editData.image)) && <p style={{ fontSize: '0.8rem', color: 'green', margin: 0 }}>✓ Imagen lista para guardar</p>}
+                                    
+                                    {editingId && editData.currentImageUrl && !editData.image && !editData.removeImage && (
+                                        <button 
+                                            type="button"
+                                            onClick={() => {
+                                                setOriginalFileName(`${editData.name}.webp`);
+                                                setImageToCrop(editData.currentImageUrl);
+                                                setIsCropping(true);
+                                            }}
+                                            style={{ 
+                                                marginTop: '8px',
+                                                padding: '10px',
+                                                background: '#f1f3f5',
+                                                border: '1px solid #dee2e6',
+                                                borderRadius: '8px',
+                                                fontSize: '0.8rem',
+                                                fontWeight: 'bold',
+                                                color: '#495057',
+                                                cursor: 'pointer',
+                                                display: 'flex',
+                                                alignItems: 'center',
+                                                justifyContent: 'center',
+                                                gap: '8px'
+                                            }}
+                                        >
+                                            ✂️ Recortar imagen actual
+                                        </button>
+                                    )}
                                 </div>
                             </div>
 

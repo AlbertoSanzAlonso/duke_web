@@ -537,7 +537,6 @@ function Home() {
                   window.scrollTo({ top: y, behavior: 'smooth' });
                 }
               }}
-              style={{ textAlign: 'center', cursor: 'pointer' }}
             >
               <ChevronDown className="floating-arrow-red" size={40} color="var(--color-primary)" />
             </div>

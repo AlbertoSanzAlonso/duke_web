@@ -22,9 +22,11 @@ const ImageCropper = ({ image, onCropComplete, onCancel }) => {
         try {
             const canvas = document.createElement('canvas');
             const img = new Image();
+            img.crossOrigin = "anonymous";
             img.src = image;
-            await new Promise((resolve) => {
+            await new Promise((resolve, reject) => {
                 img.onload = resolve;
+                img.onerror = reject;
             });
 
             const ctx = canvas.getContext('2d');
