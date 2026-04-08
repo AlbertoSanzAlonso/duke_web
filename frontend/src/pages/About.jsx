@@ -172,18 +172,25 @@ function About() {
                 <p>Instagram: @dukeburger.sj</p>
               </div>
             </div>
-            <div className="map-container">
+            <a 
+              href="https://www.google.com/maps/place/Laprida+y+Jos%C3%A9+Avel%C3%ADn+N/@-31.51325,-68.578093,17z/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="map-container"
+              style={{ display: 'block', position: 'relative', cursor: 'pointer' }}
+            >
               <iframe 
-                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3401.0894!2d-68.5462!3d-31.5187!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x96879f9f7c2c0f57%3A0x5e8f8c0e5c5e0e3a!2sLaprida%20Oeste%20%26%20Jos%C3%A9%20Avel%C3%ADn%2C%20Rivadavia%2C%20San%20Juan!5e0!3m2!1ses!2sar!4v1!5m2!1ses!2sar"
+                src="https://www.google.com/maps/embed?pb=!1m14!1m8!1m3!1d1700.772526305607!2d-68.578093!3d-31.51325!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x968141749f5fe31d%3A0xd2ddf9ed864190a0!2zTGFwcmlkYSB5IEpvc8OpIEF2ZWzDrW4gTg!5e0!3m2!1ses!2sar!4v1712570000000!5m2!1ses!2sar"
                 width="100%"
                 height="300"
-                style={{ border: 0, borderRadius: '12px' }}
+                style={{ border: 0, borderRadius: '12px', pointerEvents: 'none' }}
                 allowFullScreen=""
                 loading="lazy"
                 referrerPolicy="no-referrer-when-downgrade"
                 title="Ubicación Duke Burger"
               ></iframe>
-            </div>
+              <div style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', zIndex: 1 }}></div>
+            </a>
           </div>
         </div>
       </section>
