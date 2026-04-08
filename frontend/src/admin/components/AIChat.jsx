@@ -3,7 +3,10 @@ import { Bot, Send, X, MessageSquare, Terminal } from 'lucide-react';
 
 const AIChat = () => {
     const [isOpen, setIsOpen] = useState(() => {
-        return localStorage.getItem('duke_chat_open') === 'true';
+        const saved = localStorage.getItem('duke_chat_open') === 'true';
+        // Evitar apertura automática en móviles para no bloquear la UX inicial
+        if (typeof window !== 'undefined' && window.innerWidth <= 768) return false;
+        return saved;
     });
     const [messages, setMessages] = useState(() => {
         const saved = localStorage.getItem('duke_chat_history');
