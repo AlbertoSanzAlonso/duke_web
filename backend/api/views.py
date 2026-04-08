@@ -138,6 +138,71 @@ def MailCheckView(request):
         'error': count == -1
     })
 
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def DashboardInsightsView(request):
+    """
+    Unified performance endpoint to reduce Dashboard roundtrips (from 6 separate calls to 1).
+    """
+    from .mail_utils import get_unread_mail_count
+    now = timezone.now()
+    today_start = now.replace(hour=0, minute=0, second=0, microsecond=0)
+    
+    # 1. Profile
+    user_data = UserSerializer(request.user).data
+    
+    # 2. Sales (Optimized)
+    sales_qs = Sale.objects.filter(date__gte=today_start)
+    today_sales_count = sales_qs.count()
+    pending_today = sales_qs.filter(status='PENDING').count()
+    completed_today = sales_qs.filter(status='COMPLETED').count()
+    
+    # 3. Stats Mensuales ( IA / RAG Context Ready )
+    month_start = now.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
+    monthly_sales = Sale.objects.filter(date__gte=month_start, status='COMPLETED').aggregate(total=Sum('total_amount'))['total'] or 0
+    monthly_expenses = Expense.objects.filter(date__gte=month_start).aggregate(total=Sum('amount'))['total'] or 0
+    
+    # 4. Promos
+    active_promos = MenuEntry.objects.filter(category='Promos', is_available=True).count()
+    
+    # 5. Inventory (Low Stock Alert)
+    low_stock = InventoryItemSerializer(
+        InventoryItem.objects.filter(quantity__lte=F('min_stock')), 
+        many=True
+    ).data
+    
+    # 6. Opening Hours Today
+    day_map = {0: 7, 1: 1, 2: 2, 3: 3, 4: 4, 5: 5, 6: 6}
+    db_day = day_map[now.weekday()]
+    today_hours = OpeningHourSerializer(OpeningHour.objects.filter(day=db_day).first()).data
+    
+    # 7. Mail (Cached via mail_utils)
+    mail_host = getattr(settings, 'IMAP_SERVER', None)
+    mail_user = getattr(settings, 'IMAP_USER', None)
+    mail_pass = getattr(settings, 'IMAP_PASSWORD', None)
+    
+    mail_count = 0
+    if all([mail_host, mail_user, mail_pass]):
+        mail_count = get_unread_mail_count(mail_host, mail_user, mail_pass)
+        
+    return Response({
+        'profile': user_data,
+        'today_sales': {
+            'total_count': today_sales_count,
+            'pending': pending_today,
+            'completed': completed_today
+        },
+        'monthly_stats': {
+            'total_sales': float(monthly_sales),
+            'total_expenses': float(monthly_expenses),
+            'net': float(monthly_sales - monthly_expenses)
+        },
+        'active_promos': active_promos,
+        'low_stock': low_stock,
+        'today_hours': today_hours,
+        'unread_mail': mail_count
+    })
+
 class UserViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all().order_by('-date_joined')
     serializer_class = UserSerializer
@@ -553,9 +618,9 @@ async def OrderStreamView(request):
     Server-Sent Events (SSE) for real-time order notifications.
     Optimized for Django 4.2+ and concurrent gthread workers.
     """
-    # 1. CORS Preflight
+    # 1. CORS Preflight & Handshake
     if request.method == 'OPTIONS':
-        response = StreamingHttpResponse(status=200)
+        response = HttpResponse(status=200)
         response['Access-Control-Allow-Origin'] = '*'
         response['Access-Control-Allow-Methods'] = 'GET, OPTIONS'
         response['Access-Control-Allow-Headers'] = 'Authorization, Content-Type, X-Requested-With'
@@ -567,17 +632,16 @@ async def OrderStreamView(request):
     from asgiref.sync import sync_to_async
     from django.http import HttpResponse
 
-    # Check query param
     token_key = request.GET.get('token')
-    
-    # Check header
     if not token_key and 'Authorization' in request.headers:
         auth_header = request.headers['Authorization']
         if auth_header.startswith('Token '):
             token_key = auth_header.split('Token ')[1]
 
     if not token_key:
-        return HttpResponse(json.dumps({'error': 'No token'}), status=401, content_type='application/json')
+        response = HttpResponse(json.dumps({'error': 'No token'}), status=401, content_type='application/json')
+        response['Access-Control-Allow-Origin'] = '*'
+        return response
 
     # Async check if token exists
     @sync_to_async
@@ -588,7 +652,9 @@ async def OrderStreamView(request):
             return False
 
     if not await check_token(token_key):
-        return HttpResponse(json.dumps({'error': 'Invalid token'}), status=401, content_type='application/json')
+        response = HttpResponse(json.dumps({'error': 'Invalid token'}), status=401, content_type='application/json')
+        response['Access-Control-Allow-Origin'] = '*'
+        return response
 
     # 3. Stream Generator
     async def event_stream():

@@ -9,7 +9,7 @@ import {
 import './Accounting.css';
 import LoadingScreen from '../components/LoadingScreen';
 import Toast from '../components/Toast';
-import { Save, X, Trash2, Edit2, Search, Filter, Calendar as CalendarIcon, ChevronDown, ChevronUp, FileText, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight, Download } from 'lucide-react';
+import { Save, X, Trash2, Edit2, Search, Filter, Calendar as CalendarIcon, ChevronDown, ChevronUp, FileText, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight, Download, Plus } from 'lucide-react';
 import { exportToExcel, exportToPDF } from '../../utils/exportUtils';
 
 const Accounting = () => {

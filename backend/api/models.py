@@ -86,8 +86,8 @@ class Sale(models.Model):
 class SaleItem(models.Model):
     sale = models.ForeignKey(Sale, related_name='items', on_delete=models.CASCADE)
     menu_entry = models.ForeignKey(MenuEntry, on_delete=models.SET_NULL, null=True)
-    quantity = models.PositiveIntegerField(default=1)
-    price_at_sale = models.DecimalField(max_digits=10, decimal_places=2)
+    quantity = models.PositiveIntegerField(default=1, db_index=True)
+    price_at_sale = models.DecimalField(max_digits=10, decimal_places=2, db_index=True)
 
     def __str__(self):
         return f"{self.quantity} x {self.menu_entry.product.name if self.menu_entry else 'Unknown'}"
@@ -104,9 +104,9 @@ class Expense(models.Model):
 class InventoryItem(models.Model):
     name = models.CharField(max_length=200, db_index=True)
     category = models.CharField(max_length=100, blank=True, null=True, db_index=True)
-    quantity = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+    quantity = models.DecimalField(max_digits=10, decimal_places=2, default=0, db_index=True)
     unit = models.CharField(max_length=50, default='unidades')
-    min_stock = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+    min_stock = models.DecimalField(max_digits=10, decimal_places=2, default=0, db_index=True)
     created_at = models.DateTimeField(auto_now_add=True, null=True)
     
     def __str__(self):

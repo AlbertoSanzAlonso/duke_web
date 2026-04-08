@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { fetchSales, fetchMenuEntries, fetchOpeningHours, fetchInventory, fetchMe, checkMail } from '../../services/api';
+import { fetchDashboardInsights } from '../../services/api';
 import LoadingScreen from '../components/LoadingScreen';
 import { ShoppingBag, Star, Clock, AlertTriangle, TrendingUp, Package, CalendarOff, Mail, History, Settings as SettingsIcon, Plus } from 'lucide-react';
 
@@ -22,47 +22,18 @@ const Dashboard = () => {
         const loadDashboardData = async () => {
             try {
                 setLoading(true);
-                const [sales, menu, hours, inventory, profileData, mailData] = await Promise.all([
-                    fetchSales(),
-                    fetchMenuEntries(),
-                    fetchOpeningHours(),
-                    fetchInventory(),
-                    fetchMe(),
-                    checkMail().catch(() => ({ unread_count: -1 }))
-                ]);
-
-                setProfile(profileData);
-
-                // 1. Sales today (Local Time)
-                const todayStart = new Date();
-                todayStart.setHours(0, 0, 0, 0);
-                const todaysSales = sales.filter(s => new Date(s.date) >= todayStart);
-                const pendingToday = todaysSales.filter(s => s.status === 'PENDING').length;
-                const completedToday = todaysSales.filter(s => s.status === 'COMPLETED').length;
+                const insights = await fetchDashboardInsights();
                 
-                // 2. Active Promos
-                const activePromos = menu.filter(e => e.category === 'Promos' && e.is_available).length;
-
-                // 3. Today's Hours
-                const now = new Date();
-                const dayOfWeek = now.getDay(); // 0=Sun, 1=Mon, ..., 6=Sat
-                const dayMap = { 0: 7, 1: 1, 2: 2, 3: 3, 4: 4, 5: 5, 6: 6 };
-                const dbDay = dayMap[dayOfWeek];
-                const todayHours = hours.find(h => h.day === dbDay);
-
-                // 4. Low Stock
-                const lowStock = inventory.filter(item => parseFloat(item.quantity) <= parseFloat(item.min_stock));
-
+                setProfile(insights.profile);
                 setData({
-                    todaySalesCount: todaysSales.length,
-                    pendingToday,
-                    completedToday,
-                    activePromos,
-                    todayHours,
-                    todayHours,
-                    lowStockItems: lowStock,
-                    unreadEmails: mailData?.unread_count || 0,
-                    mailConfigured: mailData?.configured !== false
+                    todaySalesCount: insights.today_sales.total_count,
+                    pendingToday: insights.today_sales.pending,
+                    completedToday: insights.today_sales.completed,
+                    activePromos: insights.active_promos,
+                    todayHours: insights.today_hours,
+                    lowStockItems: insights.low_stock,
+                    unreadEmails: insights.unread_mail,
+                    mailConfigured: insights.unread_mail !== -1
                 });
 
             } catch (err) {
@@ -74,17 +45,9 @@ const Dashboard = () => {
 
         loadDashboardData();
         
-        // Polling for mail each 2 mins
-        const mailInterval = setInterval(async () => {
-            try {
-                const mailData = await checkMail();
-                setData(prev => ({ ...prev, unreadEmails: mailData.unread_count || 0 }));
-            } catch (e) {
-                console.error("Mail check failed", e);
-            }
-        }, 120000);
-
-        return () => clearInterval(mailInterval);
+        // Refresh every 5 minutes
+        const interval = setInterval(loadDashboardData, 300000);
+        return () => clearInterval(interval);
     }, []);
 
     if (loading) return <LoadingScreen />;
@@ -227,15 +190,15 @@ const Dashboard = () => {
                 {(profile?.is_superuser || profile?.profile?.can_use_accounting) && (
                     <Link 
                         to="/admin/contabilidad?action=new" 
-                        className="stat-card action-card-highlight"
-                        style={{ background: 'linear-gradient(135deg, #121212 0%, #1a1a1a 100%)', border: '1px solid #333', textDecoration: 'none' }}
+                        className="stat-card"
+                        style={{ textDecoration: 'none' }}
                     >
                         <div className="stat-icon-box" style={{ background: '#2b8a3e', color: 'white' }}>
                             <Plus size={24} />
                         </div>
                         <div className="stat-content">
-                            <div className="stat-label" style={{ color: '#aaa' }}>Gestión Financiera</div>
-                            <div className="stat-value" style={{ color: '#fff', fontSize: '1.2rem' }}>AÑADIR MOVIMIENTO</div>
+                            <div className="stat-label">Gestión Financiera</div>
+                            <div className="stat-value" style={{ color: '#2b8a3e', fontSize: '1.2rem' }}>AÑADIR MOVIMIENTO</div>
                         </div>
                     </Link>
                 )}
