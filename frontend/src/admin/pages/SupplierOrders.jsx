@@ -154,12 +154,35 @@ const SupplierOrders = () => {
         }
     };
 
+    const [currentPage, setCurrentPage] = useState(1);
+    const itemsPerPage = 10;
+
+    const filteredOrders = React.useMemo(() => {
+        let filtered = [...orders];
+        if (searchTerm) {
+            const term = searchTerm.toLowerCase();
+            filtered = filtered.filter(o => 
+                (o.supplier_name || "").toLowerCase().includes(term) ||
+                o.id.toString().includes(term) ||
+                (o.items && o.items.some(item => (item.item_name || "").toLowerCase().includes(term)))
+            );
+        }
+        return filtered.sort((a, b) => new Date(b.date) - new Date(a.date));
+    }, [orders, searchTerm]);
+
+    const paginatedOrders = React.useMemo(() => {
+        const start = (currentPage - 1) * itemsPerPage;
+        return filteredOrders.slice(start, start + itemsPerPage);
+    }, [filteredOrders, currentPage]);
+
+    const totalPages = Math.ceil(filteredOrders.length / itemsPerPage);
+
+    useEffect(() => {
+        setCurrentPage(1);
+    }, [searchTerm]);
+
     const handleExportExcel = () => {
-        const filtered = orders.filter(order => 
-            (order.supplier_name || "").toLowerCase().includes(searchTerm.toLowerCase()) ||
-            (order.id.toString()).includes(searchTerm)
-        );
-        const data = filtered.map(o => ({
+        const data = filteredOrders.map(o => ({
             ID: o.id,
             Fecha: new Date(o.date).toLocaleString('es-AR'),
             Proveedor: o.supplier_name,
@@ -170,10 +193,6 @@ const SupplierOrders = () => {
     };
 
     const handleExportPDF = () => {
-        const filtered = orders.filter(order => 
-            (order.supplier_name || "").toLowerCase().includes(searchTerm.toLowerCase()) ||
-            (order.id.toString()).includes(searchTerm)
-        );
         const columns = [
             { header: 'ID', dataKey: 'ID' },
             { header: 'Fecha', dataKey: 'Fecha' },
@@ -181,14 +200,14 @@ const SupplierOrders = () => {
             { header: 'Total', dataKey: 'Total' },
             { header: 'Productos', dataKey: 'Productos' }
         ];
-        const data = filtered.map(o => ({
+        const data = filteredOrders.map(o => ({
             ID: `#${o.id}`,
             Fecha: new Date(o.date).toLocaleString('es-AR'),
             Proveedor: o.supplier_name,
             Total: `$${parseFloat(o.total_cost).toLocaleString('es-AR')}`,
             Productos: o.items?.length || 0
         }));
-        const total = filtered.reduce((acc, o) => acc + parseFloat(o.total_cost), 0);
+        const total = filteredOrders.reduce((acc, o) => acc + parseFloat(o.total_cost), 0);
         exportToPDF(data, columns, `Compras_Proveedores_${new Date().toISOString().split('T')[0]}`, 'Reporte de Compras a Proveedores', { label: 'Inversión Total', value: `$${total.toLocaleString('es-AR')}` });
     };
 
@@ -219,11 +238,11 @@ const SupplierOrders = () => {
                     <h3 style={{ display: 'flex', alignItems: 'center', gap: '8px', margin: 0 }}>
                         <History size={20} color="#f03e3e" /> Historial de Compras
                     </h3>
-                    <div className="search-bar" style={{ position: 'relative', width: '220px' }}>
+                    <div className="search-bar" style={{ position: 'relative', width: '300px' }}>
                         <Search size={16} style={{ position: 'absolute', left: '10px', top: '50%', transform: 'translateY(-50%)', color: '#888' }} />
                         <input 
                             type="text" 
-                            placeholder="Buscar proveedor..." 
+                            placeholder="Buscar por proveedor, ID o producto..." 
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
                             style={{ padding: '8px 10px 8px 35px', borderRadius: '8px', border: '1px solid #ddd', fontSize: '0.85rem', width: '100%', background: '#fff' }}
@@ -245,24 +264,24 @@ const SupplierOrders = () => {
                             </tr>
                         </thead>
                         <tbody>
-                            {orders.length === 0 ? (
-                                <tr><td colSpan="4" style={{ textAlign: 'center', padding: '20px', color: '#999' }}>No hay pedidos registrados.</td></tr>
+                            {paginatedOrders.length === 0 ? (
+                                <tr><td colSpan="4" style={{ textAlign: 'center', padding: '20px', color: '#999' }}>{searchTerm ? 'No se encontraron resultados para tu búsqueda.' : 'No hay pedidos registrados.'}</td></tr>
                             ) : (
-                                orders.filter(order => 
-                                    (order.supplier_name || "").toLowerCase().includes(searchTerm.toLowerCase()) ||
-                                    (order.id.toString()).includes(searchTerm)
-                                ).map(order => (
+                                paginatedOrders.map(order => (
                                     <tr 
                                         key={order.id} 
                                         onClick={() => setSelectedOrder(order)}
                                         style={{ cursor: 'pointer' }}
                                         className="hover-row"
                                     >
-                                        <td data-label="Fecha">{new Date(order.date).toLocaleDateString('es-AR')}</td>
-                                        <td data-label="Proveedor">{order.supplier_name}</td>
+                                        <td data-label="Fecha">
+                                            {new Date(order.date).toLocaleDateString('es-AR')}
+                                            <br/><small style={{color: '#999'}}>{new Date(order.date).toLocaleTimeString('es-AR', {hour: '2-digit', minute: '2-digit'})}</small>
+                                        </td>
+                                        <td data-label="Proveedor"><strong>{order.supplier_name}</strong></td>
                                         <td data-label="Importe" className="txt-right negative">-${parseInt(order.total_cost).toLocaleString('es-AR')}</td>
                                         <td data-label="Detalles" style={{ fontSize: '0.75rem', color: '#888' }}>
-                                            {order.items?.length || 0} productos
+                                            {order.items?.length || 0} prod.
                                         </td>
                                     </tr>
                                 ))
@@ -270,6 +289,28 @@ const SupplierOrders = () => {
                         </tbody>
                     </table>
                 </div>
+
+                {totalPages > 1 && (
+                    <div className="pagination" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '10px', marginTop: '20px', padding: '10px' }}>
+                        <button 
+                            onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+                            disabled={currentPage === 1}
+                            style={{ padding: '8px 12px', borderRadius: '8px', border: '1px solid #ddd', background: currentPage === 1 ? '#eee' : '#fff', cursor: currentPage === 1 ? 'not-allowed' : 'pointer', fontSize: '0.8rem' }}
+                        >
+                            Anterior
+                        </button>
+                        <span style={{ fontSize: '0.85rem', fontWeight: 'bold' }}>
+                            Página {currentPage} de {totalPages}
+                        </span>
+                        <button 
+                            onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
+                            disabled={currentPage === totalPages}
+                            style={{ padding: '8px 12px', borderRadius: '8px', border: '1px solid #ddd', background: currentPage === totalPages ? '#eee' : '#fff', cursor: currentPage === totalPages ? 'not-allowed' : 'pointer', fontSize: '0.8rem' }}
+                        >
+                            Siguiente
+                        </button>
+                    </div>
+                )}
             </div>
 
             {/* Modal de Nueva Compra */}
