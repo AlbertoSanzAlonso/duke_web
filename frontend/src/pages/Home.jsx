@@ -205,15 +205,13 @@ function Home() {
         };
         
         acc[cat].push(itemObj);
-        if (!acc['Todas']) acc['Todas'] = [];
-        acc['Todas'].push(itemObj);
 
         return acc;
       }, {});
       
-      const availableCategories = Object.keys(grouped).filter(c => c !== 'Todas');
-      // Sort alphabetically but put 'Todas' first
-      const finalCategories = grouped['Todas'] ? ['Todas', ...availableCategories] : availableCategories;
+      const availableCategories = Object.keys(grouped);
+      // Sort alphabetically
+      const finalCategories = availableCategories.sort();
       
       console.log("Menu loaded successfully. Categories found:", finalCategories);
       
@@ -221,9 +219,8 @@ function Home() {
       
       // Ensure we have a valid activeCategory
       if (finalCategories.length > 0) {
-        const normalActive = activeCategory;
-        if (!activeCategory || !finalCategories.some(c => c.toLowerCase() === normalActive.toLowerCase())) {
-          setActiveCategory('Todas');
+        if (!activeCategory || !finalCategories.some(c => c.toLowerCase() === activeCategory.toLowerCase())) {
+          setActiveCategory(finalCategories[0]);
         }
       }
     } catch (error) {
@@ -540,7 +537,7 @@ function Home() {
                   window.scrollTo({ top: y, behavior: 'smooth' });
                 }
               }}
-              style={{ textAlign: 'center', marginBottom: '30px', cursor: 'pointer' }}
+              style={{ textAlign: 'center', cursor: 'pointer' }}
             >
               <ChevronDown className="floating-arrow-red" size={40} color="var(--color-primary)" />
             </div>
