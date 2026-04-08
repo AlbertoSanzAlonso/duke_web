@@ -208,6 +208,15 @@ def AdminSetupView(request):
     if not DeliverySetting.objects.filter(id=1).exists():
         DeliverySetting.objects.create(id=1, base_price=1000, km_price=200, max_km=15)
         delivery_setup = True
+    
+    # 6. Setup IMAP defaults
+    imap_defaults = [
+        {'key': 'imap_server', 'value': 'imap.dondominio.com', 'description': 'Servidor IMAP'},
+        {'key': 'imap_user', 'value': 'admin@dukeburger-sj.com', 'description': 'Usuario IMAP'},
+        {'key': 'imap_password', 'value': 'password_aqui', 'description': 'Contraseña IMAP'}
+    ]
+    for d in imap_defaults:
+        GlobalSetting.objects.get_or_create(key=d['key'], defaults={'value': d['value'], 'description': d['description']})
             
     return Response({
         'status': 'Success',
