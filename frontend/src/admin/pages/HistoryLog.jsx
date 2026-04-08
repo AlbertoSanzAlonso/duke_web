@@ -85,24 +85,22 @@ const HistoryLog = () => {
                 </div>
             </div>
 
-            <div className="accounting-filters" style={{ display: 'grid', gridTemplateColumns: '1fr auto auto auto auto', gap: '15px' }}>
-                <div className="search-box" style={{ background: '#fff', border: '1px solid #ddd', borderRadius: '12px', padding: '0 15px', display: 'flex', alignItems: 'center', gap: '10px' }}>
+            <div className="accounting-filters history-filters">
+                <div className="search-box">
                     <Search size={18} color="#888" />
                     <input 
                         type="text" 
-                        placeholder="Buscar por usuario, detalle o acción..." 
+                        placeholder="Buscar por usuario o acción..." 
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
-                        style={{ height: '48px', border: 'none', background: 'transparent', width: '100%', outline: 'none', fontSize: '0.95rem' }}
                     />
                 </div>
 
-                <div className="filter-box" style={{ background: '#fff', border: '1px solid #ddd', borderRadius: '12px', padding: '0 15px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <div className="filter-box">
                     <Filter size={16} color="#666" />
                     <select 
                         value={selectedModule} 
                         onChange={(e) => setSelectedModule(e.target.value)}
-                        style={{ border: 'none', padding: '0 5px', background: 'transparent', height: '48px', outline: 'none', fontWeight: '800', fontSize: '0.8rem', textTransform: 'uppercase', color: '#333' }}
                     >
                         <option value="ALL">TODOS</option>
                         <option value="TPV">TPV</option>
@@ -114,38 +112,22 @@ const HistoryLog = () => {
                     </select>
                 </div>
 
-                <div className="filter-box" style={{ background: '#fff', border: '1px solid #ddd', borderRadius: '12px', padding: '0 15px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <div className="filter-box">
                     <Clock size={16} color="#666" />
                     <input 
                         type="date" 
                         value={selectedDate}
                         onChange={(e) => setSelectedDate(e.target.value)}
-                        style={{ border: 'none', padding: '10px 5px', background: 'transparent', height: '48px', outline: 'none', fontWeight: 'bold' }}
                     />
                     {selectedDate && (
-                        <button onClick={() => setSelectedDate('')} style={{ border: 'none', background: 'none', color: '#ff4d4d', cursor: 'pointer', fontWeight: 'bold' }}>×</button>
+                        <button onClick={() => setSelectedDate('')} className="clear-date-btn">×</button>
                     )}
                 </div>
                 
                 <button 
                     onClick={loadLogs} 
                     title="Recargar historial"
-                    style={{ 
-                        height: '48px', 
-                        width: '48px',
-                        display: 'flex', 
-                        alignItems: 'center', 
-                        justifyContent: 'center',
-                        background: '#343a40', 
-                        color: 'white',
-                        border: 'none',
-                        borderRadius: '12px',
-                        cursor: 'pointer',
-                        transition: 'all 0.2s',
-                        boxShadow: '0 4px 6px rgba(0,0,0,0.1)'
-                    }}
-                    onMouseOver={e => e.currentTarget.style.background = '#000'}
-                    onMouseOut={e => e.currentTarget.style.background = '#343a40'}
+                    className="reload-btn"
                 >
                     <RefreshCw size={20} className={loading ? 'animate-spin' : ''} />
                 </button>
