@@ -145,9 +145,9 @@ const Orders = () => {
     return (
         <div className="orders-container">
             <div className="orders-header">
-                <div style={{ display: 'flex', alignItems: 'center', gap: '20px', flex: 1 }}>
+                <div className="orders-title-search" style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
                     <h2 style={{ margin: 0 }}>Gestión de Pedidos</h2>
-                    <div className="search-bar" style={{ position: 'relative', maxWidth: '300px', flex: 1 }}>
+                    <div className="search-bar" style={{ position: 'relative', maxWidth: '300px' }}>
                         <Search size={18} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: '#888' }} />
                         <input 
                             type="text" 

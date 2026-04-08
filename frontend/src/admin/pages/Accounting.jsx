@@ -626,17 +626,23 @@ const Accounting = () => {
                             <div style={{ maxHeight: '300px', overflowY: 'auto', background: '#fcfcfc', borderRadius: '10px', border: '1px solid #f1f3f5', padding: '10px' }}>
                                 {detailItem.items && detailItem.items.length > 0 ? (
                                     <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                                        {detailItem.items.map((it, idx) => (
-                                            <div key={idx} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: idx === detailItem.items.length -1 ? 'none' : '1px solid #eee', paddingBottom: '8px' }}>
-                                                <div>
-                                                    <div style={{ fontWeight: '600', fontSize: '0.9rem' }}>{it.entry_name || it.product_name || 'Producto'}</div>
-                                                    <div style={{ fontSize: '0.75rem', color: '#888' }}>{it.quantity} x ${parseFloat(it.price_at_sale || it.price || 0).toLocaleString('es-AR')}</div>
+                                        {detailItem.items.map((it, idx) => {
+                                            const itemName = it.item_name || it.entry_name || it.product_name || 'Producto';
+                                            const itemPrice = parseFloat(it.cost || it.price_at_sale || it.price || 0);
+                                            const itemTotal = itemPrice * it.quantity;
+
+                                            return (
+                                                <div key={idx} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: idx === detailItem.items.length -1 ? 'none' : '1px solid #eee', paddingBottom: '8px' }}>
+                                                    <div>
+                                                        <div style={{ fontWeight: '600', fontSize: '0.9rem' }}>{itemName}</div>
+                                                        <div style={{ fontSize: '0.75rem', color: '#888' }}>{it.quantity} x ${itemPrice.toLocaleString('es-AR')}</div>
+                                                    </div>
+                                                    <div style={{ fontWeight: 'bold' }}>
+                                                        ${itemTotal.toLocaleString('es-AR')}
+                                                    </div>
                                                 </div>
-                                                <div style={{ fontWeight: 'bold' }}>
-                                                    ${(parseFloat(it.price_at_sale || it.price || 0) * it.quantity).toLocaleString('es-AR')}
-                                                </div>
-                                            </div>
-                                        ))}
+                                            );
+                                        })}
                                     </div>
                                 ) : (
                                     <div style={{ padding: '10px', color: '#666', fontStyle: 'italic', fontSize: '0.9rem' }}>

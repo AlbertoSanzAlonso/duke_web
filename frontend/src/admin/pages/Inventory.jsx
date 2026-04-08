@@ -155,7 +155,7 @@ function Inventory() {
                         placeholder="Cantidad" 
                         value={quantity} 
                         onChange={e => setQuantity(e.target.value)} 
-                        style={{ width: '100%', padding: '12px 15px', borderRadius: '8px', border: '1px solid #ddd', boxSizing: 'border-box', fontSize: '1.2rem', textAlign: 'center', fontWeight: '900' }}
+                        style={{ width: '100%', padding: '12px 15px', borderRadius: '8px', border: '1px solid #ddd', boxSizing: 'border-box', fontSize: '1.1rem', textAlign: 'center', fontWeight: '800', fontFamily: 'inherit' }}
                     />
                 </div>
 
@@ -177,7 +177,7 @@ function Inventory() {
                         step="any" 
                         value={minStock} 
                         onChange={e => setMinStock(e.target.value)} 
-                        style={{ width: '100%', padding: '12px 15px', borderRadius: '8px', border: '1px solid #ddd', boxSizing: 'border-box', fontSize: '1.2rem', textAlign: 'center', fontWeight: '900' }}
+                        style={{ width: '100%', padding: '12px 15px', borderRadius: '8px', border: '1px solid #ddd', boxSizing: 'border-box', fontSize: '1.1rem', textAlign: 'center', fontWeight: '800', fontFamily: 'inherit' }}
                     />
                 </div>
 
@@ -242,7 +242,7 @@ function Inventory() {
                                                             step="any"
                                                             value={editQuantity} 
                                                             onChange={e => setEditQuantity(e.target.value)} 
-                                                            style={{ width: '100px', padding: '10px', borderRadius: '8px', border: '1px solid var(--admin-primary)', outline: 'none', fontWeight: 'bold', fontSize: '1.2rem', textAlign: 'center' }}
+                                                            style={{ width: '100px', padding: '10px', borderRadius: '8px', border: '1px solid var(--admin-primary)', outline: 'none', fontWeight: '800', fontSize: '1.1rem', textAlign: 'center', fontFamily: 'inherit' }}
                                                             autoFocus
                                                         />
                                                         <span style={{ fontSize: '0.8rem' }}>{item.unit}</span>
@@ -258,7 +258,7 @@ function Inventory() {
                                                         step="any"
                                                         value={editMinStock} 
                                                         onChange={e => setEditMinStock(e.target.value)} 
-                                                        style={{ width: '100px', padding: '10px', borderRadius: '8px', border: '1px solid var(--admin-primary)', outline: 'none', fontWeight: '900', fontSize: '1.2rem', textAlign: 'center' }}
+                                                        style={{ width: '100px', padding: '10px', borderRadius: '8px', border: '1px solid var(--admin-primary)', outline: 'none', fontWeight: '800', fontSize: '1.1rem', textAlign: 'center', fontFamily: 'inherit' }}
                                                     />
                                                 ) : (
                                                     <span style={{ color: '#888' }}>{item.min_stock} {item.unit}</span>

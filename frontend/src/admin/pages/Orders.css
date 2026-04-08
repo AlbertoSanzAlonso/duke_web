@@ -18,6 +18,7 @@
     display: flex;
     gap: 20px;
     align-items: center;
+    margin-left: auto;
 }
 
 .orders-stats {
@@ -125,37 +126,76 @@
     }
 
     .orders-table tr {
-        margin-bottom: 2rem;
+        margin-bottom: 1.5rem;
         border: 1px solid #eee;
         border-radius: 12px;
-        padding: 1.5rem;
+        padding: 1.2rem;
         background: #fff;
         box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+        display: grid !important;
+        grid-template-columns: 1fr auto;
+        gap: 6px;
     }
 
     .orders-table td {
-        border: none;
-        display: flex;
+        display: flex !important;
+        border: none !important;
+        padding: 0 !important;
+        min-height: auto !important;
+        border-bottom: none !important;
         align-items: center;
-        justify-content: space-between;
-        padding: 12px 15px !important;
-        border-bottom: 1px solid #f1f3f5;
-        font-size: 0.95rem;
-        min-height: 50px;
     }
 
-    .orders-table td[data-label="Acción"] {
+    .orders-table td[data-label="ID"] {
+        grid-column: 1;
+        font-weight: 900;
+        font-size: 1.1rem;
+        color: #333;
+    }
+    
+    .orders-table td[data-label="Fecha"] {
+        grid-column: 2;
+        text-align: right;
         justify-content: flex-end;
     }
 
-    .orders-table td::before {
-        content: attr(data-label);
-        font-weight: 800;
+    .date-cell {
+        flex-direction: row !important;
+        gap: 8px;
+        align-items: center;
+        font-size: 0.85rem;
         color: #888;
-        font-size: 0.75rem;
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
-        margin-right: 15px;
+    }
+
+    .orders-table td[data-label="Cliente"] {
+        grid-column: 1;
+        font-weight: bold;
+        color: #333;
+    }
+    
+    .orders-table td[data-label="Total"] {
+        grid-column: 2;
+        text-align: right;
+        font-weight: 800;
+        color: #2b8a3e;
+        justify-content: flex-end;
+    }
+
+    .orders-table td[data-label="Estado"] {
+        grid-column: 1 / span 2;
+        margin: 4px 0;
+    }
+
+    .orders-table td[data-label="Acción"] {
+        grid-column: 1 / span 2;
+        justify-content: flex-end;
+        padding-top: 10px !important;
+        border-top: 1px dashed #eee !important;
+        margin-top: 4px;
+    }
+
+    .orders-table td::before {
+        display: none !important;
     }
 }
 

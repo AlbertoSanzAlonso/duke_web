@@ -26,6 +26,11 @@ function Promos() {
     const [useExistingProduct, setUseExistingProduct] = useState(false);
     const [selectedProductId, setSelectedProductId] = useState('');
     
+    // Inline schedule edit
+    const [inlineEditingId, setInlineEditingId] = useState(null);
+    const [tempSchedule, setTempSchedule] = useState({});
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    
     // Scheduling state
     const [schedule, setSchedule] = useState({
         active_monday: true,
@@ -97,6 +102,7 @@ function Promos() {
             end_date: ''
         });
         if (fileInputRef.current) fileInputRef.current.value = '';
+        setIsModalOpen(false);
     };
 
     const handleEditClick = (entry) => {
@@ -123,7 +129,7 @@ function Promos() {
             end_date: entry.end_date || ''
         });
 
-        window.scrollTo({ top: 0, behavior: 'smooth' });
+        setIsModalOpen(true);
     };
 
     const handleSubmit = async (e) => {
@@ -205,13 +211,49 @@ function Promos() {
         }
     };
 
-    const handleToggleDay = async (entry, day) => {
+    const handleToggleDay = (entry, day) => {
+        const field = `active_${day}`;
+        if (inlineEditingId === entry.id) {
+            setTempSchedule(prev => ({
+                ...prev,
+                [field]: !prev[field]
+            }));
+        } else {
+            // Inmediato si no estamos editando (opcional, o podemos forzar edición primero)
+            // Según el usuario: "que el botón de editar cambie a guardar"
+            // Así que vamos a permitir el toggle solo si está en modo edición o iniciarlo
+            startInlineEdit(entry);
+            setTempSchedule(prev => ({
+                ...prev,
+                [field]: entry[field] !== undefined ? !entry[field] : false
+            }));
+        }
+    };
+
+    const startInlineEdit = (entry) => {
+        setInlineEditingId(entry.id);
+        setTempSchedule({
+            active_monday: entry.active_monday ?? true,
+            active_tuesday: entry.active_tuesday ?? true,
+            active_wednesday: entry.active_wednesday ?? true,
+            active_thursday: entry.active_thursday ?? true,
+            active_friday: entry.active_friday ?? true,
+            active_saturday: entry.active_saturday ?? true,
+            active_sunday: entry.active_sunday ?? true
+        });
+    };
+
+    const handleSaveInline = async (entry) => {
         try {
-            const field = `active_${day}`;
-            await updateMenuEntry(entry.id, { [field]: !entry[field] });
+            setLoading(true);
+            await updateMenuEntry(entry.id, tempSchedule);
+            setToast({ message: "Días de disponibilidad actualizados.", type: 'success' });
+            setInlineEditingId(null);
             loadData();
         } catch (err) {
             setToast({ message: err.message, type: 'error' });
+        } finally {
+            setLoading(false);
         }
     };
 
@@ -230,23 +272,88 @@ function Promos() {
         <div className="admin-card">
             {toast && <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />}
             
-            <div style={{ display: 'flex', alignItems: 'center', gap: '15px', marginBottom: '10px' }}>
-                <Star size={32} color="var(--admin-primary)" fill="var(--admin-primary)" />
-                <h2 style={{ margin: 0 }}>{isEditing ? 'Editando Promoción' : 'Gestión de Promociones'}</h2>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '20px', flexWrap: 'wrap', gap: '15px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
+                    <Star size={32} color="var(--admin-primary)" fill="var(--admin-primary)" />
+                    <h2 style={{ margin: 0 }}>Gestión de Promociones</h2>
+                </div>
+                <button 
+                    onClick={() => { resetForm(); setIsModalOpen(true); }}
+                    className="main-button"
+                    style={{ 
+                        padding: '12px 24px', 
+                        background: 'var(--admin-primary)', 
+                        color: 'white', 
+                        border: 'none', 
+                        borderRadius: '12px', 
+                        fontWeight: 'bold',
+                        cursor: 'pointer',
+                        boxShadow: '0 4px 15px rgba(240, 62, 62, 0.3)'
+                    }}
+                >
+                    + NUEVA PROMOCIÓN
+                </button>
             </div>
             <p style={{ color: '#666', marginBottom: '30px' }}>
-                {isEditing ? 'Modifica los datos del combo y guarda los cambios.' : 'Aquí puedes crear combos (ej: Burger + Papas) con su propio nombre, descripción y foto exclusiva.'}
+                Aquí puedes crear combos (ej: Burger + Papas) con su propio nombre, descripción y foto exclusiva.
             </p>
 
-            <form onSubmit={handleSubmit} style={{ 
-                background: isEditing ? '#fff9db' : '#fff', 
-                padding: '25px', 
-                borderRadius: '16px',
-                border: isEditing ? '2px solid #fcc419' : '1px solid #eee',
-                marginBottom: '40px',
-                boxShadow: '0 4px 20px rgba(0,0,0,0.05)',
-                transition: 'all 0.3s ease'
-            }}>
+            {isModalOpen && (
+                <div style={{
+                    position: 'fixed',
+                    top: 0, left: 0, right: 0, bottom: 0,
+                    background: 'rgba(0,0,0,0.8)',
+                    backdropFilter: 'blur(8px)',
+                    zIndex: 10000,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    padding: '20px'
+                }}>
+                    <div style={{
+                        background: 'white',
+                        width: '100%',
+                        maxWidth: '900px',
+                        maxHeight: '90dvh',
+                        overflowY: 'auto',
+                        borderRadius: '24px',
+                        padding: '30px',
+                        position: 'relative',
+                        boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.5)'
+                    }}>
+                        <button 
+                            onClick={resetForm}
+                            style={{
+                                position: 'absolute',
+                                top: '20px',
+                                right: '20px',
+                                background: '#f1f3f5',
+                                border: 'none',
+                                width: '40px',
+                                height: '40px',
+                                borderRadius: '50%',
+                                cursor: 'pointer',
+                                fontSize: '1.2rem',
+                                color: '#495057',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center'
+                            }}
+                        >
+                            ✕
+                        </button>
+
+                        <h2 style={{ marginBottom: '10px' }}>{isEditing ? 'Editar Promoción' : 'Nueva Promoción'}</h2>
+                        <p style={{ color: '#868e96', marginBottom: '30px' }}>
+                            {isEditing ? 'Asegúrate de completar todos los campos necesarios antes de guardar.' : 'Completa los datos para lanzar tu nueva oferta.'}
+                        </p>
+
+                        <form onSubmit={handleSubmit} style={{ 
+                            background: isEditing ? '#fff9db' : '#fff', 
+                            padding: '10px', 
+                            borderRadius: '16px',
+                            transition: 'all 0.3s ease'
+                        }}>
                 <div className="promo-form-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
                         {!isEditing && (
@@ -458,7 +565,10 @@ function Promos() {
                         {loading ? 'PROCESANDO...' : (isEditing ? '💾 GUARDAR CAMBIOS' : '🚀 LANZAR PROMOCIÓN')}
                     </button>
                 </div>
-            </form>
+                        </form>
+                    </div>
+                </div>
+            )}
 
             <h3 style={{ marginBottom: '20px' }}>Promociones Actuales</h3>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: '20px' }}>
@@ -542,29 +652,34 @@ function Promos() {
                                 </p>
                                 
                                 <div style={{ marginBottom: '15px', display: 'flex', flexWrap: 'wrap', gap: '5px' }}>
-                                    {['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'].map(day => (
-                                        <span 
-                                            key={day} 
-                                            onClick={() => handleToggleDay(entry, day)}
-                                            style={{ 
-                                                fontSize: '0.65rem', 
-                                                padding: '3px 6px', 
-                                                borderRadius: '4px', 
-                                                background: entry[`active_${day}`] ? '#e31837' : '#f1f1f1',
-                                                color: entry[`active_${day}`] ? 'white' : '#bbb',
-                                                fontWeight: 'bold',
-                                                textTransform: 'uppercase',
-                                                cursor: 'pointer',
-                                                transition: 'all 0.2s',
-                                                border: '1px solid transparent'
-                                            }}
-                                            onMouseOver={(e) => { e.target.style.transform = 'scale(1.1)'; e.target.style.borderColor = 'rgba(0,0,0,0.1)'; }}
-                                            onMouseOut={(e) => { e.target.style.transform = 'scale(1)'; e.target.style.borderColor = 'transparent'; }}
-                                            title={`Alternar ${day}`}
-                                        >
-                                            {day.slice(0, 2)}
-                                        </span>
-                                    ))}
+                                    {['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'].map(day => {
+                                        const field = `active_${day}`;
+                                        const isActive = inlineEditingId === entry.id ? tempSchedule[field] : entry[field];
+                                        
+                                        return (
+                                            <span 
+                                                key={day} 
+                                                onClick={() => handleToggleDay(entry, day)}
+                                                style={{ 
+                                                    fontSize: '0.65rem', 
+                                                    padding: '4px 8px', 
+                                                    borderRadius: '6px', 
+                                                    background: isActive ? '#e31837' : '#f1f1f1',
+                                                    color: isActive ? 'white' : '#bbb',
+                                                    fontWeight: 'bold',
+                                                    textTransform: 'uppercase',
+                                                    cursor: 'pointer',
+                                                    transition: 'all 0.2s',
+                                                    border: inlineEditingId === entry.id ? '1px dashed #e31837' : '1px solid transparent'
+                                                }}
+                                                onMouseOver={(e) => { e.target.style.transform = 'scale(1.1)'; }}
+                                                onMouseOut={(e) => { e.target.style.transform = 'scale(1)'; }}
+                                                title={`Alternar ${day}`}
+                                            >
+                                                {day.slice(0, 2)}
+                                            </span>
+                                        );
+                                    })}
                                 </div>
 
                                 {(entry.start_date || entry.end_date) && (
@@ -585,25 +700,67 @@ function Promos() {
                                 )}
                                 
                                 <div style={{ display: 'flex', gap: '10px' }}>
-                                    <button 
-                                        onClick={() => handleEditClick(entry)}
-                                        style={{ 
-                                            flex: 1,
-                                            padding: '10px', 
-                                            background: '#f8f9fa', 
-                                            border: '1px solid #ddd', 
-                                            color: '#333', 
-                                            borderRadius: '8px', 
-                                            fontWeight: 'bold',
-                                            display: 'flex',
-                                            alignItems: 'center',
-                                            justifyContent: 'center',
-                                            gap: '8px',
-                                            cursor: 'pointer'
-                                        }}
-                                    >
-                                        <Edit2 size={16} /> Editar
-                                    </button>
+                                    {inlineEditingId === entry.id ? (
+                                        <>
+                                            <button 
+                                                onClick={() => handleSaveInline(entry)}
+                                                style={{ 
+                                                    flex: 2,
+                                                    padding: '10px', 
+                                                    background: '#2f9e44', 
+                                                    border: 'none', 
+                                                    color: 'white', 
+                                                    borderRadius: '8px', 
+                                                    fontWeight: 'bold',
+                                                    display: 'flex',
+                                                    alignItems: 'center',
+                                                    justifyContent: 'center',
+                                                    gap: '8px',
+                                                    cursor: 'pointer'
+                                                }}
+                                            >
+                                                💾 GUARDAR
+                                            </button>
+                                            <button 
+                                                onClick={() => setInlineEditingId(null)}
+                                                style={{ 
+                                                    flex: 1,
+                                                    padding: '10px', 
+                                                    background: '#eee', 
+                                                    border: 'none', 
+                                                    color: '#666', 
+                                                    borderRadius: '8px', 
+                                                    fontWeight: 'bold',
+                                                    cursor: 'pointer'
+                                                }}
+                                            >
+                                                X
+                                            </button>
+                                        </>
+                                    ) : (
+                                        <button 
+                                            onClick={() => {
+                                                handleEditClick(entry); // Main form edit (price, info)
+                                                startInlineEdit(entry); // Inline schedule edit
+                                            }}
+                                            style={{ 
+                                                flex: 1,
+                                                padding: '10px', 
+                                                background: '#f8f9fa', 
+                                                border: '1px solid #ddd', 
+                                                color: '#333', 
+                                                borderRadius: '8px', 
+                                                fontWeight: 'bold',
+                                                display: 'flex',
+                                                alignItems: 'center',
+                                                justifyContent: 'center',
+                                                gap: '8px',
+                                                cursor: 'pointer'
+                                            }}
+                                        >
+                                            <Edit2 size={16} /> Editar
+                                        </button>
+                                    )}
                                     <button 
                                         onClick={() => handleDelete(entry.id)}
                                         style={{ 
