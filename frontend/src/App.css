@@ -1316,8 +1316,8 @@ img.nav-logo:hover,
   display: flex;
   justify-content: center;
   align-items: center;
-  margin-top: 60px; /* Increased from 20px to center it better between slogan and history */
-  margin-bottom: 60px;
+  margin-top: 60px;
+  margin-bottom: 5px; /* Reduced from 60px */
   position: relative;
   z-index: 10;
   max-width: 300px;
@@ -1336,7 +1336,7 @@ img.nav-logo:hover,
 /* Flare animation removed */
 
 .about-section {
-  padding: 8rem 0;
+  padding: 3rem 0; /* Reduced from 8rem 0 */
 }
 
 .about-text {

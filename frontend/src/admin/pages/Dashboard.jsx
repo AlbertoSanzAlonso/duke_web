@@ -13,7 +13,8 @@ const Dashboard = () => {
         activePromos: 0,
         todayHours: null,
         lowStockItems: [],
-        unreadEmails: 0
+        unreadEmails: 0,
+        mailConfigured: true
     });
     const [profile, setProfile] = useState(null);
 
@@ -58,8 +59,10 @@ const Dashboard = () => {
                     completedToday,
                     activePromos,
                     todayHours,
+                    todayHours,
                     lowStockItems: lowStock,
-                    unreadEmails: mailData?.unread_count || 0
+                    unreadEmails: mailData?.unread_count || 0,
+                    mailConfigured: mailData?.configured !== false
                 });
 
             } catch (err) {
@@ -187,7 +190,9 @@ const Dashboard = () => {
                         <div className="stat-content">
                             <div className="stat-label">Correo Corporativo</div>
                             <div className="stat-value" style={{ fontSize: '1.2rem', color: '#1c7ed6' }}>
-                                {data.unreadEmails > 0 ? `${data.unreadEmails} NUEVOS ↗` : data.unreadEmails === -1 ? 'ERROR CONFIG. ↗' : 'ACCEDER ↗'}
+                                {data.unreadEmails > 0 ? `${data.unreadEmails} NUEVOS ↗` : 
+                                 data.unreadEmails === -1 ? 'ERROR CONFIG. ↗' : 
+                                 !data.mailConfigured ? 'SIN CONFIG. ↗' : 'ACCEDER ↗'}
                             </div>
                         </div>
                     </a>
