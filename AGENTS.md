@@ -40,11 +40,16 @@ Este proyecto se divide en dos entornos de despliegue claramente separados para 
 - **Diagnóstico:** Ante errores 500 tras un despliegue, visitar `/api/setup-admin-super/` para forzar migraciones en la base de datos de Supabase.
 
 ## 3. Streaming, Concurrencia y Caché (Crítico)
-- **SSE Resilience**: Las conexiones `EventSource` deben incluir validación de token preventiva en frontend y retorno de `HttpResponse(status=401)` en backend para evitar bucles.
+- **SSE Resilience**: Las conexiones `EventSource` deben incluir:
+  - Validación de token preventiva en frontend.
+  - Retorno de `HttpResponse(status=401)` en backend.
+  - **Backoff Exponencial**: Reintento progresivo en frontend (5s, 10s, 20s... máx 30s).
+  - **Indicador de Salud**: Punto de estado reactivo en el sidebar (Verde/Amarillo/Rojo).
+  - **Heartbeat**: Envío obligatorio de `: ping` y heartbeats JSON cada 15s o menos para evitar timeouts de proxies.
 - **Async Views**: Todos los views de streaming (SSE) como `OrderStreamView` **DEBEN** ser `async def`.
 - **Iteradores Asíncronos**: Usar `async for obj in queryset` directamente (Django 4.2+) o `.aiter()` en versiones anteriores.
 - **Workers**: Desplegar con `gthread` workers en Gunicorn (`--threads 12`) para permitir conexiones persistentes de streaming.
-- **Buffering**: Establecer el header `X-Accel-Buffering: no` en respuestas de streaming.
+- **Buffering**: Establecer el header `X-Accel-Buffering: no` y `Cache-Control: no-cache` específicamente en la respuesta de streaming.
 - **Frontend Lazy Loading**: Toda la navegación del frontend DEBE implementarse con `React.lazy` y `Suspense` utilizando el componente `<LoadingScreen />` de la marca como fallback.
 
 ## 4. Acciones Masivas y TPV

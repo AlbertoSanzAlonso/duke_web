@@ -145,7 +145,8 @@ def DashboardInsightsView(request):
     Unified performance endpoint to reduce Dashboard roundtrips (from 6 separate calls to 1).
     """
     from .mail_utils import get_unread_mail_count
-    now = timezone.now()
+    # Use localtime to respect America/Argentina/Buenos_Aires
+    now = timezone.localtime()
     today_start = now.replace(hour=0, minute=0, second=0, microsecond=0)
     
     # 1. Profile
@@ -172,7 +173,8 @@ def DashboardInsightsView(request):
     ).data
     
     # 6. Opening Hours Today
-    day_map = {0: 7, 1: 1, 2: 2, 3: 3, 4: 4, 5: 5, 6: 6}
+    # Correct mapping: 0=Monday (1), 6=Sunday (7)
+    day_map = {0: 1, 1: 2, 2: 3, 3: 4, 4: 5, 5: 6, 6: 7}
     db_day = day_map[now.weekday()]
     today_hours = OpeningHourSerializer(OpeningHour.objects.filter(day=db_day).first()).data
     
@@ -746,7 +748,7 @@ def AIHelpView(request):
     # 2. Fetch Dynamic Live Context from DB
     live_context = ""
     try:
-        now = timezone.now()
+        now = timezone.localtime()
         today_start = now.replace(hour=0, minute=0, second=0, microsecond=0)
         
         # --- VENTAS (SÍNTESIS) ---
