@@ -60,7 +60,7 @@ export const exportToPDF = (data, columns, fileName, title, summary = null) => {
     const footerY = doc.internal.pageSize.height - 10;
     doc.setFontSize(8);
     doc.setTextColor(150, 150, 150);
-    doc.text("Generado por Duke Assist System - Correo: dukeburger-sj.com", 14, footerY);
+    doc.text(`© ${new Date().getFullYear()} Duke Burger San Juan - www.dukeburger-sj.com | Sistema Oficial`, 14, footerY);
 
     doc.save(`${fileName}.pdf`);
 };

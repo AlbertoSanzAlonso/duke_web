@@ -479,7 +479,7 @@
         .pos-fab {
             display: flex;
             position: fixed;
-            bottom: 2rem;
+            bottom: 20px;
             right: 1.5rem;
             z-index: 2000;
             background: #28a745;

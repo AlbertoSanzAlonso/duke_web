@@ -680,7 +680,7 @@ a.stat-card { text-decoration: none; cursor: pointer; }
     }
 
     .ai-chat-wrapper {
-        bottom: 15px;
+        bottom: 20px;
         left: 15px;
         right: auto;
         width: auto;
