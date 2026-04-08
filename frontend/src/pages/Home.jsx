@@ -9,7 +9,6 @@ import FloatingContact from '../components/FloatingContact';
 function Home() {
   const [activeCategory, setActiveCategory] = useState('Burgers');
   const [isScrolled, setIsScrolled] = useState(false);
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [menuData, setMenuData] = useState({});
   const [loading, setLoading] = useState(true);
   const [cart, setCart] = useState({});
@@ -24,7 +23,6 @@ function Home() {
   const [isSaving, setIsSaving] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [isPromosOpen, setIsPromosOpen] = useState(false);
-  const [errorMessage, setErrorMessage] = useState(null);
   const [addressSuggestions, setAddressSuggestions] = useState([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [deliverySettings, setDeliverySettings] = useState({});

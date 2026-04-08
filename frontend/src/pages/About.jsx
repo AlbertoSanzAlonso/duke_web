@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
-import { Menu, X } from 'lucide-react';
+import { X } from 'lucide-react';
 import InstagramFeed from '../components/InstagramFeed.tsx';
 import { fetchGalleryImages, fetchSettings, fetchOpeningHours } from '../services/api';
 import Footer from '../components/Footer';
@@ -9,25 +8,18 @@ import FloatingContact from '../components/FloatingContact';
 function About() {
   const [gallery, setGallery] = useState([]);
   const [selectedImage, setSelectedImage] = useState(null);
-  const [settings, setSettings] = useState({});
   const [openingHours, setOpeningHours] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const loadData = async () => {
       try {
-        const [galleryData, settingsData, hoursData] = await Promise.all([
+        const [galleryData, hoursData] = await Promise.all([
           fetchGalleryImages(),
-          fetchSettings(),
           fetchOpeningHours()
         ]);
         setGallery(galleryData);
         setOpeningHours(hoursData);
-        
-        // Convert array to object for easy access
-        const settingsObj = {};
-        settingsData.forEach(s => settingsObj[s.key] = s.value);
-        setSettings(settingsObj);
       } catch (error) {
         console.error("Error loading data:", error);
       } finally {
