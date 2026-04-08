@@ -584,8 +584,6 @@ function Home() {
         </div>
       </section>
 
-      {/* Footer */}
-      <Footer />
 
       {/* Floating Cart Button */}
       {totalItems > 0 && (
