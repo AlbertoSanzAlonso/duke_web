@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { fetchSupplierOrders, createSupplierOrder, fetchInventory, createInventoryItem } from '../../services/api';
+import { fetchSupplierOrders, createSupplierOrder, fetchInventory, createInventoryItem, deleteSupplierOrder, updateSupplierOrder } from '../../services/api';
 import LoadingScreen from '../components/LoadingScreen';
 import Toast from '../components/Toast';
-import { Truck, Plus, History, Trash2, ShoppingCart, Search, X, Download, FileText } from 'lucide-react';
+import ConfirmModal from '../components/ConfirmModal';
+import { Truck, Plus, History, Trash2, ShoppingCart, Search, X, Download, FileText, CheckSquare, Square, Edit2, Save } from 'lucide-react';
 import { exportToExcel, exportToPDF } from '../../utils/exportUtils';
 import './Accounting.css';
 
@@ -30,6 +31,12 @@ const SupplierOrders = () => {
     const [showMinStockModal, setShowMinStockModal] = useState(false);
     const [minStockValue, setMinStockValue] = useState('0');
     const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+
+    // Selection & Actions
+    const [selectedIds, setSelectedIds] = useState(new Set());
+    const [confirmConfig, setConfirmConfig] = useState({ isOpen: false, title: '', message: '', onConfirm: null });
+    const [editingId, setEditingId] = useState(null);
+    const [editForm, setEditForm] = useState({ supplier_name: '', total_cost: '' });
 
     useEffect(() => {
         loadData();
@@ -181,6 +188,83 @@ const SupplierOrders = () => {
         setCurrentPage(1);
     }, [searchTerm]);
 
+    const toggleSelect = (id) => {
+        const newSelected = new Set(selectedIds);
+        if (newSelected.has(id)) newSelected.delete(id);
+        else newSelected.add(id);
+        setSelectedIds(newSelected);
+    };
+
+    const toggleAll = () => {
+        if (selectedIds.size === paginatedOrders.length) {
+            setSelectedIds(new Set());
+        } else {
+            setSelectedIds(new Set(paginatedOrders.map(o => o.id)));
+        }
+    };
+
+    const handleDelete = (order) => {
+        setConfirmConfig({
+            isOpen: true,
+            title: '¿ELIMINAR PEDIDO?',
+            message: `¿Estás seguro de eliminar el pedido #${order.id} de ${order.supplier_name}? Esto no revertirá automáticamente el stock sumado al inventario.`,
+            onConfirm: async () => {
+                try {
+                    await deleteSupplierOrder(order.id);
+                    setToast({ message: "Pedido eliminado", type: 'success' });
+                    setConfirmConfig(prev => ({ ...prev, isOpen: false }));
+                    loadData();
+                } catch (error) {
+                    setToast({ message: "Error al eliminar", type: 'error' });
+                }
+            }
+        });
+    };
+
+    const handleBulkDelete = () => {
+        setConfirmConfig({
+            isOpen: true,
+            title: `¿ELIMINAR ${selectedIds.size} PEDIDOS?`,
+            message: 'Se eliminarán permanentemente todos los pedidos seleccionados.',
+            onConfirm: async () => {
+                const ids = Array.from(selectedIds);
+                let count = 0;
+                for (const id of ids) {
+                    try {
+                        await deleteSupplierOrder(id);
+                        count++;
+                    } catch (e) { console.error(e); }
+                }
+                setToast({ message: `Se eliminaron ${count} pedidos`, type: 'success' });
+                setSelectedIds(new Set());
+                setConfirmConfig(prev => ({ ...prev, isOpen: false }));
+                loadData();
+            }
+        });
+    };
+
+    const startEditing = (order) => {
+        setEditingId(order.id);
+        setEditForm({ supplier_name: order.supplier_name, total_cost: order.total_cost });
+    };
+
+    const handleUpdate = async (id) => {
+        setIsSaving(true);
+        try {
+            await updateSupplierOrder(id, {
+                supplier_name: editForm.supplier_name,
+                total_cost: parseFloat(editForm.total_cost)
+            });
+            setEditingId(null);
+            setToast({ message: "Pedido actualizado", type: 'success' });
+            loadData();
+        } catch (error) {
+            setToast({ message: "Error al actualizar", type: 'error' });
+        } finally {
+            setIsSaving(false);
+        }
+    };
+
     const handleExportExcel = () => {
         const data = filteredOrders.map(o => ({
             ID: o.id,
@@ -257,38 +341,131 @@ const SupplierOrders = () => {
                     <table className="accounting-table">
                         <thead>
                             <tr>
+                                <th style={{ width: '40px' }}>
+                                    <button onClick={toggleAll} style={{ background: 'none', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center' }}>
+                                        {selectedIds.size === paginatedOrders.length && paginatedOrders.length > 0 ? <CheckSquare size={18} color="var(--admin-primary)" /> : <Square size={18} color="#999" />}
+                                    </button>
+                                </th>
                                 <th>Fecha</th>
                                 <th>Proveedor</th>
                                 <th className="txt-right">Importe</th>
                                 <th>Detalles</th>
+                                <th className="txt-right">Acciones</th>
                             </tr>
                         </thead>
                         <tbody>
                             {paginatedOrders.length === 0 ? (
-                                <tr><td colSpan="4" style={{ textAlign: 'center', padding: '20px', color: '#999' }}>{searchTerm ? 'No se encontraron resultados para tu búsqueda.' : 'No hay pedidos registrados.'}</td></tr>
+                                <tr><td colSpan="6" style={{ textAlign: 'center', padding: '20px', color: '#999' }}>{searchTerm ? 'No se encontraron resultados para tu búsqueda.' : 'No hay pedidos registrados.'}</td></tr>
                             ) : (
-                                paginatedOrders.map(order => (
-                                    <tr 
-                                        key={order.id} 
-                                        onClick={() => setSelectedOrder(order)}
-                                        style={{ cursor: 'pointer' }}
-                                        className="hover-row"
-                                    >
-                                        <td data-label="Fecha">
-                                            {new Date(order.date).toLocaleDateString('es-AR')}
-                                            <br/><small style={{color: '#999'}}>{new Date(order.date).toLocaleTimeString('es-AR', {hour: '2-digit', minute: '2-digit'})}</small>
-                                        </td>
-                                        <td data-label="Proveedor"><strong>{order.supplier_name}</strong></td>
-                                        <td data-label="Importe" className="txt-right negative">-${parseInt(order.total_cost).toLocaleString('es-AR')}</td>
-                                        <td data-label="Detalles" style={{ fontSize: '0.75rem', color: '#888' }}>
-                                            {order.items?.length || 0} prod.
-                                        </td>
-                                    </tr>
-                                ))
+                                paginatedOrders.map(order => {
+                                    const isEditing = editingId === order.id;
+                                    return (
+                                        <tr 
+                                            key={order.id} 
+                                            onClick={() => !editingId && setSelectedOrder(order)}
+                                            style={{ cursor: 'pointer' }}
+                                            className={`hover-row ${selectedIds.has(order.id) ? 'selected-row' : ''}`}
+                                        >
+                                            <td onClick={(e) => { e.stopPropagation(); toggleSelect(order.id); }}>
+                                                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                                    {selectedIds.has(order.id) ? <CheckSquare size={18} color="var(--admin-primary)" /> : <Square size={18} color="#ddd" />}
+                                                </div>
+                                            </td>
+                                            <td data-label="Fecha">
+                                                {new Date(order.date).toLocaleDateString('es-AR')}
+                                                <br/><small style={{color: '#999'}}>{new Date(order.date).toLocaleTimeString('es-AR', {hour: '2-digit', minute: '2-digit'})}</small>
+                                            </td>
+                                            <td data-label="Proveedor">
+                                                {isEditing ? (
+                                                    <input 
+                                                        type="text" 
+                                                        value={editForm.supplier_name}
+                                                        onChange={e => setEditForm({...editForm, supplier_name: e.target.value})}
+                                                        onClick={e => e.stopPropagation()}
+                                                        style={{ padding: '6px', borderRadius: '4px', border: '1px solid #ddd', width: '100%' }}
+                                                    />
+                                                ) : <strong>{order.supplier_name}</strong>}
+                                            </td>
+                                            <td data-label="Importe" className="txt-right negative">
+                                                {isEditing ? (
+                                                    <input 
+                                                        type="number" 
+                                                        value={editForm.total_cost}
+                                                        onChange={e => setEditForm({...editForm, total_cost: e.target.value})}
+                                                        onClick={e => e.stopPropagation()}
+                                                        style={{ padding: '6px', borderRadius: '4px', border: '1px solid #ddd', width: '100px', textAlign: 'right' }}
+                                                    />
+                                                ) : `-$${parseFloat(order.total_cost).toLocaleString('es-AR')}`}
+                                            </td>
+                                            <td data-label="Detalles" style={{ fontSize: '0.75rem', color: '#888' }}>
+                                                {order.items?.length || 0} prod.
+                                            </td>
+                                            <td data-label="Acciones">
+                                                <div style={{ display: 'flex', gap: '8px', justifyContent: 'flex-end' }}>
+                                                    {isEditing ? (
+                                                        <>
+                                                            <button onClick={(e) => { e.stopPropagation(); handleUpdate(order.id); }} className="save-btn" title="Guardar"><Save size={16} /></button>
+                                                            <button onClick={(e) => { e.stopPropagation(); setEditingId(null); }} className="cancel-btn" title="Cancelar"><X size={16} /></button>
+                                                        </>
+                                                    ) : (
+                                                        <>
+                                                            <button onClick={(e) => { e.stopPropagation(); startEditing(order); }} className="edit-btn" title="Editar"><Edit2 size={16} /></button>
+                                                            <button onClick={(e) => { e.stopPropagation(); handleDelete(order); }} className="delete-btn" title="Eliminar"><Trash2 size={16} /></button>
+                                                        </>
+                                                    )}
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    );
+                                })
                             )}
                         </tbody>
                     </table>
                 </div>
+
+                {/* Bulk Actions Toolbar */}
+                {selectedIds.size > 0 && (
+                    <div className="bulk-toolbar" style={{
+                        position: 'fixed',
+                        bottom: '30px',
+                        left: '50%',
+                        transform: 'translateX(-50%)',
+                        background: '#1a1a1a',
+                        padding: '15px 30px',
+                        borderRadius: '20px',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '20px',
+                        boxShadow: '0 20px 40px rgba(0,0,0,0.4)',
+                        zIndex: 4000,
+                        border: '1px solid #333',
+                        animation: 'slideInUp 0.3s ease-out'
+                    }}>
+                        <div style={{ color: 'white', fontWeight: 'bold' }}>{selectedIds.size} seleccionados</div>
+                        <div style={{ width: '1px', height: '20px', background: '#444' }} />
+                        <button onClick={handleBulkDelete} style={{ display: 'flex', alignItems: 'center', gap: '8px', background: '#e03131', color: 'white', border: 'none', padding: '10px 20px', borderRadius: '12px', fontWeight: 'bold', cursor: 'pointer' }}><Trash2 size={18} /> ELIMINAR</button>
+                        <button onClick={() => setSelectedIds(new Set())} style={{ background: 'transparent', color: '#888', border: 'none', fontWeight: 'bold', cursor: 'pointer' }}>CANCELAR</button>
+                    </div>
+                )}
+
+                <ConfirmModal 
+                    isOpen={confirmConfig.isOpen}
+                    title={confirmConfig.title}
+                    message={confirmConfig.message}
+                    onConfirm={confirmConfig.onConfirm}
+                    onCancel={() => setConfirmConfig(prev => ({ ...prev, isOpen: false }))}
+                />
+                
+                <style>{`
+                    .selected-row { background-color: #fff9db !important; }
+                    .save-btn, .cancel-btn, .edit-btn, .delete-btn {
+                        background: none; border: none; cursor: pointer; padding: 4px; border-radius: 4px; display: flex; align-items: center; transition: all 0.2s;
+                    }
+                    .save-btn { color: #2b8a3e; } .save-btn:hover { background: #ebfbee; }
+                    .cancel-btn { color: #888; } .cancel-btn:hover { background: #f1f3f5; }
+                    .edit-btn { color: #228be6; } .edit-btn:hover { background: #e7f5ff; }
+                    .delete-btn { color: #fa5252; } .delete-btn:hover { background: #fff5f5; }
+                `}</style>
 
                 {totalPages > 1 && (
                     <div className="pagination" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '10px', marginTop: '20px', padding: '10px' }}>

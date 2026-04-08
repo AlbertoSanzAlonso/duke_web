@@ -9,7 +9,8 @@ import {
 import './Accounting.css';
 import LoadingScreen from '../components/LoadingScreen';
 import Toast from '../components/Toast';
-import { Save, X, Trash2, Edit2, Search, Filter, Calendar as CalendarIcon, ChevronDown, ChevronUp, FileText, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight, Download, Plus } from 'lucide-react';
+import ConfirmModal from '../components/ConfirmModal';
+import { Save, X, Trash2, Edit2, Search, Filter, Calendar as CalendarIcon, ChevronDown, ChevronUp, FileText, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight, Download, Plus, CheckSquare, Square } from 'lucide-react';
 import { exportToExcel, exportToPDF } from '../../utils/exportUtils';
 
 const Accounting = () => {
@@ -51,6 +52,12 @@ const Accounting = () => {
     // Edit states
     const [editingId, setEditingId] = useState(null); // format: 'type-id' e.g. 'exp-1'
     const [editForm, setEditForm] = useState({ description: '', amount: '', category: '' });
+    
+    // Selection state
+    const [selectedIds, setSelectedIds] = useState(new Set());
+    
+    // Confirm Modal state
+    const [confirmConfig, setConfirmConfig] = useState({ isOpen: false, title: '', message: '', onConfirm: null });
     
     // Detail Modal state
     const [detailItem, setDetailItem] = useState(null);
@@ -129,14 +136,21 @@ const Accounting = () => {
     };
 
     const handleDeleteExpense = async (id) => {
-        if (!window.confirm("¿Eliminar este gasto?")) return;
-        try {
-            await deleteExpense(id);
-            setToast({ message: "Gasto eliminado", type: 'success' });
-            loadData();
-        } catch (error) {
-            setToast({ message: "Error al eliminar", type: 'error' });
-        }
+        setConfirmConfig({
+            isOpen: true,
+            title: '¿ELIMINAR GASTO?',
+            message: 'Esta acción no se puede deshacer y afectará al balance contable.',
+            onConfirm: async () => {
+                try {
+                    await deleteExpense(id);
+                    setToast({ message: "Gasto eliminado", type: 'success' });
+                    setConfirmConfig(prev => ({ ...prev, isOpen: false }));
+                    loadData();
+                } catch (error) {
+                    setToast({ message: "Error al eliminar", type: 'error' });
+                }
+            }
+        });
     };
 
     const handleUpdate = async (type, id) => {
@@ -202,17 +216,79 @@ const Accounting = () => {
                     e.stopPropagation();
                     if (type === 'exp') handleDeleteExpense(item.id);
                     else if (type === 'ord') {
-                        if(window.confirm(`¿Eliminar pedido de ${item.supplier_name}?`)) {
-                            deleteSupplierOrder(item.id).then(() => { setToast({message:"Pedido eliminado", type:'success'}); loadData(); });
-                        }
+                        setConfirmConfig({
+                            isOpen: true,
+                            title: '¿ELIMINAR PEDIDO?',
+                            message: `¿Estás seguro de eliminar el pedido de ${item.supplier_name}?`,
+                            onConfirm: async () => {
+                                await deleteSupplierOrder(item.id);
+                                setToast({message:"Pedido eliminado", type:'success'});
+                                setConfirmConfig(prev => ({ ...prev, isOpen: false }));
+                                loadData();
+                            }
+                        });
                     } else if (type === 'sal') {
-                        if(window.confirm(`¿Eliminar registro de venta #${item.id}?`)) {
-                            deleteSale(item.id).then(() => { setToast({message:"Venta eliminada", type:'success'}); loadData(); });
-                        }
+                        setConfirmConfig({
+                            isOpen: true,
+                            title: '¿ELIMINAR VENTA?',
+                            message: `¿Estás seguro de eliminar el registro de venta #${item.id}? Esto no anula el ticket físico pero sí el registro contable.`,
+                            onConfirm: async () => {
+                                await deleteSale(item.id);
+                                setToast({message:"Venta eliminada", type:'success'});
+                                setConfirmConfig(prev => ({ ...prev, isOpen: false }));
+                                loadData();
+                            }
+                        });
                     }
                 }} className="delete-btn" title="Eliminar"><Trash2 size={18} /></button>
             </div>
         );
+    };
+
+    const toggleSelect = (type, id) => {
+        const key = `${type}-${id}`;
+        const newSelected = new Set(selectedIds);
+        if (newSelected.has(key)) newSelected.delete(key);
+        else newSelected.add(key);
+        setSelectedIds(newSelected);
+    };
+
+    const toggleAll = () => {
+        if (selectedIds.size === paginatedItems.length) {
+            setSelectedIds(new Set());
+        } else {
+            const keys = paginatedItems.map(item => `${item.typeIndicator}-${item.id}`);
+            setSelectedIds(new Set(keys));
+        }
+    };
+
+    const handleBulkDelete = () => {
+        setConfirmConfig({
+            isOpen: true,
+            title: `¿ELIMINAR ${selectedIds.size} REGISTROS?`,
+            message: 'Se eliminarán permanentemente todos los registros seleccionados. Esta operación puede tardar unos segundos.',
+            onConfirm: async () => {
+                const idsArray = Array.from(selectedIds);
+                let deletedCount = 0;
+                
+                for (const key of idsArray) {
+                    const [type, id] = key.split('-');
+                    try {
+                        if (type === 'exp') await deleteExpense(id);
+                        else if (type === 'ord') await deleteSupplierOrder(id);
+                        else if (type === 'sal') await deleteSale(id);
+                        deletedCount++;
+                    } catch (e) {
+                        console.error(`Error deleting ${key}:`, e);
+                    }
+                }
+                
+                setToast({ message: `Se han eliminado ${deletedCount} registros correctamente`, type: 'success' });
+                setSelectedIds(new Set());
+                setConfirmConfig(prev => ({ ...prev, isOpen: false }));
+                loadData();
+            }
+        });
     };
 
     const [viewMode, setViewMode] = useState('daily'); // 'daily', 'weekly', 'monthly'
@@ -464,6 +540,11 @@ const Accounting = () => {
                             <table className="accounting-table">
                                 <thead>
                                     <tr>
+                                        <th style={{ width: '40px' }}>
+                                            <button onClick={toggleAll} style={{ background: 'none', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center' }}>
+                                                {selectedIds.size === paginatedItems.length && paginatedItems.length > 0 ? <CheckSquare size={18} color="var(--admin-primary)" /> : <Square size={18} color="#999" />}
+                                            </button>
+                                        </th>
                                         <th>Fecha</th>
                                         <th>Tipo</th>
                                         <th>Descripción / Origen</th>
@@ -489,10 +570,15 @@ const Accounting = () => {
                                     return (
                                         <tr 
                                             key={`${type}-${item.id}`} 
-                                            className={`${isPositive ? 'row-income' : 'row-expense'} clickable-row`}
+                                            className={`${isPositive ? 'row-income' : 'row-expense'} clickable-row ${selectedIds.has(`${type}-${item.id}`) ? 'selected-row' : ''}`}
                                             onClick={() => !editingId && setDetailItem(item)}
                                             style={{ cursor: 'pointer' }}
                                         >
+                                            <td onClick={(e) => { e.stopPropagation(); toggleSelect(type, item.id); }}>
+                                                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                                    {selectedIds.has(`${type}-${item.id}`) ? <CheckSquare size={18} color="var(--admin-primary)" /> : <Square size={18} color="#ddd" />}
+                                                </div>
+                                            </td>
                                             <td data-label="Fecha">
                                                 <div style={{ display: 'flex', flexDirection: 'column', fontSize: '0.85rem' }}>
                                                     <strong>{dateObj.toLocaleDateString('es-AR')}</strong>
