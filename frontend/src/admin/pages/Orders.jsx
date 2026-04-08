@@ -25,49 +25,17 @@ const Orders = () => {
     // ... loadOrders here briefly to restore context if needed ...
 
     useEffect(() => {
-        const initialFilter = searchParams.get('filter');
-        if (initialFilter === 'today') setFilterType('daily');
         loadOrders();
+        
+        const handleNewOrder = (event) => {
+            console.log("Real-time (Orders): Nuevo pedido recibido, recargando...");
+            setToast({ message: "¡NUEVO PEDIDO RECIBIDO!", type: 'success' });
+            loadOrders();
+        };
+
+        window.addEventListener('new-order-received', handleNewOrder);
+        return () => window.removeEventListener('new-order-received', handleNewOrder);
     }, [searchParams]);
-
-    // Real-time updates via SSE
-    useEffect(() => {
-        const baseUrl = import.meta.env.VITE_API_URL || '';
-        const token = localStorage.getItem('token');
-
-        if (!token) {
-            console.warn("SSE: No hay token disponible, abortando conexión.");
-            return;
-        }
-
-        const streamUrl = `${baseUrl.replace(/\/$/, '')}/api/orders-stream/?token=${token}`;
-        const eventSource = new EventSource(streamUrl);
-
-        eventSource.onmessage = (event) => {
-            try {
-                const data = JSON.parse(event.data);
-                if (data.type === 'new_order') {
-                    console.log("SSE: Nuevo pedido recibido", data);
-                    setToast({ message: "¡NUEVO PEDIDO RECIBIDO!", type: 'success' });
-                    loadOrders(); // Refresh list automatically
-                    
-                    // Dispatch custom event for other components (like TPV/Sales)
-                    window.dispatchEvent(new CustomEvent('new-order-received', { detail: data }));
-                }
-            } catch (err) {
-                console.error("Error parsing SSE data:", err);
-            }
-        };
-
-        eventSource.onerror = (err) => {
-            console.error("SSE Connection Error:", err);
-            eventSource.close();
-        };
-
-        return () => {
-            eventSource.close();
-        };
-    }, []);
 
     const loadOrders = async () => {
         try {

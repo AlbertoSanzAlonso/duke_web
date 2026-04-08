@@ -14,6 +14,8 @@ const Sales = () => {
     const [cart, setCart] = useState([]);
     const [loading, setLoading] = useState(true);
     const [isSaving, setIsSaving] = useState(false);
+    const [deletingTicketId, setDeletingTicketId] = useState(null);
+    const [bulkConfirm, setBulkConfirm] = useState({ isOpen: false, action: null }); // { message, type }
     const [toast, setToast] = useState(null); // { message, type }
     
     // Ticket info
@@ -33,7 +35,6 @@ const Sales = () => {
 
     // List of pending tickets
     const [pendingTickets, setPendingTickets] = useState([]);
-    const [deletingTicketId, setDeletingTicketId] = useState(null);
     const [selectedTickets, setSelectedTickets] = useState([]);
 
     // Delivery Calculation State
@@ -61,34 +62,7 @@ const Sales = () => {
         return () => window.removeEventListener('new-order-received', handleNewOrder);
     }, [location.state]);
 
-    // Dedicated SSE Listener for Sales (TPV)
-    useEffect(() => {
-        const baseUrl = import.meta.env.VITE_API_URL || '';
-        const streamUrl = `${baseUrl.replace(/\/$/, '')}/api/orders-stream/`;
-        
-        const eventSource = new EventSource(streamUrl);
 
-        eventSource.onmessage = (event) => {
-            try {
-                const data = JSON.parse(event.data);
-                if (data.type === 'new_order') {
-                    console.log("SSE (TPV): Nuevo pedido recibido");
-                    // We dispatch a record so other listeners (if any) catch it,
-                    // but we also trigger the local logic.
-                    window.dispatchEvent(new CustomEvent('new-order-received', { detail: data }));
-                }
-            } catch (err) {
-                console.error("Error parsing SSE data in TPV:", err);
-            }
-        };
-
-        eventSource.onerror = (err) => {
-            console.error("SSE Connection Error in TPV:", err);
-            eventSource.close();
-        };
-
-        return () => eventSource.close();
-    }, []);
 
     const loadData = async () => {
         setLoading(true);
@@ -362,14 +336,14 @@ const Sales = () => {
         }
     };
 
-    const handleBulkAction = async (action) => {
+    const handleBulkAction = (action) => {
         if (selectedTickets.length === 0) return;
-        const confirmMsg = action === 'COMPLETE' 
-            ? `¿Deseas cobrar los ${selectedTickets.length} tickets seleccionados por caja?`
-            : `¿Deseas ELIMINAR los ${selectedTickets.length} tickets seleccionados PERMANENTEMENTE?`;
-            
-        if (!window.confirm(confirmMsg)) return;
+        setBulkConfirm({ isOpen: true, action });
+    };
 
+    const executeBulkAction = async () => {
+        const { action } = bulkConfirm;
+        setBulkConfirm({ isOpen: false, action: null });
         setIsSaving(true);
         try {
             const res = await bulkActionSales(selectedTickets, action);
@@ -791,6 +765,56 @@ const Sales = () => {
                                     disabled={isSaving}
                                 >
                                     {isSaving ? 'ELIMINANDO...' : 'SÍ, ELIMINAR'}
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Bulk Actions Confirmation Modal */}
+            {bulkConfirm.isOpen && (
+                <div className="modal-overlay" style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.92)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 7000, padding: '20px', backdropFilter: 'blur(5px)' }}>
+                    <div className="admin-card" style={{ width: '100%', maxWidth: '400px', border: '1px solid #333' }}>
+                        <div style={{ padding: '30px', textAlign: 'center' }}>
+                            <div style={{ 
+                                width: '60px', height: '60px', 
+                                background: bulkConfirm.action === 'DELETE' ? '#fff5f5' : '#ebfbee', 
+                                borderRadius: '50%', display: 'flex', alignItems: 'center', 
+                                justifyContent: 'center', margin: '0 auto 20px', 
+                                color: bulkConfirm.action === 'DELETE' ? '#f03e3e' : '#2b8a3e', 
+                                fontSize: '2rem' 
+                            }}>
+                                {bulkConfirm.action === 'DELETE' ? '⚠️' : '💵'}
+                            </div>
+                            <h3 style={{ margin: '0 0 10px', fontSize: '1.4rem' }}>
+                                {bulkConfirm.action === 'DELETE' ? 'Eliminar Selección' : 'Cobrar Selección'}
+                            </h3>
+                            <p style={{ color: '#666', marginBottom: '25px', lineHeight: '1.5' }}>
+                                {bulkConfirm.action === 'DELETE' 
+                                    ? `¿Deseas eliminar permanentemente los ${selectedTickets.length} tickets seleccionados?` 
+                                    : `¿Deseas cobrar por caja los ${selectedTickets.length} tickets seleccionados?`
+                                }
+                            </p>
+                            
+                            <div style={{ display: 'flex', gap: '12px' }}>
+                                <button 
+                                    onClick={() => setBulkConfirm({ isOpen: false, action: null })}
+                                    style={{ flex: 1, padding: '15px', background: '#f8f9fa', border: 'none', borderRadius: '10px', fontWeight: 'bold', cursor: 'pointer', color: '#333' }}
+                                >
+                                    CANCELAR
+                                </button>
+                                <button 
+                                    onClick={executeBulkAction}
+                                    style={{ 
+                                        flex: 2, padding: '15px', 
+                                        background: bulkConfirm.action === 'DELETE' ? '#f03e3e' : '#2b8a3e', 
+                                        border: 'none', borderRadius: '10px', fontWeight: 'bold', 
+                                        cursor: 'pointer', color: '#fff' 
+                                    }}
+                                    disabled={isSaving}
+                                >
+                                    {isSaving ? 'PROCESANDO...' : (bulkConfirm.action === 'DELETE' ? 'SÍ, ELIMINAR' : 'SÍ, COBRAR')}
                                 </button>
                             </div>
                         </div>
