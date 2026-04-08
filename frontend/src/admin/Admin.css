@@ -186,9 +186,13 @@ body, .admin-container, .admin-main, .admin-content {
 .admin-content h2,
 .admin-content h3,
 .admin-content h4,
-.admin-content label,
-.admin-content button {
+.admin-content label {
     color: #333 !important;
+}
+
+/* Solo forzar color oscuro en botones que no tengan un fondo explícito o sean de acción principal */
+.admin-content button:not([class*="btn"]):not([class*="button"]):not([class*="btn-text"]) {
+    color: #333;
 }
 
 /* Allow white text on dark backgrounds like badges */
@@ -512,7 +516,7 @@ a.stat-card { text-decoration: none; cursor: pointer; }
     width: 450px;
     height: 600px;
     background: #fff;
-    border-radius: 16px;
+    border-radius: 24px;
     display: flex;
     flex-direction: column;
     box-shadow: 0 10px 40px rgba(0,0,0,0.2);
@@ -653,14 +657,13 @@ a.stat-card { text-decoration: none; cursor: pointer; }
 @media (max-width: 480px) {
     .ai-chat-window {
         width: 100%;
-        height: 100%;
-        height: 100dvh;
+        height: calc(100vh - 40px);
         position: fixed;
-        top: 0;
+        top: 20px;
         left: 0;
         right: 0;
-        bottom: 0;
-        border-radius: 0;
+        bottom: 20px;
+        border-radius: 20px 20px 0 0;
         z-index: 10000;
         display: flex;
         flex-direction: column;

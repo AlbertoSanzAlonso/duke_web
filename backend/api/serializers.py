@@ -67,6 +67,9 @@ class MenuEntrySerializer(serializers.ModelSerializer):
     product_id = serializers.PrimaryKeyRelatedField(
         queryset=Product.objects.all(), source='product', write_only=True
     )
+    # The user wants both to point to the same field. 
+    # category is now read from product.
+    category = serializers.CharField(source='product.category', read_only=True)
 
     class Meta:
         model = MenuEntry

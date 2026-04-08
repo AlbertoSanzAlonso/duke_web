@@ -783,7 +783,7 @@ const Accounting = () => {
                                     />
                                 </div>
                                 
-                                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
+                                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '20px' }}>
                                     <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
                                         <label style={{ fontSize: '0.75rem', fontWeight: '800', color: '#888', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Importe ($)</label>
                                         <input 

@@ -62,7 +62,7 @@ Este proyecto se divide en dos entornos de despliegue claramente separados para 
 - **Moneda:** Todos los precios deben mostrarse en **Pesos Argentinos** utilizando el locale `es-AR` (ej. `$12.900`). Evitar el formato `12900.00`.
 - **Notificaciones y Avisos:** PROHIBIDO usar `alert()` o `confirm()` del navegador. Todos los avisos, errores y confirmaciones deben gestionarse a través del componente `<Toast />` personalizado o modales integrados en la app para mantener la experiencia de usuario dentro de la marca.
 - **Loading:** Usar el componente `<LoadingScreen />` que incluye el logo de la marca en lugar de mensajes de texto planos.
-- **Accesibilidad Admin:** Forzar color de texto oscuro (`#333 !important`) en contenedores claros para evitar conflictos con el modo oscuro del navegador.
+- **Accesibilidad Admin:** Forzar color de texto oscuro (#333 !important) en contenedores claros para evitar conflictos con el modo oscuro del navegador, pero asegurar que los botones con fondo oscuro (ej. .btn-dark, .add-movement-btn, .checkout-btn) mantengan su texto blanco mediante selectores específicos o eliminando el !important global de los botones.
 - **Responsividad:** 
   - La sección de Contabilidad e Inventario debe usar layouts verticales apilados en móviles.
   - El grid de la carta pública debe usar `minmax(min(100%, 320px), 1fr)` para evitar scroll horizontal.

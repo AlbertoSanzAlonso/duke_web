@@ -5,8 +5,8 @@
     padding: 1rem;
     overflow: hidden;
     background-color: #f5f5f5;
-    color: #333 !important;
-    /* Force dark text */
+    color: #333;
+    /* Force dark text for accessibility in light themes, but allow overrides */
 }
 
 /* Header de Categorías */
@@ -135,7 +135,7 @@
 .pos-ticket-sidebar {
     flex: 0.8;
     background: white;
-    border-radius: 12px;
+    border-radius: 24px;
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
     display: flex;
     flex-direction: column;
@@ -523,18 +523,19 @@
 
         .pos-ticket-sidebar {
             position: fixed;
-            top: 0;
+            top: 20px;
             right: -100%;
-            width: 100%;
-            max-width: 100% !important;
-            height: 100%;
+            width: calc(100% - 20px);
+            margin: 0 10px;
+            max-width: calc(100% - 20px) !important;
+            height: calc(100% - 40px);
             z-index: 9999;
             transition: right 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            border-radius: 0;
+            border-radius: 24px;
             display: flex;
             flex-direction: column;
             background: #fff;
-            box-shadow: none;
+            box-shadow: 0 0 30px rgba(0,0,0,0.3);
         }
 
         .pos-ticket-sidebar.open {
@@ -581,7 +582,6 @@
     .pending-list-container::-webkit-scrollbar-thumb:hover {
         background: #aaa;
     }
-}
 
 /* Ticket Footer fuera del media query */
 .ticket-footer {

@@ -163,7 +163,7 @@ def DashboardInsightsView(request):
     monthly_expenses = Expense.objects.filter(date__gte=month_start).aggregate(total=Sum('amount'))['total'] or 0
     
     # 4. Promos
-    active_promos = MenuEntry.objects.filter(category='Promos', is_available=True).count()
+    active_promos = MenuEntry.objects.filter(product__category='Promos', is_available=True).count()
     
     # 5. Inventory (Low Stock Alert)
     low_stock = InventoryItemSerializer(
@@ -688,71 +688,24 @@ async def OrderStreamView(request):
     response = StreamingHttpResponse(event_stream(), content_type='text/event-stream')
     
     # --- CONFIGURACIÓN CRÍTICA PARA COOLIFY / STREAMING / CORS ---
+    # Obtenemos el origin real para evitar problemas con CORS_ALLOW_CREDENTIALS
+    origin = request.headers.get('Origin') or '*'
+    
     response['Content-Type'] = 'text/event-stream'
     response['X-Accel-Buffering'] = 'no'      
     response['Cache-Control'] = 'no-cache, no-transform'    
     response['Connection'] = 'keep-alive'     
+    
     # Forcing CORS headers for standard Django views that might bypass middleware
-    response['Access-Control-Allow-Origin'] = '*'
+    response['Access-Control-Allow-Origin'] = origin
     response['Access-Control-Allow-Methods'] = 'GET, OPTIONS'
     response['Access-Control-Allow-Headers'] = 'Authorization, Content-Type, X-Requested-With'
+    response['Access-Control-Allow-Credentials'] = 'true'
     response['Access-Control-Expose-Headers'] = '*'
     # ------------------------------------------------------------
     
     return response
 
-@api_view(['POST'])
-@permission_classes([AllowAny])
-def PasswordResetRequestView(request):
-    email = request.data.get('email')
-    if not email:
-        return Response({"error": "Email requerido"}, status=status.HTTP_400_BAD_REQUEST)
-    
-    try:
-        user = User.objects.get(email=email)
-    except User.DoesNotExist:
-        # Por seguridad no indicamos si el email existe o no
-        return Response({"message": "Si el email existe, se ha enviado un enlace de recuperación."})
-
-    token = default_token_generator.make_token(user)
-    uid = urlsafe_base64_encode(force_bytes(user.pk))
-    
-    # URL del Frontend (Asegurarse que coincide con la ruta en React)
-    reset_url = f"{settings.CSRF_TRUSTED_ORIGINS[0]}/reset-password/{uid}/{token}/"
-    
-    subject = "Recupera tu contraseña - Duke Burger"
-    message = f"Hola {user.username},\n\nHemos recibido una solicitud para restablecer tu contraseña en el panel de Duke Burger.\n\nHaz clic en el siguiente enlace para crear una nueva contraseña:\n\n{reset_url}\n\nSi no has solicitado este cambio, por favor ignora este correo.\n\nSaludos,\nEquipo Duke Burger."
-    
-    try:
-        send_mail(subject, message, settings.DEFAULT_FROM_EMAIL, [email])
-        return Response({"message": "Si el email existe, se ha enviado un enlace de recuperación."})
-    except Exception as e:
-        return Response({"error": f"Error enviando correo: {str(e)}"}, status=500)
-
-@api_view(['POST'])
-@permission_classes([AllowAny])
-def PasswordResetConfirmView(request):
-    uidb64 = request.data.get('uid')
-    token = request.data.get('token')
-    new_password = request.data.get('new_password')
-    
-    if not all([uidb64, token, new_password]):
-        return Response({"error": "Datos incompletos"}, status=status.HTTP_400_BAD_REQUEST)
-        
-    try:
-        uid = force_str(urlsafe_base64_decode(uidb64))
-        user = User.objects.get(pk=uid)
-    except (TypeError, ValueError, OverflowError, User.DoesNotExist):
-        user = None
-        
-    if user is not None and default_token_generator.check_token(user, token):
-        user.set_password(new_password)
-        user.save()
-        return Response({"message": "Contraseña actualizada con éxito. Ya puedes iniciar sesión."})
-    else:
-        return Response({"error": "El enlace es inválido o ha expirado."}, status=status.HTTP_400_BAD_REQUEST)
-
-import urllib.request
 @api_view(['POST'])
 @permission_classes([permissions.IsAuthenticated])
 def AIHelpView(request):
