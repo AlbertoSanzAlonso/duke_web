@@ -172,7 +172,7 @@ function Inventory() {
                         value={name} 
                         onChange={e => setName(e.target.value)} 
                         required 
-                        style={{ width: '100%', padding: '12px 15px', borderRadius: '8px', border: '1px solid #ddd', boxSizing: 'border-box', fontSize: '1rem' }}
+                        style={{ width: '100%', padding: '8px 12px', borderRadius: '8px', border: '1px solid #ddd', boxSizing: 'border-box', fontSize: '0.9rem', height: '38px' }}
                     />
                 </div>
                 
@@ -183,7 +183,7 @@ function Inventory() {
                         placeholder="Elegir o escribir..."
                         value={category} 
                         onChange={e => setCategory(e.target.value)}
-                        style={{ width: '100%', padding: '12px 15px', borderRadius: '8px', border: '1px solid #ddd', boxSizing: 'border-box', fontSize: '1rem' }}
+                        style={{ width: '100%', padding: '8px 12px', borderRadius: '8px', border: '1px solid #ddd', boxSizing: 'border-box', fontSize: '0.9rem', height: '38px' }}
                     />
                     <datalist id="inventory-categories">
                         {categories.map(cat => (
@@ -197,16 +197,16 @@ function Inventory() {
                     <input 
                         type="number" 
                         step="any" 
-                        placeholder="Cantidad" 
+                        placeholder="Cant." 
                         value={quantity} 
                         onChange={e => setQuantity(e.target.value)} 
-                        style={{ width: '100%', padding: '12px 15px', borderRadius: '8px', border: '1px solid #ddd', boxSizing: 'border-box', fontSize: '1.1rem', textAlign: 'center', fontWeight: '800', fontFamily: 'inherit' }}
+                        style={{ width: '100%', padding: '8px 12px', borderRadius: '8px', border: '1px solid #ddd', boxSizing: 'border-box', fontSize: '0.95rem', textAlign: 'center', fontWeight: '800', height: '38px' }}
                     />
                 </div>
 
                 <div style={{ flex: '1 1 100px' }}>
                     <label style={{ fontSize: '0.75rem', fontWeight: 'bold', display: 'block', marginBottom: '4px' }}>UNIDAD</label>
-                    <select value={unit} onChange={e => setUnit(e.target.value)} style={{ width: '100%', padding: '12px 15px', borderRadius: '8px', border: '1px solid #ddd', boxSizing: 'border-box', fontSize: '1rem' }}>
+                    <select value={unit} onChange={e => setUnit(e.target.value)} style={{ width: '100%', padding: '0 12px', borderRadius: '8px', border: '1px solid #ddd', boxSizing: 'border-box', fontSize: '0.9rem', height: '38px' }}>
                         <option value="unidades">Unidades</option>
                         <option value="kg">KG</option>
                         <option value="litros">Litros</option>
@@ -222,26 +222,27 @@ function Inventory() {
                         step="any" 
                         value={minStock} 
                         onChange={e => setMinStock(e.target.value)} 
-                        style={{ width: '100%', padding: '12px 15px', borderRadius: '8px', border: '1px solid #ddd', boxSizing: 'border-box', fontSize: '1.1rem', textAlign: 'center', fontWeight: '800', fontFamily: 'inherit' }}
+                        style={{ width: '100%', padding: '8px 12px', borderRadius: '8px', border: '1px solid #ddd', boxSizing: 'border-box', fontSize: '0.95rem', textAlign: 'center', fontWeight: '800', height: '38px' }}
                     />
                 </div>
 
                 <button type="submit" className="main-button" style={{ 
                     flex: '1 1 150px', 
-                    padding: '12px 24px', 
+                    padding: '0 24px', 
                     background: 'var(--admin-primary)', 
                     color: 'white', 
                     border: 'none', 
                     borderRadius: '8px', 
                     cursor: 'pointer', 
-                    fontWeight: '800',
-                    fontSize: '0.85rem',
+                    fontWeight: '900',
+                    fontSize: '0.75rem',
                     letterSpacing: '1px',
                     transition: 'all 0.2s ease',
-                    height: '42px',
+                    height: '38px',
                     display: 'flex',
                     alignItems: 'center',
-                    justifyContent: 'center'
+                    justifyContent: 'center',
+                    marginBottom: '0'
                 }}>
                     REGISTRAR
                 </button>
