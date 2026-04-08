@@ -793,7 +793,7 @@ const Accounting = () => {
                                             onChange={e => setAmount(e.target.value)} 
                                             placeholder="0"
                                             required 
-                                            style={{ padding: '16px', borderRadius: '14px', border: '1px solid #ddd', fontSize: '1.2rem', fontWeight: '900', outline: 'none', background: '#fdfdfd' }}
+                                            style={{ padding: '16px', borderRadius: '14px', border: '1px solid #ddd', fontSize: '1rem', fontWeight: 'bold', outline: 'none', background: '#fdfdfd' }}
                                         />
                                     </div>
                                     <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
