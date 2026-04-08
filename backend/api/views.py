@@ -549,6 +549,14 @@ class GalleryImageViewSet(viewsets.ModelViewSet):
 
 @csrf_exempt
 async def OrderStreamView(request):
+    if request.method == 'OPTIONS':
+        response = StreamingHttpResponse(status=200)
+        response['Access-Control-Allow-Origin'] = '*'
+        response['Access-Control-Allow-Methods'] = 'GET, OPTIONS'
+        response['Access-Control-Allow-Headers'] = 'Authorization, Content-Type, X-Requested-With'
+        response['Access-Control-Max-Age'] = '86400'
+        return response
+
     async def event_stream():
         # Consultamos el último ID actual de forma asíncrona
         last_seen_id = 0
@@ -558,7 +566,6 @@ async def OrderStreamView(request):
 
         while True:
             # Consultamos ventas nuevas de forma eficiente usando el motor asíncrono
-            # .aiter() permite iterar sin bloquear el thread secundario de Gthread
             new_sales_qs = Sale.objects.filter(id__gt=last_seen_id).order_by('id')
             
             async for sale in new_sales_qs:
@@ -587,7 +594,7 @@ async def OrderStreamView(request):
     # Forcing CORS headers for standard Django views that might bypass middleware
     response['Access-Control-Allow-Origin'] = '*'
     response['Access-Control-Allow-Methods'] = 'GET, OPTIONS'
-    response['Access-Control-Allow-Headers'] = '*'
+    response['Access-Control-Allow-Headers'] = 'Authorization, Content-Type, X-Requested-With'
     response['Access-Control-Expose-Headers'] = '*'
     # ------------------------------------------------------------
     

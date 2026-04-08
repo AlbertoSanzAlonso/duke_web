@@ -158,9 +158,6 @@ const Settings = () => {
                     <button onClick={() => handleTabChange('users')} className={`tab-btn ${activeTab === 'users' ? 'active' : ''}`} style={{ ...tabBtnStyle(activeTab === 'users'), width: '100%' }}>
                         <UsersIcon size={18} /> Personal
                     </button>
-                    <button onClick={() => handleTabChange('mail')} className={`tab-btn ${activeTab === 'mail' ? 'active' : ''}`} style={{ ...tabBtnStyle(activeTab === 'mail'), width: '100%' }}>
-                        <Mail size={18} /> Correo
-                    </button>
                     <button onClick={() => handleTabChange('custom')} className={`tab-btn ${activeTab === 'custom' ? 'active' : ''}`} style={{ ...tabBtnStyle(activeTab === 'custom'), width: '100%' }}>
                         <Save size={18} /> Otros
                     </button>
@@ -335,61 +332,6 @@ const Settings = () => {
                     </div>
                 )}
 
-                {activeTab === 'mail' && (
-                    <div className="tab-content">
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '15px', marginBottom: '25px', borderBottom: '1px solid #eee', paddingBottom: '15px' }}>
-                            <Mail size={32} color="#f03e3e" />
-                            <h2 style={{ margin: 0, fontSize: '1.5rem' }}>Configuración de Correo Corporativo</h2>
-                        </div>
-                        
-                        <p style={{ color: '#666', marginBottom: '20px', fontSize: '0.9rem' }}>
-                            Configura los datos IMAP para recibir notificaciones de nuevos correos en el dashboard. 
-                            Por defecto se usa el puerto 993 con SSL.
-                        </p>
-
-                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '20px' }}>
-                            <div className="setting-field">
-                                <label style={labelStyle}>Servidor IMAP</label>
-                                <input 
-                                    type="text" 
-                                    value={mailSettings.imap_server || ''} 
-                                    onChange={e => setMailSettings({...mailSettings, imap_server: e.target.value})} 
-                                    style={inputStyle(true)}
-                                    placeholder="ej: imap.dondominio.com"
-                                />
-                            </div>
-                            <div className="setting-field">
-                                <label style={labelStyle}>Usuario / Email</label>
-                                <input 
-                                    type="text" 
-                                    value={mailSettings.imap_user || ''} 
-                                    onChange={e => setMailSettings({...mailSettings, imap_user: e.target.value})} 
-                                    style={inputStyle(true)}
-                                    placeholder="ej: admin@dukeburger-sj.com"
-                                />
-                            </div>
-                            <div className="setting-field">
-                                <label style={labelStyle}>Contraseña</label>
-                                <input 
-                                    type="password" 
-                                    value={mailSettings.imap_password || ''} 
-                                    onChange={e => setMailSettings({...mailSettings, imap_password: e.target.value})} 
-                                    style={inputStyle(true)}
-                                    placeholder="Contraseña de la cuenta"
-                                />
-                            </div>
-                        </div>
-
-                        <div style={{ display: 'flex', gap: '15px' }}>
-                            <button onClick={handleTestMail} style={{ ...saveButtonStyle, background: '#333', marginTop: '30px' }} disabled={isTesting || isSaving}>
-                                <AlertTriangle size={20} /> {isTesting ? 'PROBANDO...' : 'PROBAR CONEXIÓN'}
-                            </button>
-                            <button onClick={saveMailSettings} style={saveButtonStyle} disabled={isSaving || isTesting}>
-                                <Save size={20} /> {isSaving ? 'GUARDANDO...' : 'GUARDAR CONFIGURACIÓN'}
-                            </button>
-                        </div>
-                    </div>
-                )}
 
             </div>
         </div>
