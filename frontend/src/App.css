@@ -1716,3 +1716,72 @@ img.nav-logo:hover,
     display: none !important;
   }
 }
+/* Contact FAB and Modal Options */
+.contact-fab {
+  position: fixed;
+  bottom: 2.5rem;
+  right: 2rem;
+  width: 4.5rem;
+  height: 4.5rem;
+  background: #111;
+  color: white;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2000;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+  border: 2px solid #222;
+  transition: var(--transition-smooth);
+  cursor: pointer;
+}
+
+.contact-fab:hover {
+  background: var(--color-primary);
+  transform: scale(1.1) rotate(15deg);
+  border-color: var(--color-primary);
+  color: white;
+}
+
+.contact-option-btn {
+  width: 100%;
+  padding: 1.2rem;
+  border-radius: 14px;
+  font-family: var(--font-heading);
+  font-size: 1.5rem;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 15px;
+  transition: var(--transition-smooth);
+  cursor: pointer;
+  border: none;
+  letter-spacing: 1px;
+}
+
+.contact-option-btn.whatsapp {
+  background: #25D366;
+  color: white;
+}
+
+.contact-option-btn.call {
+  background: #333;
+  color: white;
+}
+
+.contact-option-btn:hover {
+  transform: translateY(-5px);
+  filter: brightness(1.1);
+  box-shadow: 0 12px 25px rgba(0,0,0,0.3);
+}
+
+/* Mobile adjustments for FAB */
+@media (max-width: 480px) {
+  .contact-fab {
+    bottom: 1.5rem;
+    right: 1.5rem;
+    width: 3.8rem;
+    height: 3.8rem;
+  }
+}

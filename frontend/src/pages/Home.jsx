@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { Menu, X, ShoppingCart, Minus, Plus, MessageCircle, MapPin, Instagram, Facebook, ChevronDown } from 'lucide-react';
+import { Menu, X, ShoppingCart, Minus, Plus, MessageCircle, MapPin, Instagram, Facebook, ChevronDown, Phone } from 'lucide-react';
 import { fetchMenuEntries, createSale, fetchOpeningHours } from '../services/api';
 import Toast from '../admin/components/Toast';
 import Footer from '../components/Footer';
@@ -30,6 +30,8 @@ function Home() {
   const [openingHours, setOpeningHours] = useState([]);
   const [isHoursModalOpen, setIsHoursModalOpen] = useState(false);
   const [toast, setToast] = useState(null);
+  const [isContactMenuOpen, setIsContactMenuOpen] = useState(false);
+  const contactPhone = "5492645095054";
 
   useEffect(() => {
     const handleScroll = () => {
@@ -597,6 +599,52 @@ function Home() {
           <ShoppingCart size={24} />
           <span className="cart-fab-count">{totalItems}</span>
         </button>
+      )}
+
+      {/* Floating Contact Button (Only if cart is empty) */}
+      {totalItems === 0 && (
+        <button className="contact-fab" onClick={() => setIsContactMenuOpen(true)}>
+          <Phone size={24} />
+        </button>
+      )}
+
+      {/* Contact Options Modal */}
+      {isContactMenuOpen && (
+        <div className="modal-overlay" onClick={() => setIsContactMenuOpen(false)} style={{ zIndex: 5000 }}>
+          <div className="cart-modal" onClick={e => e.stopPropagation()}>
+            <div className="modal-header">
+              <h2>CONTACTO DUKE</h2>
+              <button className="close-modal" onClick={() => setIsContactMenuOpen(false)}>
+                <X size={24} />
+              </button>
+            </div>
+            <div className="modal-body" style={{ padding: '30px', display: 'flex', flexDirection: 'column', gap: '15px' }}>
+              <button 
+                className="contact-option-btn whatsapp" 
+                onClick={() => {
+                  window.open(`https://wa.me/${contactPhone}`, '_blank');
+                  setIsContactMenuOpen(false);
+                }}
+              >
+                <MessageCircle size={24} />
+                WHATSAPP
+              </button>
+              <button 
+                className="contact-option-btn call" 
+                onClick={() => {
+                  window.location.href = `tel:+${contactPhone}`;
+                  setIsContactMenuOpen(false);
+                }}
+              >
+                <Phone size={24} />
+                LLAMAR AHORA
+              </button>
+              <p style={{ textAlign: 'center', color: '#666', fontSize: '0.85rem', marginTop: '10px' }}>
+                Atención directa Duke Burger San Juan
+              </p>
+            </div>
+          </div>
+        </div>
       )}
 
       {/* Cart Modal */}
