@@ -615,15 +615,15 @@ class GalleryImageViewSet(viewsets.ModelViewSet):
         cache.delete("gallery_list_public")
 
 @csrf_exempt
-async def OrderStreamView(request):
+def OrderStreamView(request):
     """
     Server-Sent Events (SSE) for real-time order notifications.
-    Optimized for concurrent gthread workers and high resilience.
+    Thread-based sync version for maximum stability with Gunicorn gthread workers.
     """
     origin = request.headers.get('Origin') or 'https://dukeburger-sj.com'
     
     try:
-        # 1. CORS Preflight & Handshake
+        # 1. CORS Preflight
         if request.method == 'OPTIONS':
             response = HttpResponse()
             response['Access-Control-Allow-Origin'] = origin
@@ -635,47 +635,35 @@ async def OrderStreamView(request):
 
         # 2. Authentication
         from rest_framework.authtoken.models import Token
-        from asgiref.sync import sync_to_async
-        
         token_key = request.GET.get('token')
+        
         if not token_key and 'Authorization' in request.headers:
             auth_header = request.headers['Authorization']
             if auth_header.startswith('Token '):
                 token_key = auth_header.split('Token ')[1]
 
-        @sync_to_async
-        def check_token(key):
-            try:
-                if not key: return False
-                return Token.objects.filter(key=key.strip()).exists()
-            except:
-                return False
+        try:
+            if not token_key or not Token.objects.filter(key=token_key.strip()).exists():
+                response = HttpResponse(json.dumps({'error': 'Invalid or missing token'}), status=401, content_type='application/json')
+                response['Access-Control-Allow-Origin'] = origin
+                response['Access-Control-Allow-Credentials'] = 'true'
+                return response
+        except:
+            return HttpResponse(status=401)
 
-        if not token_key or not await check_token(token_key):
-            response = HttpResponse(json.dumps({'error': 'Invalid or missing token'}), status=401, content_type='application/json')
-            response['Access-Control-Allow-Origin'] = origin
-            response['Access-Control-Allow-Credentials'] = 'true'
-            return response
-
-        # 3. Stream Generator
-        async def event_stream():
+        # 3. Stream Generator (Sync)
+        def event_stream():
             try:
-                # Immediate ready message to confirm connection
+                # Critical for Caddy/Traefik: yield a ready event
                 yield f"data: {json.dumps({'type': 'connection_ready', 'status': 'connected'})}\n\n"
                 
-                @sync_to_async
-                def get_last_id():
-                    last = Sale.objects.order_by('-id').first()
-                    return last.id if last else 0
-
-                @sync_to_async
-                def get_new_sales(since_id):
-                    return list(Sale.objects.filter(id__gt=since_id).order_by('id'))
-
-                last_seen_id = await get_last_id()
+                last_seen_id = 0
+                last_sale = Sale.objects.order_by('-id').first()
+                if last_sale:
+                    last_seen_id = last_sale.id
 
                 while True:
-                    new_sales = await get_new_sales(last_seen_id)
+                    new_sales = list(Sale.objects.filter(id__gt=last_seen_id).order_by('id'))
                     for sale in new_sales:
                         data = {
                             'type': 'new_order',
@@ -686,39 +674,25 @@ async def OrderStreamView(request):
                         yield f"data: {json.dumps(data)}\n\n"
                         last_seen_id = sale.id
 
-                    # Periodic Heartbeat for proxy stability (ping)
+                    # Keep-alive
                     yield ": ping\n\n"
-                    # Also send structured heartbeat
                     yield f"data: {json.dumps({'type': 'heartbeat'})}\n\n"
-                    await asyncio.sleep(5)
-            except asyncio.CancelledError:
-                # Client disconnected - normal behavior
-                pass
+                    time.sleep(5)
             except Exception as e:
-                # Log or yield the error for visibility
                 yield f"data: {json.dumps({'type': 'error', 'message': str(e)})}\n\n"
 
         response = StreamingHttpResponse(event_stream(), content_type='text/event-stream')
-        
-        # SSE Headers (Quirúrgicos para este endpoint)
-        response['X-Accel-Buffering'] = 'no'
-        response['Cache-Control'] = 'no-cache'
-        response['Connection'] = 'keep-alive'     
-        
-        # CORS Headers
+        response['X-Accel-Buffering'] = 'no'      # For Nginx
+        response['Cache-Control'] = 'no-cache'   # Avoid proxy caching
+        response['Connection'] = 'keep-alive'
         response['Access-Control-Allow-Origin'] = origin
         response['Access-Control-Allow-Credentials'] = 'true'
-        response['Access-Control-Expose-Headers'] = '*'
-        
         return response
 
     except Exception as e:
-        # CORS even on errors
         response = HttpResponse(json.dumps({'error': str(e)}), status=500, content_type='application/json')
         response['Access-Control-Allow-Origin'] = origin
         response['Access-Control-Allow-Credentials'] = 'true'
-        response['X-Accel-Buffering'] = 'no'
-        response['Cache-Control'] = 'no-cache'
         return response
 
 @api_view(['POST'])
