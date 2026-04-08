@@ -45,9 +45,22 @@ const Dashboard = () => {
 
         loadDashboardData();
         
-        // Refresh every 5 minutes
+        // Listen for real-time updates and manual config changes
+        const handleRefresh = () => {
+            console.log("Dashboard: Refreshing data due to external event...");
+            loadDashboardData();
+        };
+
+        window.addEventListener('new-order-received', handleRefresh);
+        window.addEventListener('config-updated', handleRefresh);
+
+        // Refresh every 5 minutes as fallback
         const interval = setInterval(loadDashboardData, 300000);
-        return () => clearInterval(interval);
+        return () => {
+            clearInterval(interval);
+            window.removeEventListener('new-order-received', handleRefresh);
+            window.removeEventListener('config-updated', handleRefresh);
+        };
     }, []);
 
     if (loading) return <LoadingScreen />;

@@ -78,6 +78,7 @@ const Settings = () => {
         try {
             await updateDeliveryRates(deliveryRates);
             setToast({ message: 'Tarifas guardadas correctamente', type: 'success' });
+            window.dispatchEvent(new CustomEvent('config-updated'));
         } catch (err) {
             setToast({ message: 'Error al actualizar tarifas', type: 'error' });
         } finally {
@@ -90,6 +91,7 @@ const Settings = () => {
         try {
             await Promise.all(openingHours.map(h => updateOpeningHour(h.id, h)));
             setToast({ message: 'Todos los horarios guardados', type: 'success' });
+            window.dispatchEvent(new CustomEvent('config-updated'));
         } catch (err) {
             setToast({ message: 'Error al guardar horarios', type: 'error' });
         } finally {
