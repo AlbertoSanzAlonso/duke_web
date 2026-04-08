@@ -446,7 +446,6 @@ a.stat-card { text-decoration: none; cursor: pointer; }
     background: #fff5f5;
     border-radius: 16px;
     border: 1px solid #ffc9c9;
-    max-width: 900px;
 }
 .critical-title {
     margin: 0 0 20px 0;

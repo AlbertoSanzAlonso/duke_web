@@ -167,15 +167,27 @@ const Dashboard = () => {
                                 borderRadius: '50%', width: '24px', height: '24px', 
                                 display: 'flex', alignItems: 'center', justifyContent: 'center',
                                 fontSize: '0.7rem', fontWeight: '900', border: '2px solid white',
-                                animation: 'pulse 2s infinite'
+                                animation: 'pulse 2s infinite',
+                                zIndex: 10
                             }}>
                                 {data.unreadEmails}
+                            </div>
+                        )}
+                        {data.unreadEmails === -1 && (
+                            <div title="Error de conexión IMAP" style={{ 
+                                position: 'absolute', top: '-5px', right: '-5px', 
+                                background: '#f08c00', color: 'white', 
+                                borderRadius: '50%', width: '24px', height: '24px', 
+                                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                border: '2px solid white', zIndex: 10
+                            }}>
+                                <AlertTriangle size={14} />
                             </div>
                         )}
                         <div className="stat-content">
                             <div className="stat-label">Correo Corporativo</div>
                             <div className="stat-value" style={{ fontSize: '1.2rem', color: '#1c7ed6' }}>
-                                {data.unreadEmails > 0 ? `${data.unreadEmails} NUEVOS ↗` : 'ACCEDER ↗'}
+                                {data.unreadEmails > 0 ? `${data.unreadEmails} NUEVOS ↗` : data.unreadEmails === -1 ? 'ERROR CONFIG. ↗' : 'ACCEDER ↗'}
                             </div>
                         </div>
                     </a>
