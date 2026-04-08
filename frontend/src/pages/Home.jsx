@@ -534,9 +534,9 @@ function Home() {
                 const tabs = document.querySelector('.menu-tabs');
                 const navbar = document.querySelector('.navbar');
                 if (tabs) {
-                  const navHeight = navbar ? navbar.offsetHeight : 80;
-                  const yOffset = -(navHeight + 20); // Dynamic height + extra safety gap
-                  const y = tabs.getBoundingClientRect().top + window.pageYOffset + yOffset;
+                  const navHeight = navbar ? navbar.offsetHeight : 100;
+                  // Increase offset significantly to ensure no coverage even on desktop
+                  const y = tabs.getBoundingClientRect().top + window.pageYOffset - (navHeight + 60);
                   window.scrollTo({ top: y, behavior: 'smooth' });
                 }
               }}
