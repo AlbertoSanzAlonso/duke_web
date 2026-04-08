@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { fetchSales, fetchMenuEntries, fetchOpeningHours, fetchInventory, fetchMe } from '../../services/api';
+import { fetchSales, fetchMenuEntries, fetchOpeningHours, fetchInventory, fetchMe, checkMail } from '../../services/api';
 import LoadingScreen from '../components/LoadingScreen';
 import { ShoppingBag, Star, Clock, AlertTriangle, TrendingUp, Package, CalendarOff, Mail, History, Settings as SettingsIcon } from 'lucide-react';
 
@@ -12,7 +12,8 @@ const Dashboard = () => {
         completedToday: 0,
         activePromos: 0,
         todayHours: null,
-        lowStockItems: []
+        lowStockItems: [],
+        unreadEmails: 0
     });
     const [profile, setProfile] = useState(null);
 
@@ -20,12 +21,13 @@ const Dashboard = () => {
         const loadDashboardData = async () => {
             try {
                 setLoading(true);
-                const [sales, menu, hours, inventory, profileData] = await Promise.all([
+                const [sales, menu, hours, inventory, profileData, mailData] = await Promise.all([
                     fetchSales(),
                     fetchMenuEntries(),
                     fetchOpeningHours(),
                     fetchInventory(),
-                    fetchMe()
+                    fetchMe(),
+                    checkMail().catch(() => ({ unread_count: 0 }))
                 ]);
 
                 setProfile(profileData);
@@ -56,7 +58,8 @@ const Dashboard = () => {
                     completedToday,
                     activePromos,
                     todayHours,
-                    lowStockItems: lowStock
+                    lowStockItems: lowStock,
+                    unreadEmails: mailData?.unread_count || 0
                 });
 
             } catch (err) {
@@ -67,6 +70,18 @@ const Dashboard = () => {
         };
 
         loadDashboardData();
+        
+        // Polling for mail each 2 mins
+        const mailInterval = setInterval(async () => {
+            try {
+                const mailData = await checkMail();
+                setData(prev => ({ ...prev, unreadEmails: mailData.unread_count || 0 }));
+            } catch (e) {
+                console.error("Mail check failed", e);
+            }
+        }, 120000);
+
+        return () => clearInterval(mailInterval);
     }, []);
 
     if (loading) return <LoadingScreen />;
@@ -135,22 +150,35 @@ const Dashboard = () => {
                 </Link>
 
                 {/* 5. ACCESO WEBMAIL */}
-                {(profile?.is_superuser || profile?.profile?.can_use_webmail) && (
                     <a 
                         href="https://webmail.dondominio.com/" 
                         target="_blank" 
                         rel="noopener noreferrer" 
                         className="stat-card icon-blue"
+                        style={{ position: 'relative' }}
                     >
                         <div className="stat-icon-box icon-blue" style={{ background: '#d0ebff' }}>
                             <Mail size={24} />
                         </div>
+                        {data.unreadEmails > 0 && (
+                            <div style={{ 
+                                position: 'absolute', top: '-5px', right: '-5px', 
+                                background: '#e03131', color: 'white', 
+                                borderRadius: '50%', width: '24px', height: '24px', 
+                                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                fontSize: '0.7rem', fontWeight: '900', border: '2px solid white',
+                                animation: 'pulse 2s infinite'
+                            }}>
+                                {data.unreadEmails}
+                            </div>
+                        )}
                         <div className="stat-content">
                             <div className="stat-label">Correo Corporativo</div>
-                            <div className="stat-value" style={{ fontSize: '1.2rem', color: '#1c7ed6' }}>ACCEDER WEBMAIL ↗</div>
+                            <div className="stat-value" style={{ fontSize: '1.2rem', color: '#1c7ed6' }}>
+                                {data.unreadEmails > 0 ? `${data.unreadEmails} NUEVOS ↗` : 'ACCEDER ↗'}
+                            </div>
                         </div>
                     </a>
-                )}
 
                 {/* 6. HISTORIAL */}
                 {(profile?.is_superuser || profile?.profile?.can_use_accounting) && (

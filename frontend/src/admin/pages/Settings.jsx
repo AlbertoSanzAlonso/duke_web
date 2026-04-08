@@ -1,14 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { 
-    fetchOpeningHours, updateOpeningHour, 
-    fetchDeliveryRates, updateDeliveryRates, 
-    fetchGalleryImages, createGalleryImage, deleteGalleryImage, updateGalleryImage 
+    fetchGalleryImages, createGalleryImage, deleteGalleryImage, updateGalleryImage,
+    fetchSettings, updateSetting
 } from '../../services/api';
 import { useSearchParams } from 'react-router-dom';
 import LoadingScreen from '../components/LoadingScreen';
 
 import Toast from '../components/Toast';
-import { Settings as SettingsIcon, Save, Truck, Clock, Image as ImageIcon, Plus, Trash2, X, AlertTriangle, Users as UsersIcon, History } from 'lucide-react';
+import { Settings as SettingsIcon, Save, Truck, Clock, Image as ImageIcon, Plus, Trash2, X, AlertTriangle, Users as UsersIcon, History, Mail } from 'lucide-react';
 import Gallery from './Gallery';
 import Users from './Users';
 
@@ -18,8 +17,12 @@ const Settings = () => {
     const [openingHours, setOpeningHours] = useState([]);
     const [deliveryRates, setDeliveryRates] = useState({ base_price: 0, km_price: 0, max_km: 0 });
     const [loading, setLoading] = useState(true);
-    const [isSaving, setIsSaving] = useState(false);
     const [toast, setToast] = useState(null);
+    const [mailSettings, setMailSettings] = useState({ 
+        imap_server: '', 
+        imap_user: '', 
+        imap_password: '' 
+    });
 
     useEffect(() => {
         const tab = searchParams.get('tab');
@@ -35,12 +38,22 @@ const Settings = () => {
     const loadAllData = async () => {
         setLoading(true);
         try {
-            const [hoursData, ratesData] = await Promise.all([
+            const [hoursData, ratesData, settingsData] = await Promise.all([
                 fetchOpeningHours(),
-                fetchDeliveryRates()
+                fetchDeliveryRates(),
+                fetchSettings()
             ]);
             setOpeningHours(hoursData);
             setDeliveryRates(ratesData);
+            
+            // Extract mail settings from global settings
+            const mailObj = {};
+            settingsData.forEach(s => {
+                if (['imap_server', 'imap_user', 'imap_password'].includes(s.key)) {
+                    mailObj[s.key] = s.value;
+                }
+            });
+            setMailSettings(mailObj);
         } catch (error) {
             console.error("Error loading settings:", error);
             setToast({ message: 'Error al cargar los datos', type: 'error' });
@@ -81,6 +94,22 @@ const Settings = () => {
         }
     };
 
+    const saveMailSettings = async () => {
+        setIsSaving(true);
+        try {
+            await Promise.all([
+                updateSetting('imap_server', mailSettings.imap_server),
+                updateSetting('imap_user', mailSettings.imap_user),
+                updateSetting('imap_password', mailSettings.imap_password),
+            ]);
+            setToast({ message: 'Configuración de correo actualizada', type: 'success' });
+        } catch (err) {
+            setToast({ message: 'Error al guardar configuración de correo', type: 'error' });
+        } finally {
+            setIsSaving(false);
+        }
+    };
+
     if (loading) return <LoadingScreen />;
 
     return (
@@ -105,6 +134,9 @@ const Settings = () => {
                     </button>
                     <button onClick={() => handleTabChange('users')} className={`tab-btn ${activeTab === 'users' ? 'active' : ''}`} style={{ ...tabBtnStyle(activeTab === 'users'), width: '100%' }}>
                         <UsersIcon size={18} /> Personal
+                    </button>
+                    <button onClick={() => handleTabChange('mail')} className={`tab-btn ${activeTab === 'mail' ? 'active' : ''}`} style={{ ...tabBtnStyle(activeTab === 'mail'), width: '100%' }}>
+                        <Mail size={18} /> Correo
                     </button>
                     <button onClick={() => handleTabChange('custom')} className={`tab-btn ${activeTab === 'custom' ? 'active' : ''}`} style={{ ...tabBtnStyle(activeTab === 'custom'), width: '100%' }}>
                         <Save size={18} /> Otros
@@ -277,6 +309,57 @@ const Settings = () => {
                 {activeTab === 'users' && (
                     <div className="tab-content" style={{ padding: '0' }}>
                         <Users />
+                    </div>
+                )}
+
+                {activeTab === 'mail' && (
+                    <div className="tab-content">
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '15px', marginBottom: '25px', borderBottom: '1px solid #eee', paddingBottom: '15px' }}>
+                            <Mail size={32} color="#f03e3e" />
+                            <h2 style={{ margin: 0, fontSize: '1.5rem' }}>Configuración de Correo Corporativo</h2>
+                        </div>
+                        
+                        <p style={{ color: '#666', marginBottom: '20px', fontSize: '0.9rem' }}>
+                            Configura los datos IMAP para recibir notificaciones de nuevos correos en el dashboard. 
+                            Por defecto se usa el puerto 993 con SSL.
+                        </p>
+
+                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '20px' }}>
+                            <div className="setting-field">
+                                <label style={labelStyle}>Servidor IMAP</label>
+                                <input 
+                                    type="text" 
+                                    value={mailSettings.imap_server || ''} 
+                                    onChange={e => setMailSettings({...mailSettings, imap_server: e.target.value})} 
+                                    style={inputStyle(true)}
+                                    placeholder="ej: imap.dondominio.com"
+                                />
+                            </div>
+                            <div className="setting-field">
+                                <label style={labelStyle}>Usuario / Email</label>
+                                <input 
+                                    type="text" 
+                                    value={mailSettings.imap_user || ''} 
+                                    onChange={e => setMailSettings({...mailSettings, imap_user: e.target.value})} 
+                                    style={inputStyle(true)}
+                                    placeholder="ej: admin@dukeburger-sj.com"
+                                />
+                            </div>
+                            <div className="setting-field">
+                                <label style={labelStyle}>Contraseña</label>
+                                <input 
+                                    type="password" 
+                                    value={mailSettings.imap_password || ''} 
+                                    onChange={e => setMailSettings({...mailSettings, imap_password: e.target.value})} 
+                                    style={inputStyle(true)}
+                                    placeholder="Contraseña de la cuenta"
+                                />
+                            </div>
+                        </div>
+
+                        <button onClick={saveMailSettings} style={saveButtonStyle} disabled={isSaving}>
+                            <Save size={20} /> {isSaving ? 'GUARDANDO...' : 'GUARDAR CONFIGURACIÓN DE CORREO'}
+                        </button>
                     </div>
                 )}
 

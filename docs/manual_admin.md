@@ -45,4 +45,18 @@ Es la forma principal de cargar stock.
 Arrastra y suelta para ordenar las fotos que aparecen en el carrusel de la página principal.
 
 ---
+## 9. DUKE ASSIST (ASISTENTE IA)
+El asistente de Duke tiene acceso en tiempo real a la base de datos para ayudarte a tomar decisiones inteligentes.
+- **Qué puede ver:**
+    - Ventas y Gastos del día (Balance financiero).
+    - Artículos con bajo stock (Stock Crítico) y niveles de inventario completo.
+    - Pedidos pendientes en TPV y Proveedores.
+    - Movimientos recientes realizados por el staff (Auditoría).
+- **Ejemplos de preguntas:** 
+    - "¿Cuánto vendimos hoy y cuál es el balance?"
+    - "¿Qué insumos tengo que comprar urgente?"
+    - "¿Quién borró el producto X o cargó el último gasto?"
+    - "¿Cuántas unidades de papas fritas quedan?"
+
+---
 **CONSEJO DUKE:** Revisa siempre la sección "Stock Crítico" en el Dashboard para no quedarte sin insumos en medio del servicio.

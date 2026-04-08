@@ -1,6 +1,8 @@
 .orders-container {
-    padding: 1rem;
-    overflow-y: auto;
+    padding: 2rem;
+    max-width: 1400px;
+    margin: 0 auto;
+    width: 100%;
 }
 
 .orders-header {
@@ -50,15 +52,13 @@
 
 /* Tabla */
 .orders-grid {
-    display: grid;
-    grid-template-columns: 3fr 1fr;
-    gap: 1.5rem;
-    align-items: start;
+    display: block;
+    width: 100%;
 }
 
 @media (max-width: 1200px) {
-    .orders-grid {
-        grid-template-columns: 2fr 1fr;
+    .orders-container {
+        padding: 1rem;
     }
 }
 

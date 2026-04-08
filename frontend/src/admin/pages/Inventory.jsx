@@ -14,6 +14,7 @@ function Inventory() {
     // Edit state
     const [editingItemId, setEditingItemId] = useState(null);
     const [editQuantity, setEditQuantity] = useState('');
+    const [editMinStock, setEditMinStock] = useState('');
 
     // Form inputs state
     const [name, setName] = useState('');
@@ -73,14 +74,17 @@ function Inventory() {
         }
     };
 
-    const handleUpdateQuantity = async (id) => {
-        if (!editQuantity || isNaN(editQuantity)) return;
+    const handleUpdateRow = async (id) => {
         try {
-            await updateInventoryItem(id, { quantity: parseFloat(editQuantity) });
+            await updateInventoryItem(id, { 
+                quantity: parseFloat(editQuantity) || 0,
+                min_stock: parseFloat(editMinStock) || 0 
+            });
             setEditingItemId(null);
             setEditQuantity('');
+            setEditMinStock('');
             loadInventory();
-            setToast({ message: "Stock actualizado con éxito", type: 'success' });
+            setToast({ message: "Item actualizado con éxito", type: 'success' });
         } catch (err) {
             setToast({ message: err.message, type: 'error' });
         }
@@ -177,7 +181,23 @@ function Inventory() {
                     />
                 </div>
 
-                <button type="submit" className="main-button" style={{ flex: '1 1 150px', padding: '10px 24px', height: '40px', background: 'var(--admin-primary)', color: 'white', border: 'none', borderRadius: '8px', cursor: 'pointer', fontWeight: 'bold' }}>
+                <button type="submit" className="main-button" style={{ 
+                    flex: '1 1 150px', 
+                    padding: '12px 24px', 
+                    background: 'var(--admin-primary)', 
+                    color: 'white', 
+                    border: 'none', 
+                    borderRadius: '8px', 
+                    cursor: 'pointer', 
+                    fontWeight: '800',
+                    fontSize: '0.85rem',
+                    letterSpacing: '1px',
+                    transition: 'all 0.2s ease',
+                    height: '42px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center'
+                }}>
                     REGISTRAR
                 </button>
             </form>
@@ -190,6 +210,7 @@ function Inventory() {
                                 <th style={{ padding: '15px' }}>Artículo</th>
                                 <th style={{ padding: '15px' }}>Categoría</th>
                                 <th style={{ padding: '15px' }}>Stock Actual</th>
+                                <th style={{ padding: '15px' }}>Mínimo</th>
                                 <th style={{ padding: '15px' }}>Acciones</th>
                             </tr>
                         </thead>
@@ -218,15 +239,29 @@ function Inventory() {
                                                     <div style={{ display: 'flex', gap: '5px', alignItems: 'center' }}>
                                                         <input 
                                                             type="number" 
+                                                            step="any"
                                                             value={editQuantity} 
                                                             onChange={e => setEditQuantity(e.target.value)} 
                                                             style={{ width: '80px', padding: '5px', borderRadius: '4px', border: '1px solid #ddd' }}
                                                             autoFocus
                                                         />
-                                                        <span>{item.unit}</span>
+                                                        <span style={{ fontSize: '0.8rem' }}>{item.unit}</span>
                                                     </div>
                                                 ) : (
                                                     <span style={{ fontWeight: 'bold' }}>{item.quantity} {item.unit}</span>
+                                                )}
+                                            </td>
+                                            <td data-label="Mínimo">
+                                                {isEditing ? (
+                                                    <input 
+                                                        type="number" 
+                                                        step="any"
+                                                        value={editMinStock} 
+                                                        onChange={e => setEditMinStock(e.target.value)} 
+                                                        style={{ width: '80px', padding: '5px', borderRadius: '4px', border: '1px solid #ddd' }}
+                                                    />
+                                                ) : (
+                                                    <span style={{ color: '#888' }}>{item.min_stock} {item.unit}</span>
                                                 )}
                                             </td>
                                             <td data-label="Acciones">
@@ -234,7 +269,7 @@ function Inventory() {
                                                     {isEditing ? (
                                                         <>
                                                             <button 
-                                                                onClick={() => handleUpdateQuantity(item.id)} 
+                                                                onClick={() => handleUpdateRow(item.id)} 
                                                                 style={{ padding: '6px', background: '#2f9e44', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer' }}
                                                                 title="Guardar"
                                                             >
@@ -254,6 +289,7 @@ function Inventory() {
                                                                 onClick={() => {
                                                                     setEditingItemId(item.id);
                                                                     setEditQuantity(item.quantity);
+                                                                    setEditMinStock(item.min_stock);
                                                                 }} 
                                                                 style={{ padding: '6px', background: '#333', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer' }}
                                                                 title="Editar Stock"

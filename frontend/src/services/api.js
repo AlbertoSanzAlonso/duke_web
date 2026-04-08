@@ -479,3 +479,9 @@ export const updateGalleryImage = async (id, data) => {
     if (!response.ok) return handleResponseError(response);
     return await response.json();
 };
+
+export const checkMail = async () => {
+    const response = await fetch(`${API_URL}/mail-check/`, { headers: getHeaders() });
+    if (!response.ok) return handleResponseError(response);
+    return await response.json();
+};

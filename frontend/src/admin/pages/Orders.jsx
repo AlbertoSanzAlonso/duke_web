@@ -13,8 +13,11 @@ const Orders = () => {
     const [searchTerm, setSearchTerm] = useState('');
     const [searchParams] = useSearchParams();
     const [filterType, setFilterType] = useState('all'); // 'all', 'daily', 'weekly', 'monthly'
+    const [statusFilter, setStatusFilter] = useState('ALL'); // 'ALL', 'PENDING', 'COMPLETED'
+    const [currentPage, setCurrentPage] = useState(1);
     const [showStatsModal, setShowStatsModal] = useState(false);
     const [toast, setToast] = useState(null);
+    const itemsPerPage = 10;
     const navigate = useNavigate();
 
     // ... (rest of search/memo logic remains same)
@@ -75,6 +78,11 @@ const Orders = () => {
         }
     };
 
+    // Reset pagination when filters change
+    useEffect(() => {
+        setCurrentPage(1);
+    }, [filterType, searchTerm, statusFilter]);
+
     const filteredOrders = useMemo(() => {
         let filtered = [...orders];
 
@@ -97,7 +105,12 @@ const Orders = () => {
             filtered = filtered.filter(o => new Date(o.date) >= lastMonth);
         }
 
-        // 2. Search filter
+        // 2. Status filter
+        if (statusFilter !== 'ALL') {
+            filtered = filtered.filter(o => o.status === statusFilter);
+        }
+
+        // 3. Search filter
         if (searchTerm) {
             const term = searchTerm.toLowerCase();
             filtered = filtered.filter(o => 
@@ -108,7 +121,14 @@ const Orders = () => {
         }
 
         return filtered;
-    }, [orders, filterType, searchTerm]);
+    }, [orders, filterType, searchTerm, statusFilter]);
+
+    const paginatedOrders = useMemo(() => {
+        const start = (currentPage - 1) * itemsPerPage;
+        return filteredOrders.slice(start, start + itemsPerPage);
+    }, [filteredOrders, currentPage]);
+
+    const totalPages = Math.ceil(filteredOrders.length / itemsPerPage);
 
     const totalIncome = useMemo(() => {
         return filteredOrders.reduce((acc, o) => acc + parseFloat(o.total_amount), 0);
@@ -157,6 +177,24 @@ const Orders = () => {
                             </button>
                         ))}
                     </div>
+
+                    <div className="filter-group-segmented" style={{ display: 'flex', background: '#f1f3f5', padding: '4px', borderRadius: '10px' }}>
+                        {[
+                            { id: 'ALL', label: 'TODOS' },
+                            { id: 'PENDING', label: 'PENDIENTES' },
+                            { id: 'COMPLETED', label: 'COMPLETADOS' }
+                        ].map(f => (
+                            <button 
+                                key={f.id}
+                                onClick={() => setStatusFilter(f.id)}
+                                className={`mode-selector-btn ${statusFilter === f.id ? 'active' : ''}`}
+                                style={{ padding: '8px 15px', borderRadius: '8px', minWidth: '80px', fontSize: '0.75rem' }}
+                            >
+                                {f.label}
+                            </button>
+                        ))}
+                    </div>
+
                     <div className="orders-stats" style={{ cursor: 'pointer' }} onClick={() => setShowStatsModal(true)}>
                         <div className="stat-card">
                             <span>Pedidos</span>
@@ -184,7 +222,7 @@ const Orders = () => {
                             </tr>
                         </thead>
                         <tbody>
-                            {filteredOrders.map(order => (
+                            {paginatedOrders.map(order => (
                                 <tr key={order.id} className={selectedOrder?.id === order.id ? 'selected' : ''} onClick={() => setSelectedOrder(order)}>
                                     <td data-label="ID">#{order.id}</td>
                                     <td data-label="Fecha">
@@ -221,6 +259,29 @@ const Orders = () => {
                             ))}
                         </tbody>
                     </table>
+                    
+                    {/* Pagination UI */}
+                    {totalPages > 1 && (
+                        <div className="pagination" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '10px', marginTop: '20px', padding: '10px' }}>
+                            <button 
+                                onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+                                disabled={currentPage === 1}
+                                style={{ padding: '8px 12px', borderRadius: '8px', border: '1px solid #ddd', background: currentPage === 1 ? '#eee' : '#fff', cursor: currentPage === 1 ? 'not-allowed' : 'pointer' }}
+                            >
+                                Anterior
+                            </button>
+                            <span style={{ fontSize: '0.9rem', fontWeight: 'bold' }}>
+                                Página {currentPage} de {totalPages}
+                            </span>
+                            <button 
+                                onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
+                                disabled={currentPage === totalPages}
+                                style={{ padding: '8px 12px', borderRadius: '8px', border: '1px solid #ddd', background: currentPage === totalPages ? '#eee' : '#fff', cursor: currentPage === totalPages ? 'not-allowed' : 'pointer' }}
+                            >
+                                Siguiente
+                            </button>
+                        </div>
+                    )}
                 </div>
 
                 {selectedOrder && (

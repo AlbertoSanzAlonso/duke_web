@@ -3,7 +3,10 @@ from rest_framework.response import Response
 from rest_framework.decorators import api_view, permission_classes, parser_classes, action
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from django.contrib.auth.models import User
-from django.db.models import Q, F
+from django.db.models import Q, F, Sum, Count, Avg
+from django.db.models.functions import TruncDate
+from django.utils import timezone
+from datetime import timedelta
 from .models import (Product, MenuEntry, Sale, Expense, InventoryItem, 
                      SupplierOrder, GlobalSetting, GalleryImage, OpeningHour, DeliverySetting, 
                      UserProfile, ActionLog, log_action)
@@ -58,6 +61,28 @@ def MeView(request):
             serializer.save()
             return Response(UserSerializer(user).data)
         return Response(serializer.errors, status=400)
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def MailCheckView(request):
+    """
+    Endpoint to check corporate mail unread count.
+    """
+    from .mail_utils import get_unread_mail_count
+    
+    server = GlobalSetting.objects.filter(key='imap_server').first()
+    user = GlobalSetting.objects.filter(key='imap_user').first()
+    password = GlobalSetting.objects.filter(key='imap_password').first()
+    
+    if not server or not user or not password:
+        return Response({'unread_count': 0, 'configured': False})
+        
+    count = get_unread_mail_count(server.value, user.value, password.value)
+    return Response({
+        'unread_count': count, 
+        'configured': True,
+        'error': count == -1
+    })
 
 class UserViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all().order_by('-date_joined')
@@ -376,7 +401,10 @@ class GlobalSettingViewSet(viewsets.ModelViewSet):
             {'key': 'opening_days', 'value': '1,2,3,4,5,6,7', 'description': 'Días de apertura (1=Lunes, 7=Domingo)'},
             {'key': 'opening_time', 'value': '20:00', 'description': 'Horario de apertura (HH:MM)'},
             {'key': 'closing_time', 'value': '00:00', 'description': 'Horario de cierre (HH:MM)'},
-            {'key': 'marquee_text', 'value': 'BURGER - PACHATA - LOMO - PIZZA - BEBIDA - SAN JUAN - ', 'description': 'Texto en movimiento del banner principal'}
+            {'key': 'marquee_text', 'value': 'BURGER - PACHATA - LOMO - PIZZA - BEBIDA - SAN JUAN - ', 'description': 'Texto en movimiento del banner principal'},
+            {'key': 'imap_server', 'value': 'imap.dondominio.com', 'description': 'Servidor IMAP de correo corporativo'},
+            {'key': 'imap_user', 'value': 'admin@dukeburger-sj.com', 'description': 'Usuario/Email del correo corporativo'},
+            {'key': 'imap_password', 'value': 'password_aqui', 'description': 'Contraseña del correo corporativo (SSL Puerto 993)'}
         ]
         created_count = 0
         for d in defaults:
@@ -581,31 +609,105 @@ def AIHelpView(request):
     # 2. Fetch Dynamic Live Context from DB
     live_context = ""
     try:
-        # Toda la data de Inventario para precisión
+        now = timezone.now()
+        today_start = now.replace(hour=0, minute=0, second=0, microsecond=0)
+        
+        # --- VENTAS (SÍNTESIS) ---
+        sales_today = Sale.objects.filter(date__gte=today_start, status='COMPLETED')
+        total_sales = sales_today.aggregate(Sum('total_amount'))['total_amount__sum'] or 0
+        count_sales = sales_today.count()
+        
+        # Pedidos TPV Pendientes
+        pending_sales = Sale.objects.filter(status='PENDING').count()
+        
+        # --- CONTABILIDAD ---
+        expenses_today = Expense.objects.filter(date__gte=today_start)
+        total_expenses = expenses_today.aggregate(Sum('amount'))['amount__sum'] or 0
+        
+        # --- INVENTARIO Y COMPRAS ---
         all_inventory = InventoryItem.objects.all().order_by('name')
         inventory_summary = "\n".join([f"- {i.name}: {i.quantity} {i.unit} (Stock min: {i.min_stock})" for i in all_inventory])
         
-        # Stock Crítico (Solo los que faltan para destacar)
         critical_items = InventoryItem.objects.filter(quantity__lte=F('min_stock'))
-        stock_critical_info = ", ".join([f"{i.name}" for i in critical_items]) if critical_items.exists() else "Ninguno"
+        stock_critical_info = ", ".join([f"{i.name}" for i in critical_items]) if critical_items.exists() else "Todo en orden"
         
-        # Pedidos Pendientes
-        pending_orders = Sale.objects.filter(status='PENDING').count()
-        
-        # Categorías
+        pending_supplier_orders = SupplierOrder.objects.filter(status='PENDING').count()
+
+        # --- RECIENTES (Últimos 5 logs de acción) ---
+        recent_logs = ActionLog.objects.select_related('user').all()[:5]
+        logs_text = "\n".join([f"- {log.timestamp.strftime('%H:%M')} {log.user.username if log.user else 'Sis'}: {log.description}" for log in recent_logs])
+
+        # --- MENU ---
         categories = MenuEntry.objects.values_list('category', flat=True).distinct()
-        cats_info = ", ".join(categories)
+        total_products = Product.objects.count()
+
+        # --- HISTORIAL DIARIO (Últimos 30 días) ---
+        history_start = today_start - timedelta(days=30)
+        daily_sales = Sale.objects.filter(date__gte=history_start, status='COMPLETED')\
+            .annotate(day=TruncDate('date'))\
+            .values('day')\
+            .annotate(total=Sum('total_amount'), count=Count('id'))\
+            .order_by('-day')
+            
+        daily_expenses = Expense.objects.filter(date__gte=history_start)\
+            .annotate(day=TruncDate('date'))\
+            .values('day')\
+            .annotate(total=Sum('amount'))\
+            .order_by('-day')
+
+        # Combinar ventas y gastos en un diccionario por día para el prompt
+        history_map = {}
+        for s in daily_sales:
+            day_str = s['day'].strftime('%d/%m/%Y')
+            history_map[day_str] = {'sales': s['total'], 'count': s['count'], 'expenses': 0}
+        for e in daily_expenses:
+            day_str = e['day'].strftime('%d/%m/%Y')
+            if day_str not in history_map:
+                history_map[day_str] = {'sales': 0, 'count': 0, 'expenses': e['total']}
+            else:
+                history_map[day_str]['expenses'] = e['total']
+
+        history_lines = [f"- {d}: Ventas ${v['sales']} ({v['count']} tks), Gastos ${v['expenses']}" for d, v in history_map.items()]
+        history_text = "\n".join(history_lines[:15]) # Enviamos los últimos 15 días detallados para no saturar
+
+        # --- RESUMEN MENSUAL (Mes actual y anterior) ---
+        this_month_start = today_start.replace(day=1)
+        last_month_end = this_month_start - timedelta(days=1)
+        last_month_start = last_month_end.replace(day=1)
+
+        def get_month_stats(start, end):
+            s = Sale.objects.filter(date__gte=start, date__lte=end, status='COMPLETED').aggregate(Sum('total_amount'))['total_amount__sum'] or 0
+            e = Expense.objects.filter(date__gte=start, date__lte=end).aggregate(Sum('amount'))['amount__sum'] or 0
+            return s, e
+
+        m_sales, m_exp = get_month_stats(this_month_start, now)
+        lm_sales, lm_exp = get_month_stats(last_month_start, last_month_end)
 
         live_context = (
-            f"DATOS EN TIEMPO REAL DEL PANEL:\n"
-            f"- Artículos con bajo stock/FALTA COMPRAR: {stock_critical_info}\n"
-            f"- Pedidos pendientes: {pending_orders}\n"
-            f"- Categorías activas: {cats_info}\n\n"
-            f"--- INVENTARIO COMPLETO (STOCK ACTUAL) ---\n"
+            f"ESTADO DEL SISTEMA ({now.strftime('%d/%m/%y %H:%M')}):\n\n"
+            f"--- FINANZAS HOY ---\n"
+            f"- Ventas Cobradas: ${total_sales} ({count_sales} tickets)\n"
+            f"- Gastos: ${total_expenses}\n"
+            f"- Balance: ${total_sales - total_expenses}\n\n"
+            f"--- RESUMEN MENSUAL ---\n"
+            f"- ESTE MES: Ventas ${m_sales}, Gastos ${m_exp}, Neto ${m_sales - m_exp}\n"
+            f"- MES PASADO: Ventas ${lm_sales}, Gastos ${lm_exp}, Neto ${lm_sales - lm_exp}\n\n"
+            f"--- HISTORIAL RECIENTE (Últimos días) ---\n"
+            f"{history_text}\n\n"
+            f"--- OPERACIONES ---\n"
+            f"- Pedidos TPV pendientes: {pending_sales}\n"
+            f"- Compras a proveedores pendientes: {pending_supplier_orders}\n"
+            f"- STOCK CRÍTICO: {stock_critical_info}\n\n"
+            f"--- ÚLTIMOS LOGS DE STAFF ---\n"
+            f"{logs_text}\n\n"
+            f"--- CARTA Y PRODUCTOS ---\n"
+            f"- Categorías: {', '.join(categories)}\n"
+            f"- Productos: {total_products}\n\n"
+            f"--- STOCK COMPLETO ---\n"
             f"{inventory_summary}\n"
         )
     except Exception as e:
-        live_context = "No se pudo obtener el contexto en tiempo real."
+        live_context = f"Error al obtener contexto en tiempo real: {str(e)}"
 
     # 3. Build Final System Instruction
     system_instruction = (

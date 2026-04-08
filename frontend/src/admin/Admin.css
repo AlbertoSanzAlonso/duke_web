@@ -446,6 +446,7 @@ a.stat-card { text-decoration: none; cursor: pointer; }
     background: #fff5f5;
     border-radius: 16px;
     border: 1px solid #ffc9c9;
+    max-width: 900px;
 }
 .critical-title {
     margin: 0 0 20px 0;
@@ -532,6 +533,7 @@ a.stat-card { text-decoration: none; cursor: pointer; }
     display: flex;
     justify-content: space-between;
     align-items: center;
+    flex-shrink: 0;
 }
 
 .header-info {
@@ -649,13 +651,36 @@ a.stat-card { text-decoration: none; cursor: pointer; }
 
 @media (max-width: 480px) {
     .ai-chat-window {
-        width: 100vw;
-        height: 100vh;
+        width: 100%;
+        height: 100%;
+        height: 100dvh;
         position: fixed;
-        bottom: 0;
+        top: 0;
+        left: 0;
         right: 0;
+        bottom: 0;
         border-radius: 0;
         z-index: 10000;
+        display: flex;
+        flex-direction: column;
     }
 
+    .ai-chat-wrapper {
+        bottom: 0;
+        left: 0;
+        right: 0;
+        width: 100%;
+    }
+
+    .ai-chat-messages {
+        padding: 15px;
+        flex: 1;
+        overflow-y: auto;
+    }
+}
+
+@keyframes pulse {
+    0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(224, 49, 49, 0.7); }
+    70% { transform: scale(1.1); box-shadow: 0 0 0 10px rgba(224, 49, 49, 0); }
+    100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(224, 49, 49, 0); }
 }
