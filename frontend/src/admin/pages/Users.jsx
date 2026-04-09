@@ -287,11 +287,24 @@ const Users = () => {
             {/* Modal for Create/Edit */}
             {isModalOpen && (
                 <div className="modal-overlay" style={{ background: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(4px)', zIndex: 9999 }}>
-                    <div className="modal-content" style={{ maxWidth: '600px', width: '90%', background: '#fff', color: '#333', padding: '30px', borderRadius: '16px', boxShadow: '0 20px 40px rgba(0,0,0,0.2)', position: 'relative' }}>
-                        <h3 style={{ margin: '0 0 20px 0', fontSize: '1.5rem', borderBottom: '1px solid #eee', paddingBottom: '15px' }}>
+                    <div className="modal-content" style={{ 
+                        maxWidth: '600px', 
+                        width: '95%', 
+                        background: '#fff', 
+                        color: '#333', 
+                        padding: '20px', 
+                        borderRadius: '16px', 
+                        boxShadow: '0 20px 40px rgba(0,0,0,0.2)', 
+                        position: 'relative',
+                        maxHeight: '90vh',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        overflow: 'hidden'
+                    }}>
+                        <h3 style={{ margin: '0 0 15px 0', fontSize: '1.3rem', borderBottom: '1px solid #eee', paddingBottom: '10px' }}>
                             {editingUser ? 'Editar Usuario' : 'Crear Nuevo Usuario'}
                         </h3>
-                        <form onSubmit={handleSubmit} style={{ marginTop: '0' }}>
+                        <form onSubmit={handleSubmit} style={{ margin: '0', flex: 1, overflowY: 'auto', paddingRight: '5px' }}>
                             <div className="form-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 250px), 1fr))', gap: '20px' }}>
                                 <div className="form-group" style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                                     <label style={{ color: '#444', fontSize: '0.9rem', fontWeight: 'bold', letterSpacing: '0.5px' }}><UserIcon size={14} style={{ marginRight: '5px' }} /> NOMBRE DE USUARIO</label>

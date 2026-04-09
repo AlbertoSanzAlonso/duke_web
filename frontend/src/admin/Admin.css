@@ -585,10 +585,27 @@ a.stat-card { text-decoration: none; cursor: pointer; }
     max-width: 100%; /* Use full available width in expanded mode */
 }
 
-@media (max-width: 1200px) {
+@media (max-width: 768px) {
+    .ai-chat-window {
+        width: 100vw;
+        height: 100%;
+        position: fixed;
+        top: 0;
+        left: 0;
+        bottom: 0;
+        right: 0;
+        border-radius: 0;
+        z-index: 9999;
+    }
+
     .ai-chat-window.expanded {
-        width: calc(100vw - 20px);
-        left: 50%;
+        width: 100vw;
+        height: 100%;
+        left: 0;
+        top: 0;
+        bottom: 0;
+        transform: none;
+        border-radius: 0;
     }
 }
 
@@ -858,7 +875,7 @@ a.stat-card { text-decoration: none; cursor: pointer; }
 }
 
 /* --- Users Mobile Optimizations --- */
-.users-mobile-list { display: none; flex-direction: column; gap: 12px; }
+.users-mobile-list { display: none; flex-direction: column; gap: 12px; width: 100%; }
 .user-mobile-card {
     background: #fff; padding: 15px; border-radius: 12px; border: 1px solid #eee;
     display: flex; align-items: center; justify-content: space-between; cursor: pointer;
