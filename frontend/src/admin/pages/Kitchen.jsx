@@ -49,8 +49,14 @@ const Kitchen = () => {
     const loadKitchenOrders = async () => {
         try {
             const data = await fetchSales();
-            // Filter pending and not prepared
-            const pending = data.filter(o => o.status === 'PENDING' && !o.is_prepared);
+            const todayStr = new Date().toLocaleDateString('en-CA', { timeZone: 'America/Argentina/Buenos_Aires' });
+            
+            // Filter pending, not prepared AND from today
+            const pending = data.filter(o => {
+                const orderDate = new Date(o.date).toLocaleDateString('en-CA', { timeZone: 'America/Argentina/Buenos_Aires' });
+                return o.status === 'PENDING' && !o.is_prepared && orderDate === todayStr;
+            });
+            
             setOrders(pending.sort((a, b) => new Date(a.date) - new Date(b.date))); // FIFO
         } catch (error) {
             console.error("Error loading kitchen orders:", error);
