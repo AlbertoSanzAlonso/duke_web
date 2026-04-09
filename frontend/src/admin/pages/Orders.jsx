@@ -360,7 +360,7 @@ const Orders = () => {
                 {selectedOrder && (
                     <div className="thermal-ticket" style={{ width: '80mm', margin: '0 auto', color: 'black', background: 'white' }}>
                         <div className="ticket-header-print" style={{ textAlign: 'center', marginBottom: '15px' }}>
-                            <img src="/brand/duke burger 1 negativo.png" alt="Duke Burger" style={{ height: '40px', filter: 'grayscale(1)', marginBottom: '5px' }} />
+                            <img src="/brand/duke burger 2 positivo.png" alt="Duke Burger" style={{ height: '60px', marginBottom: '5px' }} />
                             <h1 style={{ fontSize: '1.2rem', margin: '0 0 5px 0', fontWeight: '900' }}>DUKE BURGER</h1>
                             <div style={{ fontSize: '0.75rem', lineHeight: '1.2' }}>
                                 <div>Bº Frondizi - Rivadavia</div>
@@ -403,9 +403,15 @@ const Orders = () => {
                             </div>
                         </div>
 
-                        <div className="ticket-footer-print" style={{ textAlign: 'center', marginTop: '20px', fontSize: '0.75rem' }}>
-                            <p style={{ margin: '0' }}>¡Gracias por elegirnos!</p>
-                            <p style={{ margin: '0', fontWeight: 'bold' }}>DUKEBURGER-SJ.COM</p>
+                        <div className="ticket-footer-print" style={{ textAlign: 'center', marginTop: '15px', fontSize: '0.75rem' }}>
+                            <p style={{ margin: '0 0 5px 0', fontWeight: 'bold' }}>🚀 ¿TE GUSTÓ EL SABOR?</p>
+                            <img 
+                                src="https://api.qrserver.com/v1/create-qr-code/?size=100x100&data=https://g.page/r/CTunx53CILhQEBI/review" 
+                                alt="QR Reseñas" 
+                                style={{ width: '80px', height: '80px', display: 'block', margin: '5px auto', background: 'white', padding: '5px', border: '1px solid #eee' }} 
+                            />
+                            <p style={{ margin: '5px 0 0 0' }}>Escanea y dejanos tu reseña</p>
+                            <p style={{ margin: '10px 0 0 0', fontWeight: 'bold', borderTop: '1px dashed #000', paddingTop: '5px' }}>DUKEBURGER-SJ.COM</p>
                         </div>
                     </div>
                 )}
