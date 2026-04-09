@@ -166,8 +166,23 @@ def DashboardInsightsView(request):
     kitchen_ready_count = kitchen_ready_qs.count()
     
     # Serialized summaries for dashboard modals
-    kitchen_pending_list = [{"id": s.id, "customer": s.customer_name or "Particular", "total": float(s.total_amount), "is_prepared": s.is_prepared} for s in kitchen_pending_qs]
-    kitchen_ready_list = [{"id": s.id, "customer": s.customer_name or "Particular", "total": float(s.total_amount), "is_prepared": s.is_prepared} for s in kitchen_ready_qs]
+    kitchen_pending_list = [{
+        "id": s.id, 
+        "customer": s.customer_name or "Particular", 
+        "total": float(s.total_amount), 
+        "is_prepared": s.is_prepared,
+        "created_at": s.date.isoformat(),
+        "updated_at": s.updated_at.isoformat()
+    } for s in kitchen_pending_qs]
+    
+    kitchen_ready_list = [{
+        "id": s.id, 
+        "customer": s.customer_name or "Particular", 
+        "total": float(s.total_amount), 
+        "is_prepared": s.is_prepared,
+        "created_at": s.date.isoformat(),
+        "updated_at": s.updated_at.isoformat()
+    } for s in kitchen_ready_qs]
     
     # 3. Stats Mensuales ( IA / RAG Context Ready )
     month_start = now.replace(day=1, hour=0, minute=0, second=0, microsecond=0)

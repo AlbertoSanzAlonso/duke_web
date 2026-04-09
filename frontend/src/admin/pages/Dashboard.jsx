@@ -310,12 +310,19 @@ const Dashboard = () => {
                                 </h4>
                                 {data.kitchenReadyList.length === 0 ? <p style={{ opacity: 0.5, fontSize: '0.9rem', padding: '10px' }}>No hay pedidos listos todavía.</p> : (
                                     <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                                        {data.kitchenReadyList.map(order => (
-                                            <div key={order.id} style={{ display: 'flex', justifyContent: 'space-between', padding: '12px', background: '#f8f9fa', borderRadius: '10px', borderLeft: '4px solid #40c057', fontSize: '0.95rem' }}>
-                                                <span><strong>#{order.id}</strong> {order.customer}</span>
-                                                <strong style={{ color: '#2b8a3e' }}>${order.total.toLocaleString('es-AR')}</strong>
-                                            </div>
-                                        ))}
+                                        {data.kitchenReadyList.map(order => {
+                                            const entryTime = new Date(order.created_at).toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit' });
+                                            const readyTime = new Date(order.updated_at).toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit' });
+                                            return (
+                                                <div key={order.id} style={{ display: 'flex', justifyContent: 'space-between', padding: '12px', background: '#f8f9fa', borderRadius: '10px', borderLeft: '4px solid #40c057', fontSize: '0.95rem' }}>
+                                                    <span><strong>#{order.id}</strong> {order.customer}</span>
+                                                    <div style={{ textAlign: 'right', fontSize: '0.8rem', color: '#666' }}>
+                                                        <div>⏲️ {entryTime}</div>
+                                                        <div style={{ color: '#2b8a3e', fontWeight: 'bold' }}>✅ {readyTime}</div>
+                                                    </div>
+                                                </div>
+                                            );
+                                        })}
                                     </div>
                                 )}
 
@@ -324,12 +331,17 @@ const Dashboard = () => {
                                 </h4>
                                 {data.kitchenPendingList.length === 0 ? <p style={{ opacity: 0.5, fontSize: '0.9rem', padding: '10px' }}>No hay pedidos activos.</p> : (
                                     <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                                        {data.kitchenPendingList.map(order => (
-                                            <div key={order.id} style={{ display: 'flex', justifyContent: 'space-between', padding: '12px', background: '#f8f9fa', borderRadius: '10px', borderLeft: '4px solid #f03e3e', fontSize: '0.95rem' }}>
-                                                <span><strong>#{order.id}</strong> {order.customer}</span>
-                                                <strong>${order.total.toLocaleString('es-AR')}</strong>
-                                            </div>
-                                        ))}
+                                        {data.kitchenPendingList.map(order => {
+                                            const entryTime = new Date(order.created_at).toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit' });
+                                            return (
+                                                <div key={order.id} style={{ display: 'flex', justifyContent: 'space-between', padding: '12px', background: '#f8f9fa', borderRadius: '10px', borderLeft: '4px solid #f03e3e', fontSize: '0.95rem', alignItems: 'center' }}>
+                                                    <span><strong>#{order.id}</strong> {order.customer}</span>
+                                                    <div style={{ fontSize: '0.85rem', color: '#e03131', fontWeight: 'bold' }}>
+                                                        ⏲️ {entryTime}
+                                                    </div>
+                                                </div>
+                                            );
+                                        })}
                                     </div>
                                 )}
                             </div>

@@ -118,7 +118,11 @@ const Kitchen = () => {
                             <div className="kitchen-card-header">
                                 <span className="ticket-number">#{order.id}</span>
                                 <span className="ticket-time">
-                                    <Clock size={16} /> {new Date(order.date).toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit' })}
+                                    <Clock size={16} /> 
+                                    PEDIDO: {new Date(order.date).toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit' })}
+                                    {order.is_prepared && (
+                                        <> | LISTO: {new Date(order.updated_at).toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit' })}</>
+                                    )}
                                 </span>
                             </div>
                             <div className="kitchen-card-body">
