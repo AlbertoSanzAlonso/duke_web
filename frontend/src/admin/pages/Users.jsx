@@ -162,10 +162,10 @@ const Users = () => {
     if (loading && users.length === 0) return <LoadingScreen />;
 
     return (
-        <div className="admin-content">
+        <div className="admin-content users-page-content">
             {toast && <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />}
             
-            <header className="page-header" style={{ marginBottom: '30px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '20px' }}>
+            <header className="page-header users-mobile-header">
                 <div>
                     <h2 style={{ display: 'flex', alignItems: 'center', gap: '12px', margin: 0 }}>
                         <Shield size={32} color="#f03e3e" /> Gestión de Usuarios
@@ -286,7 +286,7 @@ const Users = () => {
 
             {/* Modal for Create/Edit */}
             {isModalOpen && (
-                <div className="modal-overlay" style={{ background: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(4px)', zIndex: 9999 }}>
+                <div className="modal-overlay users-modal-overlay">
                     <div className="modal-content" style={{ 
                         maxWidth: '600px', 
                         width: '95%', 
@@ -488,6 +488,27 @@ const Users = () => {
                 }
                 input:checked + .slider { background-color: #e31837; }
                 input:checked + .slider:before { transform: translateX(16px); }
+                .users-modal-overlay {
+                    position: fixed;
+                    top: 0; left: 0; right: 0; bottom: 0;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    background: rgba(0,0,0,0.85);
+                    backdrop-filter: blur(5px);
+                    z-index: 9999;
+                    padding: 15px; /* Margin for the modal itself */
+                }
+
+                @media (max-width: 768px) {
+                    .users-mobile-header {
+                        margin-bottom: 20px !important;
+                        padding: 0 5px;
+                    }
+                    .users-page-content {
+                        padding: 10px !important;
+                    }
+                }
             `}</style>
         </div>
     );

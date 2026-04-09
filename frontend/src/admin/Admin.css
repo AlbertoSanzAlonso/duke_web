@@ -132,6 +132,12 @@ select::placeholder {
   overflow-y: auto;
 }
 
+@media (max-width: 768px) {
+  .admin-content {
+    padding: 15px 10px; /* Reduced padding for mobile to prevent compression */
+  }
+}
+
 .admin-card {
     background: #fff;
     border-radius: 8px;

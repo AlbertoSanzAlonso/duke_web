@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { fetchDashboardInsights } from '../../services/api';
 import LoadingScreen from '../components/LoadingScreen';
 import { ShoppingBag, Star, Clock, AlertTriangle, TrendingUp, Package, CalendarOff, Mail, History, Settings as SettingsIcon, Plus, Utensils, CheckCircle } from 'lucide-react';
+import Toast from '../components/Toast';
 
 const Dashboard = () => {
     const [loading, setLoading] = useState(true);
@@ -21,6 +22,7 @@ const Dashboard = () => {
         mailConfigured: true
     });
     const [profile, setProfile] = useState(null);
+    const [toast, setToast] = useState(null);
 
     useEffect(() => {
         const loadDashboardData = async (silent = false) => {
@@ -88,13 +90,16 @@ const Dashboard = () => {
                 kitchenReadyList: insights.today_sales.kitchen_ready_list,
                 kitchenDeliveredList: insights.today_sales.kitchen_delivered_list
             }));
+            setToast({ message: `Pedido #${orderId} marcado como recogido`, type: 'success' });
         } catch (error) {
             console.error("Error marking as delivered", error);
+            setToast({ message: "Error al marcar como recogido", type: 'error' });
         }
     };
 
     return (
         <div className="dash-container">
+            {toast && <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />}
             <div className="dash-header">
                 <h1 className="dash-title">
                     DUKE <span style={{ color: 'var(--admin-primary)' }}>INSIGHTS</span>

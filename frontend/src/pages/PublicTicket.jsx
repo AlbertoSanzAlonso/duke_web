@@ -19,7 +19,7 @@ const PublicTicket = () => {
                 const data = await response.json();
                 setOrder(data);
                 // Set the page title to the order ID for better PDF filename
-                document.title = `Ticket_#${data.id}`;
+                document.title = `DUKE-TICKET-${data.id}`;
 
                 // Generar QR de reseñas
                 QRCode.toDataURL("https://g.page/r/CTunx53CILhQEBI/review", {
@@ -60,12 +60,12 @@ const PublicTicket = () => {
     });
 
     return (
-        <div style={{ minHeight: '100vh', background: '#0a0a0a', color: '#fff', padding: '20px', fontFamily: 'Inter, sans-serif' }}>
+        <div key={order?.id} className="public-ticket-container" style={{ minHeight: '100vh', background: '#0a0a0a', color: '#fff', padding: '20px', fontFamily: 'Inter, sans-serif' }}>
             <style>
                 {`
                     @media print {
                         @page { 
-                            size: 80mm auto; 
+                            size: auto; 
                             margin: 0; 
                         }
                         body { 
@@ -73,7 +73,12 @@ const PublicTicket = () => {
                             color: black !important; 
                             padding: 0 !important; 
                             margin: 0 !important; 
-                            width: 80mm !important;
+                        }
+                        .public-ticket-container {
+                            min-height: auto !important;
+                            height: auto !important;
+                            background: white !important;
+                            padding: 0 !important;
                         }
                         .no-print { display: none !important; }
                         footer { display: none !important; }
@@ -81,26 +86,25 @@ const PublicTicket = () => {
                             margin-bottom: 10px !important; 
                             padding-top: 10px !important;
                         }
-                        header img { height: 50px !important; filter: grayscale(1) !important; }
-                        header h1, header div { color: black !important; }
+                        header img { height: 50px !important; filter: grayscale(1) brightness(0) !important; }
+                        header h1, header div { color: black !important; -webkit-text-fill-color: black !important; }
                         header h1 { font-size: 1.1rem !important; margin-bottom: 5px !important; }
                         header div { font-size: 0.75rem !important; margin-top: 2px !important; }
                         
                         main { 
                             box-shadow: none !important; 
                             border: none !important; 
-                            margin: 0 !important; 
+                            margin: 0 auto !important; 
                             background: white !important; 
                             color: black !important;
                             border-radius: 0 !important;
-                            width: 80mm !important;
-                            max-width: 80mm !important;
+                            width: 100% !important;
+                            max-width: 100% !important;
                         }
                         
                         /* Forzar fondos blancos en todos los contenedores */
                         div, section, article { 
                             background: white !important; 
-                            background-color: white !important; 
                             color: black !important; 
                             border-color: #eee !important;
                             box-shadow: none !important;
@@ -127,9 +131,6 @@ const PublicTicket = () => {
                         html, body { height: auto !important; overflow: visible !important; }
                         main { break-inside: avoid !important; page-break-inside: avoid !important; }
                         
-                        /* Garantizar negro en cabecera */
-                        header div, header h1 { color: black !important; -webkit-text-fill-color: black !important; }
-
                         /* Redimensionar QR */
                         img[alt="QR Reseñas Google"] {
                             width: 80px !important;

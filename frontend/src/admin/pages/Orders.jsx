@@ -117,7 +117,8 @@ const Orders = () => {
     const handlePrint = (order) => {
         setPrintingOrder(order);
         const originalTitle = document.title;
-        document.title = `Ticket_#${order.id}`;
+        // Clean filename for PDF: No # and uppercase
+        document.title = `DUKE-TICKET-${order.id}`;
         
         // Pequeño delay para asegurar que el DOM se actualice con los datos del pedido antes de imprimir
         setTimeout(() => {

@@ -739,7 +739,8 @@ def OrderStreamView(request):
                             'id': sale.id,
                             'customer': sale.customer_name or 'Cliente Anónimo',
                             'total': str(sale.total_amount),
-                            'is_prepared': sale.is_prepared
+                            'is_prepared': sale.is_prepared,
+                            'is_delivered': sale.is_delivered
                         }
                         yield f"data: {json.dumps(data)}\n\n"
                         last_seen_id = sale.id
@@ -754,7 +755,8 @@ def OrderStreamView(request):
                             'customer': sale.customer_name or 'Cliente Anónimo',
                             'total': str(sale.total_amount),
                             'status': sale.status,
-                            'is_prepared': sale.is_prepared
+                            'is_prepared': sale.is_prepared,
+                            'is_delivered': sale.is_delivered
                         }
                         yield f"data: {json.dumps(data)}\n\n"
                     

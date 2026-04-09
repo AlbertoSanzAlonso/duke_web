@@ -76,6 +76,17 @@ const Kitchen = () => {
         }
     };
 
+    const handleDeliver = async (orderId) => {
+        try {
+            const { markSaleAsDelivered } = await import('../../services/api');
+            await markSaleAsDelivered(orderId);
+            setToast({ message: `Pedido #${orderId} marcado como recogido`, type: 'success' });
+            loadKitchenOrders();
+        } catch (error) {
+            setToast({ message: "Error al marcar como entregado", type: 'error' });
+        }
+    };
+
     if (loading) return <LoadingScreen />;
 
     const currentDisplay = showHistory ? historyOrders : orders;
@@ -152,9 +163,13 @@ const Kitchen = () => {
                                         <CheckCircle size={24} /> LISTO
                                     </button>
                                 ) : (
-                                    <div className="ready-badge">
-                                        <CheckCircle size={20} /> YA PREPARADO
-                                    </div>
+                                    <button 
+                                        className="deliver-btn" 
+                                        onClick={() => handleDeliver(order.id)}
+                                        title="Marcar como RECOGIDO / ENTREGADO"
+                                    >
+                                        <CheckCircle size={24} /> ENTREGAR
+                                    </button>
                                 )}
                             </div>
                         </div>

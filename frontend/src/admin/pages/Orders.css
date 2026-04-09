@@ -411,17 +411,23 @@
 
 @media print {
     @page { 
-        size: 80mm auto; 
+        size: auto; 
         margin: 0; 
     }
     
-    body * {
-        visibility: hidden !important;
+    html, body {
+        height: auto !important;
+        overflow: visible !important;
+        background: white !important;
+    }
+
+    body > *:not(#ticket-print-area) {
+        display: none !important;
     }
     
     #ticket-print-area, #ticket-print-area * {
-        visibility: visible !important;
         display: block !important;
+        visibility: visible !important;
         color: black !important;
         -webkit-print-color-adjust: exact !important;
         print-color-adjust: exact !important;
@@ -431,7 +437,7 @@
         position: absolute;
         left: 0;
         top: 0;
-        width: 80mm !important;
+        width: 100% !important;
         background: white !important;
         padding: 0 !important;
         margin: 0 !important;
@@ -440,8 +446,8 @@
     .thermal-ticket {
         font-family: 'Inter', 'Segoe UI', Arial, sans-serif !important;
         color: black !important;
-        padding: 5mm !important;
-        width: 80mm !important;
+        padding: 4mm !important;
+        width: 100% !important;
         box-sizing: border-box !important;
         break-inside: avoid !important;
         page-break-inside: avoid !important;
@@ -450,13 +456,16 @@
     .ticket-header-print img {
         display: block !important;
         margin: 0 auto 5px auto !important;
+        filter: grayscale(1) brightness(0) !important;
+        height: 50px !important;
+        width: auto !important;
     }
 
     .ticket-divider {
         border-bottom: 1px dashed black !important;
         margin: 4mm 0 !important;
         display: block !important;
-        height: 1px !important;
+        height: 0 !important;
     }
 
     .ticket-info-print, .ticket-items-print, .ticket-total-print, .ticket-footer-print {
