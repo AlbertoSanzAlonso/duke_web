@@ -25,6 +25,7 @@ const Login = lazy(() => import('./admin/pages/Login'));
 const ResetPassword = lazy(() => import('./admin/pages/ResetPassword'));
 const Profile = lazy(() => import('./admin/pages/Profile'));
 const Users = lazy(() => import('./admin/pages/Users'));
+const Kitchen = lazy(() => import('./admin/pages/Kitchen'));
 
 const ProtectedRoute = () => {
   if (!isAuthenticated()) {
@@ -44,6 +45,9 @@ function App() {
           <Route path="/ticket/:id" element={<PublicTicket />} />
           <Route path="/login" element={<Login />} />
           <Route path="/reset-password/:uid/:token" element={<ResetPassword />} />
+          <Route element={<ProtectedRoute />}>
+             <Route path="/cocina" element={<Kitchen />} />
+          </Route>
 
           {/* Admin Dashboard */}
           <Route element={<ProtectedRoute />}>
@@ -62,6 +66,7 @@ function App() {
               <Route path="config" element={<Settings />} />
               <Route path="usuarios" element={<Users />} />
               <Route path="perfil" element={<Profile />} />
+              <Route path="cocina" element={<Kitchen />} />
             </Route>
           </Route>
         </Routes>

@@ -32,3 +32,7 @@ class HasInventoryPermission(permissions.BasePermission):
 class HasGalleryPermission(permissions.BasePermission):
     def has_permission(self, request, view):
         return request.user.is_superuser or (hasattr(request.user, 'profile') and request.user.profile.can_use_gallery)
+
+class HasKitchenPermission(permissions.BasePermission):
+    def has_permission(self, request, view):
+        return request.user.is_superuser or (hasattr(request.user, 'profile') and request.user.profile.can_use_kitchen)

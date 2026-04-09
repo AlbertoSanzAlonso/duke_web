@@ -1,0 +1,187 @@
+.kitchen-container {
+    padding: 20px;
+    background: #0a0a0a;
+    min-height: 100vh;
+    color: #fff;
+    font-family: 'Inter', sans-serif;
+}
+
+.kitchen-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 25px;
+    padding-bottom: 15px;
+    border-bottom: 2px solid #333;
+}
+
+.kitchen-header h1 {
+    margin: 0;
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 2.5rem;
+    letter-spacing: 2px;
+    color: var(--admin-primary);
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.kitchen-clock {
+    font-size: 1.8rem;
+    font-weight: 700;
+    background: #1a1a1a;
+    padding: 5px 20px;
+    border-radius: 10px;
+    border: 1px solid #444;
+}
+
+.kitchen-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+    gap: 20px;
+}
+
+.kitchen-card {
+    background: #151515;
+    border-radius: 16px;
+    border: 2px solid #222;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    transition: transform 0.2s, border-color 0.2s;
+    position: relative;
+    animation: slideIn 0.3s ease-out;
+}
+
+.kitchen-card.new-order {
+    border-color: var(--admin-primary);
+    box-shadow: 0 0 20px rgba(240, 62, 62, 0.2);
+}
+
+.kitchen-card-header {
+    padding: 15px 20px;
+    background: #222;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.ticket-number {
+    font-size: 1.4rem;
+    font-weight: 900;
+    color: var(--admin-primary);
+}
+
+.ticket-time {
+    font-size: 1rem;
+    color: #aaa;
+    font-weight: 600;
+}
+
+.kitchen-card-body {
+    padding: 20px;
+    flex-grow: 1;
+}
+
+.customer-info {
+    margin-bottom: 15px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #333;
+}
+
+.customer-name {
+    font-size: 1.2rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    display: block;
+}
+
+.table-info {
+    color: #ffd43b;
+    font-weight: 700;
+    font-size: 1.1rem;
+}
+
+.items-list-kitchen {
+    margin-bottom: 20px;
+}
+
+.kitchen-item {
+    display: flex;
+    justify-content: space-between;
+    padding: 8px 0;
+    border-bottom: 1px solid #222;
+    font-size: 1.2rem;
+}
+
+.kitchen-item:last-child {
+    border-bottom: none;
+}
+
+.item-qty {
+    font-weight: 900;
+    color: var(--admin-primary);
+    margin-right: 12px;
+    font-size: 1.4rem;
+}
+
+.item-name {
+    flex-grow: 1;
+    font-weight: 600;
+}
+
+.order-notes {
+    background: #2b1d1d;
+    padding: 10px;
+    border-radius: 8px;
+    margin-top: 10px;
+    font-size: 0.95rem;
+    color: #ffc9c9;
+    border-left: 4px solid var(--admin-primary);
+}
+
+.kitchen-card-footer {
+    padding: 15px;
+    background: #1a1a1a;
+}
+
+.ready-btn {
+    width: 100%;
+    padding: 15px;
+    background: #2b8a3e;
+    color: white;
+    border: none;
+    border-radius: 10px;
+    font-size: 1.3rem;
+    font-weight: 900;
+    cursor: pointer;
+    text-transform: uppercase;
+    transition: background 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+}
+
+.ready-btn:hover {
+    background: #237032;
+}
+
+.ready-btn:active {
+    transform: scale(0.98);
+}
+
+@keyframes slideIn {
+    from { transform: translateY(20px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+}
+
+@media (max-width: 768px) {
+    .kitchen-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .kitchen-clock {
+        display: none;
+    }
+}

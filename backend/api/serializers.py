@@ -20,7 +20,8 @@ class UserProfileSerializer(serializers.ModelSerializer):
         fields = [
             'avatar', 'can_use_tpv', 'can_use_accounting', 
             'can_use_menu', 'can_use_inventory', 'can_use_promos', 
-            'can_use_gallery', 'can_use_settings', 'is_admin_manager'
+            'can_use_gallery', 'can_use_settings', 'can_use_kitchen',
+            'can_use_webmail', 'is_admin_manager'
         ]
 
 class UserSerializer(serializers.ModelSerializer):
@@ -92,7 +93,7 @@ class SaleSerializer(serializers.ModelSerializer):
     
     class Meta:
         model = Sale
-        fields = ['id', 'total_amount', 'date', 'notes', 'items', 'status', 'customer_name', 'table_number', 'delivery_cost']
+        fields = ['id', 'total_amount', 'date', 'notes', 'items', 'status', 'is_prepared', 'customer_name', 'table_number', 'delivery_cost']
 
 class SaleCreateSerializer(serializers.ModelSerializer):
     items = SaleItemSerializer(many=True)

@@ -18,7 +18,7 @@ from .serializers import (ProductSerializer, MenuEntrySerializer, SaleSerializer
                           DeliverySettingSerializer, UserSerializer, ActionLogSerializer)
 
 from .permissions import (IsAdminManager, HasTPVPermission, HasAccountingPermission,
-                         HasMenuPermission, HasInventoryPermission, HasGalleryPermission)
+                         HasMenuPermission, HasInventoryPermission, HasGalleryPermission, HasKitchenPermission)
 
 from django.utils.decorators import method_decorator
 import json
@@ -254,6 +254,7 @@ def AdminSetupView(request):
         profile.can_use_promos = True
         profile.can_use_gallery = True
         profile.can_use_settings = True
+        profile.can_use_kitchen = True
         profile.is_admin_manager = True
         profile.save()
 
@@ -282,6 +283,7 @@ def AdminSetupView(request):
         profile.can_use_promos = True
         profile.can_use_gallery = True
         profile.can_use_settings = True
+        profile.can_use_kitchen = True
         profile.is_admin_manager = True
         profile.save()
 
@@ -471,6 +473,14 @@ class SaleViewSet(viewsets.ModelViewSet):
             return Response({'message': f'{count} tickets eliminados.'})
             
         return Response({'error': 'Operación no válida'}, status=400)
+        
+    @action(detail=True, methods=['post'], url_path='mark-prepared')
+    def mark_prepared(self, request, pk=None):
+        sale = self.get_object()
+        sale.is_prepared = True
+        sale.save()
+        log_action(request.user if request.user.is_authenticated else None, 'COCINA', 'UPDATE', f'Pedido #{sale.id} marcado como PREPARADO')
+        return Response({'message': f'Pedido #{sale.id} enviado a listo.'})
 
 class ExpenseViewSet(viewsets.ModelViewSet):
     queryset = Expense.objects.all().order_by('-date')

@@ -18,7 +18,8 @@ import {
   Settings as SettingsIcon,
   Users as UsersIcon,
   LogOut,
-  Mail
+  Mail,
+  Utensils
 } from 'lucide-react';
 import './Admin.css';
 
@@ -119,6 +120,7 @@ const AdminLayout = () => {
     { name: 'Inventario', path: '/admin/inventario', icon: <Boxes size={20} />, perm: 'can_use_inventory' },
     { name: 'Pedidos Proveedor', path: '/admin/pedidos', icon: <Truck size={20} />, perm: 'can_use_inventory' },
     { name: 'Contabilidad', path: '/admin/contabilidad', icon: <TrendingUp size={20} />, perm: 'can_use_accounting' },
+    { name: 'Cocina', path: '/admin/cocina', icon: <Utensils size={20} />, perm: 'can_use_kitchen' },
   ];
 
   const menuItems = allMenuItems.filter(item => {
