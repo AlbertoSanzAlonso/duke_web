@@ -29,6 +29,10 @@ const Kitchen = lazy(() => import('./admin/pages/Kitchen'));
 
 const ProtectedRoute = () => {
   if (!isAuthenticated()) {
+    // Store the intended path to redirect back after login
+    if (window.location.pathname !== '/login' && window.location.pathname !== '/') {
+      sessionStorage.setItem('duke_redirect_after_login', window.location.pathname);
+    }
     return <Navigate to="/login" replace />;
   }
   return <Outlet />;

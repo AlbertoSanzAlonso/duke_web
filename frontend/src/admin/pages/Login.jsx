@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { login, requestPasswordReset } from '../../services/api';
+import { login, requestPasswordReset, fetchMe } from '../../services/api';
 import Toast from '../components/Toast';
 import './Login.css';
 
@@ -22,7 +22,24 @@ const Login = () => {
         setLoading(true);
         try {
             await login(username, password);
-            navigate('/admin');
+            
+            // Fetch profile to decide redirection
+            const me = await fetchMe();
+            
+            // If user was redirected from a specific page (like /cocina)
+            const from = sessionStorage.getItem('duke_redirect_after_login');
+            if (from) {
+                sessionStorage.removeItem('duke_redirect_after_login');
+                navigate(from);
+                return;
+            }
+
+            // Default redirection logic based on permissions
+            if (me.profile?.can_use_kitchen && !me.is_superuser && !me.profile?.can_use_tpv) {
+                navigate('/cocina');
+            } else {
+                navigate('/admin');
+            }
         } catch (error) {
             setToast({ message: error.message, type: 'error' });
         } finally {
