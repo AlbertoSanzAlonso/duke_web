@@ -1,0 +1,9 @@
+User-agent: *
+Allow: /
+Allow: /nosotros
+Disallow: /admin/
+Disallow: /login/
+Disallow: /ticket/
+Disallow: /reset-password/
+
+Sitemap: https://dukeburger-sj.com/sitemap.xml
