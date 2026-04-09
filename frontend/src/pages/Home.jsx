@@ -30,6 +30,7 @@ function Home() {
   const [openingHours, setOpeningHours] = useState([]);
   const [isHoursModalOpen, setIsHoursModalOpen] = useState(false);
   const [toast, setToast] = useState(null);
+  const [errorMessage, setErrorMessage] = useState(null);
 
   useEffect(() => {
     const handleScroll = () => {

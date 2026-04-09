@@ -759,8 +759,8 @@ img.nav-logo:hover,
   position: fixed;
   bottom: 2rem;
   right: 2rem;
-  width: 4rem;
-  height: 4rem;
+  width: 4.2rem;
+  height: 4.2rem;
   background: var(--color-primary);
   color: white;
   border-radius: 50%;
@@ -768,8 +768,9 @@ img.nav-logo:hover,
   align-items: center;
   justify-content: center;
   z-index: 2000;
-  box-shadow: 0 10px 30px rgba(227, 27, 35, 0.4);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
   transition: var(--transition-smooth);
+  border: 2px solid rgba(255,255,255,0.1);
 }
 
 .cart-fab-count {
@@ -1735,11 +1736,11 @@ img.nav-logo:hover,
 /* Contact FAB and Modal Options */
 .contact-fab {
   position: fixed;
-  bottom: 2.5rem;
+  bottom: 2rem;
   right: 2rem;
-  width: 4.5rem;
-  height: 4.5rem;
-  background: #333; /* Gray background requested */
+  width: 4.2rem;
+  height: 4.2rem;
+  background: #333;
   color: white;
   border-radius: 50%;
   display: flex;
@@ -1794,7 +1795,7 @@ img.nav-logo:hover,
 
 /* Mobile adjustments for FAB */
 @media (max-width: 480px) {
-  .contact-fab {
+  .contact-fab, .cart-fab {
     bottom: 1.5rem;
     right: 1.5rem;
     width: 3.8rem;
