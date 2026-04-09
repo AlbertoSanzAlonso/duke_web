@@ -169,24 +169,30 @@ function About() {
             {/* Testimonials Grid */}
             <div className="testimonials-grid" style={{ 
               display: 'grid', 
-              gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', 
-              gap: '20px', 
+              gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', 
+              gap: '25px', 
               marginBottom: '50px',
               textAlign: 'left'
             }}>
               {[
-                { name: "Andrés G.", text: "La Duke es de otro planeta. La cebolla caramelizada le da el toque justo. ¡Súper recomendados!", stars: 5 },
-                { name: "Lucía M.", text: "Pedimos la Conde y no defraudó. Se nota la calidad de los ingredientes y las papas llegaron 10 puntos.", stars: 5 },
-                { name: "Matias R.", text: "Lo mejor de Rivadavia por lejos. El sistema para pedir por la web es muy fácil y rápido. 10/10.", stars: 5 }
+                { name: "Andrés G.", text: "Las mejores smash de San Juan por lejos. La Duke es obligatoria si venís por primera vez. Calidad 10/10.", stars: 5 },
+                { name: "Lucía M.", text: "Excelente atención y ambiente. La Conde con aceite de trufa es una locura de sabor. Muy recomendado.", stars: 5 },
+                { name: "Matias R.", text: "Sabor brutal. El sistema de pedidos por la web funciona impecable y el envío es súper puntual. Mi lugar de confianza.", stars: 5 }
               ].map((rev, i) => (
-                <div key={i} style={{ background: '#222', padding: '20px', borderRadius: '16px', border: '1px solid #333' }}>
-                  <div style={{ color: '#fcc419', marginBottom: '10px', fontSize: '0.9rem' }}>
+                <div key={i} style={{ 
+                  background: 'rgba(255,255,255,0.03)', 
+                  padding: '25px', 
+                  borderRadius: '20px', 
+                  border: '1px solid rgba(255,255,255,0.1)',
+                  transition: 'transform 0.3s ease'
+                }}>
+                  <div style={{ color: '#fcc419', marginBottom: '12px', fontSize: '1rem' }}>
                     {"⭐".repeat(rev.stars)}
                   </div>
-                  <p style={{ color: '#eee', fontSize: '0.95rem', fontStyle: 'italic', marginBottom: '15px', lineHeight: '1.5' }}>
+                  <p style={{ color: '#ccc', fontSize: '1rem', fontStyle: 'italic', marginBottom: '15px', lineHeight: '1.6' }}>
                     "{rev.text}"
                   </p>
-                  <div style={{ fontWeight: 'bold', color: 'var(--color-primary)', fontSize: '0.9rem' }}>
+                  <div style={{ fontWeight: '800', color: 'var(--color-primary)', fontSize: '0.9rem', textTransform: 'uppercase', letterSpacing: '1px' }}>
                     {rev.name}
                   </div>
                 </div>
@@ -194,14 +200,30 @@ function About() {
             </div>
             
             <div style={{ borderTop: '1px solid #333', paddingTop: '40px' }}>
-              <h3 style={{ color: '#fff', marginBottom: '20px', fontFamily: 'var(--font-heading)', fontSize: '1.5rem' }}>¿VOS YA NOS PROBASTE?</h3>
-              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '30px', justifyContent: 'center', alignItems: 'center' }}>
+              <h3 style={{ 
+                color: '#fff', 
+                marginBottom: '20px', 
+                fontFamily: 'var(--font-heading)', 
+                fontSize: '1.8rem',
+                letterSpacing: '1px' 
+              }}>¿VOS YA NOS PROBASTE?</h3>
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '40px', justifyContent: 'center', alignItems: 'center' }}>
                 <a 
                   href="https://g.page/r/CTunx53CILhQEBI/review" 
                   target="_blank" 
                   rel="noopener noreferrer"
                   className="main-button"
-                  style={{ textDecoration: 'none', padding: '15px 40px', fontSize: '1.1rem' }}
+                  style={{ 
+                    textDecoration: 'none', 
+                    padding: '18px 45px', 
+                    fontSize: '1.4rem',
+                    fontFamily: 'var(--font-heading)',
+                    letterSpacing: '2px',
+                    background: 'var(--color-primary)',
+                    color: '#fff',
+                    borderRadius: '12px',
+                    boxShadow: '0 10px 20px rgba(227, 24, 55, 0.3)'
+                  }}
                 >
                   DEJAR MI RESEÑA
                 </a>
@@ -211,14 +233,14 @@ function About() {
                   padding: '12px', 
                   borderRadius: '16px', 
                   display: 'inline-block',
-                  boxShadow: '0 10px 20px rgba(0,0,0,0.2)'
+                  boxShadow: '0 15px 35px rgba(0,0,0,0.4)',
+                  border: '2px solid #eee'
                 }}>
                   <img 
                     src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=https://g.page/r/CTunx53CILhQEBI/review" 
                     alt="QR Reseñas Google" 
-                    style={{ width: '100px', height: '100px', display: 'block' }} 
+                    style={{ width: '110px', height: '110px', display: 'block' }} 
                   />
-                  <p style={{ color: '#333', fontSize: '0.65rem', fontWeight: 'bold', marginTop: '5px', margin: '5px 0 0 0' }}>ESCANEAR QR</p>
                 </div>
               </div>
             </div>
