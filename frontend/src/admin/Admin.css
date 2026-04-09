@@ -117,6 +117,13 @@ select::placeholder {
   margin: 0;
   color: #495057;
   font-weight: 600;
+  transition: all 0.3s ease;
+}
+
+.admin-panel-link:hover h3 {
+  color: #f03e3e !important;
+  transform: translateX(3px);
+  text-shadow: 0 0 10px rgba(240, 62, 62, 0.2);
 }
 
 .admin-content {

@@ -134,7 +134,7 @@ const AdminLayout = () => {
 
       <aside className={`sidebar ${isMobileOpen ? 'open' : ''}`}>
         <div className="sidebar-header">
-          <Link to="/" title="Ir a la Web principal" onClick={() => setIsMobileOpen(false)} style={{ position: 'relative' }}>
+          <Link to="/" target="_blank" rel="noopener noreferrer" title="Ir a la Web principal (Nueva pestaña)" onClick={() => setIsMobileOpen(false)} style={{ position: 'relative' }}>
             <img src="/brand/duke burger 1 negativo.png" alt="Duke Admin Logo" style={{ height: '60px', objectFit: 'contain', cursor: 'pointer' }} />
             {/* SSE Status Indicator */}
             <div
@@ -187,7 +187,9 @@ const AdminLayout = () => {
             <button className="admin-mobile-toggle" onClick={() => setIsMobileOpen(!isMobileOpen)}>
               <Menu size={24} />
             </button>
-            <h3 style={{ margin: 0, fontSize: '1.4rem', fontWeight: '800', letterSpacing: '1px' }}>DUKE BURGER PANEL</h3>
+            <Link to="/admin" className="admin-panel-link" style={{ textDecoration: 'none', color: '#fff' }}>
+              <h3 style={{ margin: 0, fontSize: '1.4rem', fontWeight: '800', letterSpacing: '1px' }}>DUKE BURGER PANEL</h3>
+            </Link>
           </div>
 
           <UserDropdown />
