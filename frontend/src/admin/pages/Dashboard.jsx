@@ -10,6 +10,8 @@ const Dashboard = () => {
         todaySalesCount: 0,
         pendingToday: 0,
         completedToday: 0,
+        kitchenPending: 0,
+        kitchenReady: 0,
         activePromos: 0,
         todayHours: null,
         lowStockItems: [],
@@ -29,6 +31,8 @@ const Dashboard = () => {
                     todaySalesCount: insights.today_sales.total_count,
                     pendingToday: insights.today_sales.pending,
                     completedToday: insights.today_sales.completed,
+                    kitchenPending: insights.today_sales.kitchen_pending,
+                    kitchenReady: insights.today_sales.kitchen_ready,
                     activePromos: insights.active_promos,
                     todayHours: insights.today_hours,
                     lowStockItems: insights.low_stock,
@@ -83,8 +87,23 @@ const Dashboard = () => {
                     <div className="stat-content">
                         <div className="stat-value">{data.todaySalesCount}</div>
                         <div className="stat-label">Pedidos de Hoy</div>
-                        <div style={{ fontSize: '0.75rem', color: '#666', marginTop: '4px' }}>
-                            <span style={{ color: '#f08c00', fontWeight: 'bold' }}>{data.pendingToday} pendientes</span> / <span style={{ color: '#2b8a3e', fontWeight: 'bold' }}>{data.completedToday} cobrados</span>
+                        <div style={{ fontSize: '0.75rem', color: '#666', marginTop: '4px', display: 'flex', gap: '8px' }}>
+                            <span style={{ color: '#2b8a3e', fontWeight: 'bold' }}>{data.completedToday} Cobrados</span>
+                            <span style={{ color: '#f08c00', fontWeight: 'bold' }}>{data.pendingToday} Pendientes</span>
+                        </div>
+                    </div>
+                </Link>
+
+                {/* NUEVO: ESTADO DE COCINA */}
+                <Link to="/admin/cocina" className="stat-card" style={{ textDecoration: 'none', background: data.kitchenReady > 0 ? '#fff5f5' : '' }}>
+                    <div className="stat-icon-box icon-gray">
+                        <History size={24} color={data.kitchenReady > 0 ? 'var(--admin-primary)' : ''} />
+                    </div>
+                    <div className="stat-content">
+                        <div className="stat-label">Estado Cocina</div>
+                        <div className="stat-value" style={{ display: 'flex', gap: '15px', alignItems: 'center' }}>
+                           <div style={{ fontSize: '1.4rem' }}>{data.kitchenReady} <small style={{ fontSize: '0.7rem', color: '#2b8a3e' }}>LISTOS</small></div>
+                           <div style={{ fontSize: '1.4rem', opacity: 0.6 }}>{data.kitchenPending} <small style={{ fontSize: '0.7rem' }}>EN COCCIÓN</small></div>
                         </div>
                     </div>
                 </Link>

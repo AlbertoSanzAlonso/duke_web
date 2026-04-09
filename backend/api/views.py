@@ -155,8 +155,12 @@ def DashboardInsightsView(request):
     # 2. Sales (Optimized)
     sales_qs = Sale.objects.filter(date__gte=today_start)
     today_sales_count = sales_qs.count()
-    pending_today = sales_qs.filter(status='PENDING').count()
+    pending_today_qs = sales_qs.filter(status='PENDING')
+    pending_today = pending_today_qs.count()
     completed_today = sales_qs.filter(status='COMPLETED').count()
+    
+    kitchen_pending = pending_today_qs.filter(is_prepared=False).count()
+    kitchen_ready = pending_today_qs.filter(is_prepared=True).count()
     
     # 3. Stats Mensuales ( IA / RAG Context Ready )
     month_start = now.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
@@ -192,7 +196,9 @@ def DashboardInsightsView(request):
         'today_sales': {
             'total_count': today_sales_count,
             'pending': pending_today,
-            'completed': completed_today
+            'completed': completed_today,
+            'kitchen_pending': kitchen_pending,
+            'kitchen_ready': kitchen_ready
         },
         'monthly_stats': {
             'total_sales': float(monthly_sales),
