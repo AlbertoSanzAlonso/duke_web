@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { X } from 'lucide-react';
-import InstagramFeed from '../components/InstagramFeed.tsx';
-import { fetchGalleryImages, fetchSettings, fetchOpeningHours } from '../services/api';
+import { Link } from 'react-router-dom';
+import { X, Menu } from 'lucide-react';
+import { fetchGalleryImages, fetchOpeningHours } from '../services/api';
 import Footer from '../components/Footer';
 import FloatingContact from '../components/FloatingContact';
 

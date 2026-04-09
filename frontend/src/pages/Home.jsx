@@ -806,11 +806,7 @@ function Home() {
               </div>
             </div>
             <div className="detail-content">
-              <div className="detail-header">
-                <h2>{selectedProduct.name}</h2>
-                <span className="detail-cat">{activeCategory}</span>
-              </div>
-              <p className="detail-desc">{selectedProduct.description || ''}</p>
+              {/* Name, Category and Description removed by user request */}
               
               {selectedProduct.ingredients && (
                 <div className="detail-ingredients">
