@@ -11,6 +11,7 @@ const Orders = () => {
     const [orders, setOrders] = useState([]);
     const [loading, setLoading] = useState(true);
     const [selectedOrder, setSelectedOrder] = useState(null);
+    const [printingOrder, setPrintingOrder] = useState(null);
     const [searchTerm, setSearchTerm] = useState('');
     const [searchParams] = useSearchParams();
     const [filterType, setFilterType] = useState('all'); // 'all', 'daily', 'weekly', 'monthly'
@@ -105,7 +106,7 @@ const Orders = () => {
     }, [filteredOrders]);
 
     const handlePrint = (order) => {
-        setSelectedOrder(order);
+        setPrintingOrder(order);
         // Pequeño delay para asegurar que el DOM se actualice con los datos del pedido antes de imprimir
         setTimeout(() => {
             window.print();
@@ -357,7 +358,7 @@ const Orders = () => {
 
             {/* Area de Impresion Oculta */}
             <div id="ticket-print-area" className="print-only">
-                {selectedOrder && (
+                {(printingOrder || selectedOrder) && (
                     <div className="thermal-ticket" style={{ width: '80mm', margin: '0 auto', color: 'black', background: 'white' }}>
                         <div className="ticket-header-print" style={{ textAlign: 'center', marginBottom: '15px' }}>
                             <img src="/brand/duke burger 2 positivo.png" alt="Duke Burger" style={{ height: '60px', marginBottom: '5px' }} />
@@ -372,17 +373,17 @@ const Orders = () => {
 
                         <div className="ticket-info-print" style={{ fontSize: '0.8rem', marginBottom: '10px' }}>
                             <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '3px' }}>
-                                <strong>TICKET #{selectedOrder.id}</strong>
-                                <span>{new Date(selectedOrder.date).toLocaleDateString('es-AR')}</span>
+                                <strong>TICKET #{(printingOrder || selectedOrder).id}</strong>
+                                <span>{new Date((printingOrder || selectedOrder).date).toLocaleDateString('es-AR')}</span>
                             </div>
-                            <div>CLIENTE: {selectedOrder.customer_name || 'PARTICULAR'}</div>
-                            {selectedOrder.table_number && <div>ENTREGA: {selectedOrder.table_number}</div>}
+                            <div>CLIENTE: {(printingOrder || selectedOrder).customer_name || 'PARTICULAR'}</div>
+                            {(printingOrder || selectedOrder).table_number && <div>ENTREGA: {(printingOrder || selectedOrder).table_number}</div>}
                         </div>
 
                         <div className="ticket-divider" style={{ borderBottom: '1px dashed #000', margin: '10px 0' }}></div>
 
                         <div className="ticket-items-print" style={{ fontSize: '0.85rem' }}>
-                            {selectedOrder.items.map(item => (
+                            {(printingOrder || selectedOrder).items.map(item => (
                                 <div key={item.id} style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '4px' }}>
                                     <span>{item.quantity} x {item.entry_name}</span>
                                     <strong>${(item.quantity * parseFloat(item.price_at_sale)).toLocaleString('es-AR')}</strong>
@@ -393,13 +394,13 @@ const Orders = () => {
                         <div className="ticket-divider" style={{ borderBottom: '1px solid #000', margin: '10px 0' }}></div>
 
                         <div className="ticket-total-print" style={{ textAlign: 'right' }}>
-                            {parseFloat(selectedOrder.delivery_cost) > 0 && (
+                            {parseFloat((printingOrder || selectedOrder).delivery_cost) > 0 && (
                                 <div style={{ fontSize: '0.75rem', marginBottom: '4px' }}>
-                                    Envío: ${parseFloat(selectedOrder.delivery_cost).toLocaleString('es-AR')}
+                                    Envío: ${parseFloat((printingOrder || selectedOrder).delivery_cost).toLocaleString('es-AR')}
                                 </div>
                             )}
                             <div style={{ fontSize: '1.2rem', fontWeight: '900' }}>
-                                TOTAL: ${Math.round(parseFloat(selectedOrder.total_amount)).toLocaleString('es-AR')}
+                                TOTAL: ${Math.round(parseFloat((printingOrder || selectedOrder).total_amount)).toLocaleString('es-AR')}
                             </div>
                         </div>
 
