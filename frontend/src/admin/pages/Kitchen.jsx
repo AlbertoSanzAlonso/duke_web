@@ -7,57 +7,58 @@ import './Kitchen.css';
 
 const Kitchen = () => {
     const [orders, setOrders] = useState([]);
+    const [historyOrders, setHistoryOrders] = useState([]);
+    const [showHistory, setShowHistory] = useState(false);
     const [loading, setLoading] = useState(true);
     const [currentTime, setCurrentTime] = useState(new Date());
     const [toast, setToast] = useState(null);
 
     useEffect(() => {
         loadKitchenOrders();
-        
-        // Timer for clock
         const timer = setInterval(() => setCurrentTime(new Date()), 1000);
         
-        // Real-time listener
         const handleNewOrder = () => {
-            console.log("Kitchen: New order received, refreshing...");
+            console.log("Kitchen refresh triggered");
             loadKitchenOrders();
-            // Optional: play sound
-            const beep = new AudioContext();
-            const osc = beep.createOscillator();
-            const gain = beep.createGain();
-            osc.connect(gain);
-            gain.connect(beep.destination);
-            osc.type = 'sine';
-            osc.frequency.setValueAtTime(880, beep.currentTime);
-            gain.gain.setValueAtTime(0.1, beep.currentTime);
-            osc.start();
-            osc.stop(beep.currentTime + 0.2);
+            // Notificamos sonido solo si no estamos viendo historial para no confundir
+            if (!showHistory) {
+                const beep = new AudioContext();
+                const osc = beep.createOscillator();
+                const gain = beep.createGain();
+                osc.connect(gain);
+                gain.connect(beep.destination);
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(880, beep.currentTime);
+                gain.gain.setValueAtTime(0.05, beep.currentTime);
+                osc.start();
+                osc.stop(beep.currentTime + 0.1);
+            }
         };
 
         window.addEventListener('new-order-received', handleNewOrder);
-        
-        // Polling as fallback every 30s
-        const poll = setInterval(loadKitchenOrders, 30000);
-
         return () => {
             clearInterval(timer);
-            clearInterval(poll);
             window.removeEventListener('new-order-received', handleNewOrder);
         };
-    }, []);
+    }, [showHistory]);
 
     const loadKitchenOrders = async () => {
         try {
             const data = await fetchSales();
             const todayStr = new Date().toLocaleDateString('en-CA', { timeZone: 'America/Argentina/Buenos_Aires' });
             
-            // Filter NOT prepared AND from today (regardless of PENDING/COMPLETED)
-            const pending = data.filter(o => {
+            // Filtro por Día
+            const todayOrders = data.filter(o => {
                 const orderDate = new Date(o.date).toLocaleDateString('en-CA', { timeZone: 'America/Argentina/Buenos_Aires' });
-                return !o.is_prepared && orderDate === todayStr;
+                return orderDate === todayStr;
             });
+
+            // Separamos por estado de preparación
+            const pending = todayOrders.filter(o => !o.is_prepared);
+            const prepared = todayOrders.filter(o => o.is_prepared);
             
-            setOrders(pending.sort((a, b) => new Date(a.date) - new Date(b.date))); // FIFO
+            setOrders(pending.sort((a, b) => new Date(a.date) - new Date(b.date))); 
+            setHistoryOrders(prepared.sort((a, b) => new Date(b.updated_at) - new Date(a.updated_at))); 
         } catch (error) {
             console.error("Error loading kitchen orders:", error);
         } finally {
@@ -68,8 +69,8 @@ const Kitchen = () => {
     const handleReady = async (orderId) => {
         try {
             await markSaleAsPrepared(orderId);
-            setOrders(prev => prev.filter(o => o.id !== orderId));
-            setToast({ message: `Pedido #${orderId} completado`, type: 'success' });
+            setToast({ message: `Pedido #${orderId} enviado al historial`, type: 'success' });
+            loadKitchenOrders();
         } catch (error) {
             setToast({ message: "Error al marcar como listo", type: 'error' });
         }
@@ -77,24 +78,43 @@ const Kitchen = () => {
 
     if (loading) return <LoadingScreen />;
 
+    const currentDisplay = showHistory ? historyOrders : orders;
+
     return (
         <div className="kitchen-container">
             <header className="kitchen-header">
-                <h1><Utensils size={40} /> COCINA DUKE</h1>
-                <div className="kitchen-clock">
-                    {currentTime.toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
+                <div className="header-top">
+                    <h1><Utensils size={40} /> COCINA DUKE</h1>
+                    <div className="kitchen-clock">
+                        {currentTime.toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
+                    </div>
+                </div>
+                
+                <div className="kitchen-nav">
+                    <button 
+                        className={`nav-item ${!showHistory ? 'active' : ''}`} 
+                        onClick={() => setShowHistory(false)}
+                    >
+                        PENDIENTES ({orders.length})
+                    </button>
+                    <button 
+                        className={`nav-item ${showHistory ? 'active' : ''}`} 
+                        onClick={() => setShowHistory(true)}
+                    >
+                        HISTORIAL HOY ({historyOrders.length})
+                    </button>
                 </div>
             </header>
 
             <div className="kitchen-grid">
-                {orders.length === 0 ? (
+                {currentDisplay.length === 0 ? (
                     <div style={{ gridColumn: '1/-1', textAlign: 'center', padding: '100px', opacity: 0.5 }}>
                         <Package size={80} style={{ marginBottom: '20px' }} />
-                        <h2>SIN PEDIDOS PENDIENTES</h2>
+                        <h2>{showHistory ? 'HISTORIAL VACÍO' : 'SIN PEDIDOS PENDIENTES'}</h2>
                     </div>
                 ) : (
-                    orders.map(order => (
-                        <div key={order.id} className="kitchen-card new-order">
+                    currentDisplay.map(order => (
+                        <div key={order.id} className={`kitchen-card ${!order.is_prepared ? 'new-order' : 'history-card'}`}>
                             <div className="kitchen-card-header">
                                 <span className="ticket-number">#{order.id}</span>
                                 <span className="ticket-time">
@@ -123,9 +143,15 @@ const Kitchen = () => {
                                 )}
                             </div>
                             <div className="kitchen-card-footer">
-                                <button className="ready-btn" onClick={() => handleReady(order.id)}>
-                                    <CheckCircle size={24} /> LISTO
-                                </button>
+                                {!order.is_prepared ? (
+                                    <button className="ready-btn" onClick={() => handleReady(order.id)}>
+                                        <CheckCircle size={24} /> LISTO
+                                    </button>
+                                ) : (
+                                    <div className="ready-badge">
+                                        <CheckCircle size={20} /> YA PREPARADO
+                                    </div>
+                                )}
                             </div>
                         </div>
                     ))

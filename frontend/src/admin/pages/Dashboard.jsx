@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { fetchDashboardInsights } from '../../services/api';
 import LoadingScreen from '../components/LoadingScreen';
-import { ShoppingBag, Star, Clock, AlertTriangle, TrendingUp, Package, CalendarOff, Mail, History, Settings as SettingsIcon, Plus } from 'lucide-react';
+import { ShoppingBag, Star, Clock, AlertTriangle, TrendingUp, Package, CalendarOff, Mail, History, Settings as SettingsIcon, Plus, Utensils } from 'lucide-react';
 
 const Dashboard = () => {
     const [loading, setLoading] = useState(true);
@@ -12,6 +12,8 @@ const Dashboard = () => {
         completedToday: 0,
         kitchenPending: 0,
         kitchenReady: 0,
+        kitchenPendingList: [],
+        kitchenReadyList: [],
         activePromos: 0,
         todayHours: null,
         lowStockItems: [],
@@ -33,6 +35,8 @@ const Dashboard = () => {
                     completedToday: insights.today_sales.completed,
                     kitchenPending: insights.today_sales.kitchen_pending,
                     kitchenReady: insights.today_sales.kitchen_ready,
+                    kitchenPendingList: insights.today_sales.kitchen_pending_list,
+                    kitchenReadyList: insights.today_sales.kitchen_ready_list,
                     activePromos: insights.active_promos,
                     todayHours: insights.today_hours,
                     lowStockItems: insights.low_stock,
@@ -67,6 +71,8 @@ const Dashboard = () => {
         };
     }, []);
 
+    const [showKitchenModal, setShowKitchenModal] = useState(false);
+
     if (loading) return <LoadingScreen />;
 
     return (
@@ -94,8 +100,18 @@ const Dashboard = () => {
                     </div>
                 </Link>
 
-                {/* NUEVO: ESTADO DE COCINA */}
-                <Link to="/admin/cocina" className="stat-card" style={{ textDecoration: 'none', background: data.kitchenReady > 0 ? '#fff5f5' : '' }}>
+                {/* NUEVO: ESTADO DE COCINA (INTERACTIVO) */}
+                <div 
+                    className="stat-card" 
+                    onClick={() => setShowKitchenModal(true)}
+                    style={{ 
+                        cursor: 'pointer', 
+                        background: data.kitchenReady > 0 ? '#fff5f5' : '',
+                        transition: 'transform 0.2s',
+                    }}
+                    onMouseEnter={e => e.currentTarget.style.transform = 'translateY(-5px)'}
+                    onMouseLeave={e => e.currentTarget.style.transform = 'translateY(0)'}
+                >
                     <div className="stat-icon-box icon-gray">
                         <History size={24} color={data.kitchenReady > 0 ? 'var(--admin-primary)' : ''} />
                     </div>
@@ -106,7 +122,7 @@ const Dashboard = () => {
                            <div style={{ fontSize: '1.4rem', opacity: 0.6 }}>{data.kitchenPending} <small style={{ fontSize: '0.7rem' }}>EN COCCIÓN</small></div>
                         </div>
                     </div>
-                </Link>
+                </div>
 
                 {/* 2. PROMOS ACTIVAS */}
                 <Link to="/admin/promos" className="stat-card" style={{ flexDirection: 'column', textAlign: 'center', textDecoration: 'none' }}>
@@ -252,6 +268,67 @@ const Dashboard = () => {
                                 <AlertTriangle size={16} color="#e03131" />
                             </div>
                         ))}
+                    </div>
+                </div>
+            )}
+            {/* MODAL DETALLE DE COCINA HOY */}
+            {showKitchenModal && (
+                <div className="modal-overlay" onClick={() => setShowKitchenModal(false)} style={{ zIndex: 5000 }}>
+                    <div className="admin-card modal-content" onClick={e => e.stopPropagation()} style={{ width: '90%', maxWidth: '600px', maxHeight: '80vh', overflowY: 'auto' }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px', borderBottom: '2px solid #eee', paddingBottom: '10px' }}>
+                            <h2 style={{ margin: 0, display: 'flex', alignItems: 'center', gap: '10px' }}>
+                                <Utensils color="var(--admin-primary)" /> Control de Cocina (Hoy)
+                            </h2>
+                            <button onClick={() => setShowKitchenModal(false)} className="icon-btn" style={{ background: 'none', border: 'none', fontSize: '1.5rem', cursor: 'pointer' }}>×</button>
+                        </div>
+
+                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px', marginBottom: '20px' }}>
+                            <div className="stat-card" style={{ background: '#f8f9fa', padding: '15px' }}>
+                                <div style={{ fontSize: '0.8rem', color: '#888' }}>EN PREPARACIÓN</div>
+                                <div style={{ fontSize: '1.5rem', fontWeight: '900' }}>{data.kitchenPending}</div>
+                            </div>
+                            <div className="stat-card" style={{ background: '#ebfbee', padding: '15px' }}>
+                                <div style={{ fontSize: '0.8rem', color: '#2b8a3e' }}>LISTOS HOY</div>
+                                <div style={{ fontSize: '1.5rem', fontWeight: '900', color: '#2b8a3e' }}>{data.kitchenReady}</div>
+                            </div>
+                        </div>
+
+                        <div className="kitchen-lists-split">
+                            <h4 style={{ textTransform: 'uppercase', fontSize: '0.8rem', color: '#2b8a3e', marginTop: '20px' }}>✓ Pedidos Listos</h4>
+                            {data.kitchenReadyList.length === 0 ? <p style={{ opacity: 0.5, fontSize: '0.9rem' }}>No hay pedidos listos todavía.</p> : (
+                                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                                    {data.kitchenReadyList.map(order => (
+                                        <div key={order.id} style={{ display: 'flex', justifyContent: 'space-between', padding: '10px', background: '#f1f3f5', borderRadius: '8px', borderLeft: '4px solid #40c057' }}>
+                                            <span><strong>#{order.id}</strong> {order.customer}</span>
+                                            <strong>${order.total.toLocaleString('es-AR')}</strong>
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
+
+                            <h4 style={{ textTransform: 'uppercase', fontSize: '0.8rem', color: '#e03131', marginTop: '30px' }}>⚡ En Cocción</h4>
+                            {data.kitchenPendingList.length === 0 ? <p style={{ opacity: 0.5, fontSize: '0.9rem' }}>No hay pedidos activos en cocina.</p> : (
+                                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                                    {data.kitchenPendingList.map(order => (
+                                        <div key={order.id} style={{ display: 'flex', justifyContent: 'space-between', padding: '10px', background: '#f1f3f5', borderRadius: '8px', borderLeft: '4px solid #f03e3e' }}>
+                                            <span><strong>#{order.id}</strong> {order.customer}</span>
+                                            <strong>${order.total.toLocaleString('es-AR')}</strong>
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
+                        </div>
+
+                        <div style={{ marginTop: '30px', textAlign: 'center' }}>
+                            <Link 
+                                to="/admin/cocina" 
+                                className="add-movement-btn" 
+                                style={{ display: 'inline-block', textDecoration: 'none', background: '#333' }}
+                                onClick={() => setShowKitchenModal(false)}
+                            >
+                                IR AL PANEL COMPLETO DE COCINA
+                            </Link>
+                        </div>
                     </div>
                 </div>
             )}
