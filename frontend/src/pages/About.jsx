@@ -139,6 +139,63 @@ function About() {
         </div>
       )}
 
+      {/* Widget de Reseñas */}
+      <section className="reviews-widget-section" style={{ padding: '60px 0', background: 'linear-gradient(to bottom, #0a0a0a, #111)' }}>
+        <div className="container">
+          <div className="review-card-modern" style={{ 
+            background: '#1a1a1a', 
+            borderRadius: '24px', 
+            padding: '40px', 
+            border: '1px solid #333',
+            textAlign: 'center',
+            boxShadow: '0 20px 50px rgba(0,0,0,0.5)',
+            maxWidth: '800px',
+            margin: '0 auto'
+          }}>
+            <div style={{ color: '#fcc419', fontSize: '1.5rem', marginBottom: '15px' }}>
+              ⭐⭐⭐⭐⭐
+            </div>
+            <h2 style={{ 
+              fontFamily: 'var(--font-heading)', 
+              fontSize: '2.5rem', 
+              color: '#fff', 
+              margin: '0 0 10px 0',
+              letterSpacing: '1px'
+            }}>¿TE GUSTÓ TU EXPERIENCIA?</h2>
+            <p style={{ color: '#aaa', fontSize: '1.1rem', marginBottom: '30px', maxWidth: '500px', margin: '0 auto 30px' }}>
+              Tu opinión es el motor de nuestro sabor. Ayudanos a seguir creciendo dejando una reseña en Google.
+            </p>
+            
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '30px', justifyContent: 'center', alignItems: 'center' }}>
+              <a 
+                href="https://g.page/r/CTunx53CILhQEBI/review" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="main-button"
+                style={{ textDecoration: 'none', padding: '15px 40px', fontSize: '1.1rem' }}
+              >
+                DEJAR MI RESEÑA
+              </a>
+              
+              <div style={{ 
+                background: '#fff', 
+                padding: '12px', 
+                borderRadius: '16px', 
+                display: 'inline-block',
+                boxShadow: '0 10px 20px rgba(0,0,0,0.2)'
+              }}>
+                <img 
+                  src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=https://g.page/r/CTunx53CILhQEBI/review" 
+                  alt="QR Reseñas Google" 
+                  style={{ width: '100px', height: '100px', display: 'block' }} 
+                />
+                <p style={{ color: '#333', fontSize: '0.65rem', fontWeight: 'bold', marginTop: '5px', margin: '5px 0 0 0' }}>ESCANEAR QR</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+      
       <section className="location-section">
         <div className="container">
           <h2 className="section-title">DÓNDE ESTAMOS</h2>
