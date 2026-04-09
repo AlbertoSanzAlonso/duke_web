@@ -390,7 +390,7 @@ const Accounting = () => {
             Tipo: item.typeIndicator === 'sal' ? 'Ingreso' : 'Egreso',
             Descripción: item.typeIndicator === 'exp' ? item.description : 
                         item.typeIndicator === 'ord' ? item.supplier_name : 
-                        item.customer_name || `Venta #${item.id}`,
+                        `Venta #${item.id}`,
             Categoría: item.typeIndicator === 'exp' ? item.category : 
                        item.typeIndicator === 'ord' ? 'Materia Prima' : 'Venta TPV',
             Importe: parseFloat(item.total_amount || item.total_cost || item.amount) * (item.typeIndicator === 'sal' ? 1 : -1)
@@ -411,7 +411,7 @@ const Accounting = () => {
             Tipo: item.typeIndicator === 'sal' ? 'Ingreso' : 'Egreso',
             Desc: item.typeIndicator === 'exp' ? item.description : 
                   item.typeIndicator === 'ord' ? item.supplier_name : 
-                  item.customer_name || `Venta #${item.id}`,
+                  `Venta #${item.id}`,
             Cat: item.typeIndicator === 'exp' ? item.category : 
                  item.typeIndicator === 'ord' ? 'Materia Prima' : 'Venta TPV',
             Imp: `${item.typeIndicator === 'sal' ? '+' : '-'}$${Math.round(parseFloat(item.total_amount || item.total_cost || item.amount)).toLocaleString('es-AR')}`
