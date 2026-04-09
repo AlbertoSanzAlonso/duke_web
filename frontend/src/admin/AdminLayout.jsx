@@ -82,11 +82,24 @@ const AdminLayout = () => {
       es.onmessage = (event) => {
         try {
           const data = JSON.parse(event.data);
+          
           if (data.type === 'new_order') {
             setNotification({
               message: `🍔 ¡NUEVO PEDIDO! de ${data.customer} ($${data.total})`,
               type: 'success'
             });
+            window.dispatchEvent(new CustomEvent('new-order-received', { detail: data }));
+          }
+          
+          if (data.type === 'order_updated') {
+            // If it was just marked as prepared, notify
+            if (data.is_prepared) {
+                setNotification({
+                    message: `✅ PEDIDO #${data.id} LISTO EN COCINA`,
+                    type: 'success'
+                });
+            }
+            // Trigger refresh in connected components
             window.dispatchEvent(new CustomEvent('new-order-received', { detail: data }));
           }
         } catch (e) {

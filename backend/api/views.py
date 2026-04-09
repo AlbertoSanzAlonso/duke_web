@@ -674,21 +674,42 @@ def OrderStreamView(request):
                 yield f"data: {json.dumps({'type': 'connection_ready', 'status': 'connected'})}\n\n"
                 
                 last_seen_id = 0
+                last_check_time = timezone.now()
                 last_sale = Sale.objects.order_by('-id').first()
                 if last_sale:
                     last_seen_id = last_sale.id
 
                 while True:
+                    current_time = timezone.now()
+                    
+                    # 1. New Orders
                     new_sales = list(Sale.objects.filter(id__gt=last_seen_id).order_by('id'))
                     for sale in new_sales:
                         data = {
                             'type': 'new_order',
                             'id': sale.id,
                             'customer': sale.customer_name or 'Cliente Anónimo',
-                            'total': str(sale.total_amount)
+                            'total': str(sale.total_amount),
+                            'is_prepared': sale.is_prepared
                         }
                         yield f"data: {json.dumps(data)}\n\n"
                         last_seen_id = sale.id
+
+                    # 2. Updated Orders (e.g. marked as prepared)
+                    # Checking orders updated since last check, excluding the ones we just sent as "new"
+                    updated_sales = list(Sale.objects.filter(updated_at__gt=last_check_time, id__lte=last_seen_id).order_by('updated_at'))
+                    for sale in updated_sales:
+                        data = {
+                            'type': 'order_updated',
+                            'id': sale.id,
+                            'customer': sale.customer_name or 'Cliente Anónimo',
+                            'total': str(sale.total_amount),
+                            'status': sale.status,
+                            'is_prepared': sale.is_prepared
+                        }
+                        yield f"data: {json.dumps(data)}\n\n"
+                    
+                    last_check_time = current_time
 
                     # Keep-alive
                     yield ": ping\n\n"
