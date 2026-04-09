@@ -34,6 +34,26 @@ function About() {
       }
     };
 
+    const fetchReviews = () => {
+      try {
+        const service = new window.google.maps.places.PlacesService(document.createElement('div'));
+        service.getDetails({
+          placeId: PLACE_ID,
+          fields: ['reviews', 'rating']
+        }, (pool, status) => {
+          if (status === window.google.maps.places.PlacesServiceStatus.OK && pool.reviews && pool.reviews.length > 0) {
+            setReviews(pool.reviews.sort((a, b) => b.time - a.time).slice(0, 3));
+          } else {
+            // Fallback professional si no hay reseñas reales aun
+            setReviews([]);
+          }
+          setLoadingReviews(false);
+        });
+      } catch (e) {
+        setLoadingReviews(false);
+      }
+    };
+
     const loadGoogleReviews = () => {
       if (!window.google) {
         const script = document.createElement("script");
@@ -44,31 +64,6 @@ function About() {
         document.head.appendChild(script);
       } else {
         fetchReviews();
-      }
-    };
-
-    const fetchReviews = () => {
-      try {
-        const service = new window.google.maps.places.PlacesService(document.createElement('div'));
-        service.getDetails({
-          placeId: PLACE_ID,
-          fields: ['reviews', 'rating']
-        }, (pool, status) => {
-          if (status === window.google.maps.places.PlacesServiceStatus.OK && pool.reviews) {
-            setReviews(pool.reviews.sort((a, b) => b.time - a.time).slice(0, 5));
-          } else {
-            console.error("Reviews failed:", status);
-            // Fallback to high-quality mock
-            setReviews([
-              { author_name: "Andrés G.", text: "Las mejores smash de San Juan por lejos. La Duke es obligatoria. Calidad 10/10.", rating: 5 },
-              { author_name: "Lucía M.", text: "Excelente atención y ambiente. La Conde es una locura de sabor. Muy recomendado.", rating: 5 },
-              { author_name: "Matias R.", text: "Sabor brutal. El sistema de pedidos por la web funciona impecable. Mi lugar de confianza.", rating: 5 }
-            ]);
-          }
-          setLoadingReviews(false);
-        });
-      } catch (e) {
-        setLoadingReviews(false);
       }
     };
 
@@ -229,39 +224,53 @@ function About() {
                   animation: 'pulse 1.5s infinite outline' 
                 }}></div>
               ))
-            ) : reviews.map((rev, i) => (
-              <div key={i} style={{ 
-                background: 'rgba(255,255,255,0.03)', 
-                padding: '30px', 
-                borderRadius: '24px', 
-                border: '1px solid rgba(255,255,255,0.08)',
-                position: 'relative',
-                display: 'flex',
-                flexDirection: 'column',
-                justifyContent: 'space-between'
+            ) : reviews.length > 0 ? (
+              reviews.map((rev, i) => (
+                <div key={i} style={{ 
+                  background: 'rgba(255,255,255,0.03)', 
+                  padding: '30px', 
+                  borderRadius: '24px', 
+                  border: '1px solid rgba(255,255,255,0.08)',
+                  position: 'relative',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  justifyContent: 'space-between'
+                }}>
+                  <div>
+                    <div style={{ color: '#fcc419', marginBottom: '15px', fontSize: '1.1rem' }}>
+                      {"⭐".repeat(rev.rating)}
+                    </div>
+                    <p style={{ color: '#eee', fontSize: '1.05rem', fontStyle: 'italic', marginBottom: '20px', lineHeight: '1.6' }}>
+                      "{rev.text.length > 220 ? rev.text.substring(0, 220) + '...' : rev.text}"
+                    </p>
+                  </div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginTop: '10px' }}>
+                    {rev.profile_photo_url && (
+                      <img 
+                        src={rev.profile_photo_url} 
+                        alt={rev.author_name} 
+                        style={{ width: '35px', height: '35px', borderRadius: '50%', border: '2px solid var(--color-primary)' }} 
+                      />
+                    )}
+                    <div style={{ fontWeight: '800', color: 'var(--color-primary)', fontSize: '0.9rem', textTransform: 'uppercase', letterSpacing: '1px' }}>
+                      {rev.author_name}
+                    </div>
+                  </div>
+                </div>
+              ))
+            ) : (
+              <div style={{ 
+                gridColumn: '1 / -1', 
+                textAlign: 'center', 
+                padding: '40px', 
+                background: 'rgba(255,255,255,0.02)', 
+                borderRadius: '24px',
+                border: '1px dashed #444'
               }}>
-                <div>
-                  <div style={{ color: '#fcc419', marginBottom: '15px', fontSize: '1.1rem' }}>
-                    {"⭐".repeat(rev.rating)}
-                  </div>
-                  <p style={{ color: '#eee', fontSize: '1.05rem', fontStyle: 'italic', marginBottom: '20px', lineHeight: '1.6' }}>
-                    "{rev.text.length > 220 ? rev.text.substring(0, 220) + '...' : rev.text}"
-                  </p>
-                </div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginTop: '10px' }}>
-                  {rev.profile_photo_url && (
-                    <img 
-                      src={rev.profile_photo_url} 
-                      alt={rev.author_name} 
-                      style={{ width: '35px', height: '35px', borderRadius: '50%', border: '2px solid var(--color-primary)' }} 
-                    />
-                  )}
-                  <div style={{ fontWeight: '800', color: 'var(--color-primary)', fontSize: '0.9rem', textTransform: 'uppercase', letterSpacing: '1px' }}>
-                    {rev.author_name}
-                  </div>
-                </div>
+                <Bot size={40} color="var(--color-primary)" style={{ marginBottom: '15px', opacity: 0.5 }} />
+                <p style={{ color: '#888', fontSize: '1.1rem' }}>Nuestro perfil de Google es nuevo. ¡Sé el primero en dejarnos tu opinión!</p>
               </div>
-            ))}
+            )}
           </div>
           
           <div style={{ borderTop: '1px solid #333', paddingTop: '50px' }}>

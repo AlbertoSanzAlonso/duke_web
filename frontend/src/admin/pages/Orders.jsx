@@ -105,7 +105,11 @@ const Orders = () => {
     }, [filteredOrders]);
 
     const handlePrint = (order) => {
-        window.print();
+        setSelectedOrder(order);
+        // Pequeño delay para asegurar que el DOM se actualice con los datos del pedido antes de imprimir
+        setTimeout(() => {
+            window.print();
+        }, 100);
     };
 
     const handleExportExcel = () => {
@@ -354,43 +358,54 @@ const Orders = () => {
             {/* Area de Impresion Oculta */}
             <div id="ticket-print-area" className="print-only">
                 {selectedOrder && (
-                    <div className="thermal-ticket">
-                        <div className="ticket-header-print">
-                            <h1>DUKE BURGERS</h1>
-                            <p>San Juan, Argentina</p>
-                            <div className="ticket-divider"></div>
+                    <div className="thermal-ticket" style={{ width: '80mm', margin: '0 auto', color: 'black', background: 'white' }}>
+                        <div className="ticket-header-print" style={{ textAlign: 'center', marginBottom: '15px' }}>
+                            <img src="/brand/duke burger 1 negativo.png" alt="Duke Burger" style={{ height: '40px', filter: 'grayscale(1)', marginBottom: '5px' }} />
+                            <h1 style={{ fontSize: '1.2rem', margin: '0 0 5px 0', fontWeight: '900' }}>DUKE BURGER</h1>
+                            <div style={{ fontSize: '0.75rem', lineHeight: '1.2' }}>
+                                <div>Bº Frondizi - Rivadavia</div>
+                                <div>San Juan | WhatsApp: 264 5142897</div>
+                                <div style={{ fontWeight: 'bold' }}>dukeburger-sj.com</div>
+                            </div>
+                            <div className="ticket-divider" style={{ borderBottom: '1px dashed #000', margin: '10px 0' }}></div>
                         </div>
-                        <div className="ticket-info-print">
-                            <p>TICKET #{selectedOrder.id}</p>
-                            <p>FECHA: {new Date(selectedOrder.date).toLocaleString('es-AR', { timeZone: 'America/Argentina/Buenos_Aires' })}</p>
-                            <p>CLIENTE: {selectedOrder.customer_name || 'Particular'}</p>
-                            {selectedOrder.table_number && <p>ENTREGA: {selectedOrder.table_number}</p>}
+
+                        <div className="ticket-info-print" style={{ fontSize: '0.8rem', marginBottom: '10px' }}>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '3px' }}>
+                                <strong>TICKET #{selectedOrder.id}</strong>
+                                <span>{new Date(selectedOrder.date).toLocaleDateString('es-AR')}</span>
+                            </div>
+                            <div>CLIENTE: {selectedOrder.customer_name || 'PARTICULAR'}</div>
+                            {selectedOrder.table_number && <div>ENTREGA: {selectedOrder.table_number}</div>}
                         </div>
-                        <div className="ticket-divider"></div>
-                        <div className="ticket-items-print">
+
+                        <div className="ticket-divider" style={{ borderBottom: '1px dashed #000', margin: '10px 0' }}></div>
+
+                        <div className="ticket-items-print" style={{ fontSize: '0.85rem' }}>
                             {selectedOrder.items.map(item => (
-                                <div key={item.id} className="ticket-row">
+                                <div key={item.id} style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '4px' }}>
                                     <span>{item.quantity} x {item.entry_name}</span>
-                                    <span>${(item.quantity * parseFloat(item.price_at_sale)).toFixed(2)}</span>
+                                    <strong>${(item.quantity * parseFloat(item.price_at_sale)).toLocaleString('es-AR')}</strong>
                                 </div>
                             ))}
                         </div>
-                        <div className="ticket-divider"></div>
-                        <div className="ticket-total-print">
+
+                        <div className="ticket-divider" style={{ borderBottom: '1px solid #000', margin: '10px 0' }}></div>
+
+                        <div className="ticket-total-print" style={{ textAlign: 'right' }}>
                             {parseFloat(selectedOrder.delivery_cost) > 0 && (
-                                <div className="ticket-row" style={{ fontSize: '0.8rem', fontWeight: 'normal' }}>
-                                    <span>Envío:</span>
-                                    <span>${parseFloat(selectedOrder.delivery_cost).toLocaleString('es-AR')}</span>
+                                <div style={{ fontSize: '0.75rem', marginBottom: '4px' }}>
+                                    Envío: ${parseFloat(selectedOrder.delivery_cost).toLocaleString('es-AR')}
                                 </div>
                             )}
-                            <div className="ticket-row">
-                                <span>TOTAL:</span>
-                                <strong>${parseFloat(selectedOrder.total_amount).toLocaleString('es-AR')}</strong>
+                            <div style={{ fontSize: '1.2rem', fontWeight: '900' }}>
+                                TOTAL: ${Math.round(parseFloat(selectedOrder.total_amount)).toLocaleString('es-AR')}
                             </div>
                         </div>
-                        <div className="ticket-footer-print">
-                            <p>¡Gracias por su visita!</p>
-                            <p>dukeburger-sj.com</p>
+
+                        <div className="ticket-footer-print" style={{ textAlign: 'center', marginTop: '20px', fontSize: '0.75rem' }}>
+                            <p style={{ margin: '0' }}>¡Gracias por elegirnos!</p>
+                            <p style={{ margin: '0', fontWeight: 'bold' }}>DUKEBURGER-SJ.COM</p>
                         </div>
                     </div>
                 )}
