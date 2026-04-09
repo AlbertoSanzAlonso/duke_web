@@ -549,21 +549,25 @@ a.stat-card { text-decoration: none; cursor: pointer; }
 }
 
 .ai-chat-window.expanded {
-    width: calc(100vw - 40px);
+    width: 95%;
+    max-width: 1000px; /* Focused reading width */
     height: calc(100vh - 40px);
     position: fixed;
     bottom: 20px;
-    left: 20px;
-    right: 20px;
+    left: 50%;
+    transform: translateX(-50%);
     border-radius: 20px;
-    z-index: 6000; /* Over everything */
+    z-index: 6000;
+}
+
+.ai-chat-window.expanded .message-bubble {
+    max-width: 100%; /* Use full available width in expanded mode */
 }
 
 @media (max-width: 1200px) {
     .ai-chat-window.expanded {
-        left: 10px;
-        right: 10px;
         width: calc(100vw - 20px);
+        left: 50%;
     }
 }
 
