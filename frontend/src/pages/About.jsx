@@ -14,7 +14,7 @@ function About() {
 
   const [reviews, setReviews] = useState([]);
   const [loadingReviews, setLoadingReviews] = useState(true);
-  const GOOGLE_API_KEY = "AIzaSyAAw_guXq9sC8E7ZEtTAdR_VPiiAU0zgGc";
+  const GOOGLE_API_KEY = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
   // The Place ID for Duke Burger in San Juan
   const PLACE_ID = "ChIJ-Xl47NdgZURmYI702tTAdR"; 
 
