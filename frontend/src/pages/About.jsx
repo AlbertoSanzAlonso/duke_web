@@ -34,7 +34,7 @@ function About() {
       <nav className="navbar scrolled">
         <div className="nav-container">
           <Link to="/">
-            <img src="/brand/duke burger 2 negativo.png" alt="Duke Logo" className="nav-logo" />
+            <img src="/brand/duke burger 2 negativo.png" alt="Duke Burger Logo - Nosotros" className="nav-logo" />
           </Link>
           
           <div className="nav-actions">
@@ -61,7 +61,7 @@ function About() {
       </section>
 
       <div className="about-logo-wrapper">
-        <img src="/brand/duke burger 1 negativo.png" alt="Duke Logo" className="duke-about-logo" />
+        <img src="/brand/duke burger 1 negativo.png" alt="Emblema Duke Burger San Juan" className="duke-about-logo" />
       </div>
 
       <section className="about-section">

@@ -462,7 +462,7 @@ function Home() {
       {/* Navigation */}
       <nav className={`navbar ${isScrolled ? 'scrolled' : ''}`}>
         <div className="nav-container">
-          <img src="/brand/duke burger 2 negativo.png" alt="Duke Logo" className="nav-logo" />
+          <img src="/brand/duke burger 2 negativo.png" alt="Duke Burger San Juan - Logo Negativo" className="nav-logo" />
           
           <div className="nav-actions">
             <div className="nav-links-desktop">
@@ -498,7 +498,7 @@ function Home() {
             </div>
           </div>
           <div className="hero-image-container">
-            <img src="/brand/hero_burger_new.png" alt="Duke Burger" className="hero-burger-img" />
+            <img src="/brand/hero_burger_new.png" alt="Deliciosa hamburguesa artesanal de Duke Burger en San Juan con queso y panceta" className="hero-burger-img" />
             <img src="/brand/duke burger 3 negativo.png" alt="Duke Sticker" className="sticker float-1" />
           </div>
         </div>
