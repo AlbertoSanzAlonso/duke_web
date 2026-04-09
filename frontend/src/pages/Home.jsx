@@ -563,7 +563,7 @@ function Home() {
             </div>
           </div>
 
-          <div className="menu-grid">
+          <div className="menu-grid" data-nosnippet>
             {loading ? (
               <p style={{ gridColumn: '1/-1', textAlign: 'center', padding: '50px' }}>Cargando carta de Duke Burger...</p>
             ) : categories.length === 0 ? (
