@@ -49,25 +49,45 @@ const PublicTicket = () => {
             <style>
                 {`
                     @media print {
-                        @page { margin: 0; size: auto; }
+                        @page { margin: 0.5cm; size: auto; }
                         body { background: white !important; color: black !important; padding: 0 !important; margin: 0 !important; }
                         .no-print { display: none !important; }
                         footer { display: none !important; }
-                        header { margin-bottom: 15px !important; }
-                        header img { height: 60px !important; }
+                        header { margin-bottom: 20px !important; }
+                        header img { height: 70px !important; filter: grayscale(1) !important; }
+                        header h1 { color: black !important; font-size: 1.2rem !important; }
+                        
                         main { 
                             box-shadow: none !important; 
-                            border: 1px solid #eee !important; 
+                            border: none !important; 
                             margin: 0 auto !important; 
                             background: white !important; 
                             color: black !important;
                             border-radius: 0 !important;
                             max-width: 100% !important;
                         }
-                        div[style*="background: #1a1a1a"] { background: white !important; border: 1px solid #eee !important; }
-                        div[style*="background: #000"] { background: #f9f9f9 !important; border: 1px solid #ddd !important; }
-                        div[style*="background: linear-gradient"] { background: #f9f9f9 !important; border: 1px solid #f03e3e !important; }
-                        span, div, h1, h2, h3, p { color: black !important; }
+                        
+                        /* Forzar fondos blancos en todos los contenedores */
+                        div, section, article { 
+                            background: white !important; 
+                            background-color: white !important; 
+                            color: black !important; 
+                            border-color: #eee !important;
+                            box-shadow: none !important;
+                        }
+
+                        .print-status-badge { display: none !important; }
+                        
+                        /* Ajuste específico para la tarjeta de dirección y QR */
+                        div[style*="background: #000"],
+                        div[style*="background: #1a1a1a"],
+                        div[style*="background: linear-gradient"] { 
+                            background: white !important; 
+                            border: 1px solid #ddd !important; 
+                            color: black !important;
+                        }
+
+                        span, p, h1, h2, h3, h4 { color: black !important; }
                         .review-btn-print { display: none !important; }
                         * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
                     }
@@ -84,7 +104,7 @@ const PublicTicket = () => {
                 <div style={{ padding: '25px', borderBottom: '1px dashed #444', textAlign: 'center' }}>
                     <div style={{ fontSize: '0.8rem', color: '#888', textTransform: 'uppercase', marginBottom: '5px' }}>Comprobante Oficial</div>
                     <div style={{ fontSize: '2.2rem', fontWeight: 'bold' }}>#{order.id}</div>
-                    <div style={{ 
+                    <div className="no-print" style={{ 
                         marginTop: '10px', 
                         display: 'inline-block',
                         padding: '4px 12px',
