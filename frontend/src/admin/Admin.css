@@ -748,9 +748,9 @@ a.stat-card { text-decoration: none; cursor: pointer; }
     }
 
     .ai-chat-wrapper {
-        bottom: 0;
-        left: 0;
-        width: 100%;
+        bottom: 20px;
+        left: 20px;
+        width: auto;
     }
 }
 
