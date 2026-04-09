@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { fetchDashboardInsights } from '../../services/api';
 import LoadingScreen from '../components/LoadingScreen';
-import { ShoppingBag, Star, Clock, AlertTriangle, TrendingUp, Package, CalendarOff, Mail, History, Settings as SettingsIcon, Plus, Utensils } from 'lucide-react';
+import { ShoppingBag, Star, Clock, AlertTriangle, TrendingUp, Package, CalendarOff, Mail, History, Settings as SettingsIcon, Plus, Utensils, CheckCircle } from 'lucide-react';
 
 const Dashboard = () => {
     const [loading, setLoading] = useState(true);
