@@ -21,7 +21,8 @@ import { CSS } from '@dnd-kit/utilities';
 import { fetchGalleryImages, createGalleryImage, deleteGalleryImage, updateGalleryImage } from '../../services/api';
 import LoadingScreen from '../components/LoadingScreen';
 import Toast from '../components/Toast';
-import { Image as ImageIcon, Plus, Trash2, X, AlertTriangle, Eye, EyeOff, Move } from 'lucide-react';
+import ImageCropperModal from '../components/ImageCropperModal';
+import { Image as ImageIcon, Plus, Trash2, X, AlertTriangle, Eye, EyeOff, Move, Scissors } from 'lucide-react';
 
 const SortableItem = ({ img, confirmDelete, handleToggleActive, handleUpdateTitle }) => {
     const {
@@ -133,6 +134,8 @@ const Gallery = () => {
     const [newImage, setNewImage] = useState({ title: '', image: null, order: 0 });
     const [imgSaving, setImgSaving] = useState(false);
     const [confirmDelete, setConfirmDelete] = useState(null);
+    const [tempImage, setTempImage] = useState(null); // URL of the selected image for cropping
+    const [showCropper, setShowCropper] = useState(false);
     
     const sensors = useSensors(
         useSensor(PointerSensor, {
@@ -189,13 +192,36 @@ const Gallery = () => {
         }
     };
 
+    const handleFileSelect = (e) => {
+        const file = e.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = () => {
+                setTempImage(reader.result);
+                setShowCropper(true);
+            };
+            reader.readAsDataURL(file);
+        }
+    }
+
+    const onCropComplete = (croppedBlob) => {
+        // Convert blob to file
+        const croppedFile = new File([croppedBlob], `gallery_${Date.now()}.jpg`, { type: 'image/jpeg' });
+        setNewImage({ ...newImage, image: croppedFile });
+        setShowCropper(false);
+        setTempImage(null);
+    }
+
     const handleAddImage = async (e) => {
         e.preventDefault();
-        if (!newImage.image) return;
+        if (!newImage.image) {
+            setToast({ message: 'Primero recorta la imagen', type: 'error' });
+            return;
+        }
         setImgSaving(true);
         try {
             const formData = new FormData();
-            formData.append('title', newImage.title);
+            formData.append('title', newImage.title || 'Foto Local');
             formData.append('image', newImage.image);
             formData.append('order', gallery.length);
             await createGalleryImage(formData);
@@ -325,21 +351,64 @@ const Gallery = () => {
                             </div>
                             <div>
                                 <label style={{ display: 'block', fontWeight: '800', marginBottom: '8px', fontSize: '0.75rem', color: '#888', textTransform: 'uppercase' }}>Archivo de Imagen *</label>
-                                <input 
-                                    type="file" 
-                                    accept="image/*" 
-                                    onChange={e => setNewImage({...newImage, image: e.target.files[0]})} 
-                                    style={{ 
-                                        width: '100%', 
-                                        padding: '10px', 
-                                        border: '1px solid #ddd', 
-                                        borderRadius: '8px', 
-                                        fontSize: '0.9rem',
-                                        background: '#f8f9fa',
-                                        cursor: 'pointer' 
-                                    }} 
-                                    required 
-                                 />
+                                {!newImage.image ? (
+                                    <div style={{ position: 'relative' }}>
+                                        <input 
+                                            type="file" 
+                                            accept="image/*" 
+                                            onChange={handleFileSelect} 
+                                            style={{ 
+                                                position: 'absolute', opacity: 0, top: 0, left: 0, right: 0, bottom: 0, 
+                                                width: '100%', cursor: 'pointer' 
+                                            }} 
+                                            required 
+                                        />
+                                        <div style={{ 
+                                            padding: '20px', border: '2px dashed #ddd', borderRadius: '12px', textAlign: 'center',
+                                            background: '#f8f9fa', color: '#666'
+                                        }}>
+                                            <Plus size={24} style={{ marginBottom: '8px' }} />
+                                            <div style={{ fontSize: '0.9rem', fontWeight: 'bold' }}>Seleccionar Imagen</div>
+                                        </div>
+                                    </div>
+                                ) : (
+                                    <div style={{ position: 'relative', borderRadius: '12px', overflow: 'hidden', height: '120px' }}>
+                                        <img 
+                                            src={URL.createObjectURL(newImage.image)} 
+                                            alt="Preview" 
+                                            style={{ width: '100%', height: '100%', objectFit: 'cover' }} 
+                                        />
+                                        <button 
+                                            type="button"
+                                            onClick={() => setNewImage({...newImage, image: null})}
+                                            style={{ 
+                                                position: 'absolute', top: '8px', right: '8px', background: 'rgba(0,0,0,0.6)', 
+                                                color: 'white', border: 'none', borderRadius: '50%', width: '30px', height: '30px',
+                                                cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center'
+                                            }}
+                                        >
+                                            <X size={16} />
+                                        </button>
+                                        <button 
+                                            type="button"
+                                            onClick={() => {
+                                                const reader = new FileReader();
+                                                reader.onload = () => {
+                                                    setTempImage(reader.result);
+                                                    setShowCropper(true);
+                                                };
+                                                reader.readAsDataURL(newImage.image);
+                                            }}
+                                            style={{ 
+                                                position: 'absolute', bottom: '8px', right: '8px', background: 'var(--admin-primary)', 
+                                                color: 'white', border: 'none', borderRadius: '8px', padding: '5px 10px',
+                                                cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '5px', fontSize: '0.75rem', fontWeight: 'bold'
+                                            }}
+                                        >
+                                            <Scissors size={14} /> RE-RECORTAR
+                                        </button>
+                                    </div>
+                                )}
                             </div>
                             <div style={{ display: 'flex', gap: '15px', marginTop: '10px' }}>
                                 <button type="button" onClick={() => setIsAddingImg(false)} style={{ flex: 1, padding: '12px', background: '#f8f9fa', border: 'none', borderRadius: '8px', fontWeight: 'bold', cursor: 'pointer' }}>Cancelar</button>
@@ -363,6 +432,18 @@ const Gallery = () => {
                         </div>
                     </div>
                 </div>
+            )}
+
+            {/* Cropper Modal */}
+            {showCropper && (
+                <ImageCropperModal 
+                    image={tempImage} 
+                    onCropComplete={onCropComplete} 
+                    onCancel={() => {
+                        setShowCropper(false);
+                        setTempImage(null);
+                    }} 
+                />
             )}
         </div>
     );
