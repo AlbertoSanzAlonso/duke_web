@@ -194,11 +194,7 @@ DEBUG = env.bool('DEBUG', default=False)
 ALLOWED_HOSTS = ['api.dukeburger-sj.com', 'dukeburger-sj.com', '*']
 
 # CORS and Security
-CORS_ALLOW_ALL_ORIGINS = True # Mantener para flexibilidad inicial
-CORS_ALLOWED_ORIGINS = [
-    "https://dukeburger-sj.com",
-    "https://api.dukeburger-sj.com",
-]
+CORS_ALLOW_ALL_ORIGINS = True
 CORS_ALLOW_CREDENTIALS = True
 CORS_ALLOW_HEADERS = ["*"]
 CORS_ALLOW_METHODS = ["*"]
@@ -209,9 +205,7 @@ CSRF_TRUSTED_ORIGINS = [
 ]
 
 CORS_PREFLIGHT_MAX_AGE = 86400
-
-# ⚠️ Forzar CORS incluso en errores 500
-CORS_URLS_REGEX = r'^/api/.*$'
+# Eliminación de CORS_URLS_REGEX para aplicar a todas las rutas por igual
 
 # Email Configuration
 EMAIL_BACKEND = env('EMAIL_BACKEND', default='django.core.mail.backends.smtp.EmailBackend')

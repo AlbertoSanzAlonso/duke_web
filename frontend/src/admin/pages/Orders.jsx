@@ -20,6 +20,7 @@ const Orders = () => {
     const [currentPage, setCurrentPage] = useState(1);
     const [showStatsModal, setShowStatsModal] = useState(false);
     const [qrImage, setQrImage] = useState('');
+    const [toast, setToast] = useState(null);
     const itemsPerPage = 10;
     const navigate = useNavigate();
 
