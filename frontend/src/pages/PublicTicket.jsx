@@ -49,22 +49,36 @@ const PublicTicket = () => {
             <style>
                 {`
                     @media print {
-                        @page { margin: 0.5cm; size: auto; }
-                        body { background: white !important; color: black !important; padding: 0 !important; margin: 0 !important; }
+                        @page { 
+                            size: 80mm auto; 
+                            margin: 0; 
+                        }
+                        body { 
+                            background: white !important; 
+                            color: black !important; 
+                            padding: 0 !important; 
+                            margin: 0 !important; 
+                            width: 80mm !important;
+                        }
                         .no-print { display: none !important; }
                         footer { display: none !important; }
-                        header { margin-bottom: 20px !important; }
-                        header img { height: 70px !important; filter: grayscale(1) !important; }
-                        header h1 { color: black !important; font-size: 1.2rem !important; }
+                        header { 
+                            margin-bottom: 10px !important; 
+                            padding-top: 10px !important;
+                        }
+                        header img { height: 50px !important; filter: grayscale(1) !important; }
+                        header h1 { font-size: 1.1rem !important; margin-bottom: 5px !important; }
+                        header div { font-size: 0.75rem !important; }
                         
                         main { 
                             box-shadow: none !important; 
                             border: none !important; 
-                            margin: 0 auto !important; 
+                            margin: 0 !important; 
                             background: white !important; 
                             color: black !important;
                             border-radius: 0 !important;
-                            max-width: 100% !important;
+                            width: 80mm !important;
+                            max-width: 80mm !important;
                         }
                         
                         /* Forzar fondos blancos en todos los contenedores */
@@ -76,19 +90,29 @@ const PublicTicket = () => {
                             box-shadow: none !important;
                         }
 
-                        .print-status-badge { display: none !important; }
+                        div[style*="padding: 25px"] { padding: 10px !important; }
                         
                         /* Ajuste específico para la tarjeta de dirección y QR */
                         div[style*="background: #000"],
                         div[style*="background: #1a1a1a"],
                         div[style*="background: linear-gradient"] { 
                             background: white !important; 
-                            border: 1px solid #ddd !important; 
+                            border: 1px dotted #ccc !important; 
                             color: black !important;
+                            padding: 10px !important;
+                            margin-top: 10px !important;
                         }
 
+                        .detail-price-badge { display: none !important; }
                         span, p, h1, h2, h3, h4 { color: black !important; }
                         .review-btn-print { display: none !important; }
+                        
+                        /* Redimensionar QR */
+                        img[alt="QR Reseñas Google"] {
+                            width: 80px !important;
+                            height: 80px !important;
+                        }
+
                         * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
                     }
                 `}
@@ -97,6 +121,11 @@ const PublicTicket = () => {
             <header style={{ textAlign: 'center', marginBottom: '30px' }}>
                 <img src="/brand/duke burger 1 negativo.png" alt="Duke Burger" style={{ height: '80px', marginBottom: '10px' }} />
                 <h1 style={{ margin: 0, fontSize: '1.5rem', letterSpacing: '2px', color: '#f03e3e' }}>TICKET DE PEDIDO</h1>
+                <div style={{ marginTop: '10px', fontSize: '0.85rem', color: '#aaa', lineHeight: '1.4' }}>
+                    <div>Bº Frondizi - Rivadavia (Laprida y Avelín)</div>
+                    <div>San Juan | WhatsApp: 264 5142897</div>
+                    <div style={{ color: '#f03e3e', fontWeight: '800' }}>dukeburger-sj.com</div>
+                </div>
             </header>
 
             <main style={{ maxWidth: '400px', margin: '0 auto', background: '#1a1a1a', borderRadius: '15px', overflow: 'hidden', boxShadow: '0 10px 40px rgba(0,0,0,0.6)', border: '1px solid #333' }}>
