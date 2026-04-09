@@ -40,6 +40,17 @@ const AdminLayout = () => {
       try {
         const data = await fetchMe();
         setProfile(data);
+        
+        // Strict redirection for kitchen-only users
+        // If user has kitchen perm but NOT superuser, NOT manager and NO other admin perms
+        const p = data.profile;
+        if (p?.can_use_kitchen && !data.is_superuser && !p?.is_admin_manager && 
+            !p?.can_use_tpv && !p?.can_use_accounting && !p?.can_use_menu && 
+            !p?.can_use_inventory && !p?.can_use_settings) {
+            
+            console.log("Access restricted: Redirecting to Kitchen view");
+            navigate('/cocina');
+        }
       } catch (e) { console.error("Profile load error", e); }
     };
     loadProfile();
