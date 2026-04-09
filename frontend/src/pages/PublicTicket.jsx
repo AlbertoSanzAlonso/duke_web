@@ -17,6 +17,8 @@ const PublicTicket = () => {
                 if (!response.ok) throw new Error('Ticket no encontrado');
                 const data = await response.json();
                 setOrder(data);
+                // Set the page title to the order ID for better PDF filename
+                document.title = `Ticket_#${data.id}`;
             } catch (err) {
                 setError(err.message);
             } finally {
@@ -24,6 +26,11 @@ const PublicTicket = () => {
             }
         };
         fetchOrder();
+
+        // Optional: restore title on unmount
+        return () => {
+            document.title = 'Duke Burger San Juan';
+        };
     }, [id]);
 
     if (loading) return <LoadingScreen />;

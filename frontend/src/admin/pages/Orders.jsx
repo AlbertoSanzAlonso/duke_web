@@ -107,9 +107,16 @@ const Orders = () => {
 
     const handlePrint = (order) => {
         setPrintingOrder(order);
+        const originalTitle = document.title;
+        document.title = `Ticket_#${order.id}`;
+        
         // Pequeño delay para asegurar que el DOM se actualice con los datos del pedido antes de imprimir
         setTimeout(() => {
             window.print();
+            // Restaurar el título original después de que se abra el diálogo de impresión
+            setTimeout(() => {
+                document.title = originalTitle;
+            }, 1000);
         }, 100);
     };
 
