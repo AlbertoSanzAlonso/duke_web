@@ -820,49 +820,51 @@ function Home() {
             <div className="detail-content">
               {/* Name, Category and Description removed by user request */}
               
-              {selectedProduct.ingredients && (
-                <div className="detail-ingredients">
-                  <h3>Ingredientes</h3>
-                  <p>{selectedProduct.ingredients}</p>
-                </div>
-              )}
-              
-              <div className="detail-footer">
-                <div className="detail-qty-control">
-                  <button 
-                    onClick={() => {
-                      if (cart[selectedProduct.id]?.quantity > 1) {
-                        updateQuantity(selectedProduct.id, -1);
+              <div className="detail-split-layout">
+                {selectedProduct.ingredients && (
+                  <div className="detail-ingredients">
+                    <h3>Ingredientes</h3>
+                    <p>{selectedProduct.ingredients}</p>
+                  </div>
+                )}
+                
+                <div className="detail-footer">
+                  <div className="detail-qty-control">
+                    <button 
+                      onClick={() => {
+                        if (cart[selectedProduct.id]?.quantity > 1) {
+                          updateQuantity(selectedProduct.id, -1);
+                        } else {
+                          updateQuantity(selectedProduct.id, -1);
+                          setSelectedProduct(null);
+                        }
+                      }}
+                    >
+                      {cart[selectedProduct.id]?.quantity > 1 ? <Minus size={20} /> : <X size={20} />}
+                    </button>
+                    <span className="detail-qty">{cart[selectedProduct.id]?.quantity || 0}</span>
+                    <button onClick={() => {
+                      if (!cart[selectedProduct.id]) {
+                        addToCart(selectedProduct);
                       } else {
-                        updateQuantity(selectedProduct.id, -1);
-                        setSelectedProduct(null);
+                        updateQuantity(selectedProduct.id, 1);
                       }
+                    }}>
+                      <Plus size={20} />
+                    </button>
+                  </div>
+                  <button 
+                    className="detail-add-button"
+                    onClick={() => {
+                      if (!cart[selectedProduct.id]) {
+                        addToCart(selectedProduct);
+                      }
+                      setSelectedProduct(null);
                     }}
                   >
-                    {cart[selectedProduct.id]?.quantity > 1 ? <Minus size={20} /> : <X size={20} />}
-                  </button>
-                  <span className="detail-qty">{cart[selectedProduct.id]?.quantity || 0}</span>
-                  <button onClick={() => {
-                    if (!cart[selectedProduct.id]) {
-                      addToCart(selectedProduct);
-                    } else {
-                      updateQuantity(selectedProduct.id, 1);
-                    }
-                  }}>
-                    <Plus size={20} />
+                    {cart[selectedProduct.id] ? 'CERRAR PRODUCTO' : `AGREGAR $${parseFloat(selectedProduct.price).toLocaleString('es-AR')}`}
                   </button>
                 </div>
-                <button 
-                  className="detail-add-button"
-                  onClick={() => {
-                    if (!cart[selectedProduct.id]) {
-                      addToCart(selectedProduct);
-                    }
-                    setSelectedProduct(null);
-                  }}
-                >
-                  {cart[selectedProduct.id] ? 'CONFIRMAR' : 'AGREGAR AL PEDIDO'}
-                </button>
               </div>
             </div>
           </div>
