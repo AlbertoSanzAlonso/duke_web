@@ -367,10 +367,10 @@ const Orders = () => {
             <div id="ticket-print-area" className="print-only">
                 {(printingOrder || selectedOrder) && (
                     <div className="thermal-ticket" style={{ width: '80mm', margin: '0 auto', color: 'black', background: 'white' }}>
-                        <div className="ticket-header-print" style={{ textAlign: 'center', marginBottom: '15px' }}>
-                            <img src="/brand/duke burger 2 positivo.png" alt="Duke Burger" style={{ height: '60px', marginBottom: '5px' }} />
-                            <h1 style={{ fontSize: '1.2rem', margin: '0 0 5px 0', fontWeight: '900' }}>DUKE BURGER</h1>
-                            <div style={{ fontSize: '0.75rem', lineHeight: '1.2' }}>
+                        <div className="ticket-header-print" style={{ textAlign: 'center', marginBottom: '15px', visibility: 'visible !important', display: 'block !important' }}>
+                            <img src="/brand/duke burger 3 positivo.png" alt="Duke Burger" style={{ height: '60px', width: 'auto', marginBottom: '5px', display: 'block', margin: '0 auto', visibility: 'visible !important' }} />
+                            <h1 style={{ fontSize: '1.2rem', margin: '0 0 5px 0', fontWeight: '900', color: 'black' }}>DUKE BURGER</h1>
+                            <div style={{ fontSize: '0.75rem', lineHeight: '1.2', color: 'black' }}>
                                 <div>Bº Frondizi - Rivadavia</div>
                                 <div>San Juan | WhatsApp: 264 5142897</div>
                                 <div style={{ fontWeight: 'bold' }}>dukeburger-sj.com</div>
@@ -378,7 +378,7 @@ const Orders = () => {
                             <div className="ticket-divider" style={{ borderBottom: '1px dashed #000', margin: '10px 0' }}></div>
                         </div>
 
-                        <div className="ticket-info-print" style={{ fontSize: '0.8rem', marginBottom: '10px' }}>
+                        <div className="ticket-info-print" style={{ fontSize: '0.8rem', marginBottom: '10px', color: 'black' }}>
                             <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '3px' }}>
                                 <strong>TICKET #{(printingOrder || selectedOrder).id}</strong>
                                 <span>{new Date((printingOrder || selectedOrder).date).toLocaleDateString('es-AR')}</span>
@@ -389,7 +389,7 @@ const Orders = () => {
 
                         <div className="ticket-divider" style={{ borderBottom: '1px dashed #000', margin: '10px 0' }}></div>
 
-                        <div className="ticket-items-print" style={{ fontSize: '0.85rem' }}>
+                        <div className="ticket-items-print" style={{ fontSize: '0.85rem', color: 'black' }}>
                             {(printingOrder || selectedOrder).items.map(item => (
                                 <div key={item.id} style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '4px' }}>
                                     <span>{item.quantity} x {item.entry_name}</span>
@@ -400,7 +400,7 @@ const Orders = () => {
 
                         <div className="ticket-divider" style={{ borderBottom: '1px solid #000', margin: '10px 0' }}></div>
 
-                        <div className="ticket-total-print" style={{ textAlign: 'right' }}>
+                        <div className="ticket-total-print" style={{ textAlign: 'right', color: 'black' }}>
                             {parseFloat((printingOrder || selectedOrder).delivery_cost) > 0 && (
                                 <div style={{ fontSize: '0.75rem', marginBottom: '4px' }}>
                                     Envío: ${parseFloat((printingOrder || selectedOrder).delivery_cost).toLocaleString('es-AR')}
@@ -411,12 +411,12 @@ const Orders = () => {
                             </div>
                         </div>
 
-                        <div className="ticket-footer-print" style={{ textAlign: 'center', marginTop: '15px', fontSize: '0.75rem' }}>
+                        <div className="ticket-footer-print" style={{ textAlign: 'center', marginTop: '15px', fontSize: '0.75rem', color: 'black', visibility: 'visible !important', display: 'block !important' }}>
                             <p style={{ margin: '0 0 5px 0', fontWeight: 'bold' }}>🚀 ¿TE GUSTÓ EL SABOR?</p>
                             <img 
                                 src="https://api.qrserver.com/v1/create-qr-code/?size=100x100&data=https://g.page/r/CTunx53CILhQEBI/review" 
                                 alt="QR Reseñas" 
-                                style={{ width: '80px', height: '80px', display: 'block', margin: '5px auto', background: 'white', padding: '5px', border: '1px solid #eee' }} 
+                                style={{ width: '80px', height: '80px', display: 'block', margin: '5px auto', background: 'white', padding: '5px', border: '1px solid #eee', visibility: 'visible !important' }} 
                             />
                             <p style={{ margin: '5px 0 0 0' }}>Escanea y dejanos tu reseña</p>
                             <p style={{ margin: '10px 0 0 0', fontWeight: 'bold', borderTop: '1px dashed #000', paddingTop: '5px' }}>DUKEBURGER-SJ.COM</p>

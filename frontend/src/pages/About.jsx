@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { Link } from 'react-router-dom';
-import { X, Menu } from 'lucide-react';
+import { X, Menu, Bot } from 'lucide-react';
 import { fetchGalleryImages, fetchOpeningHours } from '../services/api';
 import Footer from '../components/Footer';
 import FloatingContact from '../components/FloatingContact';
