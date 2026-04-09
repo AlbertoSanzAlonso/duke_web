@@ -51,10 +51,10 @@ const Kitchen = () => {
             const data = await fetchSales();
             const todayStr = new Date().toLocaleDateString('en-CA', { timeZone: 'America/Argentina/Buenos_Aires' });
             
-            // Filter pending, not prepared AND from today
+            // Filter NOT prepared AND from today (regardless of PENDING/COMPLETED)
             const pending = data.filter(o => {
                 const orderDate = new Date(o.date).toLocaleDateString('en-CA', { timeZone: 'America/Argentina/Buenos_Aires' });
-                return o.status === 'PENDING' && !o.is_prepared && orderDate === todayStr;
+                return !o.is_prepared && orderDate === todayStr;
             });
             
             setOrders(pending.sort((a, b) => new Date(a.date) - new Date(b.date))); // FIFO

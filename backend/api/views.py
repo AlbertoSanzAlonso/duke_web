@@ -155,12 +155,16 @@ def DashboardInsightsView(request):
     # 2. Sales (Optimized)
     sales_qs = Sale.objects.filter(date__gte=today_start)
     today_sales_count = sales_qs.count()
-    pending_today_qs = sales_qs.filter(status='PENDING')
-    pending_today = pending_today_qs.count()
+    pending_today = sales_qs.filter(status='PENDING').count()
     completed_today = sales_qs.filter(status='COMPLETED').count()
     
-    kitchen_pending = pending_today_qs.filter(is_prepared=False).count()
-    kitchen_ready = pending_today_qs.filter(is_prepared=True).count()
+    # Kitchen stats: Independent of payment status (can be PENDING or COMPLETED)
+    kitchen_pending = sales_qs.filter(is_prepared=False).count()
+    kitchen_ready = sales_qs.filter(is_prepared=True).filter(status='PENDING').count() # Ready to deliver but not yet finished (paid/delivered)
+    
+    # Alternative interpretation: how many are ready vs how many are in preparation regardless of status
+    kitchen_pending = sales_qs.filter(is_prepared=False).count()
+    kitchen_ready_count = sales_qs.filter(is_prepared=True).count()
     
     # 3. Stats Mensuales ( IA / RAG Context Ready )
     month_start = now.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
@@ -198,7 +202,7 @@ def DashboardInsightsView(request):
             'pending': pending_today,
             'completed': completed_today,
             'kitchen_pending': kitchen_pending,
-            'kitchen_ready': kitchen_ready
+            'kitchen_ready': kitchen_ready_count
         },
         'monthly_stats': {
             'total_sales': float(monthly_sales),
