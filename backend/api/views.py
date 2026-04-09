@@ -162,8 +162,11 @@ def DashboardInsightsView(request):
     kitchen_pending_qs = sales_qs.filter(is_prepared=False)
     kitchen_pending = kitchen_pending_qs.count()
     
-    kitchen_ready_qs = sales_qs.filter(is_prepared=True)
+    kitchen_ready_qs = sales_qs.filter(is_prepared=True, is_delivered=False)
     kitchen_ready_count = kitchen_ready_qs.count()
+    
+    kitchen_delivered_qs = sales_qs.filter(is_prepared=True, is_delivered=True)
+    kitchen_delivered_count = kitchen_delivered_qs.count()
     
     # Serialized summaries for dashboard modals
     kitchen_pending_list = [{
@@ -171,6 +174,7 @@ def DashboardInsightsView(request):
         "customer": s.customer_name or "Particular", 
         "total": float(s.total_amount), 
         "is_prepared": s.is_prepared,
+        "is_delivered": s.is_delivered,
         "created_at": s.date.isoformat(),
         "updated_at": s.updated_at.isoformat()
     } for s in kitchen_pending_qs]
@@ -180,9 +184,20 @@ def DashboardInsightsView(request):
         "customer": s.customer_name or "Particular", 
         "total": float(s.total_amount), 
         "is_prepared": s.is_prepared,
+        "is_delivered": s.is_delivered,
         "created_at": s.date.isoformat(),
         "updated_at": s.updated_at.isoformat()
     } for s in kitchen_ready_qs]
+
+    kitchen_delivered_list = [{
+        "id": s.id, 
+        "customer": s.customer_name or "Particular", 
+        "total": float(s.total_amount), 
+        "is_prepared": s.is_prepared,
+        "is_delivered": s.is_delivered,
+        "created_at": s.date.isoformat(),
+        "updated_at": s.updated_at.isoformat()
+    } for s in kitchen_delivered_qs]
     
     # 3. Stats Mensuales ( IA / RAG Context Ready )
     month_start = now.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
@@ -221,8 +236,10 @@ def DashboardInsightsView(request):
             'completed': completed_today,
             'kitchen_pending': kitchen_pending,
             'kitchen_ready': kitchen_ready_count,
+            'kitchen_delivered': kitchen_delivered_count,
             'kitchen_pending_list': kitchen_pending_list,
-            'kitchen_ready_list': kitchen_ready_list
+            'kitchen_ready_list': kitchen_ready_list,
+            'kitchen_delivered_list': kitchen_delivered_list
         },
         'monthly_stats': {
             'total_sales': float(monthly_sales),
@@ -511,6 +528,14 @@ class SaleViewSet(viewsets.ModelViewSet):
         sale.save()
         log_action(request.user if request.user.is_authenticated else None, 'COCINA', 'UPDATE', f'Pedido #{sale.id} marcado como PREPARADO')
         return Response({'message': f'Pedido #{sale.id} enviado a listo.'})
+
+    @action(detail=True, methods=['post'], url_path='mark-delivered')
+    def mark_delivered(self, request, pk=None):
+        sale = self.get_object()
+        sale.is_delivered = True
+        sale.save()
+        log_action(request.user if request.user.is_authenticated else None, 'COCINA', 'UPDATE', f'Pedido #{sale.id} marcado como RECOGIDO/ENTREGADO')
+        return Response({'message': f'Pedido #{sale.id} archivado como recogido.'})
 
 class ExpenseViewSet(viewsets.ModelViewSet):
     queryset = Expense.objects.all().order_by('-date')

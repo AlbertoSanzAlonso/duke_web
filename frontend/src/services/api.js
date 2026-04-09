@@ -276,6 +276,15 @@ export const markSaleAsPrepared = async (id) => {
     return await response.json();
 };
 
+export const markSaleAsDelivered = async (id) => {
+    const response = await fetch(`${API_URL}/sales/${id}/mark-delivered/`, {
+        method: 'POST',
+        headers: getHeaders()
+    });
+    if (!response.ok) return handleResponseError(response);
+    return await response.json();
+};
+
 // EXPENSES & ACCOUNTING
 export const fetchExpenses = async () => {
     const response = await fetch(`${API_URL}/expenses/`, { headers: getHeaders() });

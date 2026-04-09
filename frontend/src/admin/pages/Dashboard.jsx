@@ -72,8 +72,26 @@ const Dashboard = () => {
     }, []);
 
     const [showKitchenModal, setShowKitchenModal] = useState(false);
+    const [showDeliveredModal, setShowDeliveredModal] = useState(false);
 
     if (loading) return <LoadingScreen />;
+
+    const handleMarkDelivered = async (orderId) => {
+        try {
+            await import('../../services/api').then(m => m.markSaleAsDelivered(orderId));
+            // Silent refresh
+            const insights = await fetchDashboardInsights();
+            setData(prev => ({
+                ...prev,
+                kitchenReady: insights.today_sales.kitchen_ready,
+                kitchenDelivered: insights.today_sales.kitchen_delivered,
+                kitchenReadyList: insights.today_sales.kitchen_ready_list,
+                kitchenDeliveredList: insights.today_sales.kitchen_delivered_list
+            }));
+        } catch (error) {
+            console.error("Error marking as delivered", error);
+        }
+    };
 
     return (
         <div className="dash-container">
@@ -271,6 +289,7 @@ const Dashboard = () => {
                     </div>
                 </div>
             )}
+
             {/* MODAL DETALLE DE COCINA HOY */}
             {showKitchenModal && (
                 <div className="modal-overlay" onClick={() => setShowKitchenModal(false)} style={{ zIndex: 5000 }}>
@@ -280,7 +299,7 @@ const Dashboard = () => {
                         maxHeight: '85vh', 
                         display: 'flex', 
                         flexDirection: 'column',
-                        padding: '0', // Control padding internally
+                        padding: '0', 
                         overflow: 'hidden' 
                     }}>
                         {/* Header Fijo */}
@@ -305,18 +324,35 @@ const Dashboard = () => {
                             </div>
 
                             <div className="kitchen-lists-split">
-                                <h4 style={{ textTransform: 'uppercase', fontSize: '0.75rem', color: '#2b8a3e', marginTop: '10px', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                                    <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#2b8a3e' }}></div> Pedidos Listos
-                                </h4>
+                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '10px', marginBottom: '10px' }}>
+                                    <h4 style={{ textTransform: 'uppercase', fontSize: '0.75rem', color: '#2b8a3e', display: 'flex', alignItems: 'center', gap: '6px', margin: 0 }}>
+                                        <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#2b8a3e' }}></div> Pedidos Listos
+                                    </h4>
+                                    <button 
+                                        onClick={() => setShowDeliveredModal(true)} 
+                                        style={{ background: 'none', border: 'none', color: '#666', fontSize: '0.75rem', cursor: 'pointer', textDecoration: 'underline' }}
+                                    >
+                                        VER RECOGIDOS ({data.kitchenDelivered || 0})
+                                    </button>
+                                </div>
+
                                 {data.kitchenReadyList.length === 0 ? <p style={{ opacity: 0.5, fontSize: '0.9rem', padding: '10px' }}>No hay pedidos listos todavía.</p> : (
                                     <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                                         {data.kitchenReadyList.map(order => {
                                             const entryTime = new Date(order.created_at).toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit' });
                                             const readyTime = new Date(order.updated_at).toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit' });
                                             return (
-                                                <div key={order.id} style={{ display: 'flex', justifyContent: 'space-between', padding: '12px', background: '#f8f9fa', borderRadius: '10px', borderLeft: '4px solid #40c057', fontSize: '0.95rem' }}>
-                                                    <span><strong>#{order.id}</strong> {order.customer}</span>
-                                                    <div style={{ textAlign: 'right', fontSize: '0.8rem', color: '#666' }}>
+                                                <div key={order.id} style={{ display: 'flex', justifyContent: 'space-between', padding: '12px', background: '#f8f9fa', borderRadius: '10px', borderLeft: '4px solid #40c057', fontSize: '0.95rem', alignItems: 'center' }}>
+                                                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                                                        <input 
+                                                            type="checkbox" 
+                                                            title="Marcar como RECOGIDO"
+                                                            onChange={() => handleMarkDelivered(order.id)}
+                                                            style={{ width: '20px', height: '20px', cursor: 'pointer' }}
+                                                        />
+                                                        <span><strong>#{order.id}</strong> {order.customer}</span>
+                                                    </div>
+                                                    <div style={{ textAlign: 'right', fontSize: '0.7rem', color: '#666' }}>
                                                         <div>⏲️ {entryTime}</div>
                                                         <div style={{ color: '#2b8a3e', fontWeight: 'bold' }}>✅ {readyTime}</div>
                                                     </div>
@@ -368,6 +404,41 @@ const Dashboard = () => {
                             >
                                 IR AL PANEL COMPLETO DE COCINA
                             </Link>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* MODAL HISTORIAL RECOGIDOS HOY */}
+            {showDeliveredModal && (
+                <div className="modal-overlay" onClick={() => setShowDeliveredModal(false)} style={{ zIndex: 6000 }}>
+                    <div className="admin-card modal-content" onClick={e => e.stopPropagation()} style={{ 
+                        width: '85%', 
+                        maxWidth: '500px', 
+                        maxHeight: '70vh', 
+                        display: 'flex', 
+                        flexDirection: 'column',
+                        overflow: 'hidden' 
+                    }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '15px', borderBottom: '1px solid #eee' }}>
+                            <h3 style={{ margin: 0, fontSize: '1.1rem' }}>📦 Pedidos Recogidos (Hoy)</h3>
+                            <button onClick={() => setShowDeliveredModal(false)} className="icon-btn" style={{ background: 'none', border: 'none', fontSize: '1.2rem', cursor: 'pointer' }}>×</button>
+                        </div>
+                        <div style={{ flex: 1, overflowY: 'auto', padding: '15px' }}>
+                            {data.kitchenDeliveredList?.length === 0 ? <p style={{ opacity: 0.5, textAlign: 'center', padding: '20px' }}>No hay pedidos recogidos todavía.</p> : (
+                                <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                                    {data.kitchenDeliveredList?.map(order => {
+                                        const entryTime = new Date(order.created_at).toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit' });
+                                        const readyTime = new Date(order.updated_at).toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit' });
+                                        return (
+                                            <div key={order.id} style={{ display: 'flex', justifyContent: 'space-between', padding: '10px', background: '#f8f9fa', borderRadius: '8px', fontSize: '0.85rem', opacity: 0.7 }}>
+                                                <span><strong>#{order.id}</strong> {order.customer}</span>
+                                                <span style={{ fontSize: '0.7rem' }}>⏲️ {entryTime} | ✅ {readyTime}</span>
+                                            </div>
+                                        );
+                                    })}
+                                </div>
+                            )}
                         </div>
                     </div>
                 </div>
