@@ -29,7 +29,7 @@ const Footer = () => {
             <p>Laprida y José Avelín N</p>
             <p>San Juan, Argentina</p>
             <a 
-              href="https://www.google.com/maps/place/Laprida+y+Jos%C3%A9+Avel%C3%ADn+N/@-31.51325,-68.578093,17z/" 
+              href="https://share.google/uhA0uIK9PmhIATMDr" 
               target="_blank" 
               rel="noopener noreferrer"
               className="footer-map-link"
