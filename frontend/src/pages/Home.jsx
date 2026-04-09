@@ -462,13 +462,13 @@ function Home() {
   return (
     <div className="app">
       <Helmet>
-        <title>Duke Burger | Las Mejores Hamburguesas Artesanales de San Juan</title>
-        <meta name="description" content="Duke Burger San Juan: Descubrí el sabor brutal de nuestras hamburguesas artesanales, lomos y pachatas premium. Espíritu local, ingredientes frescos y el mejor delivery de San Juan. ¡Pedí ahora y viví la experiencia Duke!" />
+        <title>Duke Burger | Hamburguesería Artesanal en San Juan</title>
+        <meta name="description" content="Hamburguesería artesanal en San Juan, Argentina. Especialistas en hamburguesas, lomos y pachatas. Hacé tu pedido online para retiro en el local o delivery a domicilio." />
         <link rel="canonical" href="https://dukeburger-sj.com/" />
         
         {/* Open Graph Tags for Social Sharing */}
-        <meta property="og:title" content="Duke Burger | Sabor Brutal en San Juan" />
-        <meta property="og:description" content="Las mejores hamburguesas, lomos y pachatas de San Juan. Calidad premium y espíritu local. ¡Pedí online!" />
+        <meta property="og:title" content="Duke Burger | Hamburguesas, Lomos y Pachatas" />
+        <meta property="og:description" content="Hamburguesería artesanal en San Juan. Pedidos online para delivery y retiro." />
         <meta property="og:url" content="https://dukeburger-sj.com/" />
       </Helmet>
       {/* Navigation */}

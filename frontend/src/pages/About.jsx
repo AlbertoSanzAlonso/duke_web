@@ -75,7 +75,7 @@ function About() {
     <div className="about-page">
       <Helmet>
         <title>Sobre Nosotros | Duke Burger San Juan</title>
-        <meta name="description" content="Conocé la historia de Duke Burger en San Juan. Sabor brutal, espíritu local y las mejores hamburguesas artesanales de la ciudad. Calidad premium desde el corazón de Rivadavia." />
+        <meta name="description" content="Conocé Duke Burger. Hamburguesería artesanal en San Juan dedicada a la elaboración de hamburguesas, lomos y pachatas de calidad superior." />
         <link rel="canonical" href="https://dukeburger-sj.com/nosotros" />
       </Helmet>
       <nav className="navbar scrolled">
