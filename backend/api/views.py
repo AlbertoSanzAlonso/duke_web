@@ -841,6 +841,9 @@ def AIHelpView(request):
         "4. Usa los datos precisos del ESTADO DEL SISTEMA para responder. "
         "5. Usa pesos argentinos ($) formateados (ej: $12.900). "
         "6. Si te preguntan '¿qué falta?' o '¿qué tengo que comprar?', prioriza el stock crítico."
+        "7. PRINCIPIO DE RELEVANCIA: No ofrezcas toda la información que posees si no se te pide explícitamente. "
+        "Si el usuario te saluda o hace una pregunta genérica como '¿cómo va todo?', NO vuelques informes financieros ni de stock de inmediato. "
+        "Responde de forma educada, indica que todo está operativo y ofrece opciones breves para profundizar."
     )
 
     url = "https://api.groq.com/openai/v1/chat/completions"
