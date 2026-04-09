@@ -462,13 +462,13 @@ function Home() {
   return (
     <div className="app">
       <Helmet>
-        <title>Duke Burger | Las Mejores Hamburguesas de San Juan, Argentina</title>
-        <meta name="description" content="Las mejores hamburguesas artesanales de San Juan. Sabor brutal, espíritu local. Disfrutá de nuestras burgers, pachatas, lomos y pizzas con delivery a domicilio." />
+        <title>Duke Burger | Las Mejores Hamburguesas Artesanales de San Juan</title>
+        <meta name="description" content="Duke Burger San Juan: Descubrí el sabor brutal de nuestras hamburguesas artesanales, lomos y pachatas premium. Espíritu local, ingredientes frescos y el mejor delivery de San Juan. ¡Pedí ahora y viví la experiencia Duke!" />
         <link rel="canonical" href="https://dukeburger-sj.com/" />
         
         {/* Open Graph Tags for Social Sharing */}
-        <meta property="og:title" content="Duke Burger | Las Mejores Hamburguesas de San Juan" />
-        <meta property="og:description" content="Pedí online las mejores hamburguesas de San Juan. Sabor brutal, espíritu local." />
+        <meta property="og:title" content="Duke Burger | Sabor Brutal en San Juan" />
+        <meta property="og:description" content="Las mejores hamburguesas, lomos y pachatas de San Juan. Calidad premium y espíritu local. ¡Pedí online!" />
         <meta property="og:url" content="https://dukeburger-sj.com/" />
       </Helmet>
       {/* Navigation */}
@@ -514,7 +514,7 @@ function Home() {
             <img src="/brand/duke burger 3 negativo.png" alt="Duke Sticker" className="sticker float-1" />
           </div>
         </div>
-        <div className="marquee">
+        <div className="marquee" data-nosnippet>
           <div className="marquee-content" style={{ display: 'flex', width: 'max-content', gap: '30px' }}>
             {/* Contenido repetido para bucle infinito sin saltos */}
             {[1, 2, 3, 4, 5, 6].map((i) => (
