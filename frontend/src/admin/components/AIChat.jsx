@@ -64,6 +64,20 @@ const AIChat = () => {
         }
     };
 
+    const renderMessage = (content) => {
+        if (!content) return null;
+        
+        // Basic Markdown-like rendering
+        // 1. Bold: **text** -> <strong>text</strong>
+        let html = content.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+        // 2. Code blocks: ```text``` -> <pre>text</pre>
+        html = html.replace(/```([\s\S]*?)```/g, '<pre class="ai-chat-code">$1</pre>');
+        // 3. Inline code: `text` -> <code>text</code>
+        html = html.replace(/`(.*?)`/g, '<code>$1</code>');
+        // 4. Line breaks
+        return <div dangerouslySetInnerHTML={{ __html: html.replace(/\n/g, '<br/>') }} />;
+    };
+
     return (
         <div className="ai-chat-wrapper">
             {/* Bubble Button */}
@@ -89,7 +103,7 @@ const AIChat = () => {
                         {messages.map((msg, idx) => (
                             <div key={idx} className={`ai-message ${msg.role}`}>
                                 <div className="message-bubble">
-                                    {msg.content}
+                                    {renderMessage(msg.content)}
                                 </div>
                             </div>
                         ))}

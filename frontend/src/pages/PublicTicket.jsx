@@ -108,6 +108,13 @@ const PublicTicket = () => {
                         span, p, h1, h2, h3, h4 { color: black !important; }
                         .review-btn-print { display: none !important; }
                         
+                        /* Forzar una sola pagina */
+                        html, body { height: auto !important; overflow: visible !important; }
+                        main { break-inside: avoid !important; page-break-inside: avoid !important; }
+                        
+                        /* Garantizar negro en cabecera */
+                        header div, header h1 { color: black !important; -webkit-text-fill-color: black !important; }
+
                         /* Redimensionar QR */
                         img[alt="QR Reseñas Google"] {
                             width: 80px !important;

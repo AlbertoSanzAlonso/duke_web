@@ -751,7 +751,7 @@ def AIHelpView(request):
         logs_text = "\n".join([f"- {log.timestamp.strftime('%H:%M')} {log.user.username if log.user else 'Sis'}: {log.description}" for log in recent_logs])
 
         # --- MENU ---
-        categories = MenuEntry.objects.values_list('category', flat=True).distinct()
+        categories = MenuEntry.objects.values_list('product__category', flat=True).distinct()
         total_products = Product.objects.count()
 
         # --- HISTORIAL DIARIO (Últimos 30 días) ---

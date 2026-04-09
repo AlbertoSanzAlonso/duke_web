@@ -253,13 +253,16 @@ const Orders = () => {
                                             {order.status === 'PENDING' ? 'Pendiente' : order.status === 'COMPLETED' ? 'Completado' : 'Cancelado'}
                                         </span>
                                     </td>
-                                    <td data-label="Acción">
+                                     <td data-label="Acción">
                                         <div className="row-actions" style={{ display: 'flex', gap: '5px' }}>
-                                            <button className="icon-btn print" title="Imprimir" onClick={(e) => { e.stopPropagation(); handlePrint(order); }}>
+                                            <button className="icon-btn print" title="Ver Ticket Público" onClick={(e) => { e.stopPropagation(); window.open(`/ticket/${order.id}`, '_blank'); }}>
+                                                <Eye size={18} />
+                                            </button>
+                                            <button className="icon-btn print" title="Ticket Térmico" onClick={(e) => { e.stopPropagation(); handlePrint(order); }}>
                                                 <Printer size={18} />
                                             </button>
                                             {order.status === 'PENDING' && (
-                                                <button className="icon-btn tpv" title="Ir al TPV" onClick={(e) => { e.stopPropagation(); navigate('/admin/tpv', { state: { pendingOrder: order } }); }}>
+                                                <button className="icon-btn tpv" title="Cobrar en TPV" onClick={(e) => { e.stopPropagation(); navigate('/admin/tpv', { state: { pendingOrder: order } }); }}>
                                                     <LayoutGrid size={18} />
                                                 </button>
                                             )}
@@ -325,19 +328,12 @@ const Orders = () => {
                                     ))}
                                 </div>
 
-                                <div className="details-total" style={{ borderTop: '2px solid #333', paddingTop: '15px', marginTop: '10px' }}>
-                                    <span style={{ fontWeight: '900', fontSize: '0.9rem', color: '#888' }}>TOTAL</span>
-                                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end' }}>
-                                        {parseFloat(selectedOrder.delivery_cost) > 0 && (
-                                            <small style={{ fontSize: '0.8rem', color: '#666' }}>Envío: ${parseFloat(selectedOrder.delivery_cost).toLocaleString('es-AR')}</small>
-                                        )}
-                                        <strong style={{ fontSize: '2rem', fontWeight: '900', color: '#000' }}>${Math.round(parseFloat(selectedOrder.total_amount)).toLocaleString('es-AR')}</strong>
-                                    </div>
-                                </div>
-
                                 <div className="modal-actions-footer" style={{ display: 'flex', gap: '10px', marginTop: '1.5rem' }}>
+                                    <button className="print-full-btn" style={{ flex: 1, padding: '12px', fontSize: '0.8rem', background: '#333' }} onClick={() => window.open(`/ticket/${selectedOrder.id}`, '_blank')}>
+                                        <Eye size={16} /> VER TICKET
+                                    </button>
                                     <button className="print-full-btn" style={{ flex: 1, padding: '12px', fontSize: '0.8rem' }} onClick={() => handlePrint(selectedOrder)}>
-                                        <Printer size={16} /> IMPRIMIR
+                                        <Printer size={16} /> TÉRMICO
                                     </button>
                                     {selectedOrder.status === 'PENDING' && (
                                         <button 

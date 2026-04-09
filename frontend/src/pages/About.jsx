@@ -209,7 +209,7 @@ function About() {
               letterSpacing: '1px'
             }}>LO QUE DICEN NUESTROS CLIENTES</h2>
             <p style={{ color: '#aaa', fontSize: '1.1rem', marginBottom: '40px', maxWidth: '600px', margin: '0 auto 40px' }}>
-              La comunidad Duke sigue creciendo. Estas son algunas de las experiencias de quienes ya probaron nuestro sabor brutal.
+              Nuestro perfil de Google es nuevo, pero nuestro sabor ya es leyenda. Muy pronto verás aquí las reseñas reales de nuestra comunidad brutal.
             </p>
 
           <div className="testimonials-grid" style={{ 
