@@ -46,6 +46,33 @@ const PublicTicket = () => {
 
     return (
         <div style={{ minHeight: '100vh', background: '#0a0a0a', color: '#fff', padding: '20px', fontFamily: 'Inter, sans-serif' }}>
+            <style>
+                {`
+                    @media print {
+                        @page { margin: 0; size: auto; }
+                        body { background: white !important; color: black !important; padding: 0 !important; margin: 0 !important; }
+                        .no-print { display: none !important; }
+                        footer { display: none !important; }
+                        header { margin-bottom: 15px !important; }
+                        header img { height: 60px !important; }
+                        main { 
+                            box-shadow: none !important; 
+                            border: 1px solid #eee !important; 
+                            margin: 0 auto !important; 
+                            background: white !important; 
+                            color: black !important;
+                            border-radius: 0 !important;
+                            max-width: 100% !important;
+                        }
+                        div[style*="background: #1a1a1a"] { background: white !important; border: 1px solid #eee !important; }
+                        div[style*="background: #000"] { background: #f9f9f9 !important; border: 1px solid #ddd !important; }
+                        div[style*="background: linear-gradient"] { background: #f9f9f9 !important; border: 1px solid #f03e3e !important; }
+                        span, div, h1, h2, h3, p { color: black !important; }
+                        .review-btn-print { display: none !important; }
+                        * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+                    }
+                `}
+            </style>
             {/* Header / Logo */}
             <header style={{ textAlign: 'center', marginBottom: '30px' }}>
                 <img src="/brand/duke burger 1 negativo.png" alt="Duke Burger" style={{ height: '80px', marginBottom: '10px' }} />
@@ -184,6 +211,7 @@ const PublicTicket = () => {
                             href="https://g.page/r/CTunx53CILhQEBI/review"
                             target="_blank"
                             rel="noopener noreferrer"
+                            className="review-btn-print"
                             style={{
                                 display: 'inline-block',
                                 background: '#f03e3e',
