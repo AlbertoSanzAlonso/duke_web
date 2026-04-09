@@ -266,12 +266,12 @@ const Users = () => {
                                 <div className="user-mobile-avatar">
                                     <UserIcon size={20} />
                                 </div>
-                                <div style={{ display: 'flex', flexDirection: 'column' }}>
-                                    <strong style={{ fontSize: '1.1rem' }}>{user.username}</strong>
+                                <div className="user-mobile-details">
+                                    <strong className="user-mobile-name">{user.username}</strong>
                                     {user.is_superuser && <span style={{ fontSize: '0.7rem', color: '#339af0', fontWeight: 'bold' }}>SUPERUSUARIO</span>}
                                 </div>
                             </div>
-                            <div style={{ color: '#888' }}>
+                            <div style={{ color: '#888', flexShrink: 0 }}>
                                 <Edit2 size={18} />
                             </div>
                         </div>

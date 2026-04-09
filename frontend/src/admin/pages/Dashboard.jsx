@@ -300,10 +300,11 @@ const Dashboard = () => {
                         display: 'flex', 
                         flexDirection: 'column',
                         padding: '0', 
-                        overflow: 'hidden' 
+                        overflow: 'hidden',
+                        borderRadius: '20px'
                     }}>
                         {/* Header Fijo */}
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '20px', borderBottom: '1px solid #eee' }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '20px', borderBottom: '1px solid #eee', background: '#fff' }}>
                             <h2 style={{ margin: 0, display: 'flex', alignItems: 'center', gap: '10px', fontSize: '1.3rem' }}>
                                 <Utensils color="var(--admin-primary)" /> Control de Cocina (Hoy)
                             </h2>
@@ -329,8 +330,11 @@ const Dashboard = () => {
                                         <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#2b8a3e' }}></div> Pedidos Listos
                                     </h4>
                                     <button 
-                                        onClick={() => setShowDeliveredModal(true)} 
-                                        style={{ background: 'none', border: 'none', color: '#666', fontSize: '0.75rem', cursor: 'pointer', textDecoration: 'underline' }}
+                                        onClick={() => {
+                                            setShowKitchenModal(false);
+                                            setShowDeliveredModal(true);
+                                        }} 
+                                        style={{ background: '#f1f3f5', border: 'none', color: '#444', fontSize: '0.75rem', cursor: 'pointer', padding: '6px 12px', borderRadius: '20px', fontWeight: 'bold' }}
                                     >
                                         VER RECOGIDOS ({data.kitchenDelivered || 0})
                                     </button>
@@ -343,16 +347,18 @@ const Dashboard = () => {
                                             const readyTime = new Date(order.updated_at).toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit' });
                                             return (
                                                 <div key={order.id} style={{ display: 'flex', justifyContent: 'space-between', padding: '12px', background: '#f8f9fa', borderRadius: '10px', borderLeft: '4px solid #40c057', fontSize: '0.95rem', alignItems: 'center' }}>
-                                                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                                                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px', minWidth: 0, flex: 1 }}>
                                                         <input 
                                                             type="checkbox" 
                                                             title="Marcar como RECOGIDO"
                                                             onChange={() => handleMarkDelivered(order.id)}
-                                                            style={{ width: '20px', height: '20px', cursor: 'pointer' }}
+                                                            style={{ width: '22px', height: '22px', cursor: 'pointer', flexShrink: 0 }}
                                                         />
-                                                        <span><strong>#{order.id}</strong> {order.customer}</span>
+                                                        <span style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                                                            <strong>#{order.id}</strong> {order.customer}
+                                                        </span>
                                                     </div>
-                                                    <div style={{ textAlign: 'right', fontSize: '0.7rem', color: '#666' }}>
+                                                    <div style={{ textAlign: 'right', fontSize: '0.7rem', color: '#666', borderLeft: '1px solid #eee', paddingLeft: '10px', marginLeft: '10px', flexShrink: 0 }}>
                                                         <div>⏲️ {entryTime}</div>
                                                         <div style={{ color: '#2b8a3e', fontWeight: 'bold' }}>✅ {readyTime}</div>
                                                     </div>
@@ -371,8 +377,10 @@ const Dashboard = () => {
                                             const entryTime = new Date(order.created_at).toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit' });
                                             return (
                                                 <div key={order.id} style={{ display: 'flex', justifyContent: 'space-between', padding: '12px', background: '#f8f9fa', borderRadius: '10px', borderLeft: '4px solid #f03e3e', fontSize: '0.95rem', alignItems: 'center' }}>
-                                                    <span><strong>#{order.id}</strong> {order.customer}</span>
-                                                    <div style={{ fontSize: '0.85rem', color: '#e03131', fontWeight: 'bold' }}>
+                                                    <span style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', flex: 1, minWidth: 0 }}>
+                                                        <strong>#{order.id}</strong> {order.customer}
+                                                    </span>
+                                                    <div style={{ fontSize: '0.8rem', color: '#e03131', fontWeight: 'bold', flexShrink: 0 }}>
                                                         ⏲️ {entryTime}
                                                     </div>
                                                 </div>
@@ -383,8 +391,8 @@ const Dashboard = () => {
                             </div>
                         </div>
 
-                        {/* Footer Fijo con Botón */}
-                        <div style={{ padding: '20px', borderTop: '1px solid #eee', background: '#fff', textAlign: 'center' }}>
+                        {/* Footer Fijo con Botón (Espaciado extra para móvil) */}
+                        <div style={{ padding: '20px 20px 40px 20px', borderTop: '1px solid #eee', background: '#fff', textAlign: 'center' }}>
                             <Link 
                                 to="/admin/cocina" 
                                 className="add-movement-btn" 
@@ -415,30 +423,52 @@ const Dashboard = () => {
                     <div className="admin-card modal-content" onClick={e => e.stopPropagation()} style={{ 
                         width: '85%', 
                         maxWidth: '500px', 
-                        maxHeight: '70vh', 
+                        maxHeight: '75vh', 
                         display: 'flex', 
                         flexDirection: 'column',
-                        overflow: 'hidden' 
+                        overflow: 'hidden',
+                        borderRadius: '20px'
                     }}>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '15px', borderBottom: '1px solid #eee' }}>
-                            <h3 style={{ margin: 0, fontSize: '1.1rem' }}>📦 Pedidos Recogidos (Hoy)</h3>
-                            <button onClick={() => setShowDeliveredModal(false)} className="icon-btn" style={{ background: 'none', border: 'none', fontSize: '1.2rem', cursor: 'pointer' }}>×</button>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '20px', borderBottom: '1px solid #eee', background: '#fff' }}>
+                            <h3 style={{ margin: 0, fontSize: '1.2rem' }}>📦 Pedidos Recogidos (Hoy)</h3>
+                            <button onClick={() => setShowDeliveredModal(false)} className="icon-btn" style={{ background: 'none', border: 'none', fontSize: '1.5rem', cursor: 'pointer' }}>×</button>
                         </div>
-                        <div style={{ flex: 1, overflowY: 'auto', padding: '15px' }}>
+                        <div style={{ flex: 1, overflowY: 'auto', padding: '20px' }}>
                             {data.kitchenDeliveredList?.length === 0 ? <p style={{ opacity: 0.5, textAlign: 'center', padding: '20px' }}>No hay pedidos recogidos todavía.</p> : (
-                                <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                                     {data.kitchenDeliveredList?.map(order => {
                                         const entryTime = new Date(order.created_at).toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit' });
                                         const readyTime = new Date(order.updated_at).toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit' });
                                         return (
-                                            <div key={order.id} style={{ display: 'flex', justifyContent: 'space-between', padding: '10px', background: '#f8f9fa', borderRadius: '8px', fontSize: '0.85rem', opacity: 0.7 }}>
-                                                <span><strong>#{order.id}</strong> {order.customer}</span>
-                                                <span style={{ fontSize: '0.7rem' }}>⏲️ {entryTime} | ✅ {readyTime}</span>
+                                            <div key={order.id} style={{ display: 'flex', justifyContent: 'space-between', padding: '12px', background: '#f8f9fa', borderRadius: '10px', fontSize: '0.9rem', opacity: 0.8, alignItems: 'center' }}>
+                                                <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                                                    <strong>#{order.id}</strong> {order.customer}
+                                                </span>
+                                                <span style={{ fontSize: '0.7rem', flexShrink: 0, marginLeft: '10px' }}>⏲️ {entryTime} | ✅ {readyTime}</span>
                                             </div>
                                         );
                                     })}
                                 </div>
                             )}
+                        </div>
+                        <div style={{ padding: '20px 20px 40px 20px', borderTop: '1px solid #eee', background: '#fff' }}>
+                            <button 
+                                onClick={() => {
+                                    setShowDeliveredModal(false);
+                                    setShowKitchenModal(true);
+                                }} 
+                                style={{ 
+                                    width: '100%', 
+                                    padding: '16px', 
+                                    borderRadius: '12px', 
+                                    border: '1px solid #ddd', 
+                                    background: '#f8f9fa', 
+                                    fontWeight: 'bold', 
+                                    cursor: 'pointer' 
+                                }}
+                            >
+                                VOLVER AL CONTROL
+                            </button>
                         </div>
                     </div>
                 </div>
