@@ -94,12 +94,12 @@ function Home() {
       // Store all settings in deliverySettings for easy access
       const settingsMap = settings.reduce((acc, s) => ({ ...acc, [s.key]: s.value }), {});
       
-      // ALSO FETCH FROM DELIVERY RATES SINGLETON (More authoritative for banner/prices now)
+      // ALSO FETCH FROM DELIVERY RATES (Singleton record ID 1)
       try {
-        const dResponse = await fetch(`${import.meta.env.VITE_API_URL}/api/delivery-rates/`);
+        const dResponse = await fetch(`${import.meta.env.VITE_API_URL}/api/delivery-rates/1/`);
         const dRates = await dResponse.json();
         // Prefer the marquee from delivery-rates if it exists
-        if (dRates.marquee_text) {
+        if (dRates && dRates.marquee_text) {
           settingsMap.marquee_text = dRates.marquee_text;
         }
       } catch(e) { console.error("Error loading delivery-rates for banner", e); }

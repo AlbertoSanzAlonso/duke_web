@@ -86,6 +86,19 @@ const Settings = () => {
         }
     };
 
+    const saveGeneralSettings = async () => {
+        setIsSaving(true);
+        try {
+            await updateDeliveryRates(deliveryRates);
+            setToast({ message: 'Personalización de la web actualizada', type: 'success' });
+            window.dispatchEvent(new CustomEvent('config-updated'));
+        } catch (err) {
+            setToast({ message: 'Error al guardar personalización', type: 'error' });
+        } finally {
+            setIsSaving(false);
+        }
+    };
+
     const saveAllHours = async () => {
         setIsSaving(true);
         try {
@@ -310,7 +323,7 @@ const Settings = () => {
                             />
                             <p style={{ fontSize: '0.8rem', color: '#888', marginTop: '8px' }}>Este texto se desplazará continuamente en la parte superior e inferior de la web pública.</p>
                         </div>
-                        <button onClick={saveRates} style={saveButtonStyle} disabled={isSaving}>
+                        <button onClick={saveGeneralSettings} style={saveButtonStyle} disabled={isSaving}>
                             <Save size={20} /> {isSaving ? 'GUARDANDO...' : 'GUARDAR CAMBIOS GENERALES'}
                         </button>
                     </div>
