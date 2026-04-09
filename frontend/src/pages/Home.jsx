@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { Helmet } from 'react-helmet-async';
 import { Link } from 'react-router-dom';
 import { Menu, X, ShoppingCart, Minus, Plus, MessageCircle, MapPin, Instagram, Facebook, ChevronDown, Phone } from 'lucide-react';
 import { fetchMenuEntries, createSale, fetchOpeningHours } from '../services/api';
@@ -459,6 +460,16 @@ function Home() {
 
   return (
     <div className="app">
+      <Helmet>
+        <title>Duke Burger | Las Mejores Hamburguesas de San Juan, Argentina</title>
+        <meta name="description" content="Las mejores hamburguesas artesanales de San Juan. Sabor brutal, espíritu local. Disfrutá de nuestras burgers, pachatas, lomos y pizzas con delivery a domicilio." />
+        <link rel="canonical" href="https://dukeburger-sj.com/" />
+        
+        {/* Open Graph Tags for Social Sharing */}
+        <meta property="og:title" content="Duke Burger | Las Mejores Hamburguesas de San Juan" />
+        <meta property="og:description" content="Pedí online las mejores hamburguesas de San Juan. Sabor brutal, espíritu local." />
+        <meta property="og:url" content="https://dukeburger-sj.com/" />
+      </Helmet>
       {/* Navigation */}
       <nav className={`navbar ${isScrolled ? 'scrolled' : ''}`}>
         <div className="nav-container">

@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { Helmet } from 'react-helmet-async';
 import { Link } from 'react-router-dom';
 import { X, Menu } from 'lucide-react';
 import { fetchGalleryImages, fetchOpeningHours } from '../services/api';
@@ -31,6 +32,11 @@ function About() {
 
   return (
     <div className="about-page">
+      <Helmet>
+        <title>Sobre Nosotros | Duke Burger San Juan</title>
+        <meta name="description" content="Conocé la historia de Duke Burger en San Juan. Sabor brutal, espíritu local y las mejores hamburguesas artesanales preparadas con amor." />
+        <link rel="canonical" href="https://dukeburger-sj.com/nosotros" />
+      </Helmet>
       <nav className="navbar scrolled">
         <div className="nav-container">
           <Link to="/">
