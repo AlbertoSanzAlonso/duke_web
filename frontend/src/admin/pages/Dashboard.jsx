@@ -277,7 +277,7 @@ const Dashboard = () => {
                     <div className="admin-card modal-content" onClick={e => e.stopPropagation()} style={{ 
                         width: '90%', 
                         maxWidth: '550px', 
-                        maxHeight: '90vh', 
+                        maxHeight: '85vh', 
                         display: 'flex', 
                         flexDirection: 'column',
                         padding: '0', // Control padding internally

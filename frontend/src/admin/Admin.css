@@ -838,11 +838,27 @@ a.stat-card { text-decoration: none; cursor: pointer; }
 .user-mobile-card {
     background: #fff; padding: 15px; border-radius: 12px; border: 1px solid #eee;
     display: flex; align-items: center; justify-content: space-between; cursor: pointer;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.04);
 }
-.user-mobile-info { display: flex; align-items: center; gap: 12px; }
+.user-mobile-info { 
+    display: flex; align-items: center; gap: 12px; 
+    flex: 1; min-width: 0; /* Important for ellipsis */
+}
+.user-mobile-details {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    flex: 1;
+}
+.user-mobile-name { 
+    font-weight: 700; color: #333; 
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    font-size: 0.95rem;
+}
 .user-mobile-avatar { 
     width: 40px; height: 40px; background: #f1f3f5; border-radius: 50%;
     display: flex; align-items: center; justify-content: center; color: #495057;
+    flex-shrink: 0;
 }
 
 @media (max-width: 768px) {
