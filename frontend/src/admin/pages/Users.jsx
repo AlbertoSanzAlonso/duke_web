@@ -347,7 +347,7 @@ const Users = () => {
                                         type="password" 
                                         value={formData.confirmPassword} 
                                         onChange={e => setFormData({...formData, confirmPassword: e.target.value})}
-                                        required={!editingUser || formData.password !== ''}
+                                        required={!editingUser}
                                         placeholder="********"
                                         style={{ padding: '16px', borderRadius: '12px', border: '2px solid #f1f3f5', fontSize: '1rem', background: '#fcfcfc', color: '#111', transition: 'all 0.2s' }}
                                         className="styled-modal-input"
