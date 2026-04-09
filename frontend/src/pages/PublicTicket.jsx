@@ -67,8 +67,9 @@ const PublicTicket = () => {
                             padding-top: 10px !important;
                         }
                         header img { height: 50px !important; filter: grayscale(1) !important; }
+                        header h1, header div { color: black !important; }
                         header h1 { font-size: 1.1rem !important; margin-bottom: 5px !important; }
-                        header div { font-size: 0.75rem !important; }
+                        header div { font-size: 0.75rem !important; margin-top: 2px !important; }
                         
                         main { 
                             box-shadow: none !important; 
@@ -121,7 +122,7 @@ const PublicTicket = () => {
             <header style={{ textAlign: 'center', marginBottom: '30px' }}>
                 <img src="/brand/duke burger 1 negativo.png" alt="Duke Burger" style={{ height: '80px', marginBottom: '10px' }} />
                 <h1 style={{ margin: 0, fontSize: '1.5rem', letterSpacing: '2px', color: '#f03e3e' }}>TICKET DE PEDIDO</h1>
-                <div style={{ marginTop: '10px', fontSize: '0.85rem', color: '#aaa', lineHeight: '1.4' }}>
+                <div style={{ marginTop: '10px', fontSize: '0.85rem', color: '#eee', lineHeight: '1.4' }}>
                     <div>Bº Frondizi - Rivadavia (Laprida y Avelín)</div>
                     <div>San Juan | WhatsApp: 264 5142897</div>
                     <div style={{ color: '#f03e3e', fontWeight: '800' }}>dukeburger-sj.com</div>
