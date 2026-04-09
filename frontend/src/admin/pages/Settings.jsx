@@ -233,87 +233,56 @@ const Settings = () => {
                                 <button onClick={() => setActiveTab('hours')} className="restore-btn" style={{ color: '#f03e3e', fontWeight: 'bold' }}>Haz click en Restaurar Tabla arriba</button>
                             </div>
                         ) : (
-                            <div style={{ display: 'flex', flexDirection: 'column', gap: '15px', maxWidth: '900px', margin: '0 auto' }}>
-                                {/* Table Header for Desktop */}
-                                <div style={{ 
-                                    display: 'grid', 
-                                    gridTemplateColumns: 'minmax(150px, 1fr) 2fr 120px', 
-                                    padding: '0 15px', 
-                                    color: '#888', 
-                                    fontSize: '0.8rem', 
-                                    textTransform: 'uppercase', 
-                                    fontWeight: '800' 
-                                }}>
-                                    <span>Día</span>
-                                    <span style={{ textAlign: 'center' }}>Franja Horaria de Atención</span>
-                                    <span style={{ textAlign: 'right' }}>Estado</span>
-                                </div>
+                        <div className="opening-hours-container">
+                            {/* Table Header for Desktop (Hidden on Mobile) */}
+                            <div className="hours-desktop-header">
+                                <span>Día</span>
+                                <span style={{ textAlign: 'center' }}>Franja Horaria de Atención</span>
+                                <span style={{ textAlign: 'right' }}>Estado</span>
+                            </div>
 
+                            <div className="hours-list">
                                 {openingHours.map(hour => (
-                                    <div key={hour.id} style={{ 
-                                        display: 'grid', 
-                                        gridTemplateColumns: 'minmax(150px, 1fr) 2fr 120px', 
-                                        alignItems: 'center', 
-                                        background: hour.is_open ? '#fff' : '#f8f9fa',
-                                        padding: '15px', 
-                                        border: '1px solid #eee',
-                                        borderRadius: '12px',
-                                        gap: '15px',
-                                        boxShadow: '0 2px 4px rgba(0,0,0,0.02)'
-                                    }}>
-                                        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                                            <div style={{ 
-                                                width: '36px', height: '36px', borderRadius: '50%', 
-                                                background: hour.is_open ? '#f03e3e' : '#ccc', color: '#fff',
-                                                display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold',
-                                                fontSize: '0.9rem'
-                                            }}>
+                                    <div key={hour.id} className={`hour-row ${hour.is_open ? 'open' : 'closed'}`}>
+                                        <div className="hour-day">
+                                            <div className="day-badge">
                                                 {hour.day_name?.charAt(0) || '?'}
                                             </div>
-                                            <span style={{ fontWeight: 'bold', fontSize: '1rem' }}>{hour.day_name}</span>
+                                            <span className="day-name">{hour.day_name}</span>
                                         </div>
 
-                                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '15px' }}>
-                                            <div style={{ position: 'relative' }}>
+                                        <div className="hour-inputs">
+                                            <div className="time-field">
                                                 <input 
                                                     type="time" 
                                                     value={hour.opening_time} 
                                                     disabled={!hour.is_open}
                                                     onChange={e => handleHourChange(hour.id, 'opening_time', e.target.value)}
-                                                    style={{ ...timeInputStyle, opacity: hour.is_open ? 1 : 0.5, border: '1px solid #ddd', fontSize: '1rem', padding: '10px 12px', width: '140px', borderRadius: '8px' }}
                                                 />
                                             </div>
-                                            <span style={{ color: '#888', fontWeight: 'bold' }}>HASTA</span>
-                                            <div style={{ position: 'relative' }}>
+                                            <span className="time-separator">HASTA</span>
+                                            <div className="time-field">
                                                 <input 
                                                     type="time" 
                                                     value={hour.closing_time} 
                                                     disabled={!hour.is_open}
                                                     onChange={e => handleHourChange(hour.id, 'closing_time', e.target.value)}
-                                                    style={{ ...timeInputStyle, opacity: hour.is_open ? 1 : 0.5, border: '1px solid #ddd', fontSize: '1rem', padding: '10px 12px', width: '140px', borderRadius: '8px' }}
                                                 />
                                             </div>
                                         </div>
 
-                                        <button 
-                                            onClick={() => handleHourChange(hour.id, 'is_open', !hour.is_open)}
-                                            style={{
-                                                padding: '10px',
-                                                borderRadius: '8px',
-                                                border: '1px solid #ddd',
-                                                background: hour.is_open ? '#ebfbee' : '#f1f3f5',
-                                                color: hour.is_open ? '#2b8a3e' : '#888',
-                                                fontWeight: 'bold',
-                                                cursor: 'pointer',
-                                                fontSize: '0.8rem',
-                                                textAlign: 'center'
-                                            }}
-                                        >
-                                            {hour.is_open ? 'ABIERTO' : 'CERRADO'}
-                                        </button>
+                                        <div className="hour-action">
+                                            <button 
+                                                onClick={() => handleHourChange(hour.id, 'is_open', !hour.is_open)}
+                                                className={`status-btn ${hour.is_open ? 'active' : ''}`}
+                                            >
+                                                {hour.is_open ? 'ABIERTO' : 'CERRADO'}
+                                            </button>
+                                        </div>
                                     </div>
                                 ))}
                             </div>
+                        </div>
                         )}
 
                         <button onClick={saveAllHours} style={saveButtonStyle} disabled={isSaving}>
@@ -326,19 +295,23 @@ const Settings = () => {
                     <div className="tab-content">
                         <div style={{ display: 'flex', alignItems: 'center', gap: '15px', marginBottom: '25px', borderBottom: '1px solid #eee', paddingBottom: '15px' }}>
                             <Save size={32} color="#f03e3e" />
-                            <h2 style={{ margin: 0, fontSize: '1.5rem' }}>Personalización</h2>
+                            <h2 style={{ margin: 0, fontSize: '1.5rem' }}>Personalización Web</h2>
                         </div>
-                        <div className="setting-field">
-                            <label style={labelStyle}>Texto del Banner (Marquee)</label>
+                        <div className="setting-field" style={{ background: '#fff9db', padding: '20px', borderRadius: '12px', border: '1px solid #ffe066' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '10px' }}>
+                                <AlertTriangle size={20} color="#f08c00" />
+                                <label style={{ ...labelStyle, margin: 0, color: '#f08c00' }}>Texto del Banner (Marquee)</label>
+                            </div>
                             <textarea 
                                 value={deliveryRates.marquee_text || ''} 
                                 onChange={e => handleRateChange('marquee_text', e.target.value)} 
-                                style={{ ...inputStyle(false), height: '100px', resize: 'vertical' }}
+                                style={{ ...inputStyle(false), height: '100px', resize: 'vertical', fontSize: '1.1rem', background: '#fff' }}
                                 placeholder="Ej: BURGER - PACHATA - LOMO - PIZZA - BEBIDA - SAN JUAN"
                             />
+                            <p style={{ fontSize: '0.8rem', color: '#888', marginTop: '8px' }}>Este texto se desplazará continuamente en la parte superior e inferior de la web pública.</p>
                         </div>
                         <button onClick={saveRates} style={saveButtonStyle} disabled={isSaving}>
-                            <Save size={20} /> {isSaving ? 'GUARDANDO...' : 'GUARDAR CAMBIOS'}
+                            <Save size={20} /> {isSaving ? 'GUARDANDO...' : 'GUARDAR CAMBIOS GENERALES'}
                         </button>
                     </div>
                 )}

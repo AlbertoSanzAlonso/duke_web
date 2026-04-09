@@ -162,7 +162,7 @@ const Users = () => {
         <div className="admin-content">
             {toast && <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />}
             
-            <header className="page-header" style={{ marginBottom: '30px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <header className="page-header" style={{ marginBottom: '30px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '20px' }}>
                 <div>
                     <h2 style={{ display: 'flex', alignItems: 'center', gap: '12px', margin: 0 }}>
                         <Shield size={32} color="#f03e3e" /> Gestión de Usuarios
@@ -253,6 +253,31 @@ const Users = () => {
                         </tbody>
                     </table>
                 </div>
+
+                {/* Vista Móvil Simplificada */}
+                <div className="users-mobile-list">
+                    {filteredUsers.map(user => (
+                        <div key={user.id} className="user-mobile-card" onClick={() => handleOpenModal(user)}>
+                            <div className="user-mobile-info">
+                                <div className="user-mobile-avatar">
+                                    <UserIcon size={20} />
+                                </div>
+                                <div style={{ display: 'flex', flexDirection: 'column' }}>
+                                    <strong style={{ fontSize: '1.1rem' }}>{user.username}</strong>
+                                    {user.is_superuser && <span style={{ fontSize: '0.7rem', color: '#339af0', fontWeight: 'bold' }}>SUPERUSUARIO</span>}
+                                </div>
+                            </div>
+                            <div style={{ color: '#888' }}>
+                                <Edit2 size={18} />
+                            </div>
+                        </div>
+                    ))}
+                    {filteredUsers.length === 0 && (
+                        <div style={{ textAlign: 'center', padding: '40px', opacity: 0.5 }}>
+                            No se encontraron usuarios.
+                        </div>
+                    )}
+                </div>
             </div>
 
             {/* Modal for Create/Edit */}
@@ -263,7 +288,7 @@ const Users = () => {
                             {editingUser ? 'Editar Usuario' : 'Crear Nuevo Usuario'}
                         </h3>
                         <form onSubmit={handleSubmit} style={{ marginTop: '0' }}>
-                            <div className="form-grid" style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) minmax(0, 1fr)', gap: '20px' }}>
+                            <div className="form-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 250px), 1fr))', gap: '20px' }}>
                                 <div className="form-group" style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                                     <label style={{ color: '#444', fontSize: '0.9rem', fontWeight: 'bold', letterSpacing: '0.5px' }}><UserIcon size={14} style={{ marginRight: '5px' }} /> NOMBRE DE USUARIO</label>
                                     <input 
@@ -317,7 +342,7 @@ const Users = () => {
                                 <h4 style={{ marginBottom: '15px', display: 'flex', alignItems: 'center', gap: '8px', color: '#222' }}>
                                     <Shield size={16} /> Permisos de Acceso
                                 </h4>
-                                <div className="permissions-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(240px, 1fr))', gap: '10px' }}>
+                                <div className="permissions-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(min(100%, 240px), 1fr))', gap: '10px' }}>
                                     <PermissionToggle 
                                         label="Uso de TPV" 
                                         active={formData.profile.can_use_tpv} 

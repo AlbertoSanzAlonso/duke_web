@@ -726,18 +726,26 @@ a.stat-card { text-decoration: none; cursor: pointer; }
 @media (max-width: 480px) {
     .ai-chat-window {
         width: 100% !important;
-        height: 100dvh !important;
-        max-height: 100dvh !important;
+        height: auto !important;
         position: fixed !important;
         top: 0 !important;
         left: 0 !important;
         right: 0 !important;
         bottom: 0 !important;
+        max-height: 100% !important;
         border-radius: 0 !important;
         z-index: 10000;
         display: flex;
         flex-direction: column;
         overflow: hidden !important;
+        overscroll-behavior: contain;
+    }
+
+    .ai-chat-header {
+        position: sticky !important;
+        top: 0;
+        z-index: 10001;
+        flex-shrink: 0; /* Never shrink the header */
     }
 
     .ai-chat-messages {
@@ -745,6 +753,7 @@ a.stat-card { text-decoration: none; cursor: pointer; }
         padding: 15px;
         overflow-y: auto !important;
         -webkit-overflow-scrolling: touch;
+        overscroll-behavior: contain;
     }
 
     .ai-chat-wrapper {
@@ -758,4 +767,85 @@ a.stat-card { text-decoration: none; cursor: pointer; }
     0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(224, 49, 49, 0.7); }
     70% { transform: scale(1.1); box-shadow: 0 0 0 10px rgba(224, 49, 49, 0); }
     100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(224, 49, 49, 0); }
+}
+/* --- Responsive Settings & Hours --- */
+.opening-hours-container {
+    max-width: 900px;
+    margin: 0 auto;
+    width: 100%;
+}
+
+.hours-desktop-header {
+    display: grid;
+    grid-template-columns: minmax(150px, 1fr) 2fr 120px;
+    padding: 0 15px 10px;
+    color: #888;
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    font-weight: 800;
+}
+
+.hour-row {
+    display: grid;
+    grid-template-columns: minmax(150px, 1fr) 2fr 120px;
+    align-items: center;
+    background: #fff;
+    padding: 15px;
+    border: 1px solid #eee;
+    border-radius: 12px;
+    gap: 15px;
+    margin-bottom: 12px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+    transition: all 0.2s;
+}
+
+.hour-row.closed { background: #f8f9fa; opacity: 0.8; }
+
+.hour-day { display: flex; align-items: center; gap: 12px; }
+.day-badge { 
+    width: 36px; height: 36px; border-radius: 50%; background: #ccc; color: #fff;
+    display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 0.9rem;
+}
+.hour-row.open .day-badge { background: var(--admin-primary); }
+.day-name { font-weight: 700; font-size: 1rem; }
+
+.hour-inputs { display: flex; align-items: center; justify-content: center; gap: 15px; }
+.time-field input { 
+    border: 1px solid #ddd; font-size: 1rem; padding: 10px 12px; width: 140px; border-radius: 8px; font-weight: 700;
+}
+.time-separator { color: #888; font-weight: 800; font-size: 0.75rem; min-width: 50px; text-align: center; }
+
+.status-btn {
+    width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #ddd; background: #f1f3f5;
+    color: #888; font-weight: 800; cursor: pointer; font-size: 0.75rem; transition: all 0.2s;
+}
+.status-btn.active { background: #ebfbee; color: #2b8a3e; border-color: #2b8a3e44; }
+
+@media (max-width: 768px) {
+    .hours-desktop-header { display: none; }
+    .hour-row { grid-template-columns: 1fr; gap: 15px; padding: 20px; }
+    .hour-day { justify-content: space-between; border-bottom: 1px solid #eee; padding-bottom: 10px; }
+    .hour-inputs { flex-direction: column; gap: 10px; width: 100%; }
+    .time-field { width: 100%; }
+    .time-field input { width: 100% !important; font-size: 1.2rem; padding: 15px; }
+    .time-separator { transform: rotate(0deg); margin: 0; }
+    .hour-action { margin-top: 5px; }
+    .status-btn { padding: 15px; font-size: 0.9rem; }
+}
+
+/* --- Users Mobile Optimizations --- */
+.users-mobile-list { display: none; flex-direction: column; gap: 12px; }
+.user-mobile-card {
+    background: #fff; padding: 15px; border-radius: 12px; border: 1px solid #eee;
+    display: flex; align-items: center; justify-content: space-between; cursor: pointer;
+}
+.user-mobile-info { display: flex; align-items: center; gap: 12px; }
+.user-mobile-avatar { 
+    width: 40px; height: 40px; background: #f1f3f5; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center; color: #495057;
+}
+
+@media (max-width: 768px) {
+    .accounting-table-container { display: none; }
+    .users-mobile-list { display: flex; }
 }

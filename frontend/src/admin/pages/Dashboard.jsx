@@ -274,56 +274,84 @@ const Dashboard = () => {
             {/* MODAL DETALLE DE COCINA HOY */}
             {showKitchenModal && (
                 <div className="modal-overlay" onClick={() => setShowKitchenModal(false)} style={{ zIndex: 5000 }}>
-                    <div className="admin-card modal-content" onClick={e => e.stopPropagation()} style={{ width: '90%', maxWidth: '600px', maxHeight: '80vh', overflowY: 'auto' }}>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px', borderBottom: '2px solid #eee', paddingBottom: '10px' }}>
-                            <h2 style={{ margin: 0, display: 'flex', alignItems: 'center', gap: '10px' }}>
+                    <div className="admin-card modal-content" onClick={e => e.stopPropagation()} style={{ 
+                        width: '90%', 
+                        maxWidth: '550px', 
+                        maxHeight: '90vh', 
+                        display: 'flex', 
+                        flexDirection: 'column',
+                        padding: '0', // Control padding internally
+                        overflow: 'hidden' 
+                    }}>
+                        {/* Header Fijo */}
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '20px', borderBottom: '1px solid #eee' }}>
+                            <h2 style={{ margin: 0, display: 'flex', alignItems: 'center', gap: '10px', fontSize: '1.3rem' }}>
                                 <Utensils color="var(--admin-primary)" /> Control de Cocina (Hoy)
                             </h2>
-                            <button onClick={() => setShowKitchenModal(false)} className="icon-btn" style={{ background: 'none', border: 'none', fontSize: '1.5rem', cursor: 'pointer' }}>×</button>
+                            <button onClick={() => setShowKitchenModal(false)} className="icon-btn" style={{ background: 'none', border: 'none', fontSize: '1.5rem', cursor: 'pointer', color: '#333' }}>×</button>
                         </div>
 
-                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px', marginBottom: '20px' }}>
-                            <div className="stat-card" style={{ background: '#f8f9fa', padding: '15px' }}>
-                                <div style={{ fontSize: '0.8rem', color: '#888' }}>EN PREPARACIÓN</div>
-                                <div style={{ fontSize: '1.5rem', fontWeight: '900' }}>{data.kitchenPending}</div>
-                            </div>
-                            <div className="stat-card" style={{ background: '#ebfbee', padding: '15px' }}>
-                                <div style={{ fontSize: '0.8rem', color: '#2b8a3e' }}>LISTOS HOY</div>
-                                <div style={{ fontSize: '1.5rem', fontWeight: '900', color: '#2b8a3e' }}>{data.kitchenReady}</div>
-                            </div>
-                        </div>
-
-                        <div className="kitchen-lists-split">
-                            <h4 style={{ textTransform: 'uppercase', fontSize: '0.8rem', color: '#2b8a3e', marginTop: '20px' }}>✓ Pedidos Listos</h4>
-                            {data.kitchenReadyList.length === 0 ? <p style={{ opacity: 0.5, fontSize: '0.9rem' }}>No hay pedidos listos todavía.</p> : (
-                                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                                    {data.kitchenReadyList.map(order => (
-                                        <div key={order.id} style={{ display: 'flex', justifyContent: 'space-between', padding: '10px', background: '#f1f3f5', borderRadius: '8px', borderLeft: '4px solid #40c057' }}>
-                                            <span><strong>#{order.id}</strong> {order.customer}</span>
-                                            <strong>${order.total.toLocaleString('es-AR')}</strong>
-                                        </div>
-                                    ))}
+                        {/* Contenido Desplazable */}
+                        <div style={{ flex: 1, overflowY: 'auto', padding: '20px' }}>
+                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px', marginBottom: '20px' }}>
+                                <div className="stat-card" style={{ background: '#f8f9fa', padding: '15px' }}>
+                                    <div style={{ fontSize: '0.7rem', color: '#888', fontWeight: 'bold' }}>EN PREPARACIÓN</div>
+                                    <div style={{ fontSize: '1.5rem', fontWeight: '900' }}>{data.kitchenPending}</div>
                                 </div>
-                            )}
-
-                            <h4 style={{ textTransform: 'uppercase', fontSize: '0.8rem', color: '#e03131', marginTop: '30px' }}>⚡ En Cocción</h4>
-                            {data.kitchenPendingList.length === 0 ? <p style={{ opacity: 0.5, fontSize: '0.9rem' }}>No hay pedidos activos en cocina.</p> : (
-                                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                                    {data.kitchenPendingList.map(order => (
-                                        <div key={order.id} style={{ display: 'flex', justifyContent: 'space-between', padding: '10px', background: '#f1f3f5', borderRadius: '8px', borderLeft: '4px solid #f03e3e' }}>
-                                            <span><strong>#{order.id}</strong> {order.customer}</span>
-                                            <strong>${order.total.toLocaleString('es-AR')}</strong>
-                                        </div>
-                                    ))}
+                                <div className="stat-card" style={{ background: '#ebfbee', padding: '15px' }}>
+                                    <div style={{ fontSize: '0.7rem', color: '#2b8a3e', fontWeight: 'bold' }}>LISTOS HOY</div>
+                                    <div style={{ fontSize: '1.5rem', fontWeight: '900', color: '#2b8a3e' }}>{data.kitchenReady}</div>
                                 </div>
-                            )}
+                            </div>
+
+                            <div className="kitchen-lists-split">
+                                <h4 style={{ textTransform: 'uppercase', fontSize: '0.75rem', color: '#2b8a3e', marginTop: '10px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                    <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#2b8a3e' }}></div> Pedidos Listos
+                                </h4>
+                                {data.kitchenReadyList.length === 0 ? <p style={{ opacity: 0.5, fontSize: '0.9rem', padding: '10px' }}>No hay pedidos listos todavía.</p> : (
+                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                                        {data.kitchenReadyList.map(order => (
+                                            <div key={order.id} style={{ display: 'flex', justifyContent: 'space-between', padding: '12px', background: '#f8f9fa', borderRadius: '10px', borderLeft: '4px solid #40c057', fontSize: '0.95rem' }}>
+                                                <span><strong>#{order.id}</strong> {order.customer}</span>
+                                                <strong style={{ color: '#2b8a3e' }}>${order.total.toLocaleString('es-AR')}</strong>
+                                            </div>
+                                        ))}
+                                    </div>
+                                )}
+
+                                <h4 style={{ textTransform: 'uppercase', fontSize: '0.75rem', color: '#e03131', marginTop: '25px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                    <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#e03131', animation: 'pulse 2s infinite' }}></div> En Cocción
+                                </h4>
+                                {data.kitchenPendingList.length === 0 ? <p style={{ opacity: 0.5, fontSize: '0.9rem', padding: '10px' }}>No hay pedidos activos.</p> : (
+                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                                        {data.kitchenPendingList.map(order => (
+                                            <div key={order.id} style={{ display: 'flex', justifyContent: 'space-between', padding: '12px', background: '#f8f9fa', borderRadius: '10px', borderLeft: '4px solid #f03e3e', fontSize: '0.95rem' }}>
+                                                <span><strong>#{order.id}</strong> {order.customer}</span>
+                                                <strong>${order.total.toLocaleString('es-AR')}</strong>
+                                            </div>
+                                        ))}
+                                    </div>
+                                )}
+                            </div>
                         </div>
 
-                        <div style={{ marginTop: '30px', textAlign: 'center' }}>
+                        {/* Footer Fijo con Botón */}
+                        <div style={{ padding: '20px', borderTop: '1px solid #eee', background: '#fff', textAlign: 'center' }}>
                             <Link 
                                 to="/admin/cocina" 
                                 className="add-movement-btn" 
-                                style={{ display: 'inline-block', textDecoration: 'none', background: '#333' }}
+                                style={{ 
+                                    display: 'block', 
+                                    textDecoration: 'none', 
+                                    background: '#1a1b1e',
+                                    color: 'white',
+                                    padding: '16px',
+                                    borderRadius: '12px',
+                                    fontWeight: 'bold',
+                                    fontSize: '0.9rem',
+                                    transition: 'all 0.2s',
+                                    boxShadow: '0 4px 12px rgba(0,0,0,0.1)'
+                                }}
                                 onClick={() => setShowKitchenModal(false)}
                             >
                                 IR AL PANEL COMPLETO DE COCINA

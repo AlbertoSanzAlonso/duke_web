@@ -273,7 +273,7 @@ const Gallery = () => {
         <div style={{ padding: '20px', maxWidth: '1200px', margin: '0 auto' }}>
             {toast && <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />}
             
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '30px' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '30px', flexWrap: 'wrap', gap: '20px' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
                     <ImageIcon size={32} color="var(--admin-primary)" />
                     <h2 style={{ margin: 0, color: '#333' }}>Galería Local</h2>
@@ -316,7 +316,7 @@ const Gallery = () => {
                     items={gallery.map(i => i.id)}
                     strategy={rectSortingStrategy}
                 >
-                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '25px' }}>
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(min(100%, 280px), 1fr))', gap: '25px' }}>
                         {gallery.length === 0 ? (
                             <div style={{ gridColumn: '1/-1', textAlign: 'center', padding: '60px', background: '#f8f9fa', borderRadius: '15px', color: '#999' }}>
                                 No hay fotos en la galería todavía.
@@ -344,13 +344,19 @@ const Gallery = () => {
                             <h3 style={{ margin: 0 }}>Nueva Imagen del Local</h3>
                             <button onClick={() => setIsAddingImg(false)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#666' }}><X size={24} /></button>
                         </div>
-                        <form onSubmit={handleAddImage} style={{ padding: '25px', display: 'flex', flexDirection: 'column', gap: '20px' }}>
+                        <form onSubmit={handleAddImage} style={{ padding: '20px', display: 'flex', flexDirection: 'column', gap: '20px' }}>
                             <div>
-                                <label style={{ display: 'block', fontWeight: 'bold', marginBottom: '8px', fontSize: '0.9rem' }}>Título (Opcional)</label>
-                                <input type="text" value={newImage.title} placeholder="Ej: Salón Principal" onChange={e => setNewImage({...newImage, title: e.target.value})} style={{ width: '100%', padding: '12px', border: '1px solid #ddd', borderRadius: '8px', fontSize: '1rem' }} />
+                                <label style={{ display: 'block', fontWeight: 'bold', marginBottom: '8px', fontSize: '0.8rem', color: '#666', textTransform: 'uppercase' }}>Título (Opcional)</label>
+                                <input 
+                                    type="text" 
+                                    value={newImage.title} 
+                                    placeholder="Ej: Salón Principal" 
+                                    onChange={e => setNewImage({...newImage, title: e.target.value})} 
+                                    style={{ width: '100%', padding: '15px', border: '1px solid #ddd', borderRadius: '10px', fontSize: '1rem' }} 
+                                />
                             </div>
                             <div>
-                                <label style={{ display: 'block', fontWeight: '800', marginBottom: '8px', fontSize: '0.75rem', color: '#888', textTransform: 'uppercase' }}>Archivo de Imagen *</label>
+                                <label style={{ display: 'block', fontWeight: '800', marginBottom: '8px', fontSize: '0.8rem', color: '#666', textTransform: 'uppercase' }}>Archivo de Imagen *</label>
                                 {!newImage.image ? (
                                     <div style={{ position: 'relative' }}>
                                         <input 
@@ -359,20 +365,21 @@ const Gallery = () => {
                                             onChange={handleFileSelect} 
                                             style={{ 
                                                 position: 'absolute', opacity: 0, top: 0, left: 0, right: 0, bottom: 0, 
-                                                width: '100%', cursor: 'pointer' 
+                                                width: '100%', cursor: 'pointer', zIndex: 5 
                                             }} 
                                             required 
                                         />
                                         <div style={{ 
-                                            padding: '20px', border: '2px dashed #ddd', borderRadius: '12px', textAlign: 'center',
+                                            padding: '30px 20px', border: '2px dashed #ddd', borderRadius: '12px', textAlign: 'center',
                                             background: '#f8f9fa', color: '#666'
                                         }}>
-                                            <Plus size={24} style={{ marginBottom: '8px' }} />
-                                            <div style={{ fontSize: '0.9rem', fontWeight: 'bold' }}>Seleccionar Imagen</div>
+                                            <Plus size={32} style={{ marginBottom: '8px', color: 'var(--admin-primary)' }} />
+                                            <div style={{ fontSize: '1rem', fontWeight: 'bold' }}>Toque para seleccionar</div>
+                                            <div style={{ fontSize: '0.8rem', opacity: 0.7 }}>o arrastre la imagen aquí</div>
                                         </div>
                                     </div>
                                 ) : (
-                                    <div style={{ position: 'relative', borderRadius: '12px', overflow: 'hidden', height: '120px' }}>
+                                    <div style={{ position: 'relative', borderRadius: '12px', overflow: 'hidden', height: '160px', boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }}>
                                         <img 
                                             src={URL.createObjectURL(newImage.image)} 
                                             alt="Preview" 
@@ -382,12 +389,13 @@ const Gallery = () => {
                                             type="button"
                                             onClick={() => setNewImage({...newImage, image: null})}
                                             style={{ 
-                                                position: 'absolute', top: '8px', right: '8px', background: 'rgba(0,0,0,0.6)', 
-                                                color: 'white', border: 'none', borderRadius: '50%', width: '30px', height: '30px',
-                                                cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center'
+                                                position: 'absolute', top: '10px', right: '10px', background: 'rgba(224, 49, 49, 0.9)', 
+                                                color: 'white', border: 'none', borderRadius: '50%', width: '36px', height: '36px',
+                                                cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                                boxShadow: '0 2px 8px rgba(0,0,0,0.3)'
                                             }}
                                         >
-                                            <X size={16} />
+                                            <X size={20} />
                                         </button>
                                         <button 
                                             type="button"
@@ -400,19 +408,20 @@ const Gallery = () => {
                                                 reader.readAsDataURL(newImage.image);
                                             }}
                                             style={{ 
-                                                position: 'absolute', bottom: '8px', right: '8px', background: 'var(--admin-primary)', 
-                                                color: 'white', border: 'none', borderRadius: '8px', padding: '5px 10px',
-                                                cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '5px', fontSize: '0.75rem', fontWeight: 'bold'
+                                                position: 'absolute', bottom: '10px', right: '10px', background: 'rgba(0,0,0,0.8)', 
+                                                color: 'white', border: 'none', borderRadius: '8px', padding: '8px 12px',
+                                                cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.8rem', fontWeight: 'bold',
+                                                backdropFilter: 'blur(4px)'
                                             }}
                                         >
-                                            <Scissors size={14} /> RE-RECORTAR
+                                            <Scissors size={16} /> RE-RECORTAR
                                         </button>
                                     </div>
                                 )}
                             </div>
                             <div style={{ display: 'flex', gap: '15px', marginTop: '10px' }}>
-                                <button type="button" onClick={() => setIsAddingImg(false)} style={{ flex: 1, padding: '12px', background: '#f8f9fa', border: 'none', borderRadius: '8px', fontWeight: 'bold', cursor: 'pointer' }}>Cancelar</button>
-                                <button type="submit" disabled={imgSaving} style={{ flex: 1, padding: '12px', background: 'var(--admin-primary)', color: '#fff', border: 'none', borderRadius: '8px', fontWeight: 'bold', cursor: 'pointer' }}>{imgSaving ? 'Subiendo...' : 'Publicar Imagen'}</button>
+                                <button type="button" onClick={() => setIsAddingImg(false)} style={{ flex: 1, padding: '15px', background: '#f1f3f5', border: 'none', borderRadius: '10px', fontWeight: 'bold', color: '#495057', cursor: 'pointer' }}>Cancelar</button>
+                                <button type="submit" disabled={imgSaving} style={{ flex: 1, padding: '15px', background: 'var(--admin-primary)', color: '#fff', border: 'none', borderRadius: '10px', fontWeight: 'bold', cursor: 'pointer', boxShadow: '0 4px 12px rgba(240, 62, 62, 0.2)' }}>{imgSaving ? 'Subiendo...' : 'Publicar Foto'}</button>
                             </div>
                         </form>
                     </div>
