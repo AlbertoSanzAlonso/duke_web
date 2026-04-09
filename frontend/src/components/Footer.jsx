@@ -33,8 +33,18 @@ const Footer = () => {
               target="_blank" 
               rel="noopener noreferrer"
               className="footer-map-link"
+              style={{ marginBottom: '10px', display: 'block' }}
             >
               VER EN MAPA ↗
+            </a>
+            <a 
+              href="https://g.page/r/CTunx53CILhQEBI/review" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="footer-map-link"
+              style={{ color: '#f03e3e', borderColor: '#f03e3e' }}
+            >
+              ⭐ DEJAR RESEÑA
             </a>
           </div>
         </div>

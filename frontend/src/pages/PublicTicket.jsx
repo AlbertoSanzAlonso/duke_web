@@ -169,6 +169,51 @@ const PublicTicket = () => {
                         </div>
                     )}
 
+                    {/* Google Reviews Invitation */}
+                    <div style={{ 
+                        marginTop: '30px', 
+                        padding: '20px', 
+                        background: 'linear-gradient(135deg, #1a1a1a 0%, #000 100%)', 
+                        borderRadius: '12px', 
+                        border: '1px solid #f03e3e',
+                        textAlign: 'center'
+                    }}>
+                        <div style={{ fontSize: '1.2rem', fontWeight: 'bold', color: '#fff', marginBottom: '8px' }}>🚀 ¿Te gustó el sabor?</div>
+                        <p style={{ fontSize: '0.85rem', color: '#aaa', marginBottom: '15px' }}>Dejanos una reseña en Google y ayudanos a seguir creciendo.</p>
+                        <a 
+                            href="https://g.page/r/CTunx53CILhQEBI/review"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            style={{
+                                display: 'inline-block',
+                                background: '#f03e3e',
+                                color: '#fff',
+                                padding: '10px 20px',
+                                borderRadius: '8px',
+                                textDecoration: 'none',
+                                fontWeight: 'bold',
+                                fontSize: '0.9rem',
+                                marginBottom: '15px'
+                            }}
+                        >
+                            ⭐ DEJAR RESEÑA ⭐
+                        </a>
+                        <div style={{ marginTop: '10px' }}>
+                            <img 
+                                src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=https://g.page/r/CTunx53CILhQEBI/review" 
+                                alt="QR Reseñas Google" 
+                                style={{ 
+                                    width: '120px', 
+                                    height: '120px', 
+                                    padding: '10px', 
+                                    background: '#fff', 
+                                    borderRadius: '8px' 
+                                }} 
+                            />
+                            <p style={{ fontSize: '0.7rem', color: '#888', marginTop: '5px' }}>Escaneá para dejar tu reseña</p>
+                        </div>
+                    </div>
+
                     <div className="no-print" style={{ marginTop: '25px', paddingBottom: '30px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
                         <button 
                             onClick={() => window.print()}
