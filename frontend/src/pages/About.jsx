@@ -161,35 +161,65 @@ function About() {
               color: '#fff', 
               margin: '0 0 10px 0',
               letterSpacing: '1px'
-            }}>¿TE GUSTÓ TU EXPERIENCIA?</h2>
-            <p style={{ color: '#aaa', fontSize: '1.1rem', marginBottom: '30px', maxWidth: '500px', margin: '0 auto 30px' }}>
-              Tu opinión es el motor de nuestro sabor. Ayudanos a seguir creciendo dejando una reseña en Google.
+            }}>LO QUE DICEN NUESTROS CLIENTES</h2>
+            <p style={{ color: '#aaa', fontSize: '1.1rem', marginBottom: '40px', maxWidth: '600px', margin: '0 auto 40px' }}>
+              La comunidad Duke sigue creciendo. Estas son algunas de las experiencias de quienes ya probaron nuestro sabor brutal.
             </p>
+
+            {/* Testimonials Grid */}
+            <div className="testimonials-grid" style={{ 
+              display: 'grid', 
+              gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', 
+              gap: '20px', 
+              marginBottom: '50px',
+              textAlign: 'left'
+            }}>
+              {[
+                { name: "Andrés G.", text: "La Duke es de otro planeta. La cebolla caramelizada le da el toque justo. ¡Súper recomendados!", stars: 5 },
+                { name: "Lucía M.", text: "Pedimos la Conde y no defraudó. Se nota la calidad de los ingredientes y las papas llegaron 10 puntos.", stars: 5 },
+                { name: "Matias R.", text: "Lo mejor de Rivadavia por lejos. El sistema para pedir por la web es muy fácil y rápido. 10/10.", stars: 5 }
+              ].map((rev, i) => (
+                <div key={i} style={{ background: '#222', padding: '20px', borderRadius: '16px', border: '1px solid #333' }}>
+                  <div style={{ color: '#fcc419', marginBottom: '10px', fontSize: '0.9rem' }}>
+                    {"⭐".repeat(rev.stars)}
+                  </div>
+                  <p style={{ color: '#eee', fontSize: '0.95rem', fontStyle: 'italic', marginBottom: '15px', lineHeight: '1.5' }}>
+                    "{rev.text}"
+                  </p>
+                  <div style={{ fontWeight: 'bold', color: 'var(--color-primary)', fontSize: '0.9rem' }}>
+                    {rev.name}
+                  </div>
+                </div>
+              ))}
+            </div>
             
-            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '30px', justifyContent: 'center', alignItems: 'center' }}>
-              <a 
-                href="https://g.page/r/CTunx53CILhQEBI/review" 
-                target="_blank" 
-                rel="noopener noreferrer"
-                className="main-button"
-                style={{ textDecoration: 'none', padding: '15px 40px', fontSize: '1.1rem' }}
-              >
-                DEJAR MI RESEÑA
-              </a>
-              
-              <div style={{ 
-                background: '#fff', 
-                padding: '12px', 
-                borderRadius: '16px', 
-                display: 'inline-block',
-                boxShadow: '0 10px 20px rgba(0,0,0,0.2)'
-              }}>
-                <img 
-                  src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=https://g.page/r/CTunx53CILhQEBI/review" 
-                  alt="QR Reseñas Google" 
-                  style={{ width: '100px', height: '100px', display: 'block' }} 
-                />
-                <p style={{ color: '#333', fontSize: '0.65rem', fontWeight: 'bold', marginTop: '5px', margin: '5px 0 0 0' }}>ESCANEAR QR</p>
+            <div style={{ borderTop: '1px solid #333', paddingTop: '40px' }}>
+              <h3 style={{ color: '#fff', marginBottom: '20px', fontFamily: 'var(--font-heading)', fontSize: '1.5rem' }}>¿VOS YA NOS PROBASTE?</h3>
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '30px', justifyContent: 'center', alignItems: 'center' }}>
+                <a 
+                  href="https://g.page/r/CTunx53CILhQEBI/review" 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="main-button"
+                  style={{ textDecoration: 'none', padding: '15px 40px', fontSize: '1.1rem' }}
+                >
+                  DEJAR MI RESEÑA
+                </a>
+                
+                <div style={{ 
+                  background: '#fff', 
+                  padding: '12px', 
+                  borderRadius: '16px', 
+                  display: 'inline-block',
+                  boxShadow: '0 10px 20px rgba(0,0,0,0.2)'
+                }}>
+                  <img 
+                    src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=https://g.page/r/CTunx53CILhQEBI/review" 
+                    alt="QR Reseñas Google" 
+                    style={{ width: '100px', height: '100px', display: 'block' }} 
+                  />
+                  <p style={{ color: '#333', fontSize: '0.65rem', fontWeight: 'bold', marginTop: '5px', margin: '5px 0 0 0' }}>ESCANEAR QR</p>
+                </div>
               </div>
             </div>
           </div>
