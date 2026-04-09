@@ -26,8 +26,8 @@ const Footer = () => {
           </div>
           <div className="footer-info">
             <h3>UBICACIÓN</h3>
+            <p>Rivadavia, San Juan, Argentina</p>
             <p>Laprida y José Avelín N</p>
-            <p>San Juan, Argentina</p>
             <a 
               href="https://share.google/uhA0uIK9PmhIATMDr" 
               target="_blank" 
