@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Bot, Send, X, MessageSquare, Terminal } from 'lucide-react';
+import { Bot, Send, X, MessageSquare, Terminal, Maximize2, Minimize2 } from 'lucide-react';
 
 const AIChat = () => {
     const [isOpen, setIsOpen] = useState(() => {
@@ -14,6 +14,7 @@ const AIChat = () => {
             { role: 'assistant', content: '¡Hola! Soy Duke Assist. ¿En qué puedo ayudarte hoy con el panel?' }
         ];
     });
+    const [isExpanded, setIsExpanded] = useState(false);
     const [input, setInput] = useState('');
     const [isLoading, setIsLoading] = useState(false);
     const messagesEndRef = useRef(null);
@@ -90,13 +91,18 @@ const AIChat = () => {
 
             {/* Chat Window */}
             {isOpen && (
-                <div className="ai-chat-window">
+                <div className={`ai-chat-window ${isExpanded ? 'expanded' : ''}`}>
                     <header className="ai-chat-header">
                         <div className="header-info">
                             <Terminal size={18} color="var(--admin-primary)" />
                             <span>DUKE ASSIST v1.0 (Groq)</span>
                         </div>
-                        <button onClick={() => setIsOpen(false)}><X size={20} /></button>
+                        <div style={{ display: 'flex', gap: '5px' }}>
+                            <button className="header-action-btn" onClick={() => setIsExpanded(!isExpanded)} title={isExpanded ? "Contraer" : "Pantalla Completa"}>
+                                {isExpanded ? <Minimize2 size={18} /> : <Maximize2 size={18} />}
+                            </button>
+                            <button className="header-action-btn" onClick={() => { setIsOpen(false); setIsExpanded(false); }} title="Cerrar"><X size={20} /></button>
+                        </div>
                     </header>
 
                     <div className="ai-chat-messages">

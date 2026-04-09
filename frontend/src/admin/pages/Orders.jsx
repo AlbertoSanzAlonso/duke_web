@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
+import QRCode from 'qrcode';
 import { fetchSales } from '../../services/api';
 import { Printer, Eye, Calendar, User, Hash, Search, Filter, LayoutGrid, X, ShoppingBag, Download, FileText } from 'lucide-react';
 import { exportToExcel, exportToPDF } from '../../utils/exportUtils';
@@ -18,7 +19,7 @@ const Orders = () => {
     const [statusFilter, setStatusFilter] = useState('ALL'); // 'ALL', 'PENDING', 'COMPLETED'
     const [currentPage, setCurrentPage] = useState(1);
     const [showStatsModal, setShowStatsModal] = useState(false);
-    const [toast, setToast] = useState(null);
+    const [qrImage, setQrImage] = useState('');
     const itemsPerPage = 10;
     const navigate = useNavigate();
 
@@ -27,6 +28,13 @@ const Orders = () => {
 
     useEffect(() => {
         loadOrders();
+        
+        // Generar QR de reseñas una sola vez
+        QRCode.toDataURL("https://g.page/r/CTunx53CILhQEBI/review", {
+            margin: 1,
+            width: 200,
+            color: { dark: '#000000', light: '#ffffff' }
+        }).then(url => setQrImage(url));
         
         const handleNewOrder = (event) => {
             console.log("Real-time (Orders): Nuevo pedido recibido, recargando...");
@@ -368,7 +376,7 @@ const Orders = () => {
                 {(printingOrder || selectedOrder) && (
                     <div className="thermal-ticket" style={{ width: '80mm', margin: '0 auto', color: 'black', background: 'white' }}>
                         <div className="ticket-header-print" style={{ textAlign: 'center', marginBottom: '15px', visibility: 'visible !important', display: 'block !important' }}>
-                            <img src="/brand/duke burger 3 positivo.png" alt="Duke Burger" style={{ height: '60px', width: 'auto', marginBottom: '5px', display: 'block', margin: '0 auto', visibility: 'visible !important' }} />
+                            <img src="/brand/logo_negro.png" alt="Duke Burger" style={{ height: '60px', width: 'auto', marginBottom: '5px', display: 'block', margin: '0 auto', visibility: 'visible !important' }} />
                             <h1 style={{ fontSize: '1.2rem', margin: '0 0 5px 0', fontWeight: '900', color: 'black' }}>DUKE BURGER</h1>
                             <div style={{ fontSize: '0.75rem', lineHeight: '1.2', color: 'black' }}>
                                 <div>Bº Frondizi - Rivadavia</div>
@@ -413,11 +421,13 @@ const Orders = () => {
 
                         <div className="ticket-footer-print" style={{ textAlign: 'center', marginTop: '15px', fontSize: '0.75rem', color: 'black', visibility: 'visible !important', display: 'block !important' }}>
                             <p style={{ margin: '0 0 5px 0', fontWeight: 'bold' }}>🚀 ¿TE GUSTÓ EL SABOR?</p>
-                            <img 
-                                src="https://api.qrserver.com/v1/create-qr-code/?size=100x100&data=https://g.page/r/CTunx53CILhQEBI/review" 
-                                alt="QR Reseñas" 
-                                style={{ width: '80px', height: '80px', display: 'block', margin: '5px auto', background: 'white', padding: '5px', border: '1px solid #eee', visibility: 'visible !important' }} 
-                            />
+                            <div style={{ display: 'block', margin: '5px auto', background: 'white', padding: '5px', width: 'fit-content', border: '1px solid #eee', visibility: 'visible !important' }}>
+                                {qrImage ? (
+                                    <img src={qrImage} alt="QR" style={{ width: '80px', height: '80px', display: 'block' }} />
+                                ) : (
+                                    <div style={{ width: '80px', height: '80px' }}></div>
+                                )}
+                            </div>
                             <p style={{ margin: '5px 0 0 0' }}>Escanea y dejanos tu reseña</p>
                             <p style={{ margin: '10px 0 0 0', fontWeight: 'bold', borderTop: '1px dashed #000', paddingTop: '5px' }}>DUKEBURGER-SJ.COM</p>
                         </div>

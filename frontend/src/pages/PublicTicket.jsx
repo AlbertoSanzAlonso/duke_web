@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
+import QRCode from 'qrcode';
 import { ShoppingBag, MapPin, Calendar, Clock, ChevronLeft, Download, Printer } from 'lucide-react';
 import LoadingScreen from '../admin/components/LoadingScreen';
 
@@ -8,17 +9,24 @@ const PublicTicket = () => {
     const [order, setOrder] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
+    const [qrImage, setQrImage] = useState('');
 
     useEffect(() => {
         const fetchOrder = async () => {
             try {
-                // We use the same API endpoint, but it's public in this case
                 const response = await fetch(`${import.meta.env.VITE_API_URL}/api/sales/${id}/`);
                 if (!response.ok) throw new Error('Ticket no encontrado');
                 const data = await response.json();
                 setOrder(data);
                 // Set the page title to the order ID for better PDF filename
                 document.title = `Ticket_#${data.id}`;
+
+                // Generar QR de reseñas
+                QRCode.toDataURL("https://g.page/r/CTunx53CILhQEBI/review", {
+                    margin: 1,
+                    width: 300,
+                    color: { dark: '#000000', light: '#ffffff' }
+                }).then(url => setQrImage(url));
             } catch (err) {
                 setError(err.message);
             } finally {
@@ -134,7 +142,7 @@ const PublicTicket = () => {
             </style>
             {/* Header / Logo */}
             <header style={{ textAlign: 'center', marginBottom: '30px' }}>
-                <img src="/brand/duke burger 3 positivo.png" alt="Duke Burger" style={{ height: '80px', marginBottom: '10px' }} />
+                <img src="/brand/logo_negro.png" alt="Duke Burger" style={{ height: '80px', marginBottom: '10px', filter: 'brightness(0) invert(1)' }} />
                 <h1 style={{ margin: 0, fontSize: '1.5rem', letterSpacing: '2px', color: '#f03e3e' }}>TICKET DE PEDIDO</h1>
                 <div style={{ marginTop: '10px', fontSize: '0.85rem', color: '#eee', lineHeight: '1.4' }}>
                     <div>Bº Frondizi - Rivadavia (Laprida y Avelín)</div>
@@ -291,17 +299,11 @@ const PublicTicket = () => {
                             ⭐ DEJAR RESEÑA ⭐
                         </a>
                         <div style={{ marginTop: '10px' }}>
-                            <img 
-                                src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=https://g.page/r/CTunx53CILhQEBI/review" 
-                                alt="QR Reseñas Google" 
-                                style={{ 
-                                    width: '120px', 
-                                    height: '120px', 
-                                    padding: '10px', 
-                                    background: '#fff', 
-                                    borderRadius: '8px' 
-                                }} 
-                            />
+                            {qrImage ? (
+                                <img src={qrImage} alt="QR Reseñas Google" style={{ width: '120px', height: '120px', padding: '10px', background: '#fff', borderRadius: '8px' }} />
+                            ) : (
+                                <div style={{ width: '120px', height: '120px', margin: '0 auto', background: '#fff', borderRadius: '8px' }}></div>
+                            )}
                             <p style={{ fontSize: '0.7rem', color: '#888', marginTop: '5px' }}>Escaneá para dejar tu reseña</p>
                         </div>
                     </div>
