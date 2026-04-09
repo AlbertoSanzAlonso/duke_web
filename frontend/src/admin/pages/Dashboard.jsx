@@ -348,12 +348,29 @@ const Dashboard = () => {
                                             return (
                                                 <div key={order.id} style={{ display: 'flex', justifyContent: 'space-between', padding: '12px', background: '#f8f9fa', borderRadius: '10px', borderLeft: '4px solid #40c057', fontSize: '0.95rem', alignItems: 'center' }}>
                                                     <div style={{ display: 'flex', alignItems: 'center', gap: '12px', minWidth: 0, flex: 1 }}>
-                                                        <input 
-                                                            type="checkbox" 
+                                                        <button 
                                                             title="Marcar como RECOGIDO"
-                                                            onChange={() => handleMarkDelivered(order.id)}
-                                                            style={{ width: '22px', height: '22px', cursor: 'pointer', flexShrink: 0 }}
-                                                        />
+                                                            onClick={() => handleMarkDelivered(order.id)}
+                                                            className="archive-order-btn"
+                                                            style={{ 
+                                                                width: '32px', 
+                                                                height: '32px', 
+                                                                borderRadius: '50%', 
+                                                                border: '1px solid #ddd', 
+                                                                background: '#fff',
+                                                                display: 'flex',
+                                                                alignItems: 'center',
+                                                                justifyContent: 'center',
+                                                                cursor: 'pointer',
+                                                                flexShrink: 0,
+                                                                color: '#ddd',
+                                                                transition: 'all 0.2s'
+                                                            }}
+                                                            onMouseEnter={e => { e.currentTarget.style.background = '#ebfbee'; e.currentTarget.style.color = '#2b8a3e'; e.currentTarget.style.borderColor = '#2b8a3e'; }}
+                                                            onMouseLeave={e => { e.currentTarget.style.background = '#fff'; e.currentTarget.style.color = '#ddd'; e.currentTarget.style.borderColor = '#ddd'; }}
+                                                        >
+                                                            <CheckCircle size={18} />
+                                                        </button>
                                                         <span style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                                                             <strong>#{order.id}</strong> {order.customer}
                                                         </span>
