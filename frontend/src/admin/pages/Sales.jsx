@@ -306,6 +306,73 @@ const Sales = () => {
         }
         setIsSaving(true);
         try {
+            const currentTicketObj = pendingTickets.find(t => t.id === currentSaleId);
+            const isProcessedInKitchen = currentTicketObj && (currentTicketObj.is_prepared || currentTicketObj.is_delivered);
+
+            if (currentSaleId && isProcessedInKitchen) {
+                const oldCart = ticketSnapshot ? JSON.parse(ticketSnapshot).cart : [];
+                const addedItems = [];
+                const oldTicketItemsToKeep = [];
+                
+                cart.forEach(cItem => {
+                    const oldItem = oldCart.find(o => o.id === cItem.menu_entry);
+                    const oldQty = oldItem ? oldItem.q : 0;
+                    
+                    // Added portion
+                    if (cItem.quantity > oldQty) {
+                        addedItems.push({
+                            menu_entry: cItem.menu_entry,
+                            quantity: cItem.quantity - oldQty,
+                            price_at_sale: cItem.price
+                        });
+                    }
+                    
+                    // Original portion (accounting for potential reductions)
+                    const keepQty = Math.min(cItem.quantity, oldQty);
+                    if (keepQty > 0) {
+                        oldTicketItemsToKeep.push({
+                            menu_entry: cItem.menu_entry,
+                            quantity: keepQty,
+                            price_at_sale: cItem.price
+                        });
+                    }
+                });
+
+                if (addedItems.length > 0) {
+                    // Create Ampliacion
+                    const amplTotal = addedItems.reduce((acc, item) => acc + (item.price_at_sale * item.quantity), 0);
+                    const amplData = {
+                        total_amount: amplTotal,
+                        status: status,
+                        customer_name: `${customerName} (Ampl. #${currentSaleId})`,
+                        table_number: isDelivery ? `ENVIO: $${deliveryCost}` : "", 
+                        delivery_cost: 0,
+                        notes: saleNotes,
+                        items: addedItems
+                    };
+                    await createSale(amplData);
+
+                    // Re-save original ticket with retained items to adjust cost if needed
+                    const oldTotal = oldTicketItemsToKeep.reduce((acc, item) => acc + (item.price_at_sale * item.quantity), 0);
+                    const oldSaleData = {
+                        total_amount: oldTotal + (isDelivery ? deliveryCost : 0),
+                        status: status,
+                        customer_name: customerName,
+                        table_number: isDelivery ? `ENVIO: $${deliveryCost}` : "", 
+                        delivery_cost: isDelivery ? deliveryCost : 0,
+                        notes: saleNotes,
+                        items: oldTicketItemsToKeep
+                    };
+                    await updateSale(currentSaleId, oldSaleData);
+                    
+                    setToast({ message: "¡Ampliación creada y enviada a cocina! (Pendiente)", type: 'success' });
+                    resetCart();
+                    loadData();
+                    setIsSaving(false);
+                    return;
+                }
+            }
+
             const saleData = {
                 total_amount: total,
                 status: status,
@@ -837,10 +904,13 @@ const Sales = () => {
                                     </div>
                                     <div className="pending-customer" style={{ paddingLeft: '35px' }}>
                                         <strong>{ticket.customer_name || 'Sin nombre'}</strong>
+                                        {ticket.customer_name?.includes('(Ampl. #') && (
+                                            <span style={{ marginLeft: '10px', padding: '2px 8px', background: '#ff922b', color: '#fff', borderRadius: '4px', fontSize: '0.65rem', fontWeight: '900' }}>AMPLIACIÓN</span>
+                                        )}
                                         {ticket.table_number && <span className="table-tag">{ticket.table_number}</span>}
                                     </div>
                                     <div className="pending-items-summary" style={{ paddingLeft: '35px' }}>
-                                        {ticket.items.length} productos
+                                        {ticket.items.reduce((acc, item) => acc + item.quantity, 0)} productos
                                     </div>
                                     <div className="pending-total" style={{ paddingLeft: '35px' }}>
                                         ${parseFloat(ticket.total_amount).toLocaleString('es-AR')}

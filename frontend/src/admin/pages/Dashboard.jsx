@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { fetchDashboardInsights } from '../../services/api';
 import LoadingScreen from '../components/LoadingScreen';
-import { ShoppingBag, Star, Clock, AlertTriangle, TrendingUp, Package, CalendarOff, Mail, History, Settings as SettingsIcon, Plus, Utensils, CheckCircle } from 'lucide-react';
+import { ShoppingBag, Star, Clock, AlertTriangle, Package, Mail, History, Settings as SettingsIcon, Plus, Utensils } from 'lucide-react';
 import Toast from '../components/Toast';
 
 const Dashboard = () => {
@@ -13,8 +13,10 @@ const Dashboard = () => {
         completedToday: 0,
         kitchenPending: 0,
         kitchenReady: 0,
+        kitchenDelivered: 0,
         kitchenPendingList: [],
         kitchenReadyList: [],
+        kitchenDeliveredList: [],
         activePromos: 0,
         todayHours: null,
         lowStockItems: [],
@@ -23,49 +25,47 @@ const Dashboard = () => {
     });
     const [profile, setProfile] = useState(null);
     const [toast, setToast] = useState(null);
+    const [showKitchenModal, setShowKitchenModal] = useState(false);
+    const [showDeliveredModal, setShowDeliveredModal] = useState(false);
+    const [actionOrder, setActionOrder] = useState(null);
+
+    const loadData = async (silent = false) => {
+        try {
+            if (!silent) setLoading(true);
+            const insights = await fetchDashboardInsights();
+            
+            setProfile(insights.profile);
+            setData({
+                todaySalesCount: insights.today_sales.total_count,
+                pendingToday: insights.today_sales.pending,
+                completedToday: insights.today_sales.completed,
+                kitchenPending: insights.today_sales.kitchen_pending,
+                kitchenReady: insights.today_sales.kitchen_ready,
+                kitchenDelivered: insights.today_sales.kitchen_delivered_count || 0,
+                kitchenPendingList: insights.today_sales.kitchen_pending_list,
+                kitchenReadyList: insights.today_sales.kitchen_ready_list,
+                kitchenDeliveredList: insights.today_sales.kitchen_delivered_list || [],
+                activePromos: insights.active_promos,
+                todayHours: insights.today_hours,
+                lowStockItems: insights.low_stock,
+                unreadEmails: insights.unread_mail,
+                mailConfigured: insights.unread_mail !== -1
+            });
+        } catch (err) {
+            console.error("Error loading dashboard:", err);
+        } finally {
+            if (!silent) setLoading(false);
+        }
+    };
 
     useEffect(() => {
-        const loadDashboardData = async (silent = false) => {
-            try {
-                if (!silent) setLoading(true);
-                const insights = await fetchDashboardInsights();
-                
-                setProfile(insights.profile);
-                setData({
-                    todaySalesCount: insights.today_sales.total_count,
-                    pendingToday: insights.today_sales.pending,
-                    completedToday: insights.today_sales.completed,
-                    kitchenPending: insights.today_sales.kitchen_pending,
-                    kitchenReady: insights.today_sales.kitchen_ready,
-                    kitchenPendingList: insights.today_sales.kitchen_pending_list,
-                    kitchenReadyList: insights.today_sales.kitchen_ready_list,
-                    activePromos: insights.active_promos,
-                    todayHours: insights.today_hours,
-                    lowStockItems: insights.low_stock,
-                    unreadEmails: insights.unread_mail,
-                    mailConfigured: insights.unread_mail !== -1
-                });
-
-            } catch (err) {
-                console.error("Error loading dashboard:", err);
-            } finally {
-                if (!silent) setLoading(false);
-            }
-        };
-
-        // Initial full load with loading screen
-        loadDashboardData(false);
+        loadData(false);
         
-        // Listen for real-time updates and manual config changes (SILENT)
-        const handleRefresh = () => {
-            loadDashboardData(true);
-        };
-
+        const handleRefresh = () => loadData(true);
         window.addEventListener('new-order-received', handleRefresh);
         window.addEventListener('config-updated', handleRefresh);
 
-        // Fallback refresh every 10 minutes (SILENT)
-        const interval = setInterval(() => loadDashboardData(true), 600000);
+        const interval = setInterval(() => loadData(true), 600000);
         return () => {
             clearInterval(interval);
             window.removeEventListener('new-order-received', handleRefresh);
@@ -73,29 +73,37 @@ const Dashboard = () => {
         };
     }, []);
 
-    const [showKitchenModal, setShowKitchenModal] = useState(false);
-    const [showDeliveredModal, setShowDeliveredModal] = useState(false);
+    useEffect(() => {
+        if (showKitchenModal || showDeliveredModal) {
+            loadData(true);
+        }
+    }, [showKitchenModal, showDeliveredModal]);
 
-    if (loading) return <LoadingScreen />;
-
-    const handleMarkDelivered = async (orderId) => {
+    const handleAction = async (orderId, type) => {
         try {
-            await import('../../services/api').then(m => m.markSaleAsDelivered(orderId));
-            // Silent refresh
-            const insights = await fetchDashboardInsights();
-            setData(prev => ({
-                ...prev,
-                kitchenReady: insights.today_sales.kitchen_ready,
-                kitchenDelivered: insights.today_sales.kitchen_delivered,
-                kitchenReadyList: insights.today_sales.kitchen_ready_list,
-                kitchenDeliveredList: insights.today_sales.kitchen_delivered_list
-            }));
-            setToast({ message: `Pedido #${orderId} marcado como recogido`, type: 'success' });
+            const api = await import('../../services/api');
+            if (type === 'DELETE') {
+                if (!window.confirm("¿Eliminar este ticket permanentemente?")) return;
+                await api.deleteSale(orderId);
+            } else if (type === 'MARK_READY') {
+                await api.markSaleAsPrepared(orderId);
+            } else if (type === 'MARK_DELIVERED') {
+                await api.markSaleAsDelivered(orderId);
+            } else if (type === 'REVERT_PENDING') {
+                await api.revertSalePrepared(orderId);
+            } else if (type === 'REVERT_READY') {
+                await api.revertSaleDelivery(orderId);
+            }
+            
+            setToast({ message: "Operación realizada con éxito", type: 'success' });
+            setActionOrder(null);
+            loadData(true);
         } catch (error) {
-            console.error("Error marking as delivered", error);
-            setToast({ message: "Error al marcar como recogido", type: 'error' });
+            setToast({ message: "Error al realizar la operación", type: 'error' });
         }
     };
+
+    if (loading) return <LoadingScreen />;
 
     return (
         <div className="dash-container">
@@ -108,7 +116,6 @@ const Dashboard = () => {
             </div>
 
             <div className="dash-grid">
-                {/* 1. PEDIDOS HOY */}
                 <Link to="/admin/pedidos-clientes?filter=today" className="stat-card" style={{ textDecoration: 'none' }}>
                     <div className="stat-icon-box icon-red">
                         <ShoppingBag size={24} />
@@ -123,7 +130,6 @@ const Dashboard = () => {
                     </div>
                 </Link>
 
-                {/* NUEVO: ESTADO DE COCINA (INTERACTIVO) */}
                 <div 
                     className="stat-card" 
                     onClick={() => setShowKitchenModal(true)}
@@ -132,8 +138,6 @@ const Dashboard = () => {
                         background: data.kitchenReady > 0 ? '#fff5f5' : '',
                         transition: 'transform 0.2s',
                     }}
-                    onMouseEnter={e => e.currentTarget.style.transform = 'translateY(-5px)'}
-                    onMouseLeave={e => e.currentTarget.style.transform = 'translateY(0)'}
                 >
                     <div className="stat-icon-box icon-gray">
                         <History size={24} color={data.kitchenReady > 0 ? 'var(--admin-primary)' : ''} />
@@ -147,7 +151,6 @@ const Dashboard = () => {
                     </div>
                 </div>
 
-                {/* 2. PROMOS ACTIVAS */}
                 <Link to="/admin/promos" className="stat-card" style={{ flexDirection: 'column', textAlign: 'center', textDecoration: 'none' }}>
                     <div className="stat-icon-box icon-orange" style={{ margin: '0 auto 10px' }}>
                         <Star size={24} />
@@ -158,7 +161,6 @@ const Dashboard = () => {
                     </div>
                 </Link>
 
-                {/* 3. HORARIO HOY */}
                 <Link to="/admin/config?tab=hours" className="stat-card" style={{ textDecoration: 'none' }}>
                     <div className="stat-icon-box icon-purple">
                         <Clock size={24} />
@@ -173,7 +175,6 @@ const Dashboard = () => {
                     </div>
                 </Link>
 
-                {/* 4. STOCK CRÍTICO */}
                 <Link to="/admin/inventario" className={`stat-card ${data.lowStockItems.length > 0 ? 'critical-border' : ''}`} style={{ borderLeft: data.lowStockItems.length > 0 ? '4px solid #e03131' : '', textDecoration: 'none' }}>
                     <div className={`stat-icon-box ${data.lowStockItems.length > 0 ? 'icon-red' : 'icon-gray'}`}>
                         <AlertTriangle size={24} />
@@ -186,52 +187,18 @@ const Dashboard = () => {
                     </div>
                 </Link>
 
-                {/* 5. ACCESO WEBMAIL */}
-                    <a 
-                        href="https://webmail.dondominio.com/" 
-                        target="_blank" 
-                        rel="noopener noreferrer" 
-                        className="stat-card icon-blue"
-                        style={{ position: 'relative' }}
-                    >
-                        <div className="stat-icon-box icon-blue" style={{ background: '#d0ebff' }}>
-                            <Mail size={24} />
+                <a href="https://webmail.dondominio.com/" target="_blank" rel="noopener noreferrer" className="stat-card icon-blue" style={{ position: 'relative' }}>
+                    <div className="stat-icon-box icon-blue" style={{ background: '#d0ebff' }}>
+                        <Mail size={24} />
+                    </div>
+                    <div className="stat-content">
+                        <div className="stat-label">Correo Corporativo</div>
+                        <div className="stat-value" style={{ fontSize: '1.2rem', color: '#1c7ed6' }}>
+                            {data.unreadEmails > 0 ? `${data.unreadEmails} NUEVOS ↗` : 'ACCEDER ↗'}
                         </div>
-                        {data.unreadEmails > 0 && (
-                            <div style={{ 
-                                position: 'absolute', top: '-5px', right: '-5px', 
-                                background: '#e03131', color: 'white', 
-                                borderRadius: '50%', width: '24px', height: '24px', 
-                                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                                fontSize: '0.7rem', fontWeight: '900', border: '2px solid white',
-                                animation: 'pulse 2s infinite',
-                                zIndex: 10
-                            }}>
-                                {data.unreadEmails}
-                            </div>
-                        )}
-                        {data.unreadEmails === -1 && (
-                            <div title="Error de conexión IMAP" style={{ 
-                                position: 'absolute', top: '-5px', right: '-5px', 
-                                background: '#f08c00', color: 'white', 
-                                borderRadius: '50%', width: '24px', height: '24px', 
-                                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                                border: '2px solid white', zIndex: 10
-                            }}>
-                                <AlertTriangle size={14} />
-                            </div>
-                        )}
-                        <div className="stat-content">
-                            <div className="stat-label">Correo Corporativo</div>
-                            <div className="stat-value" style={{ fontSize: '1.2rem', color: '#1c7ed6' }}>
-                                {data.unreadEmails > 0 ? `${data.unreadEmails} NUEVOS ↗` : 
-                                 data.unreadEmails === -1 ? 'ERROR CONFIG. ↗' : 
-                                 !data.mailConfigured ? 'SIN CONFIG. ↗' : 'ACCEDER ↗'}
-                            </div>
-                        </div>
-                    </a>
+                    </div>
+                </a>
 
-                {/* 6. HISTORIAL */}
                 {(profile?.is_superuser || profile?.profile?.can_use_accounting) && (
                     <Link to="/admin/historial" className="stat-card">
                         <div className="stat-icon-box icon-gray">
@@ -244,7 +211,6 @@ const Dashboard = () => {
                     </Link>
                 )}
 
-                {/* 7. CONFIGURACIÓN */}
                 {(profile?.is_superuser || profile?.profile?.can_use_settings) && (
                     <Link to="/admin/config" className="stat-card">
                         <div className="stat-icon-box icon-dark">
@@ -256,67 +222,21 @@ const Dashboard = () => {
                         </div>
                     </Link>
                 )}
-
-                {/* 8. AÑADIR GASTO/INGRESO - ACCIÓN RÁPIDA */}
-                {(profile?.is_superuser || profile?.profile?.can_use_accounting) && (
-                    <Link 
-                        to="/admin/contabilidad?action=new" 
-                        className="stat-card"
-                        style={{ textDecoration: 'none' }}
-                    >
-                        <div className="stat-icon-box" style={{ background: '#2b8a3e', color: 'white' }}>
-                            <Plus size={24} />
-                        </div>
-                        <div className="stat-content">
-                            <div className="stat-label">Gestión Financiera</div>
-                            <div className="stat-value" style={{ color: '#2b8a3e', fontSize: '1.2rem' }}>AÑADIR MOVIMIENTO</div>
-                        </div>
-                    </Link>
-                )}
             </div>
 
-            {/* DETALLE DE STOCK BAJO */}
-            {data.lowStockItems.length > 0 && (
-                <div className="critical-section">
-                    <h3 className="critical-title">
-                        <Package size={22} /> Insumos con Stock Crítico
-                    </h3>
-                    <div className="critical-grid">
-                        {data.lowStockItems.map(item => (
-                            <div key={item.id} className="critical-item">
-                                <div>
-                                    <div className="critical-item-name">{item.name}</div>
-                                    <div className="critical-item-qty">Quedan: {item.quantity} {item.unit}</div>
-                                </div>
-                                <AlertTriangle size={16} color="#e03131" />
-                            </div>
-                        ))}
-                    </div>
-                </div>
-            )}
-
-            {/* MODAL DETALLE DE COCINA HOY */}
             {showKitchenModal && (
                 <div className="modal-overlay" onClick={() => setShowKitchenModal(false)} style={{ zIndex: 5000 }}>
                     <div className="admin-card modal-content" onClick={e => e.stopPropagation()} style={{ 
-                        width: '90%', 
-                        maxWidth: '550px', 
-                        maxHeight: '85vh', 
-                        display: 'flex', 
-                        flexDirection: 'column',
-                        padding: '0', 
-                        overflow: 'hidden',
-                        borderRadius: '20px'
+                        width: '95%', maxWidth: '550px', maxHeight: '90vh', display: 'flex', flexDirection: 'column', 
+                        padding: '0', overflow: 'hidden', borderRadius: '20px', position: 'relative'
                     }}>
-                        {/* Header Fijo */}
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '20px', borderBottom: '1px solid #eee', background: '#fff' }}>
                             <h2 style={{ margin: 0, display: 'flex', alignItems: 'center', gap: '10px', fontSize: '1.3rem' }}>
-                                <Utensils color="var(--admin-primary)" /> Control de Cocina (Hoy)
+                                <Utensils color="var(--admin-primary)" /> Control de Cocina
                             </h2>
-                            <button onClick={() => setShowKitchenModal(false)} className="icon-btn" style={{ background: 'none', border: 'none', fontSize: '1.5rem', cursor: 'pointer', color: '#333' }}>×</button>
+                            <button onClick={() => setShowKitchenModal(false)} style={{ background: 'none', border: 'none', fontSize: '1.5rem', cursor: 'pointer' }}>×</button>
                         </div>
 
-                        {/* Contenido Desplazable */}
                         <div style={{ flex: 1, overflowY: 'auto', padding: '20px' }}>
                             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px', marginBottom: '20px' }}>
                                 <div className="stat-card" style={{ background: '#f8f9fa', padding: '15px' }}>
@@ -330,167 +250,87 @@ const Dashboard = () => {
                             </div>
 
                             <div className="kitchen-lists-split">
-                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '10px', marginBottom: '10px' }}>
+                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
                                     <h4 style={{ textTransform: 'uppercase', fontSize: '0.75rem', color: '#2b8a3e', display: 'flex', alignItems: 'center', gap: '6px', margin: 0 }}>
-                                        <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#2b8a3e' }}></div> Pedidos Listos
+                                        Pedidos Listos
                                     </h4>
-                                    <button 
-                                        onClick={() => {
-                                            setShowKitchenModal(false);
-                                            setShowDeliveredModal(true);
-                                        }} 
-                                        style={{ background: '#f1f3f5', border: 'none', color: '#444', fontSize: '0.75rem', cursor: 'pointer', padding: '6px 12px', borderRadius: '20px', fontWeight: 'bold' }}
-                                    >
-                                        VER RECOGIDOS ({data.kitchenDelivered || 0})
+                                    <button onClick={() => { setShowKitchenModal(false); setShowDeliveredModal(true); }} style={{ background: '#f1f3f5', border: 'none', fontSize: '0.7rem', padding: '6px 12px', borderRadius: '20px', cursor: 'pointer' }}>
+                                        VER RECOGIDOS ({data.kitchenDelivered})
                                     </button>
                                 </div>
 
-                                {data.kitchenReadyList.length === 0 ? <p style={{ opacity: 0.5, fontSize: '0.9rem', padding: '10px' }}>No hay pedidos listos todavía.</p> : (
-                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                                        {data.kitchenReadyList.map(order => {
-                                            const entryTime = new Date(order.created_at).toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit' });
-                                            const readyTime = new Date(order.updated_at).toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit' });
-                                            return (
-                                                <div key={order.id} style={{ display: 'flex', justifyContent: 'space-between', padding: '12px', background: '#f8f9fa', borderRadius: '10px', borderLeft: '4px solid #40c057', fontSize: '0.95rem', alignItems: 'center' }}>
-                                                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px', minWidth: 0, flex: 1 }}>
-                                                        <button 
-                                                            title="Marcar como RECOGIDO"
-                                                            onClick={() => handleMarkDelivered(order.id)}
-                                                            className="archive-order-btn"
-                                                            style={{ 
-                                                                width: '32px', 
-                                                                height: '32px', 
-                                                                borderRadius: '50%', 
-                                                                border: '1px solid #ddd', 
-                                                                background: '#fff',
-                                                                display: 'flex',
-                                                                alignItems: 'center',
-                                                                justifyContent: 'center',
-                                                                cursor: 'pointer',
-                                                                flexShrink: 0,
-                                                                color: '#ddd',
-                                                                transition: 'all 0.2s'
-                                                            }}
-                                                            onMouseEnter={e => { e.currentTarget.style.background = '#ebfbee'; e.currentTarget.style.color = '#2b8a3e'; e.currentTarget.style.borderColor = '#2b8a3e'; }}
-                                                            onMouseLeave={e => { e.currentTarget.style.background = '#fff'; e.currentTarget.style.color = '#ddd'; e.currentTarget.style.borderColor = '#ddd'; }}
-                                                        >
-                                                            <CheckCircle size={18} />
-                                                        </button>
-                                                        <span style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                                                            <strong>#{order.id}</strong> {order.customer}
-                                                        </span>
-                                                    </div>
-                                                    <div style={{ textAlign: 'right', fontSize: '0.7rem', color: '#666', borderLeft: '1px solid #eee', paddingLeft: '10px', marginLeft: '10px', flexShrink: 0 }}>
-                                                        <div>⏲️ {entryTime}</div>
-                                                        <div style={{ color: '#2b8a3e', fontWeight: 'bold' }}>✅ {readyTime}</div>
-                                                    </div>
-                                                </div>
-                                            );
-                                        })}
-                                    </div>
-                                )}
+                                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                                    {data.kitchenReadyList.map(order => (
+                                        <div key={order.id} onClick={() => setActionOrder({...order, currentStatus: 'READY'})} style={{ display: 'flex', justifyContent: 'space-between', padding: '12px', background: '#f8f9fa', borderRadius: '10px', borderLeft: '4px solid #40c057', cursor: 'pointer' }}>
+                                            <span><strong>#{order.id}</strong> {order.customer}</span>
+                                            <span style={{ fontSize: '0.7rem', color: '#666' }}>✅ {new Date(order.updated_at).toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit' })}</span>
+                                        </div>
+                                    ))}
+                                </div>
 
-                                <h4 style={{ textTransform: 'uppercase', fontSize: '0.75rem', color: '#e03131', marginTop: '25px', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                                    <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#e03131', animation: 'pulse 2s infinite' }}></div> En Cocción
-                                </h4>
-                                {data.kitchenPendingList.length === 0 ? <p style={{ opacity: 0.5, fontSize: '0.9rem', padding: '10px' }}>No hay pedidos activos.</p> : (
-                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                                        {data.kitchenPendingList.map(order => {
-                                            const entryTime = new Date(order.created_at).toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit' });
-                                            return (
-                                                <div key={order.id} style={{ display: 'flex', justifyContent: 'space-between', padding: '12px', background: '#f8f9fa', borderRadius: '10px', borderLeft: '4px solid #f03e3e', fontSize: '0.95rem', alignItems: 'center' }}>
-                                                    <span style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', flex: 1, minWidth: 0 }}>
-                                                        <strong>#{order.id}</strong> {order.customer}
-                                                    </span>
-                                                    <div style={{ fontSize: '0.8rem', color: '#e03131', fontWeight: 'bold', flexShrink: 0 }}>
-                                                        ⏲️ {entryTime}
-                                                    </div>
-                                                </div>
-                                            );
-                                        })}
-                                    </div>
-                                )}
+                                <h4 style={{ textTransform: 'uppercase', fontSize: '0.75rem', color: '#e03131', marginTop: '20px' }}>En Cocción</h4>
+                                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                                    {data.kitchenPendingList.map(order => (
+                                        <div key={order.id} onClick={() => setActionOrder({...order, currentStatus: 'PENDING'})} style={{ display: 'flex', justifyContent: 'space-between', padding: '12px', background: '#f8f9fa', borderRadius: '10px', borderLeft: '4px solid #f03e3e', cursor: 'pointer' }}>
+                                            <span><strong>#{order.id}</strong> {order.customer}</span>
+                                            <span style={{ fontSize: '0.7rem', color: '#e03131' }}>⏲️ {new Date(order.created_at).toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit' })}</span>
+                                        </div>
+                                    ))}
+                                </div>
                             </div>
                         </div>
 
-                        {/* Footer Fijo con Botón (Espaciado extra para móvil) */}
-                        <div style={{ padding: '20px 20px 40px 20px', borderTop: '1px solid #eee', background: '#fff', textAlign: 'center' }}>
-                            <Link 
-                                to="/admin/cocina" 
-                                className="add-movement-btn" 
-                                style={{ 
-                                    display: 'block', 
-                                    textDecoration: 'none', 
-                                    background: '#1a1b1e',
-                                    color: 'white',
-                                    padding: '16px',
-                                    borderRadius: '12px',
-                                    fontWeight: 'bold',
-                                    fontSize: '0.9rem',
-                                    transition: 'all 0.2s',
-                                    boxShadow: '0 4px 12px rgba(0,0,0,0.1)'
-                                }}
-                                onClick={() => setShowKitchenModal(false)}
-                            >
-                                IR AL PANEL COMPLETO DE COCINA
-                            </Link>
+                        {actionOrder && (
+                            <div className="modal-overlay" style={{ background: 'rgba(0,0,0,0.6)', zIndex: 6000 }} onClick={() => setActionOrder(null)}>
+                                <div className="admin-card" onClick={e => e.stopPropagation()} style={{ width: '90%', maxWidth: '350px', padding: '0', borderRadius: '15px', overflow: 'hidden' }}>
+                                    <div style={{ padding: '20px', background: '#1a1b1e', color: '#fff' }}>
+                                        <h3 style={{ margin: 0 }}>Pedido #{actionOrder.id}</h3>
+                                        <p style={{ margin: '5px 0 0', opacity: 0.8 }}>{actionOrder.customer}</p>
+                                    </div>
+                                    <div style={{ padding: '15px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                                        {actionOrder.currentStatus === 'PENDING' && (
+                                            <button onClick={() => handleAction(actionOrder.id, 'MARK_READY')} style={{ padding: '15px', background: '#40c057', color: '#fff', border: 'none', borderRadius: '10px', fontWeight: 'bold', cursor: 'pointer' }}>PASAR A LISTO</button>
+                                        )}
+                                        {actionOrder.currentStatus === 'READY' && (
+                                            <>
+                                                <button onClick={() => handleAction(actionOrder.id, 'MARK_DELIVERED')} style={{ padding: '15px', background: '#228be6', color: '#fff', border: 'none', borderRadius: '10px', fontWeight: 'bold', cursor: 'pointer' }}>MARCAR RECOGIDO</button>
+                                                <button onClick={() => handleAction(actionOrder.id, 'REVERT_PENDING')} style={{ padding: '15px', background: '#f03e3e', color: '#fff', border: 'none', borderRadius: '10px', fontWeight: 'bold', cursor: 'pointer' }}>VOLVER A COCCIÓN</button>
+                                            </>
+                                        )}
+                                        {actionOrder.currentStatus === 'COLLECTED' && (
+                                            <button onClick={() => handleAction(actionOrder.id, 'REVERT_READY')} style={{ padding: '15px', background: '#40c057', color: '#fff', border: 'none', borderRadius: '10px', fontWeight: 'bold', cursor: 'pointer' }}>REVERTIR A LISTO</button>
+                                        )}
+                                        <button onClick={() => handleAction(actionOrder.id, 'DELETE')} style={{ padding: '15px', color: '#e03131', background: '#fff', border: '1px solid #ddd', borderRadius: '10px', fontWeight: 'bold', cursor: 'pointer' }}>ELIMINAR TICKET</button>
+                                        <button onClick={() => setActionOrder(null)} style={{ padding: '15px', background: '#f1f3f5', border: 'none', borderRadius: '10px', fontWeight: 'bold', cursor: 'pointer' }}>CANCELAR</button>
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+
+                        <div style={{ padding: '20px', borderTop: '1px solid #eee', textAlign: 'center' }}>
+                            <Link to="/admin/cocina" className="add-movement-btn" style={{ display: 'block', textDecoration: 'none', background: '#1a1b1e', color: 'white', padding: '15px', borderRadius: '12px', fontWeight: 'bold' }} onClick={() => setShowKitchenModal(false)}>VER PANEL COMPLETO</Link>
                         </div>
                     </div>
                 </div>
             )}
 
-            {/* MODAL HISTORIAL RECOGIDOS HOY */}
             {showDeliveredModal && (
-                <div className="modal-overlay" onClick={() => setShowDeliveredModal(false)} style={{ zIndex: 6000 }}>
-                    <div className="admin-card modal-content" onClick={e => e.stopPropagation()} style={{ 
-                        width: '85%', 
-                        maxWidth: '500px', 
-                        maxHeight: '75vh', 
-                        display: 'flex', 
-                        flexDirection: 'column',
-                        overflow: 'hidden',
-                        borderRadius: '20px'
-                    }}>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '20px', borderBottom: '1px solid #eee', background: '#fff' }}>
-                            <h3 style={{ margin: 0, fontSize: '1.2rem' }}>📦 Pedidos Recogidos (Hoy)</h3>
-                            <button onClick={() => setShowDeliveredModal(false)} className="icon-btn" style={{ background: 'none', border: 'none', fontSize: '1.5rem', cursor: 'pointer' }}>×</button>
+                <div className="modal-overlay" onClick={() => setShowDeliveredModal(false)} style={{ zIndex: 5000 }}>
+                    <div className="admin-card modal-content" onClick={e => e.stopPropagation()} style={{ width: '90%', maxWidth: '500px', maxHeight: '80vh', display: 'flex', flexDirection: 'column', padding: '0', overflow: 'hidden', borderRadius: '20px' }}>
+                        <div style={{ padding: '20px', borderBottom: '1px solid #eee', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                            <h3 style={{ margin: 0 }}>📦 Recogidos (Hoy)</h3>
+                            <button onClick={() => setShowDeliveredModal(false)} style={{ background: 'none', border: 'none', fontSize: '1.5rem', cursor: 'pointer' }}>×</button>
                         </div>
                         <div style={{ flex: 1, overflowY: 'auto', padding: '20px' }}>
-                            {data.kitchenDeliveredList?.length === 0 ? <p style={{ opacity: 0.5, textAlign: 'center', padding: '20px' }}>No hay pedidos recogidos todavía.</p> : (
-                                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                                    {data.kitchenDeliveredList?.map(order => {
-                                        const entryTime = new Date(order.created_at).toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit' });
-                                        const readyTime = new Date(order.updated_at).toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit' });
-                                        return (
-                                            <div key={order.id} style={{ display: 'flex', justifyContent: 'space-between', padding: '12px', background: '#f8f9fa', borderRadius: '10px', fontSize: '0.9rem', opacity: 0.8, alignItems: 'center' }}>
-                                                <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                                                    <strong>#{order.id}</strong> {order.customer}
-                                                </span>
-                                                <span style={{ fontSize: '0.7rem', flexShrink: 0, marginLeft: '10px' }}>⏲️ {entryTime} | ✅ {readyTime}</span>
-                                            </div>
-                                        );
-                                    })}
+                            {data.kitchenDeliveredList.map(order => (
+                                <div key={order.id} onClick={() => setActionOrder({...order, currentStatus: 'COLLECTED'})} style={{ display: 'flex', justifyContent: 'space-between', padding: '12px', background: '#f8f9fa', borderRadius: '10px', marginBottom: '8px', cursor: 'pointer', opacity: 0.8 }}>
+                                    <span><strong>#{order.id}</strong> {order.customer}</span>
+                                    <span style={{ fontSize: '0.7rem' }}>⏲️ {new Date(order.created_at).toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit' })}</span>
                                 </div>
-                            )}
+                            ))}
                         </div>
-                        <div style={{ padding: '20px 20px 40px 20px', borderTop: '1px solid #eee', background: '#fff' }}>
-                            <button 
-                                onClick={() => {
-                                    setShowDeliveredModal(false);
-                                    setShowKitchenModal(true);
-                                }} 
-                                style={{ 
-                                    width: '100%', 
-                                    padding: '16px', 
-                                    borderRadius: '12px', 
-                                    border: '1px solid #ddd', 
-                                    background: '#f8f9fa', 
-                                    fontWeight: 'bold', 
-                                    cursor: 'pointer' 
-                                }}
-                            >
-                                VOLVER AL CONTROL
-                            </button>
+                        <div style={{ padding: '20px', borderTop: '1px solid #eee' }}>
+                            <button onClick={() => { setShowDeliveredModal(false); setShowKitchenModal(true); }} style={{ width: '100%', padding: '15px', borderRadius: '12px', border: '1px solid #ddd', background: '#f8f9fa', fontWeight: 'bold', cursor: 'pointer' }}>VOLVER AL CONTROL</button>
                         </div>
                     </div>
                 </div>

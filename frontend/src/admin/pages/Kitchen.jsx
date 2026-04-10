@@ -234,6 +234,9 @@ const Kitchen = () => {
                             <div className="kitchen-card-body">
                                 <div className="customer-info">
                                     <span className="customer-name">{order.customer_name || 'Particular'}</span>
+                                    {order.customer_name?.includes('(Ampl. #') && (
+                                        <div style={{ background: '#ff922b', color: '#fff', fontSize: '0.65rem', fontWeight: '900', padding: '2px 6px', borderRadius: '4px', marginTop: '4px', display: 'inline-block' }}>AMPLIACIÓN</div>
+                                    )}
                                     {order.table_number && <span className="table-info">{order.table_number}</span>}
                                 </div>
                                 <div className="items-list-kitchen">
