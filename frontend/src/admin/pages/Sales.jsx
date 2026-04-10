@@ -14,10 +14,41 @@ const Sales = () => {
 
     
     useEffect(() => {
+        let es = null;
+        let timer = null;
+        
         if (isStandalone) {
-            const timer = setInterval(() => setCurrentTime(new Date()), 1000);
-            return () => clearInterval(timer);
+            timer = setInterval(() => setCurrentTime(new Date()), 1000);
+            
+            // Connect SSE for standalone TPV
+            const connectSSE = () => {
+                const sseUrl = `${import.meta.env.VITE_API_URL || ''}/api/orders-stream/`;
+                es = new EventSource(sseUrl, { withCredentials: true });
+                
+                es.onmessage = (event) => {
+                    try {
+                        const data = JSON.parse(event.data);
+                        if (data.type === 'new_order' || data.type === 'order_updated') {
+                            window.dispatchEvent(new CustomEvent('new-order-received', { detail: data }));
+                        }
+                    } catch (e) {}
+                };
+
+                es.onerror = () => {
+                    if (es) {
+                        es.close();
+                        setTimeout(connectSSE, 10000); // Reconnect after 10s
+                    }
+                };
+            };
+            
+            connectSSE();
         }
+        
+        return () => {
+            if (timer) clearInterval(timer);
+            if (es) es.close();
+        };
     }, [isStandalone]);
 
     // Internal states from previous lines (matching current file content)

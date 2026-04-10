@@ -48,10 +48,38 @@ const Kitchen = () => {
             }
         };
 
+        // SSE Connection for isolated Kitchen view
+        let es = null;
+        const isStandalone = window.location.pathname === '/cocina';
+        
+        const connectSSE = () => {
+            const sseUrl = `${import.meta.env.VITE_API_URL || ''}/api/orders-stream/`;
+            es = new EventSource(sseUrl, { withCredentials: true });
+            
+            es.onmessage = (event) => {
+                try {
+                    const data = JSON.parse(event.data);
+                    if (data.type === 'new_order' || data.type === 'order_updated') {
+                        window.dispatchEvent(new CustomEvent('new-order-received', { detail: data }));
+                    }
+                } catch (e) {}
+            };
+
+            es.onerror = () => {
+                if (es) {
+                    es.close();
+                    setTimeout(connectSSE, 10000); // Reintento robusto
+                }
+            };
+        };
+        
+        if (isStandalone) connectSSE();
+
         window.addEventListener('new-order-received', handleNewOrder);
         return () => {
             clearInterval(timer);
             window.removeEventListener('new-order-received', handleNewOrder);
+            if (es) es.close();
         };
     }, [activeTab]);
 
