@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo, useCallback, useTransition } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { 
     fetchSales, fetchSupplierOrders, createSupplierOrder, 
@@ -61,6 +61,7 @@ const Accounting = () => {
     
     // Detail Modal state
     const [detailItem, setDetailItem] = useState(null);
+    const [isPending, startTransition] = useTransition();
 
     useEffect(() => {
         loadData();
@@ -293,76 +294,95 @@ const Accounting = () => {
 
     const [viewMode, setViewMode] = useState('monthly'); // 'daily', 'weekly', 'monthly'
 
-    const filterItems = (items) => {
+    const filterItems = useCallback((items, currentSearch, currentCategory, currentView, currentStart, currentEnd) => {
         const now = new Date();
         return items.filter(item => {
             const itemDate = new Date(item.date);
             
             // 1. DATE RANGE / PERIOD FILTER
             let dateMatch = true;
-            if (startDate || endDate) {
-                if (startDate) {
-                    const sDate = new Date(startDate);
+            if (currentStart || currentEnd) {
+                if (currentStart) {
+                    const sDate = new Date(currentStart);
                     sDate.setHours(0,0,0,0);
                     if (itemDate < sDate) dateMatch = false;
                 }
-                if (endDate) {
-                    const eDate = new Date(endDate);
+                if (currentEnd) {
+                    const eDate = new Date(currentEnd);
                     eDate.setHours(23,59,59,999);
                     if (itemDate > eDate) dateMatch = false;
                 }
             } else {
                 // Default Period Filter
-                if (viewMode === 'daily') {
+                if (currentView === 'daily') {
                     dateMatch = itemDate.toDateString() === now.toDateString();
-                } else if (viewMode === 'weekly') {
+                } else if (currentView === 'weekly') {
                     const diffTime = Math.abs(now - itemDate);
                     const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
                     dateMatch = diffDays <= 7;
-                } else if (viewMode === 'monthly') {
+                } else if (currentView === 'monthly') {
                     dateMatch = itemDate.getMonth() === now.getMonth() && itemDate.getFullYear() === now.getFullYear();
                 }
             }
             if (!dateMatch) return false;
 
             // 2. CATEGORY FILTER
-            if (selectedCategory !== 'ALL') {
-                if (item.category !== selectedCategory) return false;
+            if (currentCategory !== 'ALL') {
+                if (item.category !== currentCategory) return false;
             }
 
             // 3. SEARCH FILTER (Keyword)
-            if (!searchTerm) return true;
-            const term = searchTerm.toLowerCase();
+            if (!currentSearch) return true;
+            const term = currentSearch.toLowerCase();
             const description = (item.description || item.customer_name || item.supplier_name || "").toLowerCase();
             const amount = item.amount || item.total_amount || item.total_cost || "";
             const matchesSearch = description.includes(term) || amount.toString().includes(term);
             
             return matchesSearch;
         });
-    };
+    }, []);
 
-    const filteredSales = (selectedType === 'ALL' || selectedType === 'INCOME') ? filterItems(sales) : [];
-    const filteredSupplierOrders = (selectedType === 'ALL' || selectedType === 'EXPENSE') ? filterItems(supplierOrders) : [];
-    const filteredExpenses = (selectedType === 'ALL' || selectedType === 'EXPENSE') ? filterItems(manualExpenses) : [];
+    const { 
+        filteredSales, filteredSupplierOrders, filteredExpenses, 
+        totalIncome, totalExpenses, balance, mergedItems, totalPages 
+    } = useMemo(() => {
+        const fSales = (selectedType === 'ALL' || selectedType === 'INCOME') 
+            ? filterItems(sales, searchTerm, selectedCategory, viewMode, startDate, endDate) 
+            : [];
+        const fOrders = (selectedType === 'ALL' || selectedType === 'EXPENSE') 
+            ? filterItems(supplierOrders, searchTerm, selectedCategory, viewMode, startDate, endDate) 
+            : [];
+        const fExpenses = (selectedType === 'ALL' || selectedType === 'EXPENSE') 
+            ? filterItems(manualExpenses, searchTerm, selectedCategory, viewMode, startDate, endDate) 
+            : [];
 
-    const totalIncome = filteredSales.reduce((acc, s) => acc + parseFloat(s.total_amount), 0);
-    const totalSupplierDebt = filteredSupplierOrders.reduce((acc, o) => acc + parseFloat(o.total_cost), 0);
-    const totalManualExpenses = filteredExpenses.reduce((acc, e) => acc + parseFloat(e.amount), 0);
-    const totalExpenses = totalSupplierDebt + totalManualExpenses;
-    const balance = totalIncome - totalExpenses;
+        const income = fSales.reduce((acc, s) => acc + parseFloat(s.total_amount), 0);
+        const debt = fOrders.reduce((acc, o) => acc + parseFloat(o.total_cost), 0);
+        const manual = fExpenses.reduce((acc, e) => acc + parseFloat(e.amount), 0);
+        const exp = debt + manual;
+        
+        const merged = [
+            ...fExpenses.map(e => ({ ...e, typeIndicator: 'exp' })),
+            ...fOrders.map(o => ({ ...o, typeIndicator: 'ord' })),
+            ...fSales.map(s => ({ ...s, typeIndicator: 'sal' }))
+        ].sort((a, b) => new Date(b.date) - new Date(a.date));
 
-    const mergedItems = [
-        ...filteredExpenses.map(e => ({ ...e, typeIndicator: 'exp' })),
-        ...filteredSupplierOrders.map(o => ({ ...o, typeIndicator: 'ord' })),
-        ...filteredSales.map(s => ({ ...s, typeIndicator: 'sal' }))
-    ].sort((a, b) => new Date(b.date) - new Date(a.date));
+        return {
+            filteredSales: fSales,
+            filteredSupplierOrders: fOrders,
+            filteredExpenses: fExpenses,
+            totalIncome: income,
+            totalExpenses: exp,
+            balance: income - exp,
+            mergedItems: merged,
+            totalPages: Math.ceil(merged.length / itemsPerPage)
+        };
+    }, [sales, supplierOrders, manualExpenses, searchTerm, selectedCategory, viewMode, startDate, endDate, selectedType, filterItems]);
 
-    // Pagination logic
-    const totalPages = Math.ceil(mergedItems.length / itemsPerPage);
-    const paginatedItems = mergedItems.slice(
+    const paginatedItems = useMemo(() => mergedItems.slice(
         (currentPage - 1) * itemsPerPage,
         currentPage * itemsPerPage
-    );
+    ), [mergedItems, currentPage]);
 
     // Reset pagination when filters change
     useEffect(() => {
@@ -437,8 +457,8 @@ const Accounting = () => {
                                 <input 
                                     type="text" 
                                     placeholder="Buscar..." 
-                                    value={searchTerm}
-                                    onChange={(e) => setSearchTerm(e.target.value)}
+                                    defaultValue={searchTerm}
+                                    onChange={(e) => startTransition(() => setSearchTerm(e.target.value))}
                                     style={{ padding: '10px 15px 10px 40px', borderRadius: '10px', border: '1px solid #ddd', minWidth: '150px', fontSize: '0.9rem', width: '100%' }}
                                 />
                             </div>

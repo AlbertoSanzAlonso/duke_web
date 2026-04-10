@@ -1,30 +1,27 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo, useCallback, useTransition } from 'react';
 import { useLocation } from 'react-router-dom';
 import { fetchMenuEntries, createSale, fetchSales, updateSale, deleteSale, bulkActionSales, fetchDashboardInsights, markSaleAsPrepared, markSaleAsDelivered, revertSalePrepared, revertSaleDelivery } from '../../services/api';
 import { Trash2, Edit2, ChevronRight, CheckCircle2, MoreVertical, Plus, Minus, Search, ShoppingCart, Receipt, X, MapPin, Utensils, UtensilsCrossed, History } from 'lucide-react';
 import LoadingScreen from '../components/LoadingScreen';
 import Toast from '../components/Toast';
+import DigitalClock from '../components/DigitalClock';
 import './Sales.css';
 
 const Sales = () => {
     const location = useLocation();
     const isStandalone = location.pathname === '/tpv';
-    const [currentTime, setCurrentTime] = useState(new Date());
     const [viewMode, setViewMode] = useState('tpv'); // 'tpv' or 'pending'
     const [isKitchenModalOpen, setIsKitchenModalOpen] = useState(false);
     const [kitchenData, setKitchenData] = useState(null);
     const [isLoadingKitchen, setIsLoadingKitchen] = useState(false);
     const [actionOrder, setActionOrder] = useState(null);
     const [showDeliveredModal, setShowDeliveredModal] = useState(false);
+    const [isPending, startTransition] = useTransition();
 
-    
     useEffect(() => {
         let es = null;
-        let timer = null;
         
         if (isStandalone) {
-            timer = setInterval(() => setCurrentTime(new Date()), 1000);
-            
             // Connect SSE for standalone TPV
             const connectSSE = () => {
                 const token = sessionStorage.getItem('duke_admin_token');
@@ -53,7 +50,6 @@ const Sales = () => {
         }
         
         return () => {
-            if (timer) clearInterval(timer);
             if (es) es.close();
         };
     }, [isStandalone]);
@@ -249,9 +245,9 @@ const Sales = () => {
         }
     };
 
-    const categories = ["Todas", ...new Set(menuEntries.map(e => e.category))];
+    const categories = useMemo(() => ["Todas", ...new Set(menuEntries.map(e => e.category))], [menuEntries]);
 
-    const addToCart = (entry) => {
+    const addToCart = useCallback((entry) => {
         setCart(prevCart => {
             const existing = prevCart.find(item => item.menu_entry === entry.id);
             if (existing) {
@@ -267,13 +263,13 @@ const Sales = () => {
                 quantity: 1 
             }];
         });
-    };
+    }, []);
 
-    const removeFromCart = (id) => {
+    const removeFromCart = useCallback((id) => {
         setCart(prevCart => prevCart.filter(item => item.menu_entry !== id));
-    };
+    }, []);
 
-    const updateQuantity = (id, delta) => {
+    const updateQuantity = useCallback((id, delta) => {
         setCart(prevCart => prevCart.map(item => {
             if (item.menu_entry === id) {
                 const newQty = item.quantity + delta;
@@ -281,13 +277,13 @@ const Sales = () => {
             }
             return item;
         }));
-    };
+    }, []);
 
-    const updatePrice = (id, newPrice) => {
+    const updatePrice = useCallback((id, newPrice) => {
         setCart(prevCart => prevCart.map(item => 
             item.menu_entry === id ? { ...item, price: parseFloat(newPrice) || 0 } : item
         ));
-    };
+    }, []);
 
     const handleApplyItemPrice = () => {
         if (!priceModal.item) return;
@@ -316,16 +312,25 @@ const Sales = () => {
         setModalPriceType('direct');
     };
 
-    const totalOriginalPrice = cart.reduce((acc, item) => acc + (parseFloat(item.originalPrice || item.price) * item.quantity), 0);
-    const subtotalWithItemAdjustments = cart.reduce((acc, item) => acc + (parseFloat(item.price) * item.quantity), 0);
+    const { totalOriginalPrice, subtotalWithItemAdjustments, totalSavings, total, totalItems } = useMemo(() => {
+        const orig = cart.reduce((acc, item) => acc + (parseFloat(item.originalPrice || item.price) * item.quantity), 0);
+        const sub = cart.reduce((acc, item) => acc + (parseFloat(item.price) * item.quantity), 0);
+        const globDiscount = discountType === 'percent' 
+            ? (sub * (parseFloat(discountValue || 0) / 100))
+            : parseFloat(discountValue || 0);
+        
+        const sav = (orig - sub) + globDiscount;
+        const tot = Math.max(0, orig - sav + (isDelivery ? parseFloat(deliveryCost || 0) : 0));
+        const itemsCount = cart.reduce((acc, item) => acc + item.quantity, 0);
 
-    const globalDiscountAmount = discountType === 'percent' 
-        ? (subtotalWithItemAdjustments * (parseFloat(discountValue || 0) / 100))
-        : parseFloat(discountValue || 0);
-
-    const totalSavings = (totalOriginalPrice - subtotalWithItemAdjustments) + globalDiscountAmount;
-    const total = Math.max(0, totalOriginalPrice - totalSavings + (isDelivery ? parseFloat(deliveryCost || 0) : 0));
-    const totalItems = cart.reduce((acc, item) => acc + item.quantity, 0);
+        return {
+            totalOriginalPrice: orig,
+            subtotalWithItemAdjustments: sub,
+            totalSavings: sav,
+            total: tot,
+            totalItems: itemsCount
+        };
+    }, [cart, discountType, discountValue, isDelivery, deliveryCost]);
 
     const [isTicketOpen, setIsTicketOpen] = useState(false);
     const toggleTicket = () => setIsTicketOpen(!isTicketOpen);
@@ -489,13 +494,15 @@ const Sales = () => {
         setIsTicketOpen(true);
     };
 
-    const filteredMenu = menuEntries.filter(e => {
-        const matchesCategory = selectedCategory === "Todas" || e.category === selectedCategory;
-        const matchesSearch = !searchTerm || 
-            (e.product?.name || "").toLowerCase().includes(searchTerm.toLowerCase()) ||
-            (e.category || "").toLowerCase().includes(searchTerm.toLowerCase());
-        return matchesCategory && matchesSearch;
-    });
+    const filteredMenu = useMemo(() => {
+        return menuEntries.filter(e => {
+            const matchesCategory = selectedCategory === "Todas" || e.category === selectedCategory;
+            const matchesSearch = !searchTerm || 
+                (e.product?.name || "").toLowerCase().includes(searchTerm.toLowerCase()) ||
+                (e.category || "").toLowerCase().includes(searchTerm.toLowerCase());
+            return matchesCategory && matchesSearch;
+        });
+    }, [menuEntries, selectedCategory, searchTerm]);
 
     const handleDeleteTicket = async (id) => {
         setIsSaving(true);
@@ -567,16 +574,8 @@ const Sales = () => {
                         }}>
                             <ShoppingCart size={40} /> TPV DUKE
                         </h1>
-                        <div className="kitchen-clock" style={{ 
-                            fontSize: '1.8rem', 
-                            fontWeight: '700', 
-                            background: '#1a1a1a', 
-                            color: '#fff',
-                            padding: '5px 20px', 
-                            borderRadius: '10px', 
-                            border: '1px solid #444' 
-                        }}>
-                            {currentTime.toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit', second: '2-digit', timeZone: 'America/Argentina/Buenos_Aires' })}
+                        <div className="kitchen-clock">
+                            <DigitalClock />
                         </div>
                     </div>
                 </header>

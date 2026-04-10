@@ -1,9 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo, useTransition } from 'react';
 import { fetchSupplierOrders, createSupplierOrder, fetchInventory, createInventoryItem, deleteSupplierOrder, updateSupplierOrder } from '../../services/api';
 import LoadingScreen from '../components/LoadingScreen';
 import Toast from '../components/Toast';
 import ConfirmModal from '../components/ConfirmModal';
-import { Truck, Plus, History, Trash2, ShoppingCart, Search, X, Download, FileText, CheckSquare, Square, Edit2, Save } from 'lucide-react';
+import { Truck, Plus, History, Trash2, ShoppingCart, Search, X, Download, FileText, CheckSquare, Square, Edit2, Save, Filter } from 'lucide-react';
 import { exportToExcel, exportToPDF } from '../../utils/exportUtils';
 import './Accounting.css';
 
@@ -14,6 +14,11 @@ const SupplierOrders = () => {
     const [isSaving, setIsSaving] = useState(false);
     const [toast, setToast] = useState(null);
     const [searchTerm, setSearchTerm] = useState('');
+    const [startDate, setStartDate] = useState('');
+    const [endDate, setEndDate] = useState('');
+    const [viewMode, setViewMode] = useState('monthly'); // 'daily', 'weekly', 'monthly'
+    const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
+    const [isPending, startTransition] = useTransition();
 
     // Order draft state
     const [supplierName, setSupplierName] = useState('');
@@ -164,20 +169,53 @@ const SupplierOrders = () => {
     const [currentPage, setCurrentPage] = useState(1);
     const itemsPerPage = 10;
 
-    const filteredOrders = React.useMemo(() => {
-        let filtered = [...orders];
-        if (searchTerm) {
-            const term = searchTerm.toLowerCase();
-            filtered = filtered.filter(o => 
-                (o.supplier_name || "").toLowerCase().includes(term) ||
-                o.id.toString().includes(term) ||
-                (o.items && o.items.some(item => (item.item_name || "").toLowerCase().includes(term)))
-            );
-        }
-        return filtered.sort((a, b) => new Date(b.date) - new Date(a.date));
-    }, [orders, searchTerm]);
+    const filteredOrders = useMemo(() => {
+        const now = new Date();
+        let filtered = orders.filter(item => {
+            const itemDate = new Date(item.date);
+            
+            // 1. DATE RANGE / PERIOD FILTER
+            let dateMatch = true;
+            if (startDate || endDate) {
+                if (startDate) {
+                    const sDate = new Date(startDate);
+                    sDate.setHours(0,0,0,0);
+                    if (itemDate < sDate) dateMatch = false;
+                }
+                if (endDate) {
+                    const eDate = new Date(endDate);
+                    eDate.setHours(23,59,59,999);
+                    if (itemDate > eDate) dateMatch = false;
+                }
+            } else {
+                // Default Period Filter
+                if (viewMode === 'daily') {
+                    dateMatch = itemDate.toDateString() === now.toDateString();
+                } else if (viewMode === 'weekly') {
+                    const diffTime = Math.abs(now - itemDate);
+                    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+                    dateMatch = diffDays <= 7;
+                } else if (viewMode === 'monthly') {
+                    dateMatch = itemDate.getMonth() === now.getMonth() && itemDate.getFullYear() === now.getFullYear();
+                }
+            }
+            if (!dateMatch) return false;
 
-    const paginatedOrders = React.useMemo(() => {
+            // 2. SEARCH FILTER (Keyword)
+            if (!searchTerm) return true;
+            const term = searchTerm.toLowerCase();
+            const matchesSearch = 
+                (item.supplier_name || "").toLowerCase().includes(term) ||
+                item.id.toString().includes(term) ||
+                (item.items && item.items.some(oi => (oi.item_name || "").toLowerCase().includes(term)));
+            
+            return matchesSearch;
+        });
+
+        return filtered.sort((a, b) => new Date(b.date) - new Date(a.date));
+    }, [orders, searchTerm, startDate, endDate, viewMode]);
+
+    const paginatedOrders = useMemo(() => {
         const start = (currentPage - 1) * itemsPerPage;
         return filteredOrders.slice(start, start + itemsPerPage);
     }, [filteredOrders, currentPage]);
@@ -186,7 +224,7 @@ const SupplierOrders = () => {
 
     useEffect(() => {
         setCurrentPage(1);
-    }, [searchTerm]);
+    }, [searchTerm, startDate, endDate, viewMode]);
 
     const toggleSelect = (id) => {
         const newSelected = new Set(selectedIds);
@@ -318,24 +356,83 @@ const SupplierOrders = () => {
             </header>
 
             <div className="admin-card">
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px', flexWrap: 'wrap', gap: '15px' }}>
-                    <h3 style={{ display: 'flex', alignItems: 'center', gap: '8px', margin: 0 }}>
-                        <History size={20} color="#f03e3e" /> Historial de Compras
-                    </h3>
-                    <div className="search-bar" style={{ position: 'relative', width: '300px' }}>
-                        <Search size={16} style={{ position: 'absolute', left: '10px', top: '50%', transform: 'translateY(-50%)', color: '#888' }} />
-                        <input 
-                            type="text" 
-                            placeholder="Buscar por proveedor, ID o producto..." 
-                            value={searchTerm}
-                            onChange={(e) => setSearchTerm(e.target.value)}
-                            style={{ padding: '8px 10px 8px 35px', borderRadius: '8px', border: '1px solid #ddd', fontSize: '0.85rem', width: '100%', background: '#fff' }}
-                        />
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', marginBottom: '25px' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '15px' }}>
+                        <h3 style={{ display: 'flex', alignItems: 'center', gap: '8px', margin: 0 }}>
+                            <History size={20} color="#f03e3e" /> Historial de Compras
+                        </h3>
+                        
+                        <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
+                            <div className="period-selector" style={{ display: 'flex', background: '#f1f3f5', padding: '4px', borderRadius: '10px' }}>
+                                {['daily', 'weekly', 'monthly'].map(mode => (
+                                    <button
+                                        key={mode}
+                                        onClick={() => { setViewMode(mode); setStartDate(''); setEndDate(''); }}
+                                        style={{ 
+                                            padding: '6px 15px', border: 'none', borderRadius: '8px', cursor: 'pointer', fontSize: '0.75rem', fontWeight: '800', textTransform: 'uppercase',
+                                            background: viewMode === mode && !startDate && !endDate ? '#333' : 'transparent',
+                                            color: viewMode === mode && !startDate && !endDate ? '#fff' : '#666'
+                                        }}
+                                    >
+                                        {mode === 'daily' ? 'Diario' : mode === 'weekly' ? 'Semanal' : 'Mensual'}
+                                    </button>
+                                ))}
+                            </div>
+                            
+                            <div style={{ display: 'flex', gap: '5px' }}>
+                                <button onClick={handleExportExcel} className="icon-btn" title="Excel" style={{ padding: '8px', background: '#2b8a3e', color: 'white', border: 'none', borderRadius: '6px', cursor: 'pointer' }}><Download size={16} /></button>
+                                <button onClick={handleExportPDF} className="icon-btn" title="PDF" style={{ padding: '8px', background: '#f03e3e', color: 'white', border: 'none', borderRadius: '6px', cursor: 'pointer' }}><FileText size={16} /></button>
+                            </div>
+                        </div>
                     </div>
-                    <div style={{ display: 'flex', gap: '5px' }}>
-                        <button onClick={handleExportExcel} className="icon-btn" title="Excel" style={{ padding: '6px', background: '#2b8a3e', color: 'white', border: 'none', borderRadius: '6px' }}><Download size={14} /></button>
-                        <button onClick={handleExportPDF} className="icon-btn" title="PDF" style={{ padding: '6px', background: '#f03e3e', color: 'white', border: 'none', borderRadius: '6px' }}><FileText size={14} /></button>
+
+                    <div style={{ display: 'flex', gap: '15px', flexWrap: 'wrap', alignItems: 'center' }}>
+                        <div className="search-bar" style={{ position: 'relative', flex: '1 1 300px' }}>
+                            <Search size={18} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: '#888' }} />
+                            <input 
+                                type="text" 
+                                placeholder="Buscar proveedor o ID..." 
+                                defaultValue={searchTerm}
+                                onChange={(e) => startTransition(() => setSearchTerm(e.target.value))}
+                                style={{ padding: '12px 15px 12px 40px', borderRadius: '10px', border: '1px solid #ddd', width: '100%', fontSize: '0.9rem' }}
+                            />
+                        </div>
+                        
+                        <button 
+                            onClick={() => setShowAdvancedFilters(!showAdvancedFilters)}
+                            style={{ 
+                                padding: '10px 15px', borderRadius: '10px', border: '1px solid #ddd', 
+                                background: showAdvancedFilters ? '#333' : '#fff', color: showAdvancedFilters ? '#fff' : '#333', 
+                                cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.85rem', fontWeight: 'bold'
+                            }}
+                        >
+                            <Filter size={18} /> Filtros {showAdvancedFilters ? '▲' : '▼'}
+                        </button>
                     </div>
+
+                    {showAdvancedFilters && (
+                        <div style={{ 
+                            display: 'flex', gap: '15px', padding: '20px', background: '#f8f9fa', borderRadius: '12px', 
+                            border: '1px solid #eee', flexWrap: 'wrap', animation: 'slideDown 0.2s ease'
+                        }}>
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '5px', flex: 1, minWidth: '150px' }}>
+                                <label style={{ fontSize: '0.75rem', fontWeight: 'bold', color: '#666' }}>DESDE</label>
+                                <input type="date" value={startDate} onChange={e => setStartDate(e.target.value)} style={{ padding: '10px', borderRadius: '8px', border: '1px solid #ddd' }} />
+                            </div>
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '5px', flex: 1, minWidth: '150px' }}>
+                                <label style={{ fontSize: '0.75rem', fontWeight: 'bold', color: '#666' }}>HASTA</label>
+                                <input type="date" value={endDate} onChange={e => setEndDate(e.target.value)} style={{ padding: '10px', borderRadius: '8px', border: '1px solid #ddd' }} />
+                            </div>
+                            {(startDate || endDate) && (
+                                <button 
+                                    onClick={() => { setStartDate(''); setEndDate(''); }}
+                                    style={{ alignSelf: 'flex-end', padding: '10px', background: '#fff', color: '#e03131', border: '1px solid #e03131', borderRadius: '8px', cursor: 'pointer', fontSize: '0.8rem' }}
+                                >
+                                    LIMPIAR FECHAS
+                                </button>
+                            )}
+                        </div>
+                    )}
                 </div>
                 <div className="accounting-table-container">
                     <table className="accounting-table">
