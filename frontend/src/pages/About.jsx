@@ -355,7 +355,7 @@ function About() {
               </div>
             </div>
             <a 
-              href="https://share.google/uhA0uIK9PmhIATMDr"
+              href="https://maps.app.goo.gl/pJXJKJYsuQVzLEjYA"
               target="_blank"
               rel="noopener noreferrer"
               className="map-container"

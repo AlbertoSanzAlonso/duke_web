@@ -29,7 +29,7 @@ const Footer = () => {
             <p>Rivadavia, San Juan, Argentina</p>
             <p>Laprida y José Avelín N</p>
             <a 
-              href="https://share.google/uhA0uIK9PmhIATMDr" 
+              href="https://maps.app.goo.gl/pJXJKJYsuQVzLEjYA" 
               target="_blank" 
               rel="noopener noreferrer"
               className="footer-map-link"
