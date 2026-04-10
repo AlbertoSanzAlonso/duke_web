@@ -684,11 +684,24 @@
     position: fixed;
     top: 50%;
     left: 50%;
-    transform: translate(-50%, -50%) scale(1.5);
-    width: 90vw;
+    transform: translate(-50%, -50%);
+    width: auto;
+    height: auto;
+    max-width: 95vw;
+    max-height: 90vh;
     z-index: 3000;
     cursor: zoom-out;
-    box-shadow: 0 0 100px rgba(0,0,0,0.8);
+    box-shadow: 0 0 100px rgba(0,0,0,0.9);
+    border-radius: 8px;
+    background: #000;
+}
+
+.image-wrapper.zoomed img {
+    max-width: 95vw;
+    max-height: 90vh;
+    width: auto;
+    height: auto;
+    object-fit: contain;
 }
 
 .zoom-hint {
