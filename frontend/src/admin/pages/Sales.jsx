@@ -96,7 +96,7 @@ const Sales = () => {
         const handleNewOrder = (event) => {
             console.log("Real-time: New order detected, refreshing pending tickets...");
             setToast({ message: "¡NUEVO PEDIDO RECIBIDO!", type: 'success' });
-            loadData();
+            loadData(true); // silent=true: no flash
         };
 
         // Handle navigation state from Orders.jsx
@@ -146,8 +146,8 @@ const Sales = () => {
         }
     }
 
-    const loadData = async () => {
-        setLoading(true);
+    const loadData = async (silent = false) => {
+        if (!silent) setLoading(true);
         try {
             const menuData = await fetchMenuEntries();
             setMenuEntries(menuData.filter(e => e.is_available));
@@ -176,7 +176,7 @@ const Sales = () => {
         } catch (error) {
             console.error("Error loading data:", error);
         } finally {
-            setLoading(false);
+            if (!silent) setLoading(false);
         }
     };
 

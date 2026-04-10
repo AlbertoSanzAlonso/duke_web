@@ -889,7 +889,7 @@ const Accounting = () => {
                             {detailItem.typeIndicator === 'sal' && (
                                 <button 
                                     onClick={() => window.open(`/ticket/${detailItem.id}`, '_blank')}
-                                    style={{ flex: 1, padding: '12px', background: '#333', color: '#fff !important', border: 'none', borderRadius: '8px', fontWeight: 'bold', cursor: 'pointer' }}
+                                    style={{ flex: 1, padding: '12px', background: '#333', color: '#fff', border: 'none', borderRadius: '8px', fontWeight: 'bold', cursor: 'pointer', fontSize: '0.85rem', letterSpacing: '0.5px' }}
                                 >
                                     VER TICKET COMPLETO
                                 </button>

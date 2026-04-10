@@ -33,22 +33,22 @@ function Inventory() {
 
         const handleRefresh = () => {
             console.log("Real-time: Data update detected, refreshing inventory...");
-            loadInventory();
+            loadInventory(true); // silent=true: no flash
         };
 
         window.addEventListener('new-order-received', handleRefresh);
         return () => window.removeEventListener('new-order-received', handleRefresh);
     }, []);
 
-    const loadInventory = async () => {
+    const loadInventory = async (silent = false) => {
         try {
-            setLoading(true);
+            if (!silent) setLoading(true);
             const data = await fetchInventory();
             setItems(data);
         } catch (err) {
             setError(err.message);
         } finally {
-            setLoading(false);
+            if (!silent) setLoading(false);
         }
     };
 
