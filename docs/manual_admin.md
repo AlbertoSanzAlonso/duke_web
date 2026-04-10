@@ -56,11 +56,14 @@ Arrastra y suelta para ordenar las fotos que aparecen en el carrusel de la pági
 ## 9. DUKE ASSIST (ASISTENTE IA)
 El asistente de Duke tiene acceso en tiempo real a la base de datos para ayudarte a tomar decisiones inteligentes.
 - **Qué puede ver:**
-    - Resúmenes financieros **Diarios, Semanales y Mensuales**.
+    - Resúmenes financieros **Diarios, Semanales y Mensuales** (incluyendo comparativa histórica de 6 meses).
+    - **Productos más vendidos** (Top 5 semanal con cantidades).
     - Artículos con bajo stock (Stock Crítico) y niveles de inventario completo.
     - Pedidos pendientes en TPV y Proveedores.
     - Movimientos recientes realizados por el staff (Auditoría).
 - **Ejemplos de preguntas:** 
+    - "¿Qué fue lo que más se vendió esta semana?"
+    - "¿En qué mes tuvimos más gastos el último semestre?"
     - "¿Cómo viene el balance de la semana?"
     - "¿Qué insumos tengo que comprar urgente?"
     - "¿Quién borró el producto X o cargó el último gasto?"
@@ -75,11 +78,13 @@ Esta sección detalla la ubicación exacta de cada control para que el Asistente
 - **Stock Crítico (Centro):** Listado de insumos que están por debajo del mínimo (Color Rojo).
 - **Resumen Financiero (Derecha):** Tarjetas con Ventas de Hoy, Gastos y Balance.
 - **NUEVO MOVIMIENTO (Botón Negro):** Abre directamente el modal de contabilidad.
+- **CONTROL DE COCINA (Botón Utensils):** Abre un monitor con los pedidos "En Cocción", "Listos" y "Recogidos". Desde aquí puedes adelantar estados o marcar pedidos como entregados.
 - **Últimos Pedidos (Abajo):** Acceso rápido a las ventas más recientes.
 
 ### 🛒 TPV (VENTAS)
 - **Pestaña TPV (Superior):** Muestra la carta para añadir productos al ticket.
 - **Pestaña PENDIENTES (Superior):** Listado de tickets que aún no se han cobrado.
+- **ESTADO COCINA (Botón Negro):** Abre un resumen de lo que está marchando en cocina sin salir del TPV.
 - **Selector de Categorías (Bajo pestañas):** Botones para filtrar la carta (Burgers, Pizzas, etc).
 - **Barra de Búsqueda (Arriba a la derecha):** Filtro rápido por nombre de producto.
 - **Sidebar de Ticket (Derecha):** 

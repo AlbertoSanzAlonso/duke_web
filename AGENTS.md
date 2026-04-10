@@ -24,8 +24,9 @@ Este proyecto se divide en dos entornos de despliegue claramente separados para 
 
 ## 7. Asistente IA y Soporte (Duke Assist)
 - **Modelo:** Llama-3.3-70b-versatile vía **Groq API**.
-- **RAG (Conocimiento):** El asistente lee dinámicamente el archivo `docs/manual_admin.md` y el estado en tiempo real de la base de datos (Inventario, Finanzas, Logs, Pedidos).
+- **RAG (Conocimiento):** El asistente lee dinámicamente el archivo `docs/manual_admin.md` y el estado en tiempo real de la base de datos (Inventario, Finanzas con historial de 6 meses, Logs, Pedidos, Top Ventas Semanal).
 - **Mantenimiento:** Es OBLIGATORIO actualizar `docs/manual_admin.md` cuando se realicen cambios estructurales.
+- **Consultas Analíticas**: Duke Assist debe priorizar el uso del nuevo contexto de agregación (`top_selling`, `finance_history`) para responder preguntas sobre rendimiento de productos o comparativas mensuales.
 
 ## 4. Skills Instaladas
 - `django-rest-best-practices`: Estabilidad y consistencia del backend.
@@ -93,6 +94,8 @@ Este proyecto se divide en dos entornos de despliegue claramente separados para 
 - **Scroll Indicator**: El menú incluye un indicador visual (flecha flotante) en "Nuestra Carta" con desplazamiento suave para mejorar el descubrimiento de categorías.
 - **Botón de Contacto Dinámico**: Se implementó un FAB de contacto (WhatsApp/Llamada) que solo aparece cuando el carrito está vacío, alternándose con el botón del carrito según el estado del pedido.
 - **Edición de Imágenes**: El administrador permite recortar imágenes ya existentes en el catálogo mediante `ImageCropper` con soporte Cross-Origin para S3/Supabase.
+- **Sincronización Cocina-TPV**: Al marcar un pedido como "Recogido" en el monitor de cocina, el sistema debe cambiar automáticamente su estado a `COMPLETED` para que desaparezca de la lista de pendientes del TPV y se registre en el historial financiero.
+- **Persistencia SSE**: Las conexiones de streaming deben ser independientes del estado de navegación local (tabs) para evitar micro-cortos en la recepción de pedidos.
 
 ---
 *Mantener la coherencia visual con la marca Duke Burger (Negros profundos, Rojos vibrantes, Tipografía Bebas Neue).*
