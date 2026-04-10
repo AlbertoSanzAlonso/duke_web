@@ -473,7 +473,9 @@ const Manual = () => {
                 <div key={route.id} className="route-card" onClick={() => setSelectedDetail(route)}>
                   <div className="route-header">
                     <span className="route-badge role-badge">{route.role}</span>
-                    <code className="url-code">{route.url}</code>
+                    <a href={route.url} target="_blank" rel="noreferrer" className="url-link" onClick={e => e.stopPropagation()}>
+                      <code className="url-code">{route.url}</code>
+                    </a>
                   </div>
                   <h3>{route.name}</h3>
                   <p>{route.desc}</p>
