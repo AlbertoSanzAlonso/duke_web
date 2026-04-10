@@ -44,6 +44,14 @@ import time
 import asyncio
 from io import BytesIO
 
+@api_view(['GET'])
+@permission_classes([AllowAny])
+def HealthCheckView(request):
+    """
+    Internal health check endpoint for Traefik/Coolify/Docker.
+    """
+    return Response({"status": "healthy", "timestamp": timezone.now()}, status=200)
+
 @api_view(['GET', 'PATCH'])
 @permission_classes([permissions.IsAuthenticated])
 @parser_classes([parsers.MultiPartParser, parsers.FormParser, parsers.JSONParser])

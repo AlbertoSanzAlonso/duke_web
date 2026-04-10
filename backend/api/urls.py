@@ -5,7 +5,7 @@ from .views import (ProductViewSet, MenuEntryViewSet, SaleViewSet, ExpenseViewSe
                     GlobalSettingViewSet, GalleryImageViewSet, OpeningHourViewSet, 
                     DeliverySettingViewSet, AdminSetupView, 
                     PasswordResetRequestView, PasswordResetConfirmView, MeView, UserViewSet,
-                    ActionLogViewSet, AIHelpView, MailCheckView, MailTestView, DashboardInsightsView)
+                    ActionLogViewSet, AIHelpView, MailCheckView, MailTestView, DashboardInsightsView, HealthCheckView)
 from rest_framework.authtoken.views import obtain_auth_token
 
 router = DefaultRouter()
@@ -34,4 +34,5 @@ urlpatterns = [
     path('mail-check/', MailCheckView, name='mail_check'),
     path('mail-test/', MailTestView, name='mail_test'),
     path('dashboard-insights/', DashboardInsightsView, name='dashboard_insights'),
+    path('health/', HealthCheckView, name='health_check'),
 ]
