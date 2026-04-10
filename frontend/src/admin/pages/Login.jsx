@@ -161,7 +161,7 @@ const Login = () => {
             </div>
             
             <footer className="login-footer">
-                <p>© 2025 DUKE BURGER. SAN JUAN, ARGENTINA.</p>
+                <p>© 2025 DUKE BURGER. SAN JUAN, ARGENTINA. | <a href="/manual" style={{ color: '#888', textDecoration: 'underline' }}>Guía de Uso</a></p>
             </footer>
         </div>
     );

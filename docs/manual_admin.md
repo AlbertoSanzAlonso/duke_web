@@ -1,5 +1,8 @@
 # MANUAL DE USUARIO - DUKE BURGER ADMIN
 
+> [!TIP]
+> **VERSIÓN ILUSTRADA DISPONIBLE:** Puedes acceder al manual visual interactivo en la URL: [/manual](https://dukeburger-sj.com/manual) — _Ideal para capacitación rápida del personal._
+
 ¡Bienvenido al cerebro de Duke- **Heartbeat**: Envío obligatorio de `: ping` y heartbeats JSON cada 15s o menos para evitar timeouts de proxies.
 - **Sync Workers**: En servidores Gunicorn `gthread`, se prefiere la vista SSE síncrona (`def` en lugar de `async def`) para evitar deadlocks con el ORM de Django, manejando la concurrencia mediante hilos del worker.
 - **Polling Interval**: El backend debe realizar un `time.sleep(15)` entre comprobaciones de base de datos para equilibrar la inmediatez y el consumo de recursos de Supabase.

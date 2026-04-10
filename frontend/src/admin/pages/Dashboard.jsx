@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { fetchDashboardInsights } from '../../services/api';
 import LoadingScreen from '../components/LoadingScreen';
-import { ShoppingBag, Star, Clock, AlertTriangle, Package, Mail, History, Settings as SettingsIcon, Plus, Utensils } from 'lucide-react';
+import { ShoppingBag, Star, Clock, AlertTriangle, Package, Mail, History, Settings as SettingsIcon, Plus, Utensils, HelpCircle } from 'lucide-react';
 import Toast from '../components/Toast';
 
 const Dashboard = () => {
@@ -210,7 +210,6 @@ const Dashboard = () => {
                         </div>
                     </Link>
                 )}
-
                 {(profile?.is_superuser || profile?.profile?.can_use_settings) && (
                     <Link to="/admin/config" className="stat-card">
                         <div className="stat-icon-box icon-dark">
@@ -222,6 +221,16 @@ const Dashboard = () => {
                         </div>
                     </Link>
                 )}
+
+                <Link to="/manual" className="stat-card" style={{ textDecoration: 'none' }}>
+                    <div className="stat-icon-box icon-purple" style={{ background: '#f8f0fc' }}>
+                        <HelpCircle size={24} color="#ae3ec9" />
+                    </div>
+                    <div className="stat-content">
+                        <div className="stat-label">Ayuda y Soporte</div>
+                        <div className="stat-value" style={{ color: '#ae3ec9' }}>MANUAL DE USO</div>
+                    </div>
+                </Link>
             </div>
 
             {showKitchenModal && (

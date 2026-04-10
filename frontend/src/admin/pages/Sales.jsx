@@ -581,27 +581,13 @@ const Sales = () => {
                     TICKETS PENDIENTES ({pendingTickets.length})
                 </button>
                 <button 
-                    className="kitchen-summary-btn"
+                    className={isKitchenModalOpen ? 'active' : ''}
                     onClick={() => {
                         loadKitchenSummary();
                         setIsKitchenModalOpen(true);
                     }}
-                    style={{ 
-                        marginLeft: 'auto', 
-                        background: '#1a1a1a', 
-                        color: '#fff', 
-                        borderRadius: '10px', 
-                        border: '1px solid #444',
-                        display: 'flex', 
-                        alignItems: 'center', 
-                        gap: '8px',
-                        padding: '10px 15px',
-                        cursor: 'pointer',
-                        fontWeight: 'bold',
-                        fontSize: '0.85rem'
-                    }}
                 >
-                    <Utensils size={16} /> ESTADO COCINA
+                    ESTADO COCINA
                 </button>
             </div>
 
@@ -1160,21 +1146,23 @@ const Sales = () => {
                             </h2>
                             <button className="close-btn" onClick={() => setIsKitchenModalOpen(false)}><X /></button>
                         </div>
-                        <div className="pos-modal-body" style={{ maxHeight: '70vh', overflowY: 'auto', padding: '20px' }}>
+                        <div className="pos-modal-body" style={{ maxHeight: '70vh', overflowY: 'auto', padding: '20px', background: '#fff' }}>
                             {isLoadingKitchen ? (
-                                <div style={{ textAlign: 'center', padding: '40px' }}>Cargando estado...</div>
-                            ) : kitchenData ? (
+                                <div style={{ textAlign: 'center', padding: '40px', color: '#333' }}>Cargando estado...</div>
+                            ) : kitchenData?.today_sales ? (
                                 <div className="kitchen-status-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
                                     <div className="kitchen-status-col">
-                                        <h4 style={{ color: '#f03e3e', borderBottom: '2px solid #f03e3e', paddingBottom: '5px', marginBottom: '15px' }}>EN COCINA ({kitchenData.kitchenPending})</h4>
+                                        <h4 style={{ color: '#e31b23', borderBottom: '2px solid #e31b23', paddingBottom: '5px', marginBottom: '15px', fontFamily: 'var(--font-heading)' }}>
+                                            EN COCINA ({kitchenData.today_sales.kitchen_pending})
+                                        </h4>
                                         <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                                            {kitchenData.kitchenPendingList.length === 0 ? (
-                                                <p style={{ opacity: 0.5, fontSize: '0.9rem' }}>No hay pedidos</p>
+                                            {(kitchenData.today_sales.kitchen_pending_list || []).length === 0 ? (
+                                                <p style={{ color: '#999', fontSize: '0.9rem' }}>No hay pedidos</p>
                                             ) : (
-                                                kitchenData.kitchenPendingList.map(order => (
-                                                    <div key={order.id} style={{ padding: '10px', background: '#fff5f5', borderRadius: '8px', borderLeft: '4px solid #f03e3e' }}>
-                                                        <div style={{ fontWeight: 'bold' }}>#{order.id} - {order.customer}</div>
-                                                        <div style={{ fontSize: '0.75rem', color: '#888' }}>
+                                                kitchenData.today_sales.kitchen_pending_list.map(order => (
+                                                    <div key={order.id} style={{ padding: '12px', background: '#fff5f5', borderRadius: '8px', borderLeft: '4px solid #e31b23', boxShadow: '0 2px 4px rgba(0,0,0,0.05)' }}>
+                                                        <div style={{ fontWeight: 'bold', color: '#333' }}>#{order.id} - {order.customer}</div>
+                                                        <div style={{ fontSize: '0.75rem', color: '#666', marginTop: '4px' }}>
                                                             ⏲️ {new Date(order.created_at).toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit', timeZone: 'America/Argentina/Buenos_Aires' })}
                                                         </div>
                                                     </div>
@@ -1183,15 +1171,17 @@ const Sales = () => {
                                         </div>
                                     </div>
                                     <div className="kitchen-status-col">
-                                        <h4 style={{ color: '#37b24d', borderBottom: '2px solid #37b24d', paddingBottom: '5px', marginBottom: '15px' }}>LISTOS ({kitchenData.kitchenReady})</h4>
+                                        <h4 style={{ color: '#37b24d', borderBottom: '2px solid #37b24d', paddingBottom: '5px', marginBottom: '15px', fontFamily: 'var(--font-heading)' }}>
+                                            LISTOS ({kitchenData.today_sales.kitchen_ready})
+                                        </h4>
                                         <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                                            {kitchenData.kitchenReadyList.length === 0 ? (
-                                                <p style={{ opacity: 0.5, fontSize: '0.9rem' }}>No hay pedidos</p>
+                                            {(kitchenData.today_sales.kitchen_ready_list || []).length === 0 ? (
+                                                <p style={{ color: '#999', fontSize: '0.9rem' }}>No hay pedidos</p>
                                             ) : (
-                                                kitchenData.kitchenReadyList.map(order => (
-                                                    <div key={order.id} style={{ padding: '10px', background: '#ebfbee', borderRadius: '8px', borderLeft: '4px solid #37b24d' }}>
-                                                        <div style={{ fontWeight: 'bold' }}>#{order.id} - {order.customer}</div>
-                                                        <div style={{ fontSize: '0.75rem', color: '#888' }}>
+                                                kitchenData.today_sales.kitchen_ready_list.map(order => (
+                                                    <div key={order.id} style={{ padding: '12px', background: '#ebfbee', borderRadius: '8px', borderLeft: '4px solid #37b24d', boxShadow: '0 2px 4px rgba(0,0,0,0.05)' }}>
+                                                        <div style={{ fontWeight: 'bold', color: '#333' }}>#{order.id} - {order.customer}</div>
+                                                        <div style={{ fontSize: '0.75rem', color: '#666', marginTop: '4px' }}>
                                                             ✅ {new Date(order.updated_at).toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit', timeZone: 'America/Argentina/Buenos_Aires' })}
                                                         </div>
                                                     </div>
