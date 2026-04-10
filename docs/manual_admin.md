@@ -39,6 +39,7 @@
 - **Gestión de Stock:**
     - **Alertas Rojas:** Indican que un insumo bajó del "Stock Mínimo" configurado.
     - **Ingreso de Mercadería:** Se realiza vía "Pedidos Proveedor" para automatizar la suma.
+    - **Historial de Suministros:** Las compras a proveedores incluyen selectores de periodo (Diario, Semanal, Mensual) y paginación fija de 10 elementos.
 - **Exportación:** Botones Excel (Verde) y PDF (Rojo) en la barra superior.
 
 ### 4. FINANZAS Y CONTABILIDAD
@@ -46,6 +47,9 @@
 - **Conceptos:**
     - **Balance:** Suma de Ingresos TPV - (Gastos Manuales + Compras Proveedor).
     - **Nuevo Movimiento:** Botón Azul en Dashboard/Contabilidad para registrar gastos (Luz, Alquiler, etc).
+- **Control de Tiempo:**
+    - **Periodos:** El sistema pagina cada 10 registros y permite filtrar por Hoy (Diario), 7 días (Semanal) y Mes Actual (Mensual).
+    - **Filtros Personalizados:** Se pueden buscar rangos específicos mediante el calendario "Desde/Hasta".
 - **Historial:** La IA tiene acceso a los últimos 6 meses de movimientos para análisis.
 
 ### 5. USUARIOS Y PERMISOS

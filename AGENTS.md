@@ -53,7 +53,13 @@ Este proyecto se divide en dos entornos de despliegue claramente separados para 
 - **Buffering**: Establecer el header `X-Accel-Buffering: no` y `Cache-Control: no-cache` específicamente en la respuesta de streaming.
 - **Frontend Lazy Loading**: Toda la navegación del frontend DEBE implementarse con `React.lazy` y `Suspense` utilizando el componente `<LoadingScreen />` de la marca como fallback.
 
-## 4. Acciones Masivas y TPV
+## 4. Performance y Optimización de Estado (Crítico)
+- **Localización de Estado**: Evitar re-renderizados globales. Componentes de alta frecuencia (como relojes o timers) deben estar encapsulados en componentes hijos dedicados (ej. `DigitalClock.jsx`).
+- **Memoización**: Usar `useMemo` obligatoriamente para cálculos financieros (balances, totales), filtros de búsqueda de gran volumen y extracción de categorías.
+- **Transiciones**: Implementar `useTransition` en todos los inputs de búsqueda y filtros de periodo para mantener la fluidez del teclado mientras se procesan los datos.
+- **Memorización de Handlers**: En el TPV y Contabilidad, envolver handlers de manipulación de datos en `useCallback` para evitar roturas de referencia en componentes hijos.
+
+## 5. Acciones Masivas y TPV
 - **Bulk Actions**: Las operaciones repetitivas (cobrar tickets, eliminar múltiples registros) deben implementarse mediante endpoints de tipo `@action(detail=False, methods=['post'], url_path='bulk-actions')` para optimizar el tráfico de red.
 - **Selección Múltiple**: Los listados administrativos deben permitir selección múltiple con barras de herramientas contextuales y animaciones de entrada (`slideIn`).
 
@@ -70,8 +76,9 @@ Este proyecto se divide en dos entornos de despliegue claramente separados para 
 - **Loading:** Usar el componente `<LoadingScreen />` que incluye el logo de la marca en lugar de mensajes de texto planos.
 - **Accesibilidad Admin:** Forzar color de texto oscuro (#333 !important) en contenedores claros para evitar conflictos con el modo oscuro del navegador, pero asegurar que los botones con fondo oscuro (ej. .btn-dark, .add-movement-btn, .checkout-btn) mantengan su texto blanco mediante selectores específicos o eliminando el !important global de los botones.
 - **Responsividad:** 
-  - La sección de Contabilidad e Inventario debe usar layouts verticales apilados en móviles.
+  - La sección de Contabilidad e Inventario DEBE usar layouts verticales apilados en móviles (formato tarjeta) donde el label esté arriba y el valor debajo para evitar recortes.
   - El grid de la carta pública debe usar `minmax(min(100%, 320px), 1fr)` para evitar scroll horizontal.
+  - **Paginación**: Todos los listados administrativos (Contabilidad, Compras, Pedidos) deben paginar cada 10 elementos estrictamente en móvil para facilitar el scroll.
   - **AI Assist**: El chat nunca debe auto-abrirse en móviles por defecto. Debe soportar `white-space: pre-wrap`.
 
 
@@ -86,7 +93,10 @@ Este proyecto se divide en dos entornos de despliegue claramente separados para 
 
 ## 6. Seguridad y Gestión Administrativa
 - **Login:** Acceso vía `/login` usando `TokenAuthentication` de DRF.
-- **Contabilidad:** El formulario de compra/gastos debe usar incrementos de `$100`.
+- **Contabilidad y Proveedores**: 
+  - Ambos módulos deben incluir selectores de periodo: Diario, Semanal y Mensual (por defecto).
+  - Incluir filtros avanzados de rango "Desde/Hasta" con botón de limpiar.
+  - El formulario de compra/gastos debe usar incrementos de `$100`.
 - **Base de Datos:** El proyecto usa Supabase en producción. Para crear usuarios u operativos de mantenimiento sobre la BD, se debe asegurar que se ejecuten contra la instancia de Supabase (PostgreSQL) y no la base de datos local de desarrollo.
 - **Cierre de Sesión:** El sidebar incluye un botón de "Cerrar Sesión" que limpia el `localStorage` y redirige al login.
 
