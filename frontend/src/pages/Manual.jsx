@@ -29,6 +29,7 @@ import './Manual.css';
 const Manual = () => {
   const navigate = useNavigate();
   const [selectedDetail, setSelectedDetail] = React.useState(null);
+  const [drillDown, setDrillDown] = React.useState(null);
   const [isZoomed, setIsZoomed] = React.useState(false);
 
   const mainRoutes = [
