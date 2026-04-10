@@ -12,8 +12,10 @@
 /* Header de Categorías */
 .pos-header {
     display: flex;
-    align-items: center;
+    flex-direction: column;
+    gap: 12px;
     margin-bottom: 1.5rem;
+    min-width: 0;
 }
 
 .category-tabs {
@@ -40,6 +42,7 @@
     font-size: 1.1rem;
     cursor: pointer;
     white-space: nowrap;
+    flex-shrink: 0; /* Prevent buttons from compressing */
     transition: all 0.2s;
     color: #333 !important;
 }
@@ -73,7 +76,7 @@
     flex: 2;
     display: flex;
     flex-direction: column;
-    overflow: hidden;
+    min-width: 0; /* Prevent flex child from overflowing */
 }
 
 /* Grid de Productos */
