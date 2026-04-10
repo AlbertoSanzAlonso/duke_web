@@ -543,14 +543,17 @@ class SaleViewSet(viewsets.ModelViewSet):
 
     @action(detail=True, methods=['post'], url_path='mark-delivered')
     def mark_delivered(self, request, pk=None):
-        sale = self.get_object()
-        sale.is_delivered = True
-        sale.delivered_at = timezone.now()
-        # As per user request: marking as delivered also removes it from pending list in TPV
-        sale.status = 'COMPLETED'
-        sale.save()
-        log_action(request.user if request.user.is_authenticated else None, 'COCINA', 'UPDATE', f'Pedido #{sale.id} recogido y completado automáticamente')
-        return Response({'message': f'Pedido #{sale.id} archivado como recogido y completado.'})
+        try:
+            sale = self.get_object()
+            sale.is_delivered = True
+            sale.delivered_at = timezone.now()
+            # As per user request: marking as delivered also removes it from pending list in TPV
+            sale.status = 'COMPLETED'
+            sale.save()
+            log_action(request.user if request.user.is_authenticated else None, 'COCINA', 'UPDATE', f'Pedido #{sale.id} recogido y completado automáticamente')
+            return Response({'message': f'Pedido #{sale.id} archivado como recogido y completado.'})
+        except Exception as e:
+            return Response({'error': str(e), 'detail': 'Error al procesar entrega. ¿Se ejecutaron las migraciones?'}, status=500)
 
     @action(detail=True, methods=['post'], url_path='revert-delivery')
     def revert_delivery(self, request, pk=None):
