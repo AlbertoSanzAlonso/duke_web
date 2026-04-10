@@ -137,6 +137,19 @@ const Sales = () => {
         }
     };
 
+    async function loadKitchenSummary() {
+        setIsLoadingKitchen(true);
+        try {
+            const data = await fetchDashboardInsights();
+            setKitchenData(data);
+        } catch (error) {
+            console.error("Error loading kitchen summary:", error);
+            setToast({ message: "Error al cargar el estado de cocina", type: 'error' });
+        } finally {
+            setIsLoadingKitchen(false);
+        }
+    }
+
     const loadData = async () => {
         setLoading(true);
         try {
@@ -610,7 +623,7 @@ const Sales = () => {
                     <div className="pos-main">
                         <div className="pos-left-content">
                             <div className="pos-header" style={{ gap: '15px', flexWrap: 'wrap' }}>
-                                <div className="category-tabs" style={{ flex: 1, minWidth: 'min-content' }}>
+                                <div className="category-tabs" style={{ flex: 1, minWidth: 0 }}>
                                     {categories.map(cat => (
                                         <button 
                                             key={cat} 

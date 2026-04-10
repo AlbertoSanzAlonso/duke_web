@@ -21,7 +21,13 @@
     gap: 0.5rem;
     overflow-x: auto;
     padding-bottom: 0.5rem;
-    scrollbar-width: thin;
+    scrollbar-width: none; /* Firefox */
+    -ms-overflow-style: none; /* IE 10+ */
+    -webkit-overflow-scrolling: touch;
+}
+
+.category-tabs::-webkit-scrollbar {
+    display: none; /* Chrome, Safari, Edge */
 }
 
 .category-btn {
@@ -35,6 +41,13 @@
     white-space: nowrap;
     transition: all 0.2s;
     color: #333 !important;
+}
+
+@media (max-width: 768px) {
+    .category-btn {
+        padding: 0.7rem 1.2rem;
+        font-size: 0.9rem;
+    }
 }
 
 .category-btn.active {

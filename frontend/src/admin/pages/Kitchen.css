@@ -140,7 +140,7 @@
 
 .ticket-time {
     font-size: 0.8rem;
-    color: #aaa;
+    color: #fff;
     font-weight: 600;
 }
 
@@ -166,6 +166,7 @@
     font-weight: 800;
     text-transform: uppercase;
     display: block;
+    color: #fff;
 }
 
 .table-info {
@@ -183,8 +184,8 @@
     justify-content: space-between;
     padding: 8px 0;
     border-bottom: 1px solid #222;
-    font-size: 1.2rem;
-    color: #fff;
+    font-size: 1.25rem;
+    color: #fff !important;
 }
 
 .kitchen-item:last-child {
@@ -193,14 +194,18 @@
 
 .item-qty {
     font-weight: 900;
-    color: var(--admin-primary);
+    color: #fff !important;
+    background: var(--admin-primary);
+    padding: 2px 8px;
+    border-radius: 4px;
     margin-right: 12px;
     font-size: 1.4rem;
 }
 
 .item-name {
     flex-grow: 1;
-    font-weight: 600;
+    font-weight: 700;
+    color: #fff !important;
 }
 
 .order-notes {

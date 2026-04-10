@@ -291,7 +291,7 @@ const Accounting = () => {
         });
     };
 
-    const [viewMode, setViewMode] = useState('daily'); // 'daily', 'weekly', 'monthly'
+    const [viewMode, setViewMode] = useState('monthly'); // 'daily', 'weekly', 'monthly'
 
     const filterItems = (items) => {
         const now = new Date();
@@ -554,7 +554,7 @@ const Accounting = () => {
                                     </tr>
                                 </thead>
                                 <tbody>
-                                {paginatedItems.map(item => {
+                                {paginatedItems.length > 0 ? paginatedItems.map(item => {
                                     const type = item.typeIndicator;
                                     const isEditing = editingId === `${type}-${item.id}`;
                                     const dateObj = new Date(item.date);
@@ -622,7 +622,7 @@ const Accounting = () => {
                                                         value={editForm.amount} 
                                                         onChange={val => setEditForm({...editForm, amount: val.target.value})}
                                                         className="inline-edit-input txt-right"
-                                                        style={{ width: '100px' }}
+                                                        style={{ width: '140px' }}
                                                         onClick={e => e.stopPropagation()}
                                                     />
                                                 ) : `${isPositive ? '+' : '-'}$${Math.round(parseFloat(amountVal)).toLocaleString('es-AR')}`}
@@ -632,7 +632,17 @@ const Accounting = () => {
                                             </td>
                                         </tr>
                                     );
-                                })}
+                                }) : (
+                                    <tr>
+                                        <td colSpan="7" style={{ textAlign: 'center', padding: '100px 0', color: '#999' }}>
+                                            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '15px' }}>
+                                                <Filter size={48} opacity={0.3} />
+                                                <p style={{ fontSize: '1.2rem', fontWeight: 'bold' }}>No se encontraron movimientos</p>
+                                                <p style={{ fontSize: '0.9rem' }}>Prueba a cambiar los filtros o el periodo seleccionado</p>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                )}
                                 </tbody>
                             </table>
                         </div>

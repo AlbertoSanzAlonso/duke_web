@@ -2,7 +2,7 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import QRCode from 'qrcode';
 import { fetchSales } from '../../services/api';
-import { Printer, Eye, Calendar, User, Hash, Search, Filter, LayoutGrid, X, ShoppingBag, Download, FileText } from 'lucide-react';
+import { Eye, Calendar, User, Hash, Search, Filter, LayoutGrid, X, ShoppingBag, Download, FileText } from 'lucide-react';
 import { exportToExcel, exportToPDF } from '../../utils/exportUtils';
 import LoadingScreen from '../components/LoadingScreen';
 import Toast from '../components/Toast';
@@ -12,7 +12,6 @@ const Orders = () => {
     const [orders, setOrders] = useState([]);
     const [loading, setLoading] = useState(true);
     const [selectedOrder, setSelectedOrder] = useState(null);
-    const [printingOrder, setPrintingOrder] = useState(null);
     const [searchTerm, setSearchTerm] = useState('');
     const [searchParams] = useSearchParams();
     const [filterType, setFilterType] = useState('all'); // 'all', 'daily', 'weekly', 'monthly'
@@ -114,21 +113,6 @@ const Orders = () => {
         return filteredOrders.reduce((acc, o) => acc + parseFloat(o.total_amount), 0);
     }, [filteredOrders]);
 
-    const handlePrint = (order) => {
-        setPrintingOrder(order);
-        const originalTitle = document.title;
-        // Clean filename for PDF: No # and uppercase
-        document.title = `DUKE-TICKET-${order.id}`;
-        
-        // Pequeño delay para asegurar que el DOM se actualice con los datos del pedido antes de imprimir
-        setTimeout(() => {
-            window.print();
-            // Restaurar el título original después de que se abra el diálogo de impresión
-            setTimeout(() => {
-                document.title = originalTitle;
-            }, 1000);
-        }, 100);
-    };
 
     const handleExportExcel = () => {
         const data = filteredOrders.map(o => ({
@@ -280,9 +264,6 @@ const Orders = () => {
                                             <button className="icon-btn print" title="Ver Ticket Público" onClick={(e) => { e.stopPropagation(); window.open(`/ticket/${order.id}`, '_blank'); }}>
                                                 <Eye size={18} />
                                             </button>
-                                            <button className="icon-btn print" title="Ticket Térmico" onClick={(e) => { e.stopPropagation(); handlePrint(order); }}>
-                                                <Printer size={18} />
-                                            </button>
                                             {order.status === 'PENDING' && (
                                                 <button className="icon-btn tpv" title="Cobrar en TPV" onClick={(e) => { e.stopPropagation(); navigate('/admin/tpv', { state: { pendingOrder: order } }); }}>
                                                     <LayoutGrid size={18} />
@@ -354,9 +335,6 @@ const Orders = () => {
                                     <button className="print-full-btn" style={{ flex: 1, padding: '12px', fontSize: '0.8rem', background: '#333' }} onClick={() => window.open(`/ticket/${selectedOrder.id}`, '_blank')}>
                                         <Eye size={16} /> VER TICKET
                                     </button>
-                                    <button className="print-full-btn" style={{ flex: 1, padding: '12px', fontSize: '0.8rem' }} onClick={() => handlePrint(selectedOrder)}>
-                                        <Printer size={16} /> TÉRMICO
-                                    </button>
                                     {selectedOrder.status === 'PENDING' && (
                                         <button 
                                             className="print-full-btn" 
@@ -373,69 +351,6 @@ const Orders = () => {
                 )}
             </div>
 
-            {/* Area de Impresion Oculta */}
-            <div id="ticket-print-area" className="print-only">
-                {(printingOrder || selectedOrder) && (
-                    <div className="thermal-ticket" style={{ width: '80mm', margin: '0 auto', color: 'black', background: 'white' }}>
-                        <div className="ticket-header-print" style={{ textAlign: 'center', marginBottom: '15px', visibility: 'visible !important', display: 'block !important' }}>
-                            <img src="/brand/logo_negro.png" alt="Duke Burger" style={{ height: '60px', width: 'auto', marginBottom: '5px', display: 'block', margin: '0 auto', visibility: 'visible !important' }} />
-                            <h1 style={{ fontSize: '1.2rem', margin: '0 0 5px 0', fontWeight: '900', color: 'black' }}>DUKE BURGER</h1>
-                            <div style={{ fontSize: '0.75rem', lineHeight: '1.2', color: 'black' }}>
-                                <div>Bº Frondizi - Rivadavia</div>
-                                <div>San Juan | WhatsApp: 264 5142897</div>
-                                <div style={{ fontWeight: 'bold' }}>dukeburger-sj.com</div>
-                            </div>
-                            <div className="ticket-divider" style={{ borderBottom: '1px dashed #000', margin: '10px 0' }}></div>
-                        </div>
-
-                        <div className="ticket-info-print" style={{ fontSize: '0.8rem', marginBottom: '10px', color: 'black' }}>
-                            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '3px' }}>
-                                <strong>TICKET #{(printingOrder || selectedOrder).id}</strong>
-                                <span>{new Date((printingOrder || selectedOrder).date).toLocaleDateString('es-AR')}</span>
-                            </div>
-                            <div>CLIENTE: {(printingOrder || selectedOrder).customer_name || 'PARTICULAR'}</div>
-                            {(printingOrder || selectedOrder).table_number && <div>ENTREGA: {(printingOrder || selectedOrder).table_number}</div>}
-                        </div>
-
-                        <div className="ticket-divider" style={{ borderBottom: '1px dashed #000', margin: '10px 0' }}></div>
-
-                        <div className="ticket-items-print" style={{ fontSize: '0.85rem', color: 'black' }}>
-                            {(printingOrder || selectedOrder).items.map(item => (
-                                <div key={item.id} style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '4px' }}>
-                                    <span>{item.quantity} x {item.entry_name}</span>
-                                    <strong>${(item.quantity * parseFloat(item.price_at_sale)).toLocaleString('es-AR')}</strong>
-                                </div>
-                            ))}
-                        </div>
-
-                        <div className="ticket-divider" style={{ borderBottom: '1px solid #000', margin: '10px 0' }}></div>
-
-                        <div className="ticket-total-print" style={{ textAlign: 'right', color: 'black' }}>
-                            {parseFloat((printingOrder || selectedOrder).delivery_cost) > 0 && (
-                                <div style={{ fontSize: '0.75rem', marginBottom: '4px' }}>
-                                    Envío: ${parseFloat((printingOrder || selectedOrder).delivery_cost).toLocaleString('es-AR')}
-                                </div>
-                            )}
-                            <div style={{ fontSize: '1.2rem', fontWeight: '900' }}>
-                                TOTAL: ${Math.round(parseFloat((printingOrder || selectedOrder).total_amount)).toLocaleString('es-AR')}
-                            </div>
-                        </div>
-
-                        <div className="ticket-footer-print" style={{ textAlign: 'center', marginTop: '15px', fontSize: '0.75rem', color: 'black', visibility: 'visible !important', display: 'block !important' }}>
-                            <p style={{ margin: '0 0 5px 0', fontWeight: 'bold' }}>🚀 ¿TE GUSTÓ EL SABOR?</p>
-                            <div style={{ display: 'block', margin: '5px auto', background: 'white', padding: '5px', width: 'fit-content', border: '1px solid #eee', visibility: 'visible !important' }}>
-                                {qrImage ? (
-                                    <img src={qrImage} alt="QR" style={{ width: '80px', height: '80px', display: 'block' }} />
-                                ) : (
-                                    <div style={{ width: '80px', height: '80px' }}></div>
-                                )}
-                            </div>
-                            <p style={{ margin: '5px 0 0 0' }}>Escanea y dejanos tu reseña</p>
-                            <p style={{ margin: '10px 0 0 0', fontWeight: 'bold', borderTop: '1px dashed #000', paddingTop: '5px' }}>DUKEBURGER-SJ.COM</p>
-                        </div>
-                    </div>
-                )}
-            </div>
 
             {/* Modal de Estadísticas Detalladas */}
             {showStatsModal && (

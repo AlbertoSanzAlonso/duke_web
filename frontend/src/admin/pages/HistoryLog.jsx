@@ -74,7 +74,7 @@ const HistoryLog = () => {
     if (loading) return <LoadingScreen />;
 
     return (
-        <div className="accounting-container" style={{ padding: '20px' }}>
+        <div className="admin-content accounting-page">
             <div className="accounting-header">
                 <div className="header-title">
                     <History size={28} style={{ color: 'var(--admin-primary)' }} />
