@@ -132,6 +132,21 @@ const Manual = () => {
       color: '#9b59b6'
     },
     {
+      id: 'configuracion',
+      title: 'Configuración Duke',
+      icon: <Settings className="section-icon" />,
+      description: 'Ajustes maestros del sistema, tarifas y personal.',
+      image: '/manual/configuracion.webp',
+      features: [
+        'Parámetros de Envío: Define precio base, costo por KM y límites GPS.',
+        'Gestión de Horarios: Controla la disponibilidad de la web pública por día.',
+        'Galería de Imágenes: Sube y recorta fotos para el menú digital.',
+        'Gestión de Personal: Administra usuarios, contraseñas y permisos.',
+        'Seguridad: Control de accesos y configuración de motor de pagos.'
+      ],
+      color: '#34495e'
+    },
+    {
       id: 'asistente',
       title: 'Duke Assist (IA)',
       icon: <Sparkles className="section-icon" />,
