@@ -519,17 +519,21 @@ function Home() {
           </div>
         </div>
         <div className="marquee" data-nosnippet>
-          <div className="marquee-content" style={{ display: 'flex', width: 'max-content', gap: '30px' }}>
-            {/* Contenido repetido masivamente para asegurar bucle infinito sin huecos independientemente del largo del texto */}
-            {[...Array(20)].map((_, i) => (
-              <span key={i} style={{ 
-                fontFamily: 'var(--font-heading)', 
-                fontSize: '2rem', 
-                color: 'white',
-                whiteSpace: 'nowrap'
-              }}>
-                {deliverySettings.marquee_text || "BURGER - PACHATA - LOMO - PIZZA - BEBIDA - SAN JUAN - "}
-              </span>
+          <div className="marquee-content" style={{ display: 'flex', width: 'max-content' }}>
+            {/* Duplicamos el bloque para un bucle infinito perfecto con transform: translateX(-50%) */}
+            {[1, 2].map((idx) => (
+              <div key={idx} style={{ display: 'flex', gap: '30px', paddingRight: '30px' }}>
+                {[...Array(20)].map((_, i) => (
+                  <span key={i} style={{ 
+                    fontFamily: 'var(--font-heading)', 
+                    fontSize: '2rem', 
+                    color: 'white',
+                    whiteSpace: 'nowrap'
+                  }}>
+                    {deliverySettings.marquee_text || "BURGER - PACHATA - LOMO - PIZZA - BEBIDA - SAN JUAN - "}
+                  </span>
+                ))}
+              </div>
             ))}
           </div>
         </div>

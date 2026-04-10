@@ -112,27 +112,43 @@ const Users = () => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        const isChangingPassword = formData.password.length > 0 || formData.confirmPassword.length > 0;
-        if (isChangingPassword && formData.password !== formData.confirmPassword) {
+        
+        const pwd = (formData.password || '').trim();
+        const cpwd = (formData.confirmPassword || '').trim();
+        
+        const isChangingPassword = pwd.length > 0 || cpwd.length > 0;
+        
+        if (isChangingPassword && pwd !== cpwd) {
             setToast({ message: "Las contraseñas no coinciden", type: 'error' });
             return;
         }
 
         try {
             if (editingUser) {
-                const dataToUpdate = { ...formData };
-                delete dataToUpdate.confirmPassword;
-                if (!dataToUpdate.password) delete dataToUpdate.password;
+                // Ensure only necessary fields are sent to PATCH
+                const dataToUpdate = {
+                    username: formData.username,
+                    email: formData.email,
+                    profile: formData.profile
+                };
+                
+                if (pwd.length > 0) {
+                    dataToUpdate.password = pwd;
+                }
                 
                 await updateUser(editingUser.id, dataToUpdate);
                 setToast({ message: "Usuario actualizado", type: 'success' });
             } else {
-                if (!formData.password) {
+                if (pwd.length === 0) {
                     setToast({ message: "La contraseña es obligatoria", type: 'error' });
                     return;
                 }
-                const dataToCreate = { ...formData };
-                delete dataToCreate.confirmPassword;
+                const dataToCreate = {
+                    username: formData.username,
+                    email: formData.email,
+                    password: pwd,
+                    profile: formData.profile
+                };
                 await createUser(dataToCreate);
                 setToast({ message: "Usuario creado", type: 'success' });
             }

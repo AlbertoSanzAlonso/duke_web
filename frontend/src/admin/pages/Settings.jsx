@@ -205,7 +205,7 @@ const Settings = () => {
                                 </div>
                             </div>
                             <div className="setting-field">
-                                <label style={labelStyle}>Distancia Máxima (GPS)</label>
+                                <label style={labelStyle}>Distancia Máxima</label>
                                 <div style={{ position: 'relative' }}>
                                     <input type="number" value={deliveryRates.max_km} onChange={e => handleRateChange('max_km', e.target.value)} style={inputStyle(true)} />
                                     <span style={kmTextStyle}>KM</span>
