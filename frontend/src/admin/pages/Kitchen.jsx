@@ -1,17 +1,38 @@
 import React, { useState, useEffect } from 'react';
-import { fetchSales, markSaleAsPrepared } from '../../services/api';
-import { Utensils, Clock, CheckCircle, Package } from 'lucide-react';
+import { fetchSales, markSaleAsPrepared, markSaleAsDelivered, revertSaleDelivery } from '../../services/api';
+import { Utensils, Clock, CheckCircle, Package, History, ArrowLeftRight } from 'lucide-react';
 import LoadingScreen from '../components/LoadingScreen';
 import Toast from '../components/Toast';
+import ConfirmModal from '../components/ConfirmModal';
 import './Kitchen.css';
 
 const Kitchen = () => {
-    const [orders, setOrders] = useState([]);
-    const [historyOrders, setHistoryOrders] = useState([]);
-    const [showHistory, setShowHistory] = useState(false);
+    const [pendingOrders, setPendingOrders] = useState([]);
+    const [readyOrders, setReadyOrders] = useState([]);
+    const [collectedOrders, setCollectedOrders] = useState([]);
+    
+    // activeTab: 'pending' | 'ready' | 'collected'
+    const [activeTab, setActiveTab] = useState('pending');
     const [loading, setLoading] = useState(true);
     const [currentTime, setCurrentTime] = useState(new Date());
     const [toast, setToast] = useState(null);
+    
+    // Modal state
+    const [confirmModal, setConfirmModal] = useState({ 
+        isOpen: false, 
+        title: '', 
+        message: '', 
+        onConfirm: null,
+        confirmText: 'Confirmar',
+        type: 'info'
+    });
+
+    const formatTime = (dateStr) => {
+        if (!dateStr) return '---';
+        const date = new Date(dateStr);
+        if (isNaN(date.getTime())) return '---';
+        return date.toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit' });
+    };
 
     useEffect(() => {
         loadKitchenOrders();
@@ -20,8 +41,8 @@ const Kitchen = () => {
         const handleNewOrder = () => {
             console.log("Kitchen refresh triggered");
             loadKitchenOrders();
-            // Notificamos sonido solo si no estamos viendo historial para no confundir
-            if (!showHistory) {
+            // Notificamos sonido solo si estamos viendo pendientes para no confundir
+            if (activeTab === 'pending') {
                 const beep = new AudioContext();
                 const osc = beep.createOscillator();
                 const gain = beep.createGain();
@@ -40,25 +61,29 @@ const Kitchen = () => {
             clearInterval(timer);
             window.removeEventListener('new-order-received', handleNewOrder);
         };
-    }, [showHistory]);
+    }, [activeTab]);
 
     const loadKitchenOrders = async () => {
         try {
             const data = await fetchSales();
             const todayStr = new Date().toLocaleDateString('en-CA', { timeZone: 'America/Argentina/Buenos_Aires' });
             
-            // Filtro por Día
-            const todayOrders = data.filter(o => {
+            // Filtro por Día o estado pendiente/listo
+            const activeOrders = data.filter(o => {
                 const orderDate = new Date(o.date).toLocaleDateString('en-CA', { timeZone: 'America/Argentina/Buenos_Aires' });
-                return orderDate === todayStr;
+                const isToday = orderDate === todayStr;
+                // Mostrar si es de hoy O si aún no está entregado (esté pendiente o listo)
+                return isToday || !o.is_delivered;
             });
 
-            // Separamos por estado de preparación
-            const pending = todayOrders.filter(o => !o.is_prepared);
-            const prepared = todayOrders.filter(o => o.is_prepared);
+            // Separamos por estado
+            const pending = activeOrders.filter(o => !o.is_prepared);
+            const ready = activeOrders.filter(o => o.is_prepared && !o.is_delivered);
+            const collected = activeOrders.filter(o => o.is_prepared && o.is_delivered);
             
-            setOrders(pending.sort((a, b) => new Date(a.date) - new Date(b.date))); 
-            setHistoryOrders(prepared.sort((a, b) => new Date(b.updated_at) - new Date(a.updated_at))); 
+            setPendingOrders(pending.sort((a, b) => new Date(a.date) - new Date(b.date))); 
+            setReadyOrders(ready.sort((a, b) => new Date(b.prepared_at || b.updated_at) - new Date(a.prepared_at || a.updated_at))); 
+            setCollectedOrders(collected.sort((a, b) => new Date(b.delivered_at || b.updated_at) - new Date(a.delivered_at || a.updated_at)));
         } catch (error) {
             console.error("Error loading kitchen orders:", error);
         } finally {
@@ -69,27 +94,62 @@ const Kitchen = () => {
     const handleReady = async (orderId) => {
         try {
             await markSaleAsPrepared(orderId);
-            setToast({ message: `Pedido #${orderId} enviado al historial`, type: 'success' });
+            setToast({ message: `Pedido #${orderId} enviado a LISTOS`, type: 'success' });
             loadKitchenOrders();
         } catch (error) {
             setToast({ message: "Error al marcar como listo", type: 'error' });
         }
     };
 
-    const handleDeliver = async (orderId) => {
-        try {
-            const { markSaleAsDelivered } = await import('../../services/api');
-            await markSaleAsDelivered(orderId);
-            setToast({ message: `Pedido #${orderId} marcado como recogido`, type: 'success' });
-            loadKitchenOrders();
-        } catch (error) {
-            setToast({ message: "Error al marcar como entregado", type: 'error' });
-        }
+    const showDeliverConfirm = (order) => {
+        setConfirmModal({
+            isOpen: true,
+            title: 'Marcar como Recogido',
+            message: `¿Estás seguro de que quieres pasar el pedido #${order.id} (${order.customer_name || 'Particular'}) a la lista de RECOGIDOS?`,
+            confirmText: 'SÍ, ENTREGAR',
+            type: 'success',
+            onConfirm: async () => {
+                try {
+                    await markSaleAsDelivered(order.id);
+                    setToast({ message: `Pedido #${order.id} marcado como recogido`, type: 'success' });
+                    setConfirmModal(prev => ({ ...prev, isOpen: false }));
+                    loadKitchenOrders();
+                } catch (error) {
+                    setToast({ message: "Error al marcar como entregado", type: 'error' });
+                }
+            }
+        });
+    };
+
+    const showRevertConfirm = (order) => {
+        setConfirmModal({
+            isOpen: true,
+            title: 'Revertir Entrega',
+            message: `¿Quieres devolver el pedido #${order.id} a la lista de pedidos LISTOS?`,
+            confirmText: 'SÍ, REVERTIR',
+            type: 'info',
+            onConfirm: async () => {
+                try {
+                    await revertSaleDelivery(order.id);
+                    setToast({ message: `Pedido #${order.id} devuelto a LISTOS`, type: 'info' });
+                    setConfirmModal(prev => ({ ...prev, isOpen: false }));
+                    loadKitchenOrders();
+                } catch (error) {
+                    setToast({ message: "Error al revertir entrega", type: 'error' });
+                }
+            }
+        });
     };
 
     if (loading) return <LoadingScreen />;
 
-    const currentDisplay = showHistory ? historyOrders : orders;
+    const getDisplayOrders = () => {
+        if (activeTab === 'pending') return pendingOrders;
+        if (activeTab === 'ready') return readyOrders;
+        return collectedOrders;
+    };
+
+    const currentDisplay = getDisplayOrders();
 
     return (
         <div className="kitchen-container">
@@ -103,16 +163,22 @@ const Kitchen = () => {
                 
                 <div className="kitchen-nav">
                     <button 
-                        className={`nav-item ${!showHistory ? 'active' : ''}`} 
-                        onClick={() => setShowHistory(false)}
+                        className={`nav-item ${activeTab === 'pending' ? 'active' : ''}`} 
+                        onClick={() => setActiveTab('pending')}
                     >
-                        PENDIENTES ({orders.length})
+                        PENDIENTES ({pendingOrders.length})
                     </button>
                     <button 
-                        className={`nav-item ${showHistory ? 'active' : ''}`} 
-                        onClick={() => setShowHistory(true)}
+                        className={`nav-item ${activeTab === 'ready' ? 'active' : ''}`} 
+                        onClick={() => setActiveTab('ready')}
                     >
-                        HISTORIAL HOY ({historyOrders.length})
+                        LISTOS ({readyOrders.length})
+                    </button>
+                    <button 
+                        className={`nav-item ${activeTab === 'collected' ? 'active' : ''}`} 
+                        onClick={() => setActiveTab('collected')}
+                    >
+                        RECOGIDOS ({collectedOrders.length})
                     </button>
                 </div>
             </header>
@@ -121,18 +187,30 @@ const Kitchen = () => {
                 {currentDisplay.length === 0 ? (
                     <div style={{ gridColumn: '1/-1', textAlign: 'center', padding: '100px', opacity: 0.5 }}>
                         <Package size={80} style={{ marginBottom: '20px' }} />
-                        <h2>{showHistory ? 'HISTORIAL VACÍO' : 'SIN PEDIDOS PENDIENTES'}</h2>
+                        <h2>
+                            {activeTab === 'pending' && 'SIN PEDIDOS PENDIENTES'}
+                            {activeTab === 'ready' && 'SIN PEDIDOS LISTOS'}
+                            {activeTab === 'collected' && 'HISTORIAL DE RECOGIDOS VACÍO'}
+                        </h2>
                     </div>
                 ) : (
                     currentDisplay.map(order => (
-                        <div key={order.id} className={`kitchen-card ${!order.is_prepared ? 'new-order' : 'history-card'}`}>
+                        <div 
+                            key={order.id} 
+                            className={`kitchen-card ${activeTab === 'pending' ? 'new-order' : (activeTab === 'ready' ? 'ready-card' : 'collected-card')}`}
+                            onClick={() => {
+                                if (activeTab === 'ready') showDeliverConfirm(order);
+                                else if (activeTab === 'collected') showRevertConfirm(order);
+                            }}
+                            style={{ cursor: activeTab !== 'pending' ? 'pointer' : 'default' }}
+                        >
                             <div className="kitchen-card-header">
                                 <span className="ticket-number">#{order.id}</span>
                                 <span className="ticket-time">
                                     <Clock size={16} /> 
-                                    PEDIDO: {new Date(order.date).toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit' })}
+                                    {formatTime(order.date)}
                                     {order.is_prepared && (
-                                        <> | LISTO: {new Date(order.updated_at).toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit' })}</>
+                                        <> | <span className="prepared-time">LISTO: {formatTime(order.prepared_at || order.updated_at)}</span></>
                                     )}
                                 </span>
                             </div>
@@ -158,18 +236,23 @@ const Kitchen = () => {
                                 )}
                             </div>
                             <div className="kitchen-card-footer">
-                                {!order.is_prepared ? (
-                                    <button className="ready-btn" onClick={() => handleReady(order.id)}>
+                                {activeTab === 'pending' && (
+                                    <button className="ready-btn" onClick={(e) => {
+                                        e.stopPropagation();
+                                        handleReady(order.id);
+                                    }}>
                                         <CheckCircle size={24} /> LISTO
                                     </button>
-                                ) : (
-                                    <button 
-                                        className="deliver-btn" 
-                                        onClick={() => handleDeliver(order.id)}
-                                        title="Marcar como RECOGIDO / ENTREGADO"
-                                    >
-                                        <CheckCircle size={24} /> ENTREGAR
-                                    </button>
+                                )}
+                                {activeTab === 'ready' && (
+                                    <div className="card-hint">
+                                        <CheckCircle size={18} /> Pulsa para entregar
+                                    </div>
+                                )}
+                                {activeTab === 'collected' && (
+                                    <div className="card-hint revert">
+                                        <ArrowLeftRight size={18} /> Pulsa para revertir
+                                    </div>
                                 )}
                             </div>
                         </div>
@@ -178,6 +261,16 @@ const Kitchen = () => {
             </div>
 
             {toast && <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />}
+            
+            <ConfirmModal 
+                isOpen={confirmModal.isOpen}
+                title={confirmModal.title}
+                message={confirmModal.message}
+                confirmText={confirmModal.confirmText}
+                type={confirmModal.type}
+                onConfirm={confirmModal.onConfirm}
+                onCancel={() => setConfirmModal(prev => ({ ...prev, isOpen: false }))}
+            />
         </div>
     );
 };

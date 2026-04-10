@@ -285,6 +285,15 @@ export const markSaleAsDelivered = async (id) => {
     return await response.json();
 };
 
+export const revertSaleDelivery = async (id) => {
+    const response = await fetch(`${API_URL}/sales/${id}/revert-delivery/`, {
+        method: 'POST',
+        headers: getHeaders()
+    });
+    if (!response.ok) return handleResponseError(response);
+    return await response.json();
+};
+
 // EXPENSES & ACCOUNTING
 export const fetchExpenses = async () => {
     const response = await fetch(`${API_URL}/expenses/`, { headers: getHeaders() });

@@ -51,6 +51,7 @@ function App() {
           <Route path="/reset-password/:uid/:token" element={<ResetPassword />} />
           <Route element={<ProtectedRoute />}>
              <Route path="/cocina" element={<Kitchen />} />
+             <Route path="/tpv" element={<Sales />} />
           </Route>
 
           {/* Admin Dashboard */}

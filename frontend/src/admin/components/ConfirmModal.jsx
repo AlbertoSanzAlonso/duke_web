@@ -1,7 +1,9 @@
 import React from 'react';
 
-function ConfirmModal({ isOpen, title, message, onConfirm, onCancel }) {
+function ConfirmModal({ isOpen, title, message, onConfirm, onCancel, confirmText = "Eliminar", type = "danger" }) {
     if (!isOpen) return null;
+
+    const confirmBg = type === "danger" ? "#e03131" : "#12b886";
 
     return (
         <div style={{
@@ -31,8 +33,8 @@ function ConfirmModal({ isOpen, title, message, onConfirm, onCancel }) {
                 <div style={{ 
                     fontSize: '3rem', 
                     marginBottom: '15px',
-                    color: '#e03131'
-                }}>⚠️</div>
+                    color: type === "danger" ? "#e03131" : "#12b886"
+                }}>{type === "danger" ? "⚠️" : "ℹ️"}</div>
                 <h3 style={{ 
                     margin: '0 0 10px 0', 
                     fontSize: '1.5rem', 
@@ -69,14 +71,14 @@ function ConfirmModal({ isOpen, title, message, onConfirm, onCancel }) {
                             flex: 1,
                             padding: '12px',
                             border: 'none',
-                            background: '#e03131',
+                            background: confirmBg,
                             color: 'white',
                             borderRadius: '10px',
                             cursor: 'pointer',
                             fontWeight: 'bold'
                         }}
                     >
-                        Eliminar
+                        {confirmText}
                     </button>
                 </div>
             </div>

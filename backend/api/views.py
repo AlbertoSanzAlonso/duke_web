@@ -523,8 +523,10 @@ class SaleViewSet(viewsets.ModelViewSet):
         
     @action(detail=True, methods=['post'], url_path='mark-prepared')
     def mark_prepared(self, request, pk=None):
+        from django.utils import timezone
         sale = self.get_object()
         sale.is_prepared = True
+        sale.prepared_at = timezone.now()
         sale.save()
         log_action(request.user if request.user.is_authenticated else None, 'COCINA', 'UPDATE', f'Pedido #{sale.id} marcado como PREPARADO')
         return Response({'message': f'Pedido #{sale.id} enviado a listo.'})
@@ -536,6 +538,14 @@ class SaleViewSet(viewsets.ModelViewSet):
         sale.save()
         log_action(request.user if request.user.is_authenticated else None, 'COCINA', 'UPDATE', f'Pedido #{sale.id} marcado como RECOGIDO/ENTREGADO')
         return Response({'message': f'Pedido #{sale.id} archivado como recogido.'})
+
+    @action(detail=True, methods=['post'], url_path='revert-delivery')
+    def revert_delivery(self, request, pk=None):
+        sale = self.get_object()
+        sale.is_delivered = False
+        sale.save()
+        log_action(request.user if request.user.is_authenticated else None, 'COCINA', 'UPDATE', f'Pedido #{sale.id} devuelto a LISTO (revertir entrega)')
+        return Response({'message': f'Pedido #{sale.id} devuelto a la lista de listos.'})
 
 class ExpenseViewSet(viewsets.ModelViewSet):
     queryset = Expense.objects.all().order_by('-date')

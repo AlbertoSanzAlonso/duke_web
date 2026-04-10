@@ -772,14 +772,16 @@ a.stat-card { text-decoration: none; cursor: pointer; }
 
 @media (max-width: 480px) {
     .ai-chat-window {
-        width: 100% !important;
-        height: auto !important;
+        width: 100vw !important;
+        height: 100vh !important;
+        height: 100dvh !important; /* Dynamic Viewport Height for better mobile support */
         position: fixed !important;
         top: 0 !important;
         left: 0 !important;
         right: 0 !important;
         bottom: 0 !important;
-        max-height: 100% !important;
+        max-height: 100vh !important;
+        max-height: 100dvh !important;
         border-radius: 0 !important;
         z-index: 10000;
         display: flex;

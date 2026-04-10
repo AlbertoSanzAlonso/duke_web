@@ -8,15 +8,27 @@ import './Sales.css';
 
 const Sales = () => {
     const location = useLocation();
+    const isStandalone = location.pathname === '/tpv';
+    const [currentTime, setCurrentTime] = useState(new Date());
     const [viewMode, setViewMode] = useState('tpv'); // 'tpv' or 'pending'
+
+    
+    useEffect(() => {
+        if (isStandalone) {
+            const timer = setInterval(() => setCurrentTime(new Date()), 1000);
+            return () => clearInterval(timer);
+        }
+    }, [isStandalone]);
+
+    // Internal states from previous lines (matching current file content)
     const [menuEntries, setMenuEntries] = useState([]);
     const [selectedCategory, setSelectedCategory] = useState("Todas");
     const [cart, setCart] = useState([]);
     const [loading, setLoading] = useState(true);
     const [isSaving, setIsSaving] = useState(false);
     const [deletingTicketId, setDeletingTicketId] = useState(null);
-    const [bulkConfirm, setBulkConfirm] = useState({ isOpen: false, action: null }); // { message, type }
-    const [toast, setToast] = useState(null); // { message, type }
+    const [bulkConfirm, setBulkConfirm] = useState({ isOpen: false, action: null }); 
+    const [toast, setToast] = useState(null); 
     
     // Ticket info
     const [customerName, setCustomerName] = useState('');
@@ -25,12 +37,12 @@ const Sales = () => {
     const [isDelivery, setIsDelivery] = useState(false);
     const [searchTerm, setSearchTerm] = useState('');
     const [currentSaleId, setCurrentSaleId] = useState(null);
-    const [discountType, setDiscountType] = useState('fixed'); // 'fixed' or 'percent'
+    const [discountType, setDiscountType] = useState('fixed'); 
     const [discountValue, setDiscountValue] = useState('');
 
     // Individual Item Price Modal
     const [priceModal, setPriceModal] = useState({ isOpen: false, item: null });
-    const [modalPriceType, setModalPriceType] = useState('direct'); // 'direct', 'fixed', 'percent'
+    const [modalPriceType, setModalPriceType] = useState('direct'); 
     const [modalPriceValue, setModalPriceValue] = useState('');
 
     // List of pending tickets
@@ -61,9 +73,7 @@ const Sales = () => {
         window.addEventListener('new-order-received', handleNewOrder);
         return () => window.removeEventListener('new-order-received', handleNewOrder);
     }, [location.state]);
-
-
-
+    
     const loadData = async () => {
         setLoading(true);
         try {
@@ -369,6 +379,43 @@ const Sales = () => {
     return (
         <div className="pos-container">
             {toast && <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />}
+            
+            {isStandalone && (
+                <header className="kitchen-header" style={{ 
+                    display: 'flex', 
+                    flexDirection: 'column',
+                    marginBottom: '20px', 
+                    paddingBottom: '15px',
+                    borderBottom: '2px solid #333'
+                }}>
+                    <div className="header-top" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%' }}>
+                        <h1 style={{ 
+                            margin: 0, 
+                            fontFamily: "'Bebas Neue', sans-serif", 
+                            fontSize: '2.5rem', 
+                            letterSpacing: '2px',
+                            color: 'var(--admin-primary, #f03e3e)', 
+                            display: 'flex', 
+                            alignItems: 'center', 
+                            gap: '15px' 
+                        }}>
+                            <ShoppingCart size={40} /> TPV DUKE
+                        </h1>
+                        <div className="kitchen-clock" style={{ 
+                            fontSize: '1.8rem', 
+                            fontWeight: '700', 
+                            background: '#1a1a1a', 
+                            color: '#fff',
+                            padding: '5px 20px', 
+                            borderRadius: '10px', 
+                            border: '1px solid #444' 
+                        }}>
+                            {currentTime.toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
+                        </div>
+                    </div>
+                </header>
+            )}
+
             {/* FAB para móviles */}
             {/* FAB para móviles - Simplificado */}
             <button className={`pos-fab ${isTicketOpen ? 'hidden' : ''}`} onClick={toggleTicket}>
