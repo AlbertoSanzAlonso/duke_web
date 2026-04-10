@@ -27,7 +27,7 @@ const Manual = () => {
       name: 'Panel de Administración', 
       url: 'https://dukeburger-sj.com/admin', 
       desc: 'Centro de control interno para gestión de stock, finanzas y configuración.',
-      image: '/manual/admin.png',
+      image: '/manual/admin.webp',
       features: [
         'Dashboard operativo con métricas en tiempo real.',
         'Gestión avanzada de inventario y alertas de stock.',
@@ -41,7 +41,7 @@ const Manual = () => {
       name: 'TPV (Punto de Venta)', 
       url: 'https://dukeburger-sj.com/tpv', 
       desc: 'Terminal táctil para cobro rápido en mostrador y gestión de pedidos locales.',
-      image: '/manual/tpv.png',
+      image: '/manual/tpv.webp',
       features: [
         'Interfaz táctil optimizada para rapidez.',
         'Cálculo automático de envíos por geolocalización.',
@@ -55,7 +55,7 @@ const Manual = () => {
       name: 'Monitor de Cocina', 
       url: 'https://dukeburger-sj.com/cocina', 
       desc: 'Pantalla operativa para el equipo de producción.',
-      image: '/manual/kitchen.png',
+      image: '/manual/kitchen.webp',
       features: [
         'Visualización clara de pedidos por orden de llegada.',
         'Control de estados: En Cocción -> Listo -> Recogido.',
