@@ -37,6 +37,7 @@ const Sales = () => {
     const [isDelivery, setIsDelivery] = useState(false);
     const [searchTerm, setSearchTerm] = useState('');
     const [currentSaleId, setCurrentSaleId] = useState(null);
+    const [ticketSnapshot, setTicketSnapshot] = useState(null);
     const [discountType, setDiscountType] = useState('fixed'); 
     const [discountValue, setDiscountValue] = useState('');
 
@@ -261,6 +262,7 @@ const Sales = () => {
         setDeliveryCost(0);
         setIsDelivery(false);
         setCurrentSaleId(null);
+        setTicketSnapshot(null);
         setIsTicketOpen(false);
         setDiscountValue('');
         setDiscountType('fixed');
@@ -307,18 +309,30 @@ const Sales = () => {
     };
 
     const loadPendingSale = (ticket) => {
-        setCart(ticket.items.map(item => ({
+        const loadedCart = ticket.items.map(item => ({
             menu_entry: item.menu_entry,
             name: item.entry_name,
             price: parseFloat(item.price_at_sale),
             originalPrice: parseFloat(item.original_price || item.price_at_sale),
             quantity: item.quantity
-        })));
+        }));
+        
+        setCart(loadedCart);
         setCustomerName(ticket.customer_name || '');
         setSaleNotes(ticket.notes || '');
         setDeliveryCost(parseFloat(ticket.delivery_cost || 0));
         setIsDelivery(parseFloat(ticket.delivery_cost || 0) > 0);
         setCurrentSaleId(ticket.id);
+        
+        // Tracking state to detect if user modified anything
+        setTicketSnapshot(JSON.stringify({
+            cart: loadedCart.map(item => ({ id: item.menu_entry, q: item.quantity, p: item.price })),
+            name: (ticket.customer_name || '').trim(),
+            notes: (ticket.notes || '').trim(),
+            delCost: parseFloat(ticket.delivery_cost || 0),
+            isDel: parseFloat(ticket.delivery_cost || 0) > 0
+        }));
+        
         setViewMode('tpv');
         setIsTicketOpen(true);
     };
@@ -689,15 +703,40 @@ const Sales = () => {
                                 </div>
                                 
                                 <div className="pos-actions-grid" style={{ gap: '6px', display: 'grid', gridTemplateColumns: '1fr 1fr' }}>
-                                    <button 
-                                        className="pending-btn" 
-                                        disabled={cart.length === 0 || isSaving}
-                                        onClick={() => handleSaveTicket('PENDING')}
-                                        style={{ padding: '8px', fontSize: '0.85rem', background: '#ff922b', border: 'none', borderRadius: '6px', cursor: 'pointer', color: 'white', fontWeight: '800' }}
-                                    >
-                                        MARCHAR A COCINA
-                                        <div style={{fontSize: '0.65rem', fontWeight: '500'}}>DEJAR PENDIENTE</div>
-                                    </button>
+                                    {(() => {
+                                        const currentSnapshot = JSON.stringify({
+                                            cart: cart.map(item => ({ id: item.menu_entry, q: item.quantity, p: item.price })),
+                                            name: customerName.trim(),
+                                            notes: saleNotes.trim(),
+                                            delCost: parseFloat(deliveryCost || 0),
+                                            isDel: isDelivery
+                                        });
+                                        const hasModifications = true; // Por defecto
+                                        const disableMarchar = cart.length === 0 || isSaving || (currentSaleId && ticketSnapshot === currentSnapshot);
+                                        
+                                        return (
+                                            <button 
+                                                className="pending-btn" 
+                                                disabled={disableMarchar}
+                                                onClick={() => handleSaveTicket('PENDING')}
+                                                style={{ 
+                                                    padding: '8px', 
+                                                    fontSize: '0.85rem', 
+                                                    background: disableMarchar ? '#ccc' : '#ff922b', 
+                                                    border: 'none', 
+                                                    borderRadius: '6px', 
+                                                    cursor: disableMarchar ? 'not-allowed' : 'pointer', 
+                                                    color: 'white', 
+                                                    fontWeight: '800' 
+                                                }}
+                                            >
+                                                {currentSaleId && disableMarchar ? 'MARCHANDO...' : 'MARCHAR A COCINA'}
+                                                <div style={{fontSize: '0.65rem', fontWeight: '500'}}>
+                                                    {currentSaleId && disableMarchar ? 'SIN MODIFICAR' : (currentSaleId ? 'ACTUALIZAR PEDIDO' : 'DEJAR PENDIENTE')}
+                                                </div>
+                                            </button>
+                                        );
+                                    })()}
                                     <button 
                                         className="checkout-btn" 
                                         disabled={cart.length === 0 || isSaving}
