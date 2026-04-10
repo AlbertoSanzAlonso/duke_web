@@ -22,7 +22,9 @@ const Sales = () => {
             
             // Connect SSE for standalone TPV
             const connectSSE = () => {
-                const sseUrl = `${import.meta.env.VITE_API_URL || ''}/api/orders-stream/`;
+                const token = sessionStorage.getItem('duke_admin_token');
+                const sseUrl = `${import.meta.env.VITE_API_URL || ''}/api/orders-stream/?token=${token ? token.trim() : ''}`;
+                console.log("SSE Standalone TPV: Connecting to", sseUrl);
                 es = new EventSource(sseUrl, { withCredentials: true });
                 
                 es.onmessage = (event) => {

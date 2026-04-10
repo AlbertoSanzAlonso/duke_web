@@ -53,7 +53,9 @@ const Kitchen = () => {
         const isStandalone = window.location.pathname === '/cocina';
         
         const connectSSE = () => {
-            const sseUrl = `${import.meta.env.VITE_API_URL || ''}/api/orders-stream/`;
+            const token = sessionStorage.getItem('duke_admin_token');
+            const sseUrl = `${import.meta.env.VITE_API_URL || ''}/api/orders-stream/?token=${token ? token.trim() : ''}`;
+            console.log("SSE Standalone Kitchen: Connecting to", sseUrl);
             es = new EventSource(sseUrl, { withCredentials: true });
             
             es.onmessage = (event) => {
