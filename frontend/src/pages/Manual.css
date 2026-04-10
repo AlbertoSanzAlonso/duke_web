@@ -730,41 +730,88 @@
     transform: scale(1.02);
 }
 
-.faq-section {
-    margin-top: 5rem;
-    padding: 2rem 0;
+.faq-column {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    max-width: 900px;
+    margin: 2rem auto 0;
 }
 
-.faq-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-    gap: 2rem;
-    margin-top: 2rem;
-}
-
-.faq-item {
+.faq-row-btn {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1.5rem 2rem;
     background: rgba(255,255,255,0.02);
-    padding: 2rem;
-    border-radius: 15px;
     border: 1px solid #222;
+    border-radius: 12px;
+    cursor: pointer;
     transition: all 0.3s ease;
+    text-align: left;
+    width: 100%;
 }
 
-.faq-item:hover {
+.faq-row-btn:hover {
+    background: rgba(255,255,255,0.05);
     border-color: var(--color-primary);
-    background: rgba(255,255,255,0.04);
+    transform: translateX(10px);
 }
 
-.faq-item h3 {
+.faq-row-content {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+}
+
+.faq-q {
     font-size: 1.1rem;
-    color: var(--color-primary);
-    margin-bottom: 1rem;
+    color: #eee;
+    font-weight: 500;
 }
 
-.faq-item p {
-    color: #888;
-    line-height: 1.6;
-    font-size: 0.95rem;
+.faq-icon {
+    color: var(--color-primary);
+    opacity: 0.8;
+}
+
+.faq-arrow {
+    color: #444;
+    transition: color 0.3s;
+}
+
+.faq-row-btn:hover .faq-arrow {
+    color: var(--color-primary);
+}
+
+.faq-long-desc {
+    font-size: 1.2rem;
+    line-height: 1.8;
+    color: #ccc;
+    margin-bottom: 2rem;
+    white-space: pre-wrap;
+}
+
+.faq-link-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    padding: 1rem 2rem;
+    background: var(--color-primary);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: opacity 0.3s;
+}
+
+.faq-link-btn:hover {
+    opacity: 0.9;
+}
+
+.faq-view .modal-content {
+    padding: 3rem;
 }
     
 @media (max-width: 900px) {

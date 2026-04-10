@@ -22,13 +22,15 @@ import {
   LayoutDashboard,
   Mail,
   ClipboardList,
-  Settings
+  Settings,
+  HelpCircle
 } from 'lucide-react';
 import './Manual.css';
 
 const Manual = () => {
   const navigate = useNavigate();
   const [selectedDetail, setSelectedDetail] = React.useState(null);
+  const [selectedFAQ, setSelectedFAQ] = React.useState(null);
   const [drillDown, setDrillDown] = React.useState(null);
   const [isZoomed, setIsZoomed] = React.useState(false);
 
@@ -249,16 +251,80 @@ const Manual = () => {
     }
   ];
 
+
   const faqs = [
-    { q: '¿Cómo cambio el horario?', a: 'Ve a Configuración > Horarios. Allí verás una tabla con los días de la semana donde puedes ajustar la franja de atención y marcar el estado como Abierto o Cerrado.' },
-    { q: '¿Cómo cambio las promos?', a: 'Accede al módulo de Promociones desde el Panel. Puedes crear nuevas promos, elegir en qué días se publican y subir una imagen dedicada para cada una.' },
-    { q: '¿Cómo cambio las imágenes de la galería?', a: 'Dentro de Configuración > Galería, puedes subir nuevas fotos del local. Usa el icono de las flechas para reordenarlas según cómo quieras que aparezcan en la web.' },
-    { q: '¿Cómo añado/quito/modifico artículos?', a: 'Para insumos de cocina y stock, usa el módulo de Inventario. Para productos definitivos del menú, usa el módulo de Productos.' },
-    { q: '¿Cómo creo un nuevo usuario?', a: 'En Configuración > Personal puedes dar de alta a nuevos miembros del equipo y asignarles permisos específicos (ej. solo Cocina o solo Contabilidad).' },
-    { q: '¿Cómo manejo tickets?', a: 'Usa el TPV para generar nuevas ventas. Los tickets pendientes aparecerán en la lista lateral para ser cobrados o editados en cualquier momento.' },
-    { q: '¿Cómo manejo pedidos al proveedor?', a: 'En Inventario > Pedidos Proveedor puedes registrar las compras realizadas. Al completar un pedido, el stock de esos insumos se incrementará automáticamente.' },
-    { q: '¿Cómo manejo pedidos de clientes?', a: 'Todos los pedidos que entran por la web aparecen en Gestión de Pedidos. Desde allí puedes ver el ticket, imprimirlo y cambiar su estado.' },
-    { q: '¿Cómo funciona la carta?', a: 'En el módulo Menú Online puedes activar o desactivar productos que ya están en tu catálogo (Productos) y asignarles el precio de venta final.' }
+    { 
+      q: '¿Flujo de Pedido Web (Online)?', 
+      a: 'Descubre cómo viaja un pedido desde la web hasta la cocina.',
+      longDesc: 'Cuando un cliente pide desde la web: 1. El pedido llega al Panel de Gestión (Sonido de alerta) y al TPV. 2. Se envía automáticamente al Monitor de Cocina. 3. Los administradores pueden imprimir el ticket y coordinar el delivery.',
+      linkTo: 'pedidos'
+    },
+    { 
+      q: '¿Flujo de Pedido en Local (TPV)?', 
+      a: 'Optimiza la atención presencial usando el Punto de Venta.',
+      longDesc: 'Para pedidos en persona: 1. El cajero marca los productos en el TPV. 2. Al confirmar, el pedido aparece instantáneamente en el Monitor de Cocina. 3. Se genera un ticket físico o digital que se puede enviar por WhatsApp al cliente.',
+      linkTo: 'tpv'
+    },
+    { 
+      q: '¿Cómo funcionan las notificaciones (TPV, WhatsApp, Cocina)?', 
+      a: 'Sincronización total en tiempo real para evitar retrasos.',
+      longDesc: 'El sistema utiliza tecnología SSE para comunicación instantánea. Cuando entra un pedido web, se dispara una notificación sonora en el Panel y aparece en el listado del TPV. Al mismo tiempo, el Monitor de Cocina recibe el comanda sin intervención humana. Si el cliente solicita ticket por WhatsApp, el TPV abre un link directo con el mensaje pre-armado.',
+      linkTo: 'admin'
+    },
+    { 
+      q: '¿Cómo cambio el horario?', 
+      a: 'Ajusta la disponibilidad semanal desde el Panel de Administración.',
+      longDesc: 'Para modificar los horarios de atención que ven tus clientes, dirígete a la sección de Configuración y pulsa en la pestaña de Horarios. Podrás definir la hora de apertura y cierre para cada día de la semana. Los cambios se guardan al instante y afectan a la posibilidad de realizar pedidos online.',
+      linkTo: 'configuracion'
+    },
+    { 
+      q: '¿Cómo cambio las promos?', 
+      a: 'Gestiona banners y ofertas activas en el módulo de Promociones.',
+      longDesc: 'Las promociones se gestionan desde su propio módulo en el panel lateral. Puedes crear nuevas ofertas, asignarles una imagen atractiva y, lo más importante, decidir en qué días de la semana deben aparecer publicadas de forma automática.',
+      linkTo: 'asistente'
+    },
+    { 
+      q: '¿Cómo cambio las imágenes de la galería?', 
+      a: 'Sube y reordena fotos del local desde Configuración.',
+      longDesc: 'Las fotos del carrusel principal de la web se gestionan en Configuración > Galería. Puedes subir nuevas capturas y usar el icono de las flechas para reordenarlas arrastrando cada card. Esto permite destacar las imágenes que prefieras que el cliente vea primero.',
+      linkTo: 'configuracion'
+    },
+    { 
+      q: '¿Cómo añado/quito/modifico artículos?', 
+      a: 'Usa Inventario para insumos o Productos para el catálogo general.',
+      longDesc: 'Dependiendo de lo que quieras modificar: si es un insumo (como "Carne" o "Pan"), usa el módulo de Inventario. Si es un producto final que vendes (como "Burger Duke"), usa el módulo de Productos para editar su descripción o stock base.',
+      linkTo: 'inventario'
+    },
+    { 
+      q: '¿Cómo creo un nuevo usuario?', 
+      a: 'Administra el personal desde Configuración > Personal.',
+      longDesc: 'Para dar de alta a un nuevo empleado, ve a Configuración y entra en la pestaña de Personal. Pulsa en "+ Nuevo Usuario", introduce sus datos y asígnale los permisos necesarios según su función en el local (Cajero, Cocinero, Administrador).',
+      linkTo: 'usuarios'
+    },
+    { 
+      q: '¿Cómo manejo tickets?', 
+      a: 'Usa el TPV para generar tickets y cobrarlos en mostrador.',
+      longDesc: 'El TPV (Punto de Venta) es el centro de operaciones diario. Desde allí generas los pedidos locales, imprimes tickets y gestionas las cuentas pendientes que aún no han sido cobradas.',
+      linkTo: 'tpv'
+    },
+    { 
+      q: '¿Cómo manejo pedidos al proveedor?', 
+      a: 'Registra compras en el módulo de Pedidos del Inventario.',
+      longDesc: 'Cuando compras mercancía, regístrala como un "Pedido a Proveedor" dentro del módulo de Inventario. Al marcarlo como "Recibido", el sistema sumará automáticamente esas cantidades al stock disponible de cada insumo.',
+      linkTo: 'inventario'
+    },
+    { 
+      q: '¿Cómo manejo pedidos de clientes?', 
+      a: 'Consulta y procesa ventas online en Gestión de Pedidos.',
+      longDesc: 'Todos los pedidos que los clientes realizan desde su móvil llegan a "Gestión de Pedidos". Desde aquí puedes controlar el flujo: ver el ticket, enviarlo a cocina y marcarlo como entregado una vez que el cliente lo recibe.',
+      linkTo: 'pedidos'
+    },
+    { 
+      q: '¿Cómo funciona la carta?', 
+      a: 'Publica productos y asigna precios en Menú Online.',
+      longDesc: 'El catálogo de Productos es tu "almacén" de ítems, pero el "Menú Online" es tu "vitrina". Solo los productos que actives en el Menú Online con un precio asignado serán visibles para los clientes en la web.',
+      linkTo: 'carta'
+    }
   ];
 
   return (
@@ -266,6 +332,44 @@ const Manual = () => {
       <Helmet>
         <title>Manual de Usuario | Duke Burger Admin</title>
       </Helmet>
+
+      {selectedFAQ && (
+        <div className="manual-modal-overlay faq-modal" onClick={() => setSelectedFAQ(null)}>
+          <div className="manual-modal-container faq-view" onClick={e => e.stopPropagation()}>
+            <div className="modal-header">
+              <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
+                <HelpCircle className="faq-modal-icon" />
+                <h2>{selectedFAQ.q}</h2>
+              </div>
+              <button className="close-btn" onClick={() => setSelectedFAQ(null)}><X size={24} /></button>
+            </div>
+            <div className="modal-content">
+              <div className="faq-detail-body">
+                <p className="faq-long-desc">{selectedFAQ.longDesc}</p>
+                
+                {selectedFAQ.linkTo && (
+                  <div className="faq-link-section">
+                    <p>Módulo relacionado:</p>
+                    <button 
+                      className="faq-link-btn" 
+                      onClick={() => {
+                        const target = modules.find(m => m.id === selectedFAQ.linkTo) || 
+                                     mainRoutes.find(r => r.id === selectedFAQ.linkTo);
+                        if (target) {
+                          setSelectedDetail(target);
+                          setSelectedFAQ(null);
+                        }
+                      }}
+                    >
+                      <ExternalLink size={18} /> Ver {selectedFAQ.linkTo.toUpperCase()}
+                    </button>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       {selectedDetail && (
         <div className="manual-modal-overlay fullscreen" onClick={() => { setSelectedDetail(null); setDrillDown(null); setIsZoomed(false); }}>
@@ -422,12 +526,15 @@ const Manual = () => {
 
           <section className="faq-section">
             <h2 className="section-title">Preguntas Frecuentes (FAQ)</h2>
-            <div className="faq-grid">
+            <div className="faq-column">
               {faqs.map((faq, i) => (
-                <div key={i} className="faq-item">
-                  <h3>{faq.q}</h3>
-                  <p>{faq.a}</p>
-                </div>
+                <button key={i} className="faq-row-btn" onClick={() => setSelectedFAQ(faq)}>
+                  <div className="faq-row-content">
+                    <HelpCircle size={18} className="faq-icon" />
+                    <span className="faq-q">{faq.q}</span>
+                  </div>
+                  <Maximize2 size={16} className="faq-arrow" />
+                </button>
               ))}
             </div>
           </section>
