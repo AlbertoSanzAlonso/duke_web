@@ -439,7 +439,7 @@ const SupplierOrders = () => {
                         </div>
                     )}
                 </div>
-                <div className="accounting-table-container">
+                <div className="accounting-table-container accounting-desktop-only">
                     <table className="accounting-table">
                         <thead>
                             <tr>
@@ -533,6 +533,32 @@ const SupplierOrders = () => {
                             )}
                         </tbody>
                     </table>
+                </div>
+
+                {/* ── MOBILE CARDS ── */}
+                <div className="accounting-mobile-only">
+                    {paginatedOrders.length === 0 ? (
+                        <div style={{ textAlign: 'center', padding: '40px 0', color: '#999' }}>
+                            <p style={{ fontWeight: 600 }}>{searchTerm ? 'No se encontraron resultados.' : 'No hay pedidos registrados.'}</p>
+                        </div>
+                    ) : paginatedOrders.map(order => {
+                        const dRaw = order.date || "";
+                        const dStr = dRaw.includes('T') ? dRaw : dRaw.replace(' ', 'T');
+                        const dObj = new Date(dStr);
+                        return (
+                            <div key={`mob-ord-${order.id}`} onClick={() => !editingId && setSelectedOrder(order)}
+                                style={{ background: '#fff', border: '1px solid #eee', borderRadius: '12px', padding: '14px 16px', marginBottom: '10px', cursor: 'pointer', boxShadow: '0 1px 4px rgba(0,0,0,0.07)' }}>
+                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+                                    <strong style={{ fontSize: '0.95rem', color: '#333' }}>{order.supplier_name}</strong>
+                                    <strong style={{ color: '#d63939' }}>-${parseFloat(order.total_cost).toLocaleString('es-AR')}</strong>
+                                </div>
+                                <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                                    <span style={{ fontSize: '0.78rem', color: '#aaa' }}>{order.items?.length || 0} productos</span>
+                                    <span style={{ fontSize: '0.75rem', color: '#bbb' }}>{isNaN(dObj) ? '' : dObj.toLocaleDateString('es-AR')}</span>
+                                </div>
+                            </div>
+                        );
+                    })}
                 </div>
 
                 {/* Bulk Actions Toolbar */}

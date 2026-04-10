@@ -595,3 +595,12 @@
 .save-btn:hover { background: #f0fdf4; transform: scale(1.1); }
 .cancel-btn:hover { background: #f8f9fa; transform: scale(1.1); }
 .delete-btn:hover { background: #fff5f5; transform: scale(1.1); }
+
+/* ── DUAL RENDERING: Desktop table / Mobile cards ── */
+.accounting-mobile-only { display: none; }
+.accounting-desktop-only { display: block; }
+
+@media (max-width: 900px) {
+    .accounting-desktop-only { display: none !important; }
+    .accounting-mobile-only  { display: block !important; }
+}

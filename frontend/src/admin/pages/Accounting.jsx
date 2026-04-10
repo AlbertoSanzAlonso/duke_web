@@ -563,7 +563,7 @@ const Accounting = () => {
                 <div className="accounting-history" style={{ gridColumn: '1 / -1' }}>
                     <div className="admin-card">
                         <h3>Historial de Movimientos</h3>
-                        <div className="accounting-table-container">
+                        <div className="accounting-table-container accounting-desktop-only">
                             <table className="accounting-table">
                                 <thead>
                                     <tr>
@@ -674,6 +674,42 @@ const Accounting = () => {
                                 )}
                                 </tbody>
                             </table>
+                        </div>
+
+                        {/* ── MOBILE CARDS ── */}
+                        <div className="accounting-mobile-only">
+                            {paginatedItems.length > 0 ? paginatedItems.map(item => {
+                                const type = item.typeIndicator;
+                                const dStr = (item.date || "").includes('T') ? item.date : (item.date || "").replace(' ', 'T');
+                                const dateObj = new Date(dStr);
+                                const amountVal = type === 'exp' ? item.amount : type === 'ord' ? item.total_cost : item.total_amount;
+                                const description = type === 'exp' ? item.description : type === 'ord' ? `${item.supplier_name} (Pedido #${item.id})` : `Venta #${item.id} ${item.customer_name ? `(${item.customer_name})` : ''}`;
+                                const categoryLabel = type === 'exp' ? item.category : type === 'ord' ? 'Materia Prima' : 'Venta TPV';
+                                const badgeClass = type === 'exp' ? 'badge-manual' : type === 'ord' ? 'badge-order' : 'badge-income';
+                                const badgeLabel = type === 'exp' ? 'Gasto' : type === 'ord' ? 'Proveedor' : 'Ingreso';
+                                const isPositive = type === 'sal';
+                                return (
+                                    <div key={`mob-${type}-${item.id}`} onClick={() => setDetailItem(item)}
+                                        style={{ background: '#fff', border: '1px solid #eee', borderRadius: '12px', padding: '14px 16px', marginBottom: '10px', cursor: 'pointer', boxShadow: '0 1px 4px rgba(0,0,0,0.07)' }}>
+                                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+                                            <span className={`badge ${badgeClass}`}>{badgeLabel}</span>
+                                            <strong style={{ fontSize: '1rem', color: isPositive ? '#2fb344' : '#d63939' }}>
+                                                {isPositive ? '+' : '-'}${Math.round(parseFloat(amountVal)).toLocaleString('es-AR')}
+                                            </strong>
+                                        </div>
+                                        <div style={{ fontSize: '0.88rem', color: '#333', marginBottom: '4px', fontWeight: 600 }}>{description}</div>
+                                        <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                                            <span style={{ fontSize: '0.78rem', color: '#aaa' }}>{categoryLabel}</span>
+                                            <span style={{ fontSize: '0.75rem', color: '#bbb' }}>{isNaN(dateObj) ? '' : dateObj.toLocaleDateString('es-AR')}</span>
+                                        </div>
+                                    </div>
+                                );
+                            }) : (
+                                <div style={{ textAlign: 'center', padding: '40px 0', color: '#999' }}>
+                                    <Filter size={36} opacity={0.3} />
+                                    <p style={{ marginTop: '10px', fontWeight: 600 }}>No se encontraron movimientos</p>
+                                </div>
+                            )}
                         </div>
 
                         {/* Pagination UI */}
