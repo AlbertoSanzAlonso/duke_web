@@ -225,7 +225,9 @@ const AdminLayout = () => {
             </Link>
           </div>
 
-          <UserDropdown />
+          <div style={{ margin: '4px 4px 4px 0' }}>
+            <UserDropdown />
+          </div>
         </header>
         <div className="admin-content">
           <Outlet />
