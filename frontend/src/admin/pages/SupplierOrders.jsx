@@ -172,7 +172,12 @@ const SupplierOrders = () => {
     const filteredOrders = useMemo(() => {
         const now = new Date();
         let filtered = orders.filter(item => {
-            const itemDate = new Date(item.date);
+            if (!item.date) return false;
+            // Safari/Mobile fix: replace space with T
+            const dateStr = item.date.includes('T') ? item.date : item.date.replace(' ', 'T');
+            const itemDate = new Date(dateStr);
+            
+            if (isNaN(itemDate.getTime())) return false;
             
             // 1. DATE RANGE / PERIOD FILTER
             let dateMatch = true;
@@ -469,8 +474,16 @@ const SupplierOrders = () => {
                                                 </div>
                                             </td>
                                             <td data-label="Fecha">
-                                                {new Date(order.date).toLocaleDateString('es-AR')}
-                                                <br/><small style={{color: '#999'}}>{new Date(order.date).toLocaleTimeString('es-AR', {hour: '2-digit', minute: '2-digit'})}</small>
+                                                {(() => {
+                                                    const dStr = order.date.includes('T') ? order.date : order.date.replace(' ', 'T');
+                                                    const dObj = new Date(dStr);
+                                                    return (
+                                                        <>
+                                                            {dObj.toLocaleDateString('es-AR')}
+                                                            <br/><small style={{color: '#999'}}>{dObj.toLocaleTimeString('es-AR', {hour: '2-digit', minute: '2-digit'})} hs</small>
+                                                        </>
+                                                    );
+                                                })()}
                                             </td>
                                             <td data-label="Proveedor">
                                                 {isEditing ? (

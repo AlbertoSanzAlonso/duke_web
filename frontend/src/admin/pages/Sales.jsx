@@ -621,26 +621,27 @@ const Sales = () => {
                 <>
                     <div className="pos-main">
                         <div className="pos-left-content">
-                            <div className="pos-header" style={{ gap: '15px', flexWrap: 'wrap' }}>
-                                <div className="category-tabs" style={{ flex: 1, minWidth: 0 }}>
+                            <div className="pos-header" style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
+                                <div className="category-tabs" style={{ display: 'flex', overflowX: 'auto', paddingBottom: '5px', gap: '8px' }}>
                                     {categories.map(cat => (
                                         <button 
                                             key={cat} 
                                             className={`category-btn ${selectedCategory === cat ? 'active' : ''}`}
                                             onClick={() => setSelectedCategory(cat)}
+                                            style={{ whiteSpace: 'nowrap' }}
                                         >
                                             {cat}
                                         </button>
                                     ))}
                                 </div>
-                                <div className="search-bar" style={{ position: 'relative', width: '250px', flexGrow: 1, flexShrink: 1, minWidth: '200px' }}>
+                                <div className="search-bar" style={{ position: 'relative', width: '100%' }}>
                                     <Search size={18} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: '#888' }} />
                                     <input 
                                         type="text" 
-                                        placeholder="Buscar..." 
-                                        value={searchTerm}
-                                        onChange={(e) => setSearchTerm(e.target.value)}
-                                        style={{ padding: '10px 15px 10px 40px', borderRadius: '10px', border: '1px solid #ddd', fontSize: '0.9rem', width: '100%', background: '#fff' }}
+                                        placeholder="Buscar producto o categoría..." 
+                                        defaultValue={searchTerm}
+                                        onChange={(e) => startTransition(() => setSearchTerm(e.target.value))}
+                                        style={{ padding: '12px 15px 12px 40px', borderRadius: '10px', border: '1px solid #ddd', fontSize: '0.95rem', width: '100%', background: '#fff' }}
                                     />
                                 </div>
                             </div>

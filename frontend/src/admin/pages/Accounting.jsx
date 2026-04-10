@@ -297,7 +297,13 @@ const Accounting = () => {
     const filterItems = useCallback((items, currentSearch, currentCategory, currentView, currentStart, currentEnd) => {
         const now = new Date();
         return items.filter(item => {
-            const itemDate = new Date(item.date);
+            if (!item.date) return false;
+            // Safari/Mobile fix: Ensure ISO format by replacing the space with 'T' if necessary
+            const dateStr = item.date.includes('T') ? item.date : item.date.replace(' ', 'T');
+            const itemDate = new Date(dateStr);
+            
+            // Check if date is valid before filtering
+            if (isNaN(itemDate.getTime())) return false;
             
             // 1. DATE RANGE / PERIOD FILTER
             let dateMatch = true;
@@ -577,7 +583,9 @@ const Accounting = () => {
                                 {paginatedItems.length > 0 ? paginatedItems.map(item => {
                                     const type = item.typeIndicator;
                                     const isEditing = editingId === `${type}-${item.id}`;
-                                    const dateObj = new Date(item.date);
+                                    // Safari/Mobile fix: handle non-ISO space-separated dates
+                                    const dStr = item.date.includes('T') ? item.date : item.date.replace(' ', 'T');
+                                    const dateObj = new Date(dStr);
                                     
                                     // Detect amounts based on type
                                     const amountVal = type === 'exp' ? item.amount : type === 'ord' ? item.total_cost : item.total_amount;

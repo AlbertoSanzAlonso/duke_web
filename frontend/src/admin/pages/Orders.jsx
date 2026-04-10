@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useTransition } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import QRCode from 'qrcode';
 import { fetchSales } from '../../services/api';
@@ -20,6 +20,10 @@ const Orders = () => {
     const [showStatsModal, setShowStatsModal] = useState(false);
     const [qrImage, setQrImage] = useState('');
     const [toast, setToast] = useState(null);
+    const [startDate, setStartDate] = useState('');
+    const [endDate, setEndDate] = useState('');
+    const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
+    const [isPending, startTransition] = useTransition();
     const itemsPerPage = 10;
     const navigate = useNavigate();
 
@@ -60,29 +64,45 @@ const Orders = () => {
     // Reset pagination when filters change
     useEffect(() => {
         setCurrentPage(1);
-    }, [filterType, searchTerm, statusFilter]);
+    }, [filterType, searchTerm, statusFilter, startDate, endDate]);
 
     const filteredOrders = useMemo(() => {
         let filtered = [...orders];
 
         // 1. Time filter
         const now = new Date();
-        const todayStr = now.toLocaleDateString('en-CA'); // YYYY-MM-DD
         
-        if (filterType === 'daily') {
-            filtered = filtered.filter(o => {
-                const orderDate = new Date(o.date).toLocaleDateString('en-CA');
-                return orderDate === todayStr;
-            });
-        } else if (filterType === 'weekly') {
-            const lastWeek = new Date();
-            lastWeek.setDate(now.getDate() - 7);
-            filtered = filtered.filter(o => new Date(o.date) >= lastWeek);
-        } else if (filterType === 'monthly') {
-            const lastMonth = new Date();
-            lastMonth.setMonth(now.getMonth() - 1);
-            filtered = filtered.filter(o => new Date(o.date) >= lastMonth);
-        }
+        filtered = filtered.filter(o => {
+            const dateStr = o.date.includes('T') ? o.date : o.date.replace(' ', 'T');
+            const itemDate = new Date(dateStr);
+            if (isNaN(itemDate.getTime())) return false;
+
+            if (startDate || endDate) {
+                if (startDate) {
+                    const sDate = new Date(startDate);
+                    sDate.setHours(0,0,0,0);
+                    if (itemDate < sDate) return false;
+                }
+                if (endDate) {
+                    const eDate = new Date(endDate);
+                    eDate.setHours(23,59,59,999);
+                    if (itemDate > eDate) return false;
+                }
+                return true;
+            }
+
+            if (filterType === 'daily') {
+                return itemDate.toDateString() === now.toDateString();
+            } else if (filterType === 'weekly') {
+                const diffTime = Math.abs(now - itemDate);
+                const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+                return diffDays <= 7;
+            } else if (filterType === 'monthly') {
+                return itemDate.getMonth() === now.getMonth() && itemDate.getFullYear() === now.getFullYear();
+            }
+            
+            return true;
+        });
 
         // 2. Status filter
         if (statusFilter !== 'ALL') {
@@ -117,7 +137,10 @@ const Orders = () => {
     const handleExportExcel = () => {
         const data = filteredOrders.map(o => ({
             ID: o.id,
-            Fecha: new Date(o.date).toLocaleString('es-AR'),
+            Fecha: (() => {
+                const dStr = o.date.includes('T') ? o.date : o.date.replace(' ', 'T');
+                return new Date(dStr).toLocaleString('es-AR');
+            })(),
             Cliente: o.customer_name || 'Particular',
             Mesa_Entrega: o.table_number || '-',
             Total: `$${parseFloat(o.total_amount).toLocaleString('es-AR')}`,
@@ -137,7 +160,10 @@ const Orders = () => {
         ];
         const data = filteredOrders.map(o => ({
             ID: `#${o.id}`,
-            Fecha: new Date(o.date).toLocaleString('es-AR'),
+            Fecha: (() => {
+                const dStr = o.date.includes('T') ? o.date : o.date.replace(' ', 'T');
+                return new Date(dStr).toLocaleString('es-AR');
+            })(),
             Cliente: o.customer_name || 'Particular',
             Mesa: o.table_number || '-',
             Total: `$${parseFloat(o.total_amount).toLocaleString('es-AR')}`,
@@ -160,8 +186,8 @@ const Orders = () => {
                         <input 
                             type="text" 
                             placeholder="Buscar por ID, nombre o mesa..." 
-                            value={searchTerm}
-                            onChange={(e) => setSearchTerm(e.target.value)}
+                            defaultValue={searchTerm}
+                            onChange={(e) => startTransition(() => setSearchTerm(e.target.value))}
                             style={{ padding: '10px 15px 10px 40px', borderRadius: '10px', border: '1px solid #ddd', fontSize: '0.9rem', width: '100%', background: '#fff' }}
                         />
                     </div>
@@ -185,9 +211,13 @@ const Orders = () => {
                         ].map(f => (
                             <button 
                                 key={f.id}
-                                onClick={() => setFilterType(f.id)}
-                                className={`mode-selector-btn ${filterType === f.id ? 'active' : ''}`}
-                                style={{ padding: '8px 15px', borderRadius: '8px', minWidth: '80px' }}
+                                onClick={() => { setFilterType(f.id); setStartDate(''); setEndDate(''); }}
+                                className={`mode-selector-btn ${filterType === f.id && !startDate && !endDate ? 'active' : ''}`}
+                                style={{ 
+                                    padding: '8px 15px', borderRadius: '8px', minWidth: '80px', border: 'none', cursor: 'pointer',
+                                    background: filterType === f.id && !startDate && !endDate ? '#333' : 'transparent',
+                                    color: filterType === f.id && !startDate && !endDate ? '#fff' : '#666'
+                                }}
                             >
                                 {f.label}
                             </button>
@@ -204,12 +234,27 @@ const Orders = () => {
                                 key={f.id}
                                 onClick={() => setStatusFilter(f.id)}
                                 className={`mode-selector-btn ${statusFilter === f.id ? 'active' : ''}`}
-                                style={{ padding: '8px 15px', borderRadius: '8px', minWidth: '80px', fontSize: '0.75rem' }}
+                                style={{ 
+                                    padding: '8px 15px', borderRadius: '8px', minWidth: '80px', fontSize: '0.75rem', border: 'none', cursor: 'pointer',
+                                    background: statusFilter === f.id ? '#333' : 'transparent',
+                                    color: statusFilter === f.id ? '#fff' : '#666'
+                                }}
                             >
                                 {f.label}
                             </button>
                         ))}
                     </div>
+
+                    <button 
+                        onClick={() => setShowAdvancedFilters(!showAdvancedFilters)}
+                        style={{ 
+                            padding: '10px 15px', borderRadius: '10px', border: '1px solid #ddd', 
+                            background: showAdvancedFilters ? '#333' : '#fff', color: showAdvancedFilters ? '#fff' : '#333', 
+                            cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px', fontWeight: 'bold'
+                        }}
+                    >
+                        <Filter size={18} /> {showAdvancedFilters ? '▲' : '▼'}
+                    </button>
 
                     <div className="orders-stats" style={{ cursor: 'pointer' }} onClick={() => setShowStatsModal(true)}>
                         <div className="stat-card">
@@ -222,6 +267,30 @@ const Orders = () => {
                         </div>
                     </div>
                 </div>
+
+                {showAdvancedFilters && (
+                    <div className="admin-card" style={{ 
+                        display: 'flex', gap: '15px', padding: '20px', marginTop: '15px', background: '#f8f9fa', borderRadius: '12px', 
+                        border: '1px solid #eee', flexWrap: 'wrap', animation: 'slideDown 0.2s ease', clear: 'both'
+                    }}>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '5px', flex: 1, minWidth: '150px' }}>
+                            <label style={{ fontSize: '0.75rem', fontWeight: 'bold', color: '#666' }}>FECHA DESDE</label>
+                            <input type="date" value={startDate} onChange={e => setStartDate(e.target.value)} style={{ padding: '10px', borderRadius: '8px', border: '1px solid #ddd' }} />
+                        </div>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '5px', flex: 1, minWidth: '150px' }}>
+                            <label style={{ fontSize: '0.75rem', fontWeight: 'bold', color: '#666' }}>FECHA HASTA</label>
+                            <input type="date" value={endDate} onChange={e => setEndDate(e.target.value)} style={{ padding: '10px', borderRadius: '8px', border: '1px solid #ddd' }} />
+                        </div>
+                        {(startDate || endDate) && (
+                            <button 
+                                onClick={() => { setStartDate(''); setEndDate(''); }}
+                                style={{ alignSelf: 'flex-end', padding: '10px', background: '#fff', color: '#e03131', border: '1px solid #e03131', borderRadius: '8px', cursor: 'pointer', fontSize: '0.8rem' }}
+                            >
+                                LIMPIAR FECHAS
+                            </button>
+                        )}
+                    </div>
+                )}
             </div>
 
             <div className="orders-grid">
@@ -243,8 +312,16 @@ const Orders = () => {
                                     <td data-label="ID">#{order.id}</td>
                                     <td data-label="Fecha">
                                         <div className="date-cell">
-                                            <span>{new Date(order.date).toLocaleDateString('es-AR', { timeZone: 'America/Argentina/Buenos_Aires' })}</span>
-                                            <small>{new Date(order.date).toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit', timeZone: 'America/Argentina/Buenos_Aires' })}</small>
+                                            {(() => {
+                                                const dStr = order.date.includes('T') ? order.date : order.date.replace(' ', 'T');
+                                                const dObj = new Date(dStr);
+                                                return (
+                                                    <>
+                                                        <span>{dObj.toLocaleDateString('es-AR', { timeZone: 'America/Argentina/Buenos_Aires' })}</span>
+                                                        <small>{dObj.toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit', timeZone: 'America/Argentina/Buenos_Aires' })} hs</small>
+                                                    </>
+                                                );
+                                            })()}
                                         </div>
                                     </td>
                                     <td data-label="Cliente">
