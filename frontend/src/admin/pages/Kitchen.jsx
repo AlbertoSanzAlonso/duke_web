@@ -81,7 +81,12 @@ const Kitchen = () => {
                 if (!o.is_delivered) return true;
                 
                 // 3. Si ESTÁ entregado, lo mostramos en historial solo durante las siguientes 6 horas desde la entrega
-                const deliveredDate = o.delivered_at ? new Date(o.delivered_at) : new Date(o.updated_at);
+                const deliveredDate = o.delivered_at ? new Date(o.delivered_at) : 
+                                      (o.updated_at ? new Date(o.updated_at) : new Date(o.date));
+                                      
+                // Protección contra fechas inválidas
+                if (isNaN(deliveredDate.getTime())) return true; // Mostrar por defecto si hay un fallo de parseo
+                
                 const hoursSinceDelivered = (now - deliveredDate) / (1000 * 60 * 60);
                 return hoursSinceDelivered <= 6;
             });
@@ -92,8 +97,18 @@ const Kitchen = () => {
             const collected = activeOrders.filter(o => o.is_prepared && o.is_delivered);
             
             setPendingOrders(pending.sort((a, b) => new Date(a.date) - new Date(b.date))); 
-            setReadyOrders(ready.sort((a, b) => new Date(b.prepared_at || b.updated_at) - new Date(a.prepared_at || a.updated_at))); 
-            setCollectedOrders(collected.sort((a, b) => new Date(b.delivered_at || b.updated_at) - new Date(a.delivered_at || a.updated_at)));
+            
+            setReadyOrders(ready.sort((a, b) => {
+                const dateA = a.prepared_at ? new Date(a.prepared_at) : (a.updated_at ? new Date(a.updated_at) : new Date(a.date));
+                const dateB = b.prepared_at ? new Date(b.prepared_at) : (b.updated_at ? new Date(b.updated_at) : new Date(b.date));
+                return dateB - dateA;
+            })); 
+            
+            setCollectedOrders(collected.sort((a, b) => {
+                const dateA = a.delivered_at ? new Date(a.delivered_at) : (a.updated_at ? new Date(a.updated_at) : new Date(a.date));
+                const dateB = b.delivered_at ? new Date(b.delivered_at) : (b.updated_at ? new Date(b.updated_at) : new Date(b.date));
+                return dateB - dateA;
+            }));
         } catch (error) {
             console.error("Error loading kitchen orders:", error);
         } finally {
