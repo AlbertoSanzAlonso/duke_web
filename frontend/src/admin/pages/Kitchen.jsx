@@ -23,7 +23,7 @@ const Kitchen = () => {
         if (!dateStr) return '---';
         const date = new Date(dateStr);
         if (isNaN(date.getTime())) return '---';
-        return date.toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit' });
+        return date.toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit', timeZone: 'America/Argentina/Buenos_Aires' });
     };
 
     useEffect(() => {
@@ -177,7 +177,7 @@ const Kitchen = () => {
                 <div className="header-top">
                     <h1><Utensils size={40} /> COCINA DUKE</h1>
                     <div className="kitchen-clock">
-                        {currentTime.toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
+                        {currentTime.toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit', second: '2-digit', timeZone: 'America/Argentina/Buenos_Aires' })}
                     </div>
                 </div>
                 

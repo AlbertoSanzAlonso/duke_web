@@ -306,10 +306,19 @@ const Sales = () => {
         }
         setIsSaving(true);
         try {
-            const currentTicketObj = pendingTickets.find(t => t.id === currentSaleId);
-            const isProcessedInKitchen = currentTicketObj && (currentTicketObj.is_prepared || currentTicketObj.is_delivered);
+            let currentTicketObj = pendingTickets.find(t => t.id === currentSaleId);
+            
+            // If updating, ideally refresh the latest state from the server to avoid stale split logic
+            if (currentSaleId) {
+                try {
+                    const allSales = await fetchSales();
+                    currentTicketObj = allSales.find(s => s.id === currentSaleId);
+                } catch (e) {
+                    console.error("Failed to refresh ticket for split logic", e);
+                }
+            }
 
-            if (currentSaleId && isProcessedInKitchen) {
+            if (currentSaleId && currentTicketObj) {
                 const oldCart = ticketSnapshot ? JSON.parse(ticketSnapshot).cart : [];
                 const addedItems = [];
                 const oldTicketItemsToKeep = [];
@@ -353,10 +362,11 @@ const Sales = () => {
                     await createSale(amplData);
 
                     // Re-save original ticket with retained items to adjust cost if needed
+                    // Important: We keep total_amount for the original part, plus delivery if it existed
                     const oldTotal = oldTicketItemsToKeep.reduce((acc, item) => acc + (item.price_at_sale * item.quantity), 0);
                     const oldSaleData = {
                         total_amount: oldTotal + (isDelivery ? deliveryCost : 0),
-                        status: status,
+                        status: currentTicketObj.status, // Keep original status
                         customer_name: customerName,
                         table_number: isDelivery ? `ENVIO: $${deliveryCost}` : "", 
                         delivery_cost: isDelivery ? deliveryCost : 0,
@@ -365,7 +375,7 @@ const Sales = () => {
                     };
                     await updateSale(currentSaleId, oldSaleData);
                     
-                    setToast({ message: "¡Ampliación creada y enviada a cocina! (Pendiente)", type: 'success' });
+                    setToast({ message: "¡Ampliación creada y enviada a cocina!", type: 'success' });
                     resetCart();
                     loadData();
                     setIsSaving(false);
@@ -522,7 +532,7 @@ const Sales = () => {
                             borderRadius: '10px', 
                             border: '1px solid #444' 
                         }}>
-                            {currentTime.toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
+                            {currentTime.toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit', second: '2-digit', timeZone: 'America/Argentina/Buenos_Aires' })}
                         </div>
                     </div>
                 </header>

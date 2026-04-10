@@ -263,7 +263,7 @@ const Dashboard = () => {
                                     {data.kitchenReadyList.map(order => (
                                         <div key={order.id} onClick={() => setActionOrder({...order, currentStatus: 'READY'})} style={{ display: 'flex', justifyContent: 'space-between', padding: '12px', background: '#f8f9fa', borderRadius: '10px', borderLeft: '4px solid #40c057', cursor: 'pointer' }}>
                                             <span><strong>#{order.id}</strong> {order.customer}</span>
-                                            <span style={{ fontSize: '0.7rem', color: '#666' }}>✅ {new Date(order.updated_at).toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit' })}</span>
+                                            <span style={{ fontSize: '0.7rem', color: '#666' }}>✅ {new Date(order.updated_at).toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit', timeZone: 'America/Argentina/Buenos_Aires' })}</span>
                                         </div>
                                     ))}
                                 </div>
@@ -273,7 +273,7 @@ const Dashboard = () => {
                                     {data.kitchenPendingList.map(order => (
                                         <div key={order.id} onClick={() => setActionOrder({...order, currentStatus: 'PENDING'})} style={{ display: 'flex', justifyContent: 'space-between', padding: '12px', background: '#f8f9fa', borderRadius: '10px', borderLeft: '4px solid #f03e3e', cursor: 'pointer' }}>
                                             <span><strong>#{order.id}</strong> {order.customer}</span>
-                                            <span style={{ fontSize: '0.7rem', color: '#e03131' }}>⏲️ {new Date(order.created_at).toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit' })}</span>
+                                            <span style={{ fontSize: '0.7rem', color: '#e03131' }}>⏲️ {new Date(order.created_at).toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit', timeZone: 'America/Argentina/Buenos_Aires' })}</span>
                                         </div>
                                     ))}
                                 </div>
@@ -323,9 +323,9 @@ const Dashboard = () => {
                         </div>
                         <div style={{ flex: 1, overflowY: 'auto', padding: '20px' }}>
                             {data.kitchenDeliveredList.map(order => (
-                                <div key={order.id} onClick={() => setActionOrder({...order, currentStatus: 'COLLECTED'})} style={{ display: 'flex', justifyContent: 'space-between', padding: '12px', background: '#f8f9fa', borderRadius: '10px', marginBottom: '8px', cursor: 'pointer', opacity: 0.8 }}>
+                                <div key={order.id} onClick={() => setActionOrder({...order, currentStatus: 'COLLECTED'})} style={{ display: 'flex', justifyContent: 'space-between', padding: '12px', background: '#f8f9fa', borderRadius: '10px', marginBottom: '8px', cursor: 'pointer' }}>
                                     <span><strong>#{order.id}</strong> {order.customer}</span>
-                                    <span style={{ fontSize: '0.7rem' }}>⏲️ {new Date(order.created_at).toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit' })}</span>
+                                    <span style={{ fontSize: '0.7rem' }}>⏲️ {new Date(order.created_at).toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit', timeZone: 'America/Argentina/Buenos_Aires' })}</span>
                                 </div>
                             ))}
                         </div>
