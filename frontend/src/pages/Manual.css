@@ -800,22 +800,44 @@
     white-space: pre-wrap;
 }
 
+.faq-link-section {
+    margin-top: 3rem;
+    padding-top: 2rem;
+    border-top: 1px solid rgba(255,255,255,0.05);
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end; /* Align to side */
+    gap: 1rem;
+}
+
+.faq-link-section p {
+    color: #666;
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin: 0;
+}
+
 .faq-link-btn {
     display: inline-flex;
     align-items: center;
-    gap: 10px;
-    padding: 1rem 2rem;
-    background: var(--color-primary);
+    gap: 12px;
+    padding: 1rem 2.5rem;
+    background: #e31b23;
     color: white;
     border: none;
     border-radius: 8px;
-    font-weight: bold;
+    font-weight: 800;
+    font-size: 1rem;
     cursor: pointer;
-    transition: opacity 0.3s;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(227, 27, 35, 0.2);
 }
 
 .faq-link-btn:hover {
-    opacity: 0.9;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(227, 27, 35, 0.4);
+    background: #ff1f29;
 }
 
 .faq-view .modal-content {
