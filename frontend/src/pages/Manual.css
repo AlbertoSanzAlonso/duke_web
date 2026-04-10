@@ -688,20 +688,48 @@
     width: auto;
     height: auto;
     max-width: 95vw;
-    max-height: 90vh;
-    z-index: 3000;
+    max-height: 95vh;
+    z-index: 5000;
     cursor: zoom-out;
-    box-shadow: 0 0 100px rgba(0,0,0,0.9);
+    box-shadow: 0 0 0 1000px rgba(0, 0, 0, 0.85); /* Darker backdrop */
     border-radius: 8px;
     background: #000;
 }
 
+.zoom-close-btn {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    background: rgba(227, 27, 35, 0.9);
+    color: white;
+    border: none;
+    width: 45px;
+    height: 45px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    z-index: 5001;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+}
+
+.zoom-close-btn:hover {
+    transform: scale(1.1);
+    background: #e31b23;
+}
+
 .image-wrapper.zoomed img {
     max-width: 95vw;
-    max-height: 90vh;
+    max-height: 95vh;
     width: auto;
     height: auto;
     object-fit: contain;
+}
+
+.manual-card, .route-card {
+    cursor: pointer;
 }
 
 .zoom-hint {

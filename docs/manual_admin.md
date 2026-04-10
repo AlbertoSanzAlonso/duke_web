@@ -48,13 +48,26 @@
     - **Nuevo Movimiento:** Botón Azul en Dashboard/Contabilidad para registrar gastos (Luz, Alquiler, etc).
 - **Historial:** La IA tiene acceso a los últimos 6 meses de movimientos para análisis.
 
-### 5. CONFIGURACIÓN MAESTRA
-- **Ubicación:** Icono de engranaje en Sidebar.
-- **Secciones (Pestañas Superiores):**
-    - **Tarifas:** Ajuste de Precio Base Envío y Plus por KM (Cálculo GPS).
-    - **Horarios:** Control de apertura/cierre de la Web Pública.
-    - **Galería:** Ordenar fotos mediante arrastrar (flechas).
-    - **Personal:** Crear usuarios y asignar roles.
+### 5. USUARIOS Y PERMISOS
+- **Gestión de Cuentas:** Acceso en Configuración -> Pestaña "Personal".
+- **Niveles de Acceso (Roles):**
+    - **SUPERUSER:** Control total del sistema (Finanzas, Configuración, Borrado).
+    - **TPV / CAJERO:** Acceso a ventas, pedidos y tickets. No puede ver balances ni mover stock.
+    - **COCINA:** Solo acceso al monitor de producción.
+    - **CONTABILIDAD:** Acceso a reportes y registro de gastos. No puede vender.
+- **Auditoría:** Todas las acciones están vinculadas al usuario que inició sesión.
+
+### 6. PERFIL PERSONAL
+- **Ubicación:** Menú desplegable en la **Esquina Superior Derecha** (Donde aparece el nombre/avatar).
+- **Acciones:**
+    - **Avatar:** Cambiar la foto que te identifica en el sistema.
+    - **Credenciales:** Actualizar correo electrónico y contraseña personal.
+    - **Cierre de Sesión:** Botón "Cerrar Sesión" para proteger tu cuenta al final del turno.
+
+### 7. GESTIÓN DE INCIDENCIAS
+- **Modificaciones:** Al editar un pedido en el panel, el ticket digital (link de WhatsApp) se actualiza instantáneamente para el cliente. No requiere nuevo link.
+- **Errores de Cocina:** Se puede revertir un pedido de "Listo" a "En Cocción" pulsando la tarjeta en el Monitor de Cocina para priorizar su corrección.
+- **Cancelaciones:** Al anular un pedido, el sistema devuelve automáticamente los productos al Inventario para evitar descuadres.
 
 ---
 

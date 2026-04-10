@@ -251,6 +251,55 @@ const Manual = () => {
 
   const faqs = [
     { 
+      q: '¿Cómo gestiono los permisos de mi equipo?', 
+      a: 'Asigna roles específicos para cada función en el local.',
+      longDesc: 'Desde Configuración > Personal, puedes editar cada usuario y asignarle un Nivel de Acceso: 1. SUPERUSER (Acceso total), 2. TPV (Solo ventas), 3. COCINA (Solo monitor), 4. CONTABILIDAD (Solo finanzas). Esto protege la información sensible y evita que empleados toquen configuraciones críticas.',
+      example: 'Un cajero nuevo solo necesita el rol "TPV". Así podrá cobrar, pero no podrá ver los balances de ganancias del mes.',
+      linkTo: 'configuracion'
+    },
+    { 
+      q: '¿Cómo personalizo mi perfil?', 
+      a: 'Cambia tu avatar, correo y contraseña en segundos.',
+      longDesc: 'En la esquina superior derecha de cualquier pantalla verás tu nombre y avatar. Al pulsar allí se despliega el Menú de Usuario. Puedes subir una foto personalizada, cambiar tu correo electrónico de acceso y actualizar tu contraseña de seguridad.',
+      example: 'Pulsa sobre tu nombre arriba a la derecha, elige "Mi Perfil" y sube una foto tuya para que el staff te reconozca en los logs de auditoría.',
+      linkTo: 'admin'
+    },
+    { 
+      q: '¿Cómo funcionan las Promociones y Banners?', 
+      a: 'Programa ofertas automáticas por día de la semana.',
+      longDesc: 'En el módulo de Promociones puedes crear ofertas y asignarles días específicos (ej: Martes y Jueves). En la web del cliente, estas promos aparecerán resaltadas en la parte superior. Si una promo no tiene el día actual marcado, desaparecerá automáticamente de la vista del público.',
+      example: 'Creas una "Promo Amigos" con 20% OFF solo para los viernes. El viernes a las 00:00 el sistema la publica sola y el sábado a las 00:00 la quita sin que hagas nada.',
+      linkTo: 'asistente'
+    },
+    { 
+      q: '¿Cómo afecta el Horario al cliente?', 
+      a: 'Control total sobre cuándo se pueden recibir pedidos web.',
+      longDesc: 'Si el local está fuera de horario (ej: son las 4 AM) o has marcado el día como "Cerrado" en Configuración, la web pública desactivará automáticamente el botón de "Realizar Pedido". El cliente podrá ver la carta, pero verá un aviso indicando que el local está cerrado y a qué hora vuelve a abrir.',
+      example: 'Si cierras por reformas un miércoles, marca ese día como "Cerrado" en Horarios. Los clientes verán "Local Cerrado por el Momento" en lugar del carrito de compras.',
+      linkTo: 'configuracion'
+    },
+    { 
+      q: '¿Cómo se calcula exactamente el precio de envío?', 
+      a: 'Transparencia total basada en GPS y tarifas por KM.',
+      longDesc: 'El sistema usa la fórmula: [Precio Base] + ([Distancia en KM] * [Precio por KM]). IMPORTANTE: Duke Burger aplica un redondeo automático al siguiente múltiplo de $100 para evitar complicaciones con el cambio (ej: si el cálculo da $1.420, el sistema cobrará $1.500).',
+      example: 'Base: $1000, Plus/KM: $200, Distancia: 3km. Cálculo: 1000 + (3 * 200) = $1.600. El cliente verá este desglose antes de confirmar su pedido.',
+      linkTo: 'configuracion'
+    },
+    { 
+      q: '¿Qué pasa si modifico un pedido ya realizado?', 
+      a: 'Sincronización instantánea del ticket digital del cliente.',
+      longDesc: 'Si un cliente llama para añadir algo o cambiar un gusto, puedes editar el pedido desde el Panel. Al guardar los cambios, el "Ticket Digital" (el link que le enviaste por WhatsApp) se actualiza al instante. El cliente siempre verá la versión final real sin necesidad de que le mandes un enlace nuevo.',
+      example: 'El cliente olvidó pedir una gaseosa. La añades desde Pedidos Clientes, y cuando él refresque su link de WhatsApp, ya verá la gaseosa sumada al total.',
+      linkTo: 'pedidos'
+    },
+    { 
+      q: '¿Qué hacer ante un error en Cocina?', 
+      a: 'Gestión de platos equivocados o pedidos que deben repetirse.',
+      longDesc: 'Si la cocina se confunde, puedes buscar el pedido y cambiar su estado de "Listo" a "En Cocción" nuevamente para que vuelva a aparecer resaltado. Si el pedido debe anularse por completo por falta de insumos, usa el botón "Cancelar"; esto devolverá los productos al stock para que no haya descuadres en el inventario.',
+      example: 'El cocinero hizo una burger con cebolla por error. Marcas el pedido como "En Cocción" de nuevo para que sepa que debe repetirla prioritariamente.',
+      linkTo: 'cocina'
+    },
+    { 
       q: '¿Flujo de Pedido Web (Online)?', 
       a: 'Descubre cómo viaja un pedido desde la web hasta la cocina.',
       longDesc: 'Cuando un cliente pide desde la web: 1. El pedido llega al Panel de Gestión (Sonido de alerta) y al TPV. 2. Se envía automáticamente al Monitor de Cocina. 3. Los administradores pueden imprimir el ticket y coordinar el delivery.',
@@ -402,6 +451,11 @@ const Manual = () => {
                 <div className="modal-image-box">
                   <div className={`image-wrapper ${isZoomed ? 'zoomed' : ''}`} onClick={() => setIsZoomed(!isZoomed)}>
                     <img src={drillDown ? drillDown.image : selectedDetail.image} alt="Capture" />
+                    {isZoomed && (
+                      <button className="zoom-close-btn" onClick={(e) => { e.stopPropagation(); setIsZoomed(false); }}>
+                        <X size={24} />
+                      </button>
+                    )}
                     <div className="zoom-hint"><Maximize2 size={20} /> Click para ampliar</div>
                   </div>
                   <div className="image-caption">Captura real: {drillDown ? drillDown.title : (selectedDetail.name || selectedDetail.title)}</div>
