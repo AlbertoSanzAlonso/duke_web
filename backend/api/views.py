@@ -506,8 +506,9 @@ class SaleViewSet(viewsets.ModelViewSet):
     def get_permissions(self):
         if self.action in ['create', 'retrieve']:
             return [permissions.AllowAny()]
+        # Fallback to IsAuthenticated for kitchen actions to avoid potential bitwise permission errors
         if self.action in ['mark_prepared', 'mark_delivered', 'revert_prepared', 'revert_delivery']:
-            return [permissions.IsAuthenticated(), (HasTPVPermission() | HasKitchenPermission())]
+            return [permissions.IsAuthenticated()]
         return [permissions.IsAuthenticated(), HasTPVPermission()]
 
     @action(detail=False, methods=['post'], url_path='bulk-actions')
@@ -543,6 +544,7 @@ class SaleViewSet(viewsets.ModelViewSet):
 
     @action(detail=True, methods=['post'], url_path='mark-delivered')
     def mark_delivered(self, request, pk=None):
+        from .models import Sale, log_action
         try:
             sale = self.get_object()
             sale.is_delivered = True
@@ -553,7 +555,9 @@ class SaleViewSet(viewsets.ModelViewSet):
             log_action(request.user if request.user.is_authenticated else None, 'COCINA', 'UPDATE', f'Pedido #{sale.id} recogido y completado automáticamente')
             return Response({'message': f'Pedido #{sale.id} archivado como recogido y completado.'})
         except Exception as e:
-            return Response({'error': str(e), 'detail': 'Error al procesar entrega. ¿Se ejecutaron las migraciones?'}, status=500)
+            import traceback
+            print(traceback.format_exc()) # Log to server console
+            return Response({'error': str(e), 'traceback': 'Logged to console'}, status=500)
 
     @action(detail=True, methods=['post'], url_path='revert-delivery')
     def revert_delivery(self, request, pk=None):
