@@ -522,34 +522,109 @@
     text-transform: uppercase;
 }
 
+/* Fullscreen Modal Overrides */
+.manual-modal-overlay.fullscreen {
+    padding: 0;
+}
+
+.manual-modal-container.fullscreen {
+    max-width: 100vw;
+    height: 100vh;
+    max-height: 100vh;
+    border-radius: 0;
+    border: none;
+}
+
+/* Image Zoom Logic */
+.image-wrapper {
+    position: relative;
+    cursor: zoom-in;
+    border-radius: 15px;
+    overflow: hidden;
+    transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
+}
+
+.image-wrapper img {
+    width: 100%;
+    display: block;
+}
+
+.image-wrapper.zoomed {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) scale(1.5);
+    width: 90vw;
+    z-index: 3000;
+    cursor: zoom-out;
+    box-shadow: 0 0 100px rgba(0,0,0,0.8);
+}
+
+.zoom-hint {
+    position: absolute;
+    bottom: 10px;
+    right: 10px;
+    background: rgba(0,0,0,0.6);
+    color: #fff;
+    padding: 5px 10px;
+    border-radius: 20px;
+    font-size: 0.7rem;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    pointer-events: none;
+}
+
+/* Extra Info & Dashboard Grid */
+.extra-info-grid, .element-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+    background: rgba(255,255,255,0.03);
+    padding: 1.5rem;
+    border-radius: 15px;
+    border: 1px solid #222;
+    margin: 1rem 0;
+}
+
+.info-item, .element-item {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    font-size: 0.85rem;
+    color: #ccc;
+}
+
+.info-item strong, .el-header strong {
+    color: #fff;
+    font-size: 0.9rem;
+}
+
+.el-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 5px;
+    color: var(--color-primary);
+}
+
+.dashboard-structure h3 {
+    font-size: 1.1rem;
+    color: #fff;
+    margin-top: 1.5rem;
+}
+
 @media (max-width: 900px) {
     .manual-modal-container .modal-content {
         grid-template-columns: 1fr;
     }
     
     .manual-modal-overlay {
-        padding: 1rem;
-    }
-}
-
-@media (max-width: 768px) {
-    .manual-hero .hero-title {
-        font-size: 3rem;
-    }
-    
-    .manual-grid {
-        grid-template-columns: 1fr;
-    }
-    
-    .route-map-grid {
-        grid-template-columns: 1fr;
+        padding: 0;
     }
 
-    .assist-highlight {
-        padding: 2rem;
-    }
-    
-    .assist-content h2 {
-        font-size: 2rem;
+    .image-wrapper.zoomed {
+        transform: translate(-50%, -50%) scale(1);
+        width: 100vw;
     }
 }
