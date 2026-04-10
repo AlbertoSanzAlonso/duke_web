@@ -416,6 +416,14 @@
     font-weight: 900;
 }
 
+.route-badge.role-badge {
+    background: #e31b23;
+    color: white;
+    font-weight: 800;
+    letter-spacing: 1px;
+    padding: 4px 12px;
+}
+
 .route-card h3 {
     font-size: 1.6rem;
     margin: 0;

@@ -38,8 +38,9 @@ const Manual = () => {
     { 
       id: 'admin',
       name: 'Panel de Administración', 
+      role: 'PARA: ADMINISTRADORES / DUEÑOS',
       url: 'https://dukeburger-sj.com/admin', 
-      desc: 'Centro de control interno para gestión de stock, finanzas y configuración.',
+      desc: 'Centro de control estratégico para supervisar finanzas, stock crítico y configurar parámetros del sistema Duke.',
       image: '/manual/admin.webp',
       features: [
         'Dashboard operativo con métricas en tiempo real.',
@@ -106,8 +107,9 @@ const Manual = () => {
     { 
       id: 'tpv',
       name: 'TPV (Punto de Venta)', 
+      role: 'PARA: CAJEROS / ATENCIÓN',
       url: 'https://dukeburger-sj.com/tpv', 
-      desc: 'Terminal táctil para cobro rápido en mostrador y gestión de pedidos locales.',
+      desc: 'Terminal de ventas presencial optimizada para atención rápida, cobros y despacho de pedidos locales y web.',
       image: '/manual/tpv.webp',
       features: [
         'Interfaz táctil optimizada para rapidez.',
@@ -120,8 +122,9 @@ const Manual = () => {
     { 
       id: 'cocina',
       name: 'Monitor de Cocina', 
+      role: 'PARA: EQUIPO DE COCINA',
       url: 'https://dukeburger-sj.com/cocina', 
-      desc: 'Pantalla operativa para el equipo de producción.',
+      desc: 'Entorno de trabajo para los cocineros enfocado en la preparación secuencial y aviso de platos listos.',
       image: '/manual/kitchen.webp',
       features: [
         'Visualización clara de pedidos por orden de llegada.',
@@ -495,7 +498,7 @@ const Manual = () => {
               {mainRoutes.map(route => (
                 <div key={route.id} className="route-card" onClick={() => setSelectedDetail(route)}>
                   <div className="route-header">
-                    <span className="route-badge">CONEXIÓN DIRECTA</span>
+                    <span className="route-badge role-badge">{route.role}</span>
                     <code className="url-code">{route.url}</code>
                   </div>
                   <h3>{route.name}</h3>
