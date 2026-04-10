@@ -277,7 +277,7 @@ img.nav-logo:hover,
   font-family: var(--font-heading);
   font-size: 2rem;
   color: white;
-  animation: scrolling 60s linear infinite;
+  animation: scrolling 80s linear infinite;
 }
 
 @keyframes scrolling {
