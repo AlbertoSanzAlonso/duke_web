@@ -583,8 +583,8 @@ const Accounting = () => {
                                 {paginatedItems.length > 0 ? paginatedItems.map(item => {
                                     const type = item.typeIndicator;
                                     const isEditing = editingId === `${type}-${item.id}`;
-                                    // Safari/Mobile fix: handle non-ISO space-separated dates
-                                    const dStr = item.date.includes('T') ? item.date : item.date.replace(' ', 'T');
+                                    // Safari/Mobile fix: handle non-ISO space-separated dates with safety check
+                                    const dStr = (item.date || "").includes('T') ? item.date : (item.date || "").replace(' ', 'T');
                                     const dateObj = new Date(dStr);
                                     
                                     // Detect amounts based on type

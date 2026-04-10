@@ -475,8 +475,10 @@ const SupplierOrders = () => {
                                             </td>
                                             <td data-label="Fecha">
                                                 {(() => {
-                                                    const dStr = order.date.includes('T') ? order.date : order.date.replace(' ', 'T');
+                                                    const dRaw = order.date || "";
+                                                    const dStr = dRaw.includes('T') ? dRaw : dRaw.replace(' ', 'T');
                                                     const dObj = new Date(dStr);
+                                                    if (isNaN(dObj.getTime())) return "Fecha Inválida";
                                                     return (
                                                         <>
                                                             {dObj.toLocaleDateString('es-AR')}

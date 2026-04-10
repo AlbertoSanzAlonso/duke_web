@@ -622,13 +622,12 @@ const Sales = () => {
                     <div className="pos-main">
                         <div className="pos-left-content">
                             <div className="pos-header" style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
-                                <div className="category-tabs" style={{ display: 'flex', overflowX: 'auto', paddingBottom: '5px', gap: '8px' }}>
+                                <div className="category-tabs">
                                     {categories.map(cat => (
                                         <button 
                                             key={cat} 
                                             className={`category-btn ${selectedCategory === cat ? 'active' : ''}`}
                                             onClick={() => setSelectedCategory(cat)}
-                                            style={{ whiteSpace: 'nowrap' }}
                                         >
                                             {cat}
                                         </button>
