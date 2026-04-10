@@ -140,7 +140,7 @@
 }
 
 .ticket-time {
-    font-size: 0.9rem;
+    font-size: 0.8rem;
     color: #aaa;
     font-weight: 600;
 }
@@ -148,6 +148,7 @@
 .prepared-time {
     color: #40c057;
     font-weight: 800;
+    font-size: 0.8rem;
 }
 
 .kitchen-card-body {

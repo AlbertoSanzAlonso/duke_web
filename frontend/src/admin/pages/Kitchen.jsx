@@ -1,9 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { fetchSales, markSaleAsPrepared, markSaleAsDelivered, revertSaleDelivery } from '../../services/api';
-import { Utensils, Clock, CheckCircle, Package, History, ArrowLeftRight } from 'lucide-react';
+import { fetchSales, markSaleAsPrepared, markSaleAsDelivered, revertSaleDelivery, revertSalePrepared, deleteSale } from '../../services/api';
+import { Utensils, Clock, CheckCircle, Package, History, ArrowLeftRight, Settings } from 'lucide-react';
 import LoadingScreen from '../components/LoadingScreen';
 import Toast from '../components/Toast';
-import ConfirmModal from '../components/ConfirmModal';
 import './Kitchen.css';
 
 const Kitchen = () => {
@@ -18,14 +17,7 @@ const Kitchen = () => {
     const [toast, setToast] = useState(null);
     
     // Modal state
-    const [confirmModal, setConfirmModal] = useState({ 
-        isOpen: false, 
-        title: '', 
-        message: '', 
-        onConfirm: null,
-        confirmText: 'Confirmar',
-        type: 'info'
-    });
+    const [actionModal, setActionModal] = useState({ isOpen: false, order: null });
 
     const formatTime = (dateStr) => {
         if (!dateStr) return '---';
@@ -116,54 +108,29 @@ const Kitchen = () => {
         }
     };
 
-    const handleReady = async (orderId) => {
+    const handleAction = async (actionType, order) => {
+        setActionModal({ isOpen: false, order: null });
         try {
-            await markSaleAsPrepared(orderId);
-            setToast({ message: `Pedido #${orderId} enviado a LISTOS`, type: 'success' });
+            if (actionType === 'TO_READY') {
+                await markSaleAsPrepared(order.id);
+                setToast({ message: `Pedido #${order.id} enviado a LISTOS`, type: 'success' });
+            } else if (actionType === 'TO_PENDING') {
+                await revertSalePrepared(order.id);
+                setToast({ message: `Pedido #${order.id} devuelto a PENDIENTES`, type: 'info' });
+            } else if (actionType === 'TO_COLLECTED') {
+                await markSaleAsDelivered(order.id);
+                setToast({ message: `Pedido #${order.id} marcado como RECOGIDO`, type: 'success' });
+            } else if (actionType === 'REVERT_COLLECTED') {
+                await revertSaleDelivery(order.id);
+                setToast({ message: `Pedido #${order.id} devuelto a LISTOS`, type: 'info' });
+            } else if (actionType === 'DELETE') {
+                await deleteSale(order.id);
+                setToast({ message: `Pedido #${order.id} eliminado`, type: 'success' });
+            }
             loadKitchenOrders();
         } catch (error) {
-            setToast({ message: "Error al marcar como listo", type: 'error' });
+            setToast({ message: "Error al realizar la acción", type: 'error' });
         }
-    };
-
-    const showDeliverConfirm = (order) => {
-        setConfirmModal({
-            isOpen: true,
-            title: 'Marcar como Recogido',
-            message: `¿Estás seguro de que quieres pasar el pedido #${order.id} (${order.customer_name || 'Particular'}) a la lista de RECOGIDOS?`,
-            confirmText: 'SÍ, ENTREGAR',
-            type: 'success',
-            onConfirm: async () => {
-                try {
-                    await markSaleAsDelivered(order.id);
-                    setToast({ message: `Pedido #${order.id} marcado como recogido`, type: 'success' });
-                    setConfirmModal(prev => ({ ...prev, isOpen: false }));
-                    loadKitchenOrders();
-                } catch (error) {
-                    setToast({ message: "Error al marcar como entregado", type: 'error' });
-                }
-            }
-        });
-    };
-
-    const showRevertConfirm = (order) => {
-        setConfirmModal({
-            isOpen: true,
-            title: 'Revertir Entrega',
-            message: `¿Quieres devolver el pedido #${order.id} a la lista de pedidos LISTOS?`,
-            confirmText: 'SÍ, REVERTIR',
-            type: 'info',
-            onConfirm: async () => {
-                try {
-                    await revertSaleDelivery(order.id);
-                    setToast({ message: `Pedido #${order.id} devuelto a LISTOS`, type: 'info' });
-                    setConfirmModal(prev => ({ ...prev, isOpen: false }));
-                    loadKitchenOrders();
-                } catch (error) {
-                    setToast({ message: "Error al revertir entrega", type: 'error' });
-                }
-            }
-        });
     };
 
     if (loading) return <LoadingScreen />;
@@ -223,16 +190,13 @@ const Kitchen = () => {
                         <div 
                             key={order.id} 
                             className={`kitchen-card ${activeTab === 'pending' ? 'new-order' : (activeTab === 'ready' ? 'ready-card' : 'collected-card')}`}
-                            onClick={() => {
-                                if (activeTab === 'ready') showDeliverConfirm(order);
-                                else if (activeTab === 'collected') showRevertConfirm(order);
-                            }}
-                            style={{ cursor: activeTab !== 'pending' ? 'pointer' : 'default' }}
+                            onClick={() => setActionModal({ isOpen: true, order })}
+                            style={{ cursor: 'pointer' }}
                         >
                             <div className="kitchen-card-header">
                                 <span className="ticket-number">#{order.id}</span>
                                 <span className="ticket-time">
-                                    <Clock size={16} /> 
+                                    <Clock size={14} /> 
                                     {formatTime(order.date)}
                                     {order.is_prepared && (
                                         <> | <span className="prepared-time">LISTO: {formatTime(order.prepared_at || order.updated_at)}</span></>
@@ -261,24 +225,9 @@ const Kitchen = () => {
                                 )}
                             </div>
                             <div className="kitchen-card-footer">
-                                {activeTab === 'pending' && (
-                                    <button className="ready-btn" onClick={(e) => {
-                                        e.stopPropagation();
-                                        handleReady(order.id);
-                                    }}>
-                                        <CheckCircle size={24} /> LISTO
-                                    </button>
-                                )}
-                                {activeTab === 'ready' && (
-                                    <div className="card-hint">
-                                        <CheckCircle size={18} /> Pulsa para entregar
-                                    </div>
-                                )}
-                                {activeTab === 'collected' && (
-                                    <div className="card-hint revert">
-                                        <ArrowLeftRight size={18} /> Pulsa para revertir
-                                    </div>
-                                )}
+                                <div className="card-hint">
+                                    <Settings size={18} /> Pulsa para gestionar opciones
+                                </div>
                             </div>
                         </div>
                     ))
@@ -287,15 +236,48 @@ const Kitchen = () => {
 
             {toast && <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />}
             
-            <ConfirmModal 
-                isOpen={confirmModal.isOpen}
-                title={confirmModal.title}
-                message={confirmModal.message}
-                confirmText={confirmModal.confirmText}
-                type={confirmModal.type}
-                onConfirm={confirmModal.onConfirm}
-                onCancel={() => setConfirmModal(prev => ({ ...prev, isOpen: false }))}
-            />
+            {actionModal.isOpen && actionModal.order && (
+                <div className="modal-overlay">
+                    <div className="admin-modal kitchen-options-modal" style={{ maxWidth: '400px' }}>
+                        <div className="modal-content" style={{ padding: '25px', textAlign: 'center', background: '#fff', color: '#333', borderRadius: '16px' }}>
+                            <h3 style={{ margin: '0 0 20px', fontSize: '1.5rem', fontWeight: '900' }}>
+                                GESTIÓN TICKET #{actionModal.order.id}
+                            </h3>
+                            
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                                {activeTab === 'pending' && (
+                                    <>
+                                        <button onClick={() => handleAction('TO_READY', actionModal.order)} style={{ padding: '15px', background: '#2b8a3e', color: '#fff', border: 'none', borderRadius: '10px', fontWeight: 'bold', fontSize: '1.1rem', cursor: 'pointer' }}>MARCAR COMO LISTO</button>
+                                        <button onClick={() => handleAction('TO_COLLECTED', actionModal.order)} style={{ padding: '15px', background: '#4dabf7', color: '#fff', border: 'none', borderRadius: '10px', fontWeight: 'bold', fontSize: '1.1rem', cursor: 'pointer' }}>MARCAR COMO ESTUVO RECOGIDO DIRECTAMENTE</button>
+                                    </>
+                                )}
+                                
+                                {activeTab === 'ready' && (
+                                    <>
+                                        <button onClick={() => handleAction('TO_COLLECTED', actionModal.order)} style={{ padding: '15px', background: '#4dabf7', color: '#fff', border: 'none', borderRadius: '10px', fontWeight: 'bold', fontSize: '1.1rem', cursor: 'pointer' }}>MARCAR COMO RECOGIDO</button>
+                                        <button onClick={() => handleAction('TO_PENDING', actionModal.order)} style={{ padding: '15px', background: '#f59f00', color: '#fff', border: 'none', borderRadius: '10px', fontWeight: 'bold', fontSize: '1.1rem', cursor: 'pointer' }}>VOLVER A PENDIENTE (En Cocción)</button>
+                                    </>
+                                )}
+                                
+                                {activeTab === 'collected' && (
+                                    <>
+                                        <button onClick={() => handleAction('REVERT_COLLECTED', actionModal.order)} style={{ padding: '15px', background: '#2b8a3e', color: '#fff', border: 'none', borderRadius: '10px', fontWeight: 'bold', fontSize: '1.1rem', cursor: 'pointer' }}>VOLVER A LISTO (No fue entregado)</button>
+                                        <button onClick={() => handleAction('TO_PENDING', actionModal.order)} style={{ padding: '15px', background: '#f59f00', color: '#fff', border: 'none', borderRadius: '10px', fontWeight: 'bold', fontSize: '1.1rem', cursor: 'pointer' }}>VOLVER A PENDIENTE (En Cocción)</button>
+                                    </>
+                                )}
+                                
+                                <button onClick={() => {
+                                    if(window.confirm('¿Estás SEGURO de que quieres eliminar este ticket permanentemente? Esta acción destruirá el pedido y no se cobrará.')) {
+                                        handleAction('DELETE', actionModal.order);
+                                    }
+                                }} style={{ padding: '15px', background: '#f03e3e', color: '#fff', border: 'none', borderRadius: '10px', fontWeight: 'bold', fontSize: '1.1rem', cursor: 'pointer', marginTop: '10px' }}>ELIMINAR TICKET</button>
+                                
+                                <button onClick={() => setActionModal({ isOpen: false, order: null })} style={{ padding: '15px', background: '#f1f3f5', color: '#333', border: '1px solid #ccc', borderRadius: '10px', fontWeight: 'bold', fontSize: '1.1rem', cursor: 'pointer', marginTop: '10px' }}>CANCELAR</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 };

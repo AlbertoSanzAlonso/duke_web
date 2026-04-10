@@ -543,9 +543,21 @@ class SaleViewSet(viewsets.ModelViewSet):
     def revert_delivery(self, request, pk=None):
         sale = self.get_object()
         sale.is_delivered = False
+        sale.delivered_at = None
         sale.save()
         log_action(request.user if request.user.is_authenticated else None, 'COCINA', 'UPDATE', f'Pedido #{sale.id} devuelto a LISTO (revertir entrega)')
         return Response({'message': f'Pedido #{sale.id} devuelto a la lista de listos.'})
+
+    @action(detail=True, methods=['post'], url_path='revert-prepared')
+    def revert_prepared(self, request, pk=None):
+        sale = self.get_object()
+        sale.is_prepared = False
+        sale.is_delivered = False
+        sale.prepared_at = None
+        sale.delivered_at = None
+        sale.save()
+        log_action(request.user if request.user.is_authenticated else None, 'COCINA', 'UPDATE', f'Pedido #{sale.id} devuelto a PENDIENTE (cocinando)')
+        return Response({'message': f'Pedido #{sale.id} devuelto a pendiente de cocción.'})
 
 class ExpenseViewSet(viewsets.ModelViewSet):
     queryset = Expense.objects.all().order_by('-date')
