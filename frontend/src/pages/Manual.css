@@ -314,6 +314,50 @@
     border-top: 1px solid #1a1a1a;
 }
 
+.route-card h3 {
+    font-size: 1.8rem;
+    margin: 0 0 1rem 0;
+    color: #fff;
+}
+
+.route-meta {
+    display: flex;
+    flex-direction: column;
+    gap: 0.8rem;
+    align-items: flex-start;
+    margin-bottom: 1.5rem;
+}
+
+.example-box {
+    background: rgba(227, 27, 35, 0.05);
+    border-left: 4px solid #e31b23;
+    padding: 1.5rem;
+    margin: 1.5rem 0;
+    border-radius: 4px 12px 12px 4px;
+}
+
+.example-box strong {
+    color: #e31b23;
+    font-size: 0.9rem;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 0.5rem;
+}
+
+.example-box p {
+    color: #eee;
+    margin: 0;
+    font-style: italic;
+    font-size: 1rem;
+    line-height: 1.5;
+}
+
+.faq-example {
+    margin-top: 0;
+    margin-bottom: 2rem;
+}
+
 .url-link {
     text-decoration: none;
     transition: opacity 0.3s;

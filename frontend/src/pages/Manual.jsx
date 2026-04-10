@@ -96,24 +96,27 @@ const Manual = () => {
       image: '/manual/tpv.webp',
       features: [
         'Carrito Lateral: Los productos elegidos aparecen a la derecha.',
-        'Buscador superior: Filtra productos por nombre rápidamente.',
+        'Icono Regalo: Indica que el producto es una cortesía ($0).',
+        'Icono Descuento: Indica un porcentaje de rebaja aplicado al ítem.',
         'Botón Cobrar: Finaliza la venta y genera el ticket.',
         'Tickets Pendientes: Listado inferior para cuentas sin cerrar.'
-      ]
+      ],
+      example: 'Llega un cumpleañero y le regalas una bebida. Pulsas el icono de regalo en el carrito para que el precio pase a $0 y el stock se descuente igual.'
     },
     { 
       id: 'cocina',
       name: 'Monitor de Cocina', 
       role: 'PARA: EQUIPO DE COCINA',
       url: 'https://dukeburger-sj.com/admin/cocina', 
-      desc: 'Visible en el menú lateral. Pantalla dedicada para organizar la producción por orden de prioridad.',
+      desc: 'Visible en el menú lateral. Pantalla dedicada para organizar la producción por orden de llegada.',
       image: '/manual/kitchen.webp',
       features: [
-        'Cards de Pedido: Cada pedido es una tarjeta con su tiempo transcurrido.',
-        'Botón "Listo": En la card del pedido para avisar al cajero.',
-        'Botón "Entregado": Para archivar el pedido una vez despachado.',
-        'Historial: Botón superior derecho para ver los platos de hoy.'
-      ]
+        'Estado "En Cocción" (Naranja): Se activa al empezar a preparar el plato.',
+        'Estado "Listo" (Verde): Avisa al cajero que el pedido puede retirarse.',
+        'Estado "Entregado": Archiva el pedido y lo quita de la pantalla principal.',
+        'Tiempo de Espera: Cada card muestra cuánto lleva el cliente esperando.'
+      ],
+      example: 'Entra un pedido. Pulsas el botón de la card para pasarlo a "En Cocción". Cuando terminas las burgers, pulsas "Listo" para que el cajero sepa que debe entregarlo.'
     }
   ];
 
@@ -146,6 +149,7 @@ const Manual = () => {
         'Buscador: Campo de texto superior para filtrar por cliente o ID.'
       ],
       color: '#ffffff',
+      example: 'Busca el pedido #1042, haz clic en el icono del ticket y coordina el envío con el cliente.',
       url: 'https://dukeburger-sj.com/admin/pedidos-clientes'
     },
     {
@@ -161,6 +165,7 @@ const Manual = () => {
         'Alertas Rojas: Fila resaltada automáticamente si falta mercancía.'
       ],
       color: '#2ecc71',
+      example: 'Añade "Carne Vacuna 15kg" usando el formulario superior para actualizar el almacén tras recibir al proveedor.',
       url: 'https://dukeburger-sj.com/admin/inventario'
     },
     {
@@ -176,6 +181,7 @@ const Manual = () => {
         'Listado: Tabla inferior con el detalle de cada movimiento de dinero.'
       ],
       color: '#9b59b6',
+      example: 'Pulsa "+ Nuevo Movimiento" y registra un gasto de "$5.000" bajo el concepto "Reparación Luz" para cuadrar caja.',
       url: 'https://dukeburger-sj.com/admin/contabilidad'
     },
     {
@@ -187,8 +193,8 @@ const Manual = () => {
       subSections: [
         {
           title: 'Parámetros de Envío',
-          desc: 'Pestaña "General". Ajusta montos de delivery en los campos centrales.',
-          image: '/manual/configuracion.webp'
+          desc: 'Ajusta el precio base, el plus por cada kilómetro recorrido y el radio máximo de entrega (GPS). Cuando un cliente introduce su dirección en la web, el sistema calcula automáticamente la distancia y el costo exacto del envío.',
+          image: '/manual/configuracion_envio.webp'
         },
         {
           title: 'Gestión de Horarios',
@@ -207,99 +213,125 @@ const Manual = () => {
         }
       ],
       features: [
+        'Cálculo Automático: Precio basado en la dirección del cliente + GPS.',
         'Barra de Pestañas: Localizada arriba para cambiar de sección técnica.',
         'Botón "Guardar": Siempre visible abajo para confirmar los cambios.',
         'Selector de Redondeo: Ajusta los múltiplos de precio ($100, $500, etc).'
       ],
       color: '#34495e',
+      example: 'Cambia el "Plus por KM" a $1.200 si necesitas ajustar las tarifas por el precio de la nafta.',
       url: 'https://dukeburger-sj.com/admin/config'
     },
     {
       id: 'asistente',
       title: 'Duke Assist (IA)',
       icon: <Sparkles className="section-icon" />,
-      description: 'Asistente inteligente con acceso a datos reales.',
-      items: [
-        'Responde preguntas sobre ventas y stock.',
-        'Analiza tendencias financieras.',
-        'Siempre disponible en el botón flotante.'
+      description: 'Asistente de Inteligencia Artificial con acceso total a la base de datos operativa de Duke Burger.',
+      image: '/manual/asistente_ui.webp',
+      features: [
+        'Ventana Adaptable: Puedes **agrandar** la ventana con el icono superior derecho o **cerrarla** con la "X".',
+        'Analítica de Ventas: "¿Cuánto ganamos ayer?", "¿Cuál fue el mejor día de la semana?".',
+        'Auditoría de Stock: "¿Hay pan de papa?", "¿Qué insumos están criticamente bajos?".',
+        'Seguridad y Logs: "¿Quién borró el pedido #1020?", "¿Quién editó el precio de la Duke?".',
+        'Soporte Técnico: "¿Cómo cambio el radio del GPS?", "¿Cómo se borra un usuario?".',
+        'Memoria de Contexto: Recuerda historial financiero de los últimos 6 meses.'
       ],
-      color: '#e31b23'
+      example: 'Escribe: "¿Qué fue lo que más se vendió el martes?" o "¿Tengo stock suficiente de gaseosas para hoy?"',
+      subSections: [
+        {
+          title: 'Gestión de Ventana',
+          desc: 'La interfaz es flexible. Usa el icono de flechas arriba a la derecha para expandir el chat a pantalla completa o la "X" para ocultarlo cuando no lo necesites.',
+          image: '/manual/asistente_ui.webp'
+        }
+      ],
+      color: '#e31b23',
+      url: '#'
     }
   ];
-
 
   const faqs = [
     { 
       q: '¿Flujo de Pedido Web (Online)?', 
       a: 'Descubre cómo viaja un pedido desde la web hasta la cocina.',
       longDesc: 'Cuando un cliente pide desde la web: 1. El pedido llega al Panel de Gestión (Sonido de alerta) y al TPV. 2. Se envía automáticamente al Monitor de Cocina. 3. Los administradores pueden imprimir el ticket y coordinar el delivery.',
+      example: 'Un cliente pide una Burger Duke desde San Juan Centro. El TPV suena, tú lo ves y a los 2 segundos el cocinero ya tiene la comanda en su pantalla.',
       linkTo: 'pedidos'
     },
     { 
       q: '¿Flujo de Pedido en Local (TPV)?', 
       a: 'Optimiza la atención presencial usando el Punto de Venta.',
       longDesc: 'Para pedidos en persona: 1. El cajero marca los productos en el TPV. 2. Al confirmar, el pedido aparece instantáneamente en el Monitor de Cocina. 3. Se genera un ticket físico o digital que se puede enviar por WhatsApp al cliente.',
+      example: 'Llega un cliente al mostrador. Seleccionas "2 Pachatas", pulsas "Cobrar" y envías el ticket por WhatsApp al cliente para que tenga su comprobante digital.',
       linkTo: 'tpv'
     },
     { 
       q: '¿Cómo funcionan las notificaciones (TPV, WhatsApp, Cocina)?', 
       a: 'Sincronización total en tiempo real para evitar retrasos.',
       longDesc: 'El sistema utiliza tecnología SSE para comunicación instantánea. Cuando entra un pedido web, se dispara una notificación sonora en el Panel y aparece en el listado del TPV. Al mismo tiempo, el Monitor de Cocina recibe el comanda sin intervención humana. Si el cliente solicita ticket por WhatsApp, el TPV abre un link directo con el mensaje pre-armado.',
+      example: 'Estás en el TPV y oyes un timbre. Es un pedido web. No tienes que refrescar, ya está ahí. El cocinero grita "¡Nuevo pedido!", porque ya le salió en su monitor.',
       linkTo: 'admin'
     },
     { 
       q: '¿Cómo cambio el horario?', 
       a: 'Ajusta la disponibilidad semanal desde el Panel de Administración.',
       longDesc: 'Para modificar los horarios de atención que ven tus clientes, dirígete a la sección de Configuración y pulsa en la pestaña de Horarios. Podrás definir la hora de apertura y cierre para cada día de la semana. Los cambios se guardan al instante y afectan a la posibilidad de realizar pedidos online.',
+      example: 'Si es feriado y abren más tarde, vas a Configuración > Horarios y cambias el lunes de 20:00 a 22:00. Al guardar, ningún cliente podrá pedir antes de las 22:00.',
       linkTo: 'configuracion'
     },
     { 
       q: '¿Cómo cambio las promos?', 
       a: 'Gestiona banners y ofertas activas en el módulo de Promociones.',
       longDesc: 'Las promociones se gestionan desde su propio módulo en el panel lateral. Puedes crear nuevas ofertas, asignarles una imagen atractiva y, lo más importante, decidir en qué días de la semana deben aparecer publicadas de forma automática.',
+      example: 'Quieres un "2x1 los Miércoles". Creas la promo, marcas "Miércoles" y el sistema la publicará sola todos los miércoles sin que tengas que hacer nada.',
       linkTo: 'asistente'
     },
     { 
       q: '¿Cómo cambio las imágenes de la galería?', 
       a: 'Sube y reordena fotos del local desde Configuración.',
       longDesc: 'Las fotos del carrusel principal de la web se gestionan en Configuración > Galería. Puedes subir nuevas capturas y usar el icono de las flechas para reordenarlas arrastrando cada card. Esto permite destacar las imágenes que prefieras que el cliente vea primero.',
+      example: 'Has tomado una foto increíble de una nueva hamburguesa. La subes a la Galería y la arrastras a la primera posición para que sea lo primero que vean los clientes.',
       linkTo: 'configuracion'
     },
     { 
       q: '¿Cómo añado/quito/modifico artículos?', 
       a: 'Usa Inventario para insumos o Productos para el catálogo general.',
       longDesc: 'Dependiendo de lo que quieras modificar: si es un insumo (como "Carne" o "Pan"), usa el módulo de Inventario. Si es un producto final que vendes (como "Burger Duke"), usa el módulo de Productos para editar su descripción o stock base.',
+      example: 'Te quedaste sin "Cheddar". Entras a Inventario, buscas "Cheddar" y pones el stock en 0. Si el sistema detecta stock 0, avisará en las alertas del Dashboard.',
       linkTo: 'inventario'
     },
     { 
       q: '¿Cómo creo un nuevo usuario?', 
       a: 'Administra el personal desde Configuración > Personal.',
       longDesc: 'Para dar de alta a un nuevo empleado, ve a Configuración y entra en la pestaña de Personal. Pulsa en "+ Nuevo Usuario", introduce sus datos y asígnale los permisos necesarios según su función en el local (Cajero, Cocinero, Administrador).',
+      example: 'Contratas a un nuevo cocinero. Le creas un usuario con rol "Cocinero" para que solo pueda ver el Monitor de Cocina y no las finanzas.',
       linkTo: 'usuarios'
     },
     { 
       q: '¿Cómo manejo tickets?', 
       a: 'Usa el TPV para generar tickets y cobrarlos en mostrador.',
       longDesc: 'El TPV (Punto de Venta) es el centro de operaciones diario. Desde allí generas los pedidos locales, imprimes tickets y gestionas las cuentas pendientes que aún no han sido cobradas.',
+      example: 'Un cliente habitual pide lo de siempre. Buscas su nombre, seleccionas el pedido y pulsas "Cobrar". El historial financiero se actualiza al instante.',
       linkTo: 'tpv'
     },
     { 
       q: '¿Cómo manejo pedidos al proveedor?', 
       a: 'Registra compras en el módulo de Pedidos del Inventario.',
       longDesc: 'Cuando compras mercancía, regístrala como un "Pedido a Proveedor" dentro del módulo de Inventario. Al marcarlo como "Recibido", el sistema sumará automáticamente esas cantidades al stock disponible de cada insumo.',
+      example: 'Llega el camión de las gaseosas. Vas a Inventario, pulsas "+ Pedido", marcas las cantidades recibidas y el stock se suma automáticamente al total.',
       linkTo: 'inventario'
     },
     { 
       q: '¿Cómo manejo pedidos de clientes?', 
       a: 'Consulta y procesa ventas online en Gestión de Pedidos.',
       longDesc: 'Todos los pedidos que los clientes realizan desde su móvil llegan a "Gestión de Pedidos". Desde aquí puedes controlar el flujo: ver el ticket, enviarlo a cocina y marcarlo como entregado una vez que el cliente lo recibe.',
+      example: 'Un cliente cancela su pedido por teléfono. Buscas el pedido por su ID en el listado y pulsas el botón rojo "Cancelar" para devolver los productos al stock.',
       linkTo: 'pedidos'
     },
     { 
       q: '¿Cómo funciona la carta?', 
       a: 'Publica productos y asigna precios en Menú Online.',
       longDesc: 'El catálogo de Productos es tu "almacén" de ítems, pero el "Menú Online" es tu "vitrina". Solo los productos que actives en el Menú Online con un precio asignado serán visibles para los clientes en la web.',
+      example: 'Quieres vender una hamburguesa edición limitada. La activas en el Menú Online, le pones precio de $9.500 y en 1 segundo ya aparece en la web de los clientes.',
       linkTo: 'carta'
     }
   ];
@@ -324,6 +356,13 @@ const Manual = () => {
               <div className="faq-detail-body">
                 <p className="faq-long-desc">{selectedFAQ.longDesc}</p>
                 
+                {selectedFAQ.example && (
+                  <div className="example-box faq-example">
+                    <strong>EJEMPLO PRÁCTICO:</strong>
+                    <p>{selectedFAQ.example}</p>
+                  </div>
+                )}
+
                 {selectedFAQ.linkTo && (
                   <div className="faq-link-section">
                     <p>Módulo relacionado:</p>
@@ -430,6 +469,13 @@ const Manual = () => {
                   </div>
                 )}
 
+                {selectedDetail.example && (
+                  <div className="example-box">
+                    <strong><Sparkles size={16} /> EJEMPLO DE USO:</strong>
+                    <p>{selectedDetail.example}</p>
+                  </div>
+                )}
+
                 <h3 style={{ marginTop: '20px' }}>Funcionalidades Clave:</h3>
                 <ul className="detail-features">
                   {(selectedDetail.features || selectedDetail.items).map((f, i) => (
@@ -471,13 +517,13 @@ const Manual = () => {
             <div className="route-map-grid">
               {mainRoutes.map(route => (
                 <div key={route.id} className="route-card" onClick={() => setSelectedDetail(route)}>
-                  <div className="route-header">
+                  <h3>{route.name}</h3>
+                  <div className="route-meta">
                     <span className="route-badge role-badge">{route.role}</span>
                     <a href={route.url} target="_blank" rel="noreferrer" className="url-link" onClick={e => e.stopPropagation()}>
                       <code className="url-code">{route.url}</code>
                     </a>
                   </div>
-                  <h3>{route.name}</h3>
                   <p>{route.desc}</p>
                   <div className="route-action-hint">Ver Guía Completa →</div>
                 </div>
