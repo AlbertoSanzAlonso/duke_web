@@ -292,7 +292,7 @@ const Accounting = () => {
         });
     };
 
-    const [viewMode, setViewMode] = useState('monthly'); // 'daily', 'weekly', 'monthly'
+    const [viewMode, setViewMode] = useState('all'); // 'all', 'daily', 'weekly', 'monthly'
 
     const filterItems = useCallback((items, currentSearch, currentCategory, currentView, currentStart, currentEnd) => {
         const now = new Date();

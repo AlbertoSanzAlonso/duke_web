@@ -16,7 +16,7 @@ const SupplierOrders = () => {
     const [searchTerm, setSearchTerm] = useState('');
     const [startDate, setStartDate] = useState('');
     const [endDate, setEndDate] = useState('');
-    const [viewMode, setViewMode] = useState('monthly'); // 'daily', 'weekly', 'monthly'
+    const [viewMode, setViewMode] = useState('all'); // 'all', 'daily', 'weekly', 'monthly'
     const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
     const [isPending, startTransition] = useTransition();
 
