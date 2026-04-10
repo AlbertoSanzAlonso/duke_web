@@ -198,7 +198,7 @@ const Settings = () => {
                                 </div>
                             </div>
                             <div className="setting-field">
-                                <label style={labelStyle}>Plus por KM Recorrido</label>
+                                <label style={labelStyle}>Por KM Recorrido</label>
                                 <div style={{ position: 'relative' }}>
                                     <span style={priceSymbolStyle}>$</span>
                                     <input type="number" value={deliveryRates.km_price} onChange={e => handleRateChange('km_price', e.target.value)} style={inputStyle(false)} />

@@ -112,7 +112,8 @@ const Users = () => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        if (formData.password && formData.password !== formData.confirmPassword) {
+        const isChangingPassword = formData.password.length > 0 || formData.confirmPassword.length > 0;
+        if (isChangingPassword && formData.password !== formData.confirmPassword) {
             setToast({ message: "Las contraseñas no coinciden", type: 'error' });
             return;
         }

@@ -182,7 +182,8 @@ const Kitchen = () => {
             <header className="kitchen-header">
                 <div className="header-top">
                     <h1><Utensils size={40} /> COCINA DUKE</h1>
-                    <div className="kitchen-clock">
+                    <div className="kitchen-clock" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        <Clock size={20} />
                         {currentTime.toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit', second: '2-digit', timeZone: 'America/Argentina/Buenos_Aires' })}
                     </div>
                 </div>
@@ -230,7 +231,7 @@ const Kitchen = () => {
                             <div className="kitchen-card-header">
                                 <span className="ticket-number">#{order.id}</span>
                                 <span className="ticket-time">
-                                    <Clock size={14} /> 
+                                    <Clock size={14} style={{ marginRight: '5px' }} /> 
                                     {formatTime(order.date)}
                                     {order.is_prepared && (
                                         <> | <span className="prepared-time">LISTO: {formatTime(order.prepared_at || order.updated_at)}</span></>

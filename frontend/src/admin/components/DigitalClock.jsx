@@ -11,11 +11,21 @@ const DigitalClock = () => {
 
     return (
         <div className="current-time">
-            <Clock size={16} />
-            <span>
-                {currentTime.toLocaleDateString('es-AR', { weekday: 'long', day: 'numeric', month: 'long' })}
+            <Clock size={16} style={{ marginRight: '8px' }} />
+            <span style={{ textTransform: 'capitalize' }}>
+                {currentTime.toLocaleDateString('es-AR', { 
+                    weekday: 'long', 
+                    day: 'numeric', 
+                    month: 'long',
+                    timeZone: 'America/Argentina/Buenos_Aires'
+                })}
                 {' - '}
-                {currentTime.toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
+                {currentTime.toLocaleTimeString('es-AR', { 
+                    hour: '2-digit', 
+                    minute: '2-digit', 
+                    second: '2-digit',
+                    timeZone: 'America/Argentina/Buenos_Aires'
+                })}
             </span>
         </div>
     );

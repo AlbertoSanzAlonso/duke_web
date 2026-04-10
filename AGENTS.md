@@ -76,10 +76,11 @@ Este proyecto se divide en dos entornos de despliegue claramente separados para 
 - **Loading:** Usar el componente `<LoadingScreen />` que incluye el logo de la marca en lugar de mensajes de texto planos.
 - **Accesibilidad Admin:** Forzar color de texto oscuro (#333 !important) en contenedores claros para evitar conflictos con el modo oscuro del navegador, pero asegurar que los botones con fondo oscuro (ej. .btn-dark, .add-movement-btn, .checkout-btn) mantengan su texto blanco mediante selectores específicos o eliminando el !important global de los botones.
 - **Responsividad:** 
-  - La sección de Contabilidad e Inventario DEBE usar layouts verticales apilados en móviles (formato tarjeta) donde el label esté arriba y el valor debajo para evitar recortes.
+  - La sección de Contabilidad e Inventario DEBE usar **renderizado dual**: tabla normal en desktop (`.accounting-desktop-only`) y tarjetas `<div>` nativas en móvil (`.accounting-mobile-only`). NUNCA usar transformaciones CSS de tabla (`display: block` en `<td>`) porque colapsan en Safari/Chrome móvil.
   - El grid de la carta pública debe usar `minmax(min(100%, 320px), 1fr)` para evitar scroll horizontal.
   - **Paginación**: Todos los listados administrativos (Contabilidad, Compras, Pedidos) deben paginar cada 10 elementos estrictamente en móvil para facilitar el scroll.
   - **AI Assist**: El chat nunca debe auto-abrirse en móviles por defecto. Debe soportar `white-space: pre-wrap`.
+  - **Categorías TPV (móvil)**: El contenedor `.pos-left-content` NUNCA debe tener `overflow: hidden`. Usar `min-width: 0` para contener el flex sin recortar el scroll horizontal de las categorías.
 
 
 ## 5. Logística y Seguridad (Nuevas Reglas)
@@ -94,7 +95,8 @@ Este proyecto se divide en dos entornos de despliegue claramente separados para 
 ## 6. Seguridad y Gestión Administrativa
 - **Login:** Acceso vía `/login` usando `TokenAuthentication` de DRF.
 - **Contabilidad y Proveedores**: 
-  - Ambos módulos deben incluir selectores de periodo: Diario, Semanal y Mensual (por defecto).
+  - Ambos módulos deben incluir selector de periodo **TODOS / Diario / Semanal / Mensual** — el valor por defecto es **`'all'`** (Todos) para que en móvil el historial sea visible desde el primer momento.
+  - El selector debe tener siempre el botón "TODOS" resaltado al cargar (sin filtro activo).
   - Incluir filtros avanzados de rango "Desde/Hasta" con botón de limpiar.
   - El formulario de compra/gastos debe usar incrementos de `$100`.
 - **Base de Datos:** El proyecto usa Supabase en producción. Para crear usuarios u operativos de mantenimiento sobre la BD, se debe asegurar que se ejecuten contra la instancia de Supabase (PostgreSQL) y no la base de datos local de desarrollo.
@@ -106,6 +108,12 @@ Este proyecto se divide en dos entornos de despliegue claramente separados para 
 - **Edición de Imágenes**: El administrador permite recortar imágenes ya existentes en el catálogo mediante `ImageCropper` con soporte Cross-Origin para S3/Supabase.
 - **Sincronización Cocina-TPV**: Al marcar un pedido como "Recogido" en el monitor de cocina, el sistema debe cambiar automáticamente su estado a `COMPLETED` para que desaparezca de la lista de pendientes del TPV y se registre en el historial financiero.
 - **Persistencia SSE**: Las conexiones de streaming deben ser independientes del estado de navegación local (tabs) para evitar micro-cortos en la recepción de pedidos.
+- **Refresco Silencioso (SSE)**: Cuando un evento SSE dispara un `loadData()`, SIEMPRE usar el parámetro `silent=true` para evitar el parpadeo del `<LoadingScreen />`. El patrón es: `loadData(silent = false) { if (!silent) setLoading(true); ... finally { if (!silent) setLoading(false); } }`. Los handlers de SSE llaman `loadData(true)`.
+
+## 8. Pitfalls Conocidos (CSS/React)
+- **`overflow: hidden` en `.admin-card`**: NUNCA usar `overflow: hidden` en el contenedor principal de tarjetas admin. En móvil recorta los elementos renderizados, haciéndolos invisibles. Usar `overflow: visible`.
+- **`!important` en estilos inline React**: Los estilos inline de React NO admiten `!important`. `color: '#fff !important'` es ignorado — el motor de estilo lo descarta silenciosamente. Usar siempre `color: '#fff'` y resolver conflictos a nivel CSS.
+- **Transformaciones CSS de tabla**: Cambiar `display: block` en `<table>/<tbody>/<tr>/<td>` para layout responsive es inestable en Safari/Chrome mobile. La fila colapsa a altura 0. Usar **renderizado dual JSX** en su lugar.
 
 ---
 *Mantener la coherencia visual con la marca Duke Burger (Negros profundos, Rojos vibrantes, Tipografía Bebas Neue).*

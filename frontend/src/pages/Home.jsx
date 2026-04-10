@@ -520,8 +520,8 @@ function Home() {
         </div>
         <div className="marquee" data-nosnippet>
           <div className="marquee-content" style={{ display: 'flex', width: 'max-content', gap: '30px' }}>
-            {/* Contenido repetido para bucle infinito sin saltos */}
-            {[1, 2, 3, 4, 5, 6].map((i) => (
+            {/* Contenido repetido masivamente para asegurar bucle infinito sin huecos independientemente del largo del texto */}
+            {[...Array(20)].map((_, i) => (
               <span key={i} style={{ 
                 fontFamily: 'var(--font-heading)', 
                 fontSize: '2rem', 
