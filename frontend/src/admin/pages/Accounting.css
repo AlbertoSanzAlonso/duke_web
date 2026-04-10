@@ -389,61 +389,78 @@
         grid-template-columns: 1fr !important;
     }
 
-    .accounting-table, 
-    .accounting-table thead, 
-    .accounting-table tbody, 
-    .accounting-table th, 
-    .accounting-table td, 
+    /* Convert table to block layout */
+    .accounting-table {
+        display: block !important;
+        width: 100% !important;
+    }
+
+    .accounting-table thead {
+        display: none !important; /* Hide header completely - no absolute positioning */
+    }
+
+    .accounting-table tbody {
+        display: block !important;
+        width: 100% !important;
+    }
+
     .accounting-table tr {
         display: block !important;
+        width: 100% !important;
+        box-sizing: border-box !important;
+        margin-bottom: 16px !important;
+        border: 1px solid #eee !important;
+        border-radius: 12px !important;
+        padding: 0 !important; /* No padding on tr, use td padding */
+        background: #fff !important;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.06) !important;
+        overflow: hidden !important;
     }
 
-    .accounting-table thead tr {
-        position: absolute;
-        top: -9999px;
-        left: -9999px;
-    }
-
-    .accounting-table tr {
-        margin-bottom: 25px;
-        border: 2px solid #f0f0f0;
-        border-radius: 16px;
-        padding: 15px;
-        background: #fff;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    /* Hide checkbox column on mobile */
+    .accounting-table td:first-child {
+        display: none !important;
     }
 
     .accounting-table td {
-        border: none;
-        position: relative;
-        padding: 12px 10px !important;
-        padding-top: 35px !important;
-        text-align: left !important;
-        min-height: 60px;
-        display: block !important;
-        border-bottom: 1px solid #f5f5f5;
-        font-size: 0.95rem;
-        word-break: break-word;
-        background: #fff;
+        display: flex !important;
+        width: 100% !important;
+        box-sizing: border-box !important;
+        justify-content: space-between !important;
+        align-items: center !important;
+        padding: 12px 16px !important;
+        border: none !important;
+        border-bottom: 1px solid #f5f5f5 !important;
+        font-size: 0.9rem !important;
+        text-align: right !important;
+        color: #333 !important;
+        min-height: 44px !important;
+    }
+
+    .accounting-table td:last-child {
+        border-bottom: none !important;
     }
 
     .accounting-table td::before {
-        position: absolute;
-        top: 10px;
-        left: 10px;
-        width: calc(100% - 20px);
+        content: attr(data-label) !important;
+        font-size: 0.72rem !important;
+        font-weight: 800 !important;
+        color: #999 !important;
+        text-transform: uppercase !important;
+        letter-spacing: 1px !important;
         text-align: left !important;
-        font-weight: 800;
-        color: #acacac;
-        content: attr(data-label);
-        font-size: 0.65rem;
-        text-transform: uppercase;
-        letter-spacing: 1.5px;
-        line-height: 1;
+        flex-shrink: 0 !important;
+        margin-right: 10px !important;
+        position: static !important; /* override any absolute positioning */
     }
 
     .accounting-table td.txt-right {
-        text-align: left !important;
+        text-align: right !important;
+    }
+
+    /* Table container - no overflow-x needed in card layout */
+    .accounting-table-container {
+        overflow-x: visible !important;
     }
 
     .pagination-container {
