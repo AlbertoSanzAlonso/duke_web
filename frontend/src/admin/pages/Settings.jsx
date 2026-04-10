@@ -26,6 +26,7 @@ const Settings = () => {
     });
     const [isSaving, setIsSaving] = useState(false);
     const [isTesting, setIsTesting] = useState(false);
+    const [confirmRestore, setConfirmRestore] = useState(false);
 
     useEffect(() => {
         const tab = searchParams.get('tab');
@@ -225,15 +226,7 @@ const Settings = () => {
                                 <h2 style={{ margin: 0, fontSize: '1.5rem' }}>Gestión de Horarios</h2>
                             </div>
                             <button 
-                                onClick={async () => {
-                                    if(window.confirm("¿Deseas restaurar los horarios por defecto?")) {
-                                        setLoading(true);
-                                        const response = await fetch(`${import.meta.env.VITE_API_URL.replace(/\/$/, "")}/api/setup-admin-super/`);
-                                        const data = await response.json();
-                                        setToast({ message: "Datos restaurados con éxito", type: 'success' });
-                                        loadAllData();
-                                    }
-                                }}
+                                onClick={() => setConfirmRestore(true)}
                                 style={{ ...addImgBtnStyle, background: '#f8f9fa', border: '1px solid #ddd', color: '#444', boxShadow: 'none' }}
                             >
                                 <AlertTriangle size={20} /> Restaurar Tabla
@@ -343,6 +336,46 @@ const Settings = () => {
 
 
             </div>
+
+            {/* Modal de Confirmación de Restauración */}
+            {confirmRestore && (
+                <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.65)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 9999, padding: '20px' }}>
+                    <div style={{ background: '#fff', borderRadius: '16px', padding: '32px', maxWidth: '420px', width: '100%', boxShadow: '0 20px 60px rgba(0,0,0,0.3)' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '14px', marginBottom: '20px' }}>
+                            <AlertTriangle size={36} color="#f08c00" />
+                            <h3 style={{ margin: 0, fontSize: '1.3rem', color: '#333' }}>Restaurar Tabla de Horarios</h3>
+                        </div>
+                        <p style={{ color: '#666', lineHeight: '1.6', marginBottom: '28px' }}>
+                            Esta acción restaurará los horarios a los valores por defecto. ¿Deseas continuar?
+                        </p>
+                        <div style={{ display: 'flex', gap: '12px' }}>
+                            <button
+                                onClick={() => setConfirmRestore(false)}
+                                style={{ flex: 1, padding: '13px', background: '#f8f9fa', border: '1px solid #ddd', borderRadius: '10px', fontWeight: '700', cursor: 'pointer', fontSize: '0.95rem' }}
+                            >
+                                CANCELAR
+                            </button>
+                            <button
+                                onClick={async () => {
+                                    setConfirmRestore(false);
+                                    setLoading(true);
+                                    try {
+                                        await fetch(`${import.meta.env.VITE_API_URL.replace(/\/$/, "")}/api/setup-admin-super/`);
+                                        setToast({ message: 'Datos restaurados con éxito', type: 'success' });
+                                        loadAllData();
+                                    } catch (err) {
+                                        setToast({ message: 'Error al restaurar los datos', type: 'error' });
+                                        setLoading(false);
+                                    }
+                                }}
+                                style={{ flex: 1, padding: '13px', background: '#f03e3e', color: '#fff', border: 'none', borderRadius: '10px', fontWeight: '800', cursor: 'pointer', fontSize: '0.95rem' }}
+                            >
+                                SÍ, RESTAURAR
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 };
