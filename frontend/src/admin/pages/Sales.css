@@ -11,6 +11,8 @@
 
 /* Header de Categorías */
 .pos-header {
+    display: flex;
+    align-items: center;
     margin-bottom: 1.5rem;
 }
 
@@ -479,7 +481,7 @@
         .pos-fab {
             display: flex;
             position: fixed;
-            bottom: 20px;
+            bottom: 40px;
             right: 1.5rem;
             z-index: 2000;
             background: #28a745;

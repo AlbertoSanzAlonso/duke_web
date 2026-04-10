@@ -294,7 +294,7 @@ const Sales = () => {
             }
             
             setToast({ 
-                message: status === 'PENDING' ? "¡Ticket guardado como pendiente!" : "¡Venta cobrada con éxito!", 
+                message: status === 'PENDING' ? "¡Ticket enviado a cocina! (Pendiente de pago)" : "¡Venta cobrada con éxito!", 
                 type: 'success' 
             });
             resetCart();
@@ -447,8 +447,8 @@ const Sales = () => {
                 <>
                     <div className="pos-main">
                         <div className="pos-left-content">
-                            <div className="pos-header">
-                                <div className="category-tabs" style={{ flex: 1 }}>
+                            <div className="pos-header" style={{ gap: '15px' }}>
+                                <div className="category-tabs" style={{ flex: 1, minWidth: 0 }}>
                                     {categories.map(cat => (
                                         <button 
                                             key={cat} 
@@ -459,7 +459,7 @@ const Sales = () => {
                                         </button>
                                     ))}
                                 </div>
-                                <div className="search-bar" style={{ position: 'relative', width: '250px', marginLeft: '15px' }}>
+                                <div className="search-bar" style={{ position: 'relative', width: '250px', flexShrink: 1, minWidth: '100px' }}>
                                     <Search size={18} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: '#888' }} />
                                     <input 
                                         type="text" 
@@ -688,14 +688,15 @@ const Sales = () => {
                                     <span className="total-price" style={{ fontSize: '1.4rem', fontWeight: '900' }}>${total.toLocaleString('es-AR')}</span>
                                 </div>
                                 
-                                <div className="pos-actions-grid" style={{ gap: '6px' }}>
+                                <div className="pos-actions-grid" style={{ gap: '6px', display: 'grid', gridTemplateColumns: '1fr 1fr' }}>
                                     <button 
                                         className="pending-btn" 
                                         disabled={cart.length === 0 || isSaving}
                                         onClick={() => handleSaveTicket('PENDING')}
-                                        style={{ padding: '8px', fontSize: '0.75rem', background: '#495057' }}
+                                        style={{ padding: '8px', fontSize: '0.85rem', background: '#ff922b', border: 'none', borderRadius: '6px', cursor: 'pointer', color: 'white', fontWeight: '800' }}
                                     >
-                                        PENDIENTE
+                                        MARCHAR A COCINA
+                                        <div style={{fontSize: '0.65rem', fontWeight: '500'}}>DEJAR PENDIENTE</div>
                                     </button>
                                     <button 
                                         className="checkout-btn" 
@@ -704,6 +705,7 @@ const Sales = () => {
                                         style={{ padding: '8px', fontSize: '0.85rem', background: '#28a745', border: 'none', borderRadius: '6px', cursor: 'pointer', color: 'white', fontWeight: '800' }}
                                     >
                                         COBRAR
+                                        <div style={{fontSize: '0.65rem', fontWeight: '500'}}>FINALIZAR TICKET</div>
                                     </button>
                                 </div>
                             </div>
