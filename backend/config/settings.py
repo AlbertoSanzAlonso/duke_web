@@ -191,13 +191,33 @@ STATIC_ROOT = BASE_DIR / "staticfiles"
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = env.bool('DEBUG', default=False)
-ALLOWED_HOSTS = ['api.dukeburger-sj.com', 'dukeburger-sj.com', '*']
+ALLOWED_HOSTS = ['api.dukeburger-sj.com', 'dukeburger-sj.com', 'localhost', '127.0.0.1']
 
 # CORS and Security
-CORS_ALLOW_ALL_ORIGINS = True
+CORS_ALLOWED_ORIGINS = [
+    "https://dukeburger-sj.com",
+    "https://api.dukeburger-sj.com",
+]
 CORS_ALLOW_CREDENTIALS = True
-CORS_ALLOW_HEADERS = ["*"]
-CORS_ALLOW_METHODS = ["*"]
+CORS_ALLOW_HEADERS = [
+    "accept",
+    "accept-encoding",
+    "authorization",
+    "content-type",
+    "dnt",
+    "origin",
+    "user-agent",
+    "x-csrftoken",
+    "x-requested-with",
+]
+CORS_ALLOW_METHODS = [
+    "DELETE",
+    "GET",
+    "OPTIONS",
+    "PATCH",
+    "POST",
+    "PUT",
+]
 
 CSRF_TRUSTED_ORIGINS = [
     "https://dukeburger-sj.com",
@@ -205,7 +225,6 @@ CSRF_TRUSTED_ORIGINS = [
 ]
 
 CORS_PREFLIGHT_MAX_AGE = 86400
-# Eliminación de CORS_URLS_REGEX para aplicar a todas las rutas por igual
 
 # Email Configuration
 EMAIL_BACKEND = env('EMAIL_BACKEND', default='django.core.mail.backends.smtp.EmailBackend')

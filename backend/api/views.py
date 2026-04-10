@@ -506,6 +506,8 @@ class SaleViewSet(viewsets.ModelViewSet):
     def get_permissions(self):
         if self.action in ['create', 'retrieve']:
             return [permissions.AllowAny()]
+        if self.action in ['mark_prepared', 'mark_delivered', 'revert_prepared', 'revert_delivery']:
+            return [permissions.IsAuthenticated(), (HasTPVPermission() | HasKitchenPermission())]
         return [permissions.IsAuthenticated(), HasTPVPermission()]
 
     @action(detail=False, methods=['post'], url_path='bulk-actions')
@@ -543,9 +545,12 @@ class SaleViewSet(viewsets.ModelViewSet):
     def mark_delivered(self, request, pk=None):
         sale = self.get_object()
         sale.is_delivered = True
+        sale.delivered_at = timezone.now()
+        # As per user request: marking as delivered also removes it from pending list in TPV
+        sale.status = 'COMPLETED'
         sale.save()
-        log_action(request.user if request.user.is_authenticated else None, 'COCINA', 'UPDATE', f'Pedido #{sale.id} marcado como RECOGIDO/ENTREGADO')
-        return Response({'message': f'Pedido #{sale.id} archivado como recogido.'})
+        log_action(request.user if request.user.is_authenticated else None, 'COCINA', 'UPDATE', f'Pedido #{sale.id} recogido y completado automáticamente')
+        return Response({'message': f'Pedido #{sale.id} archivado como recogido y completado.'})
 
     @action(detail=True, methods=['post'], url_path='revert-delivery')
     def revert_delivery(self, request, pk=None):
