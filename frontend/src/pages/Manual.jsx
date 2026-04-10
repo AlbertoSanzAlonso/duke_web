@@ -40,66 +40,49 @@ const Manual = () => {
       name: 'Panel de Administración', 
       role: 'PARA: ADMINISTRADORES / DUEÑOS',
       url: 'https://dukeburger-sj.com/admin', 
-      desc: 'Centro de control estratégico para supervisar finanzas, stock crítico y configurar parámetros del sistema Duke.',
+      desc: 'Centro de control estratégico accesible desde el inicio. Supervisa finanzas, stock crítico y configura parámetros globales.',
       image: '/manual/admin.webp',
       features: [
-        'Dashboard operativo con métricas en tiempo real.',
-        'Gestión avanzada de inventario y alertas de stock.',
-        'Control financiero con historial de 6 meses.',
-        'Configuración de horarios y tarifas de delivery.',
-        'Gestión de usuarios y niveles de acceso.'
+        'Dashboard: Resumen visual nada más entrar.',
+        'Alertas Stock: Indicadores rojos en la parte inferior del dash.',
+        'Configuración: Pestañas superiores para ajustes maestros.',
+        'Personal: Gestión de permisos desde Usuarios.'
       ],
       dashboardElements: [
         { 
           id: 'insights_pedidos',
           title: 'Pedidos de Hoy', 
-          desc: 'Resumen cuantitativo de ventas del día, tickets cobrados y pendientes.', 
+          desc: 'Resumen en la parte superior izquierda del Dashboard.', 
           icon: <ShoppingBag size={18} />, 
           image: '/manual/admin.webp',
-          longDesc: 'Este elemento muestra la actividad comercial del día en curso. Permite al administrador saber cuántos pedidos se han generado, cuántos ya han sido cobrados y cuántos están en espera de ser procesados o entregados.',
+          longDesc: 'Ubicado en la primera tarjeta del Dashboard. Muestra el total de ventas del día. Al hacer clic en el número de "Pendientes", el sistema te redirige automáticamente al listado de pedidos para gestionarlos.',
           linkTo: 'pedidos' 
         },
         { 
           id: 'insights_cocina',
           title: 'Estado Cocina', 
-          desc: 'Vista rápida de la carga de trabajo en cocina (Listos vs En Cocción).', 
+          desc: 'Segunda tarjeta del Dashboard. Control de tiempos.', 
           icon: <ChefHat size={18} />, 
           image: '/manual/kitchen.webp',
-          longDesc: 'Muestra en tiempo real la eficiencia operativa del equipo de producción. Ayuda a detectar cuellos de botella si el volumen de pedidos "En Cocción" es muy superior al de "Listos".',
+          longDesc: 'Muestra cuántos pedidos hay "En Cocción" y cuántos están "Listos". Puedes pulsar el botón "Ver más" para abrir el monitor de cocina completo y gestionar prioridades.',
           linkTo: 'cocina' 
         },
         { 
           id: 'insights_stock',
           title: 'Alertas de Stock', 
-          desc: 'Indicador crítico de insumos agotados o por debajo del mínimo.', 
+          desc: 'Tarjeta roja en la fila superior cuando hay faltantes.', 
           icon: <AlertTriangle size={18} />, 
           image: '/manual/inventario.webp',
-          longDesc: 'Notifica automáticamente cualquier ingrediente o producto que esté llegando a su límite crítico definido en el inventario. Ideal para realizar pedidos a proveedores a tiempo.',
+          longDesc: 'Aparece resaltada en rojo si algún insumo baja del mínimo. Haz clic en la tarjeta para ir directamente al Almacén y ver qué artículos necesitan reposición urgente.',
           linkTo: 'inventario' 
-        },
-        { 
-          id: 'insights_correo',
-          title: 'Correo Corporativo', 
-          desc: 'Bandeja de entrada para consultas directas desde el formulario web.', 
-          icon: <Mail size={18} />,
-          image: '/manual/admin.webp', // Pending real image
-          longDesc: 'Canal de comunicación directa con el cliente. Aquí se reciben los mensajes enviados desde la sección de contacto de la web pública.'
-        },
-        { 
-          id: 'insights_auditoria',
-          title: 'Auditoría', 
-          desc: 'Historial detallado de cada acción realizada en el sistema.', 
-          icon: <ClipboardList size={18} />,
-          image: '/manual/admin.webp', // Pending real image
-          longDesc: 'Registro de seguridad que almacena el "Logs" de movimientos: quién entró, qué producto editó, qué pedido eliminó, etc.'
         },
         { 
           id: 'insights_sistema',
           title: 'Sistema', 
-          desc: 'Acceso directo a la configuración global (Tarifas, Horarios, GPS).', 
+          desc: 'Última tarjeta del Dashboard o vía "Configuración" en el lateral.', 
           icon: <Settings size={18} />, 
           image: '/manual/configuracion.webp',
-          longDesc: 'Ajustes estructurales de la aplicación. Cambiar el precio base del envío o modificar el radio de entrega afecta a todo el sistema al instante.',
+          longDesc: 'Desde aquí controlas los pilares del negocio. Pulsa el botón para acceder a la configuración de GPS, tarifas de envío y horarios de apertura de la web.',
           linkTo: 'configuracion' 
         }
       ]
@@ -108,30 +91,28 @@ const Manual = () => {
       id: 'tpv',
       name: 'TPV (Punto de Venta)', 
       role: 'PARA: CAJEROS / ATENCIÓN',
-      url: 'https://dukeburger-sj.com/tpv', 
-      desc: 'Terminal de ventas presencial optimizada para atención rápida, cobros y despacho de pedidos locales y web.',
+      url: 'https://dukeburger-sj.com/admin/tpv', 
+      desc: 'Localizado en el menú lateral. Interfaz táctil para cobros rápidos y gestión de pedidos físicos.',
       image: '/manual/tpv.webp',
       features: [
-        'Interfaz táctil optimizada para rapidez.',
-        'Cálculo automático de envíos por geolocalización.',
-        'Generación de tickets digitales vía QR o WhatsApp.',
-        'Sincronización instantánea con la cocina.',
-        'Manejo de múltiples tickets pendientes simultáneos.'
+        'Carrito Lateral: Los productos elegidos aparecen a la derecha.',
+        'Buscador superior: Filtra productos por nombre rápidamente.',
+        'Botón Cobrar: Finaliza la venta y genera el ticket.',
+        'Tickets Pendientes: Listado inferior para cuentas sin cerrar.'
       ]
     },
     { 
       id: 'cocina',
       name: 'Monitor de Cocina', 
       role: 'PARA: EQUIPO DE COCINA',
-      url: 'https://dukeburger-sj.com/cocina', 
-      desc: 'Entorno de trabajo para los cocineros enfocado en la preparación secuencial y aviso de platos listos.',
+      url: 'https://dukeburger-sj.com/admin/cocina', 
+      desc: 'Visible en el menú lateral. Pantalla dedicada para organizar la producción por orden de prioridad.',
       image: '/manual/kitchen.webp',
       features: [
-        'Visualización clara de pedidos por orden de llegada.',
-        'Control de estados: En Cocción -> Listo -> Recogido.',
-        'Alertas visuales para pedidos con mucha espera.',
-        'Integración con el TPV para avisar al cajero automáticamente.',
-        'Pantalla de historial de pedidos entregados hoy.'
+        'Cards de Pedido: Cada pedido es una tarjeta con su tiempo transcurrido.',
+        'Botón "Listo": En la card del pedido para avisar al cajero.',
+        'Botón "Entregado": Para archivar el pedido una vez despachado.',
+        'Historial: Botón superior derecho para ver los platos de hoy.'
       ]
     }
   ];
@@ -141,104 +122,97 @@ const Manual = () => {
       id: 'carta',
       title: 'Menú Online',
       icon: <LayoutDashboard className="section-icon" />,
-      description: 'Gestión de la carta pública y precios de venta.',
+      description: 'Accede desde "Carta" en el panel lateral. Controla qué vendes en la web.',
       image: '/manual/carta.webp',
       features: [
-        'Publicación Instantánea: Elige productos del catálogo y hazlos visibles.',
-        'Gestión de Precios: Define el valor de venta al público para la web.',
-        'Filtros por Categoría: Burgers, Pachatas, Pizzas, Bebidas y Otros.',
-        'Disponibilidad: Botón para retirar de la carta productos sin stock.',
-        'Buscador: Localiza rápidamente cualquier producto publicado.'
+        'Añadir Producto: Selector superior para publicar ítems del catálogo.',
+        'Botón "Retirar": En cada card de producto para ocultarlo de la web.',
+        'Filtros Superiores: Navega entre Burgers, Pizzas, Bebidas, etc.',
+        'Edición de Precios: Escribe el valor directamente en el campo de la tarjeta.'
       ],
-      color: '#e67e22'
+      color: '#e67e22',
+      url: 'https://dukeburger-sj.com/admin/carta'
     },
     {
       id: 'pedidos',
       title: 'Gestión de Pedidos',
       icon: <ShoppingBag className="section-icon" />,
-      description: 'Panel centralizado para administrar todos los pedidos entrantes de la web.',
+      description: 'Módulo "Pedidos Clientes" en el lateral. Control de ventas online.',
       image: '/manual/pedidos.webp',
       features: [
-        'Buscador Inteligente: Localiza pedidos por ID, Nombre o contenido.',
-        'Filtros de Periodo: Segmentación por Hoy, Semana o Mes.',
-        'Filtros de Estado: Clasifica entre Pendientes y Completados.',
-        'Columnas Detalladas: Fecha, Cliente, Total y Estado.',
-        'Exportación: Botones de Excel (Verde) y PDF (Rojo) para reportes.',
-        'Acciones: Ver ticket, Imprimir y Cambio de estado rápido.'
+        'Barra de Filtros: En la parte superior (Hoy, Última Semana, Mes).',
+        'Botones de Exportación: Iconos de Excel y PDF arriba a la derecha.',
+        'Acción "Ver": Haz clic en la lupa de cada fila para ver el ticket completo.',
+        'Buscador: Campo de texto superior para filtrar por cliente o ID.'
       ],
-      color: '#ffffff'
+      color: '#ffffff',
+      url: 'https://dukeburger-sj.com/admin/pedidos-clientes'
     },
     {
       id: 'inventario',
-      title: 'Inventario de Almacén',
+      title: 'Almacén de Insumos',
       icon: <Package className="section-icon" />,
-      description: 'Control de materia prima y alertas de stock crítico.',
+      description: 'Módulo "Inventario" en el lateral. Gestión de stock de materia prima.',
       image: '/manual/inventario.webp',
       features: [
-        'Buscador de Artículos: Filtrado instantáneo por nombre de insumo.',
-        'Registro Rápido: Formulario superior para añadir nuevos productos.',
-        'Alertas de Stock Mínimo: El sistema avisa si un artículo está bajo.',
-        'Ajuste manual de stock y unidades de medida (Kg, Unidades, Cajas).',
-        'Exportación: Descarga el stock actual en Excel o PDF para auditoría.'
+        'Formulario de Alta: En la parte superior para añadir nuevos insumos.',
+        'Tabla de Stock: Indica cantidad, medida y alertas de mínimo.',
+        'Botón "Ajustar": Icono de lápiz para corregir stock manualmente.',
+        'Alertas Rojas: Fila resaltada automáticamente si falta mercancía.'
       ],
-      color: '#2ecc71'
+      color: '#2ecc71',
+      url: 'https://dukeburger-sj.com/admin/inventario'
     },
     {
       id: 'finanzas',
       title: 'Contabilidad Duke',
       icon: <TrendingUp className="section-icon" />,
-      description: 'Control de ingresos, gastos y balance de caja detallado.',
+      description: 'Módulo "Contabilidad" en el lateral. Balance de caja y gastos.',
       image: '/manual/contabilidad.webp',
       features: [
-        'Tarjetas de Resumen: Ingresos, Gastos y Beneficio Neto del periodo.',
-        'Filtros Temporales: Consulta balance Diario, Semanal o Mensual.',
-        'Registro de Movimientos: Botón "+ Nuevo Movimiento" para gastos manuales.',
-        'Historial Detallado: Listado con Fecha, Tipo, Descripción e Importe.',
-        'Auditoría: Seguimiento de origen (Venta TPV, Pago Proveedor, etc).'
+        'Dashboard Financiero: 3 tarjetas superiores (Ingresos, Gastos, Neto).',
+        'Botón "+ Movimiento": Azul, arriba a la derecha para añadir gastos.',
+        'Filtros de Mes: Selector superior para ver balances históricos.',
+        'Listado: Tabla inferior con el detalle de cada movimiento de dinero.'
       ],
-      color: '#9b59b6'
+      color: '#9b59b6',
+      url: 'https://dukeburger-sj.com/admin/contabilidad'
     },
     {
       id: 'configuracion',
       title: 'Configuración Duke',
       icon: <Settings className="section-icon" />,
-      description: 'Ajustes maestros del sistema, tarifas y personal.',
+      description: 'Módulo "Configuración" (icono engranaje) o desde el Dashboard.',
       image: '/manual/configuracion.webp',
       subSections: [
         {
           title: 'Parámetros de Envío',
-          desc: 'Ajusta el precio base, el plus por kilometraje y el radio máximo de entrega (GPS). Guardar cambios aplica instantáneamente.',
+          desc: 'Pestaña "General". Ajusta montos de delivery en los campos centrales.',
           image: '/manual/configuracion.webp'
         },
         {
           title: 'Gestión de Horarios',
-          desc: 'Define las franjas horarias de atención para cada día de la semana. Puedes marcar días como cerrados o abiertos las 24hs (00:00 a 00:00).',
+          desc: 'Pestaña "Horarios". Usa los selectores para definir apertura y cierre diaria.',
           image: '/manual/horarios.webp'
         },
         {
           title: 'Galería Local',
-          desc: 'Administra las fotos que aparecen en tu vitrina digital. Puedes reordenarlas arrastrando desde el icono de las flechas y añadir títulos descriptivos.',
+          desc: 'Pestaña "Galería". Botón "Subir Imagen" arriba y flechas para reordenar.',
           image: '/manual/galeria.webp'
         },
         {
           title: 'Gestión de Usuarios',
-          desc: 'Controla quién tiene acceso al sistema y con qué nivel de permisos (SuperUser, TPV, Contabilidad). Puedes crear nuevos perfiles de staff, resetear contraseñas o dar de baja accesos.',
+          desc: 'Pestaña "Personal". Botón "+ Nuevo Usuario" para añadir staff.',
           image: '/manual/usuarios.webp'
-        },
-        {
-          title: 'Personalización Web',
-          desc: 'Permite editar el texto del banner deslizante (Marquee) que aparece en la web pública. Ideal para anunciar promociones del día o mensajes de bienvenida.',
-          image: '/manual/personalizacion.webp'
         }
       ],
       features: [
-        'Parámetros de Envío: Define precio base, costo por KM y límites GPS.',
-        'Gestión de Horarios: Controla la disponibilidad de la web pública por día.',
-        'Galería de Imágenes: Sube y recorta fotos para el menú digital.',
-        'Gestión de Personal: Administra usuarios, contraseñas y permisos.',
-        'Seguridad: Control de accesos y configuración de motor de pagos.'
+        'Barra de Pestañas: Localizada arriba para cambiar de sección técnica.',
+        'Botón "Guardar": Siempre visible abajo para confirmar los cambios.',
+        'Selector de Redondeo: Ajusta los múltiplos de precio ($100, $500, etc).'
       ],
-      color: '#34495e'
+      color: '#34495e',
+      url: 'https://dukeburger-sj.com/admin/config'
     },
     {
       id: 'asistente',
