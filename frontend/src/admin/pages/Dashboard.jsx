@@ -41,7 +41,7 @@ const Dashboard = () => {
                 completedToday: insights.today_sales.completed,
                 kitchenPending: insights.today_sales.kitchen_pending,
                 kitchenReady: insights.today_sales.kitchen_ready,
-                kitchenDelivered: insights.today_sales.kitchen_delivered_count || 0,
+                kitchenDelivered: insights.today_sales.kitchen_delivered || 0,
                 kitchenPendingList: insights.today_sales.kitchen_pending_list,
                 kitchenReadyList: insights.today_sales.kitchen_ready_list,
                 kitchenDeliveredList: insights.today_sales.kitchen_delivered_list || [],
@@ -230,11 +230,11 @@ const Dashboard = () => {
                         width: '95%', maxWidth: '550px', maxHeight: '90vh', display: 'flex', flexDirection: 'column', 
                         padding: '0', overflow: 'hidden', borderRadius: '20px', position: 'relative'
                     }}>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '20px', borderBottom: '1px solid #eee', background: '#fff' }}>
-                            <h2 style={{ margin: 0, display: 'flex', alignItems: 'center', gap: '10px', fontSize: '1.3rem' }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '20px', borderBottom: '1px solid #333', background: '#1a1b1e', color: '#fff' }}>
+                            <h2 style={{ margin: 0, display: 'flex', alignItems: 'center', gap: '10px', fontSize: '1.3rem', color: '#fff' }}>
                                 <Utensils color="var(--admin-primary)" /> Control de Cocina
                             </h2>
-                            <button onClick={() => setShowKitchenModal(false)} style={{ background: 'none', border: 'none', fontSize: '1.5rem', cursor: 'pointer' }}>×</button>
+                            <button onClick={() => setShowKitchenModal(false)} style={{ background: 'none', border: 'none', fontSize: '1.5rem', cursor: 'pointer', color: '#fff' }}>×</button>
                         </div>
 
                         <div style={{ flex: 1, overflowY: 'auto', padding: '20px' }}>

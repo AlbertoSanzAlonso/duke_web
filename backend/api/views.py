@@ -4,10 +4,10 @@ from rest_framework.decorators import api_view, permission_classes, parser_class
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from django.contrib.auth.models import User
 from django.db.models import Q, F, Sum, Count, Avg
-from django.db.models.functions import TruncDate
+from django.db.models.functions import TruncDate, TruncMonth
 from django.utils import timezone
 from datetime import timedelta
-from .models import (Product, MenuEntry, Sale, Expense, InventoryItem, 
+from .models import (Product, MenuEntry, Sale, SaleItem, Expense, InventoryItem, 
                      SupplierOrder, GlobalSetting, GalleryImage, OpeningHour, DeliverySetting, 
                      UserProfile, ActionLog, log_action)
 from .serializers import (ProductSerializer, MenuEntrySerializer, SaleSerializer, 
@@ -929,15 +929,52 @@ def AIHelpView(request):
         # --- RESUMEN SEMANAL (Últimos 7 días) ---
         week_start = today_start - timedelta(days=7)
         w_sales, w_exp = get_month_stats(week_start, now)
+        
+        # --- TOP PRODUCTOS (Semanal) ---
+        top_selling = SaleItem.objects.filter(sale__date__gte=week_start, sale__status='COMPLETED')\
+            .values('menu_entry__product__name')\
+            .annotate(qty=Sum('quantity'))\
+            .order_by('-qty')[:5]
+        top_selling_text = ", ".join([f"{p['menu_entry__product__name']} ({p['qty']})" for p in top_selling]) if top_selling.exists() else "Sin ventas registradas"
+
+        # --- COMPARATIVA MENSUAL (6 meses) ---
+        monthly_history = Sale.objects.filter(date__gte=now - timedelta(days=180), status='COMPLETED')\
+            .annotate(month=TruncMonth('date'))\
+            .values('month')\
+            .annotate(ventas=Sum('total_amount'))\
+            .order_by('-month')
+        
+        monthly_exp_history = Expense.objects.filter(date__gte=now - timedelta(days=180))\
+            .annotate(month=TruncMonth('date'))\
+            .values('month')\
+            .annotate(gastos=Sum('amount'))\
+            .order_by('-month')
+
+        finance_history_map = {}
+        for s in monthly_history:
+            m_str = s['month'].strftime('%B %Y')
+            finance_history_map[m_str] = {'v': s['ventas'], 'g': 0}
+        for e in monthly_exp_history:
+            m_str = e['month'].strftime('%B %Y')
+            if m_str in finance_history_map:
+                finance_history_map[m_str]['g'] = e['gastos']
+            else:
+                finance_history_map[m_str] = {'v': 0, 'g': e['gastos']}
+        
+        finance_history_text = "\n".join([f"- {m}: Ventas ${data['v']} | Gastos ${data['g']}" for m, data in finance_history_map.items()])
 
         live_context = (
             f"ESTADO DEL SISTEMA ({now.strftime('%d/%m/%y %H:%M')}):\n\n"
+            f"--- PRODUCTOS MÁS VENDIDOS (ESTA SEMANA) ---\n"
+            f"{top_selling_text}\n\n"
             f"--- FINANZAS HOY ---\n"
             f"- Ventas Cobradas: ${total_sales} ({count_sales} tickets)\n"
             f"- Gastos: ${total_expenses}\n"
             f"- Balance: ${total_sales - total_expenses}\n\n"
             f"--- RESUMEN SEMANAL (7 días) ---\n"
             f"- Ventas: ${w_sales}, Gastos: ${w_exp}, Neto: ${w_sales - w_exp}\n\n"
+            f"--- COMPARATIVA MENSUAL (Historial) ---\n"
+            f"{finance_history_text}\n\n"
             f"--- RESUMEN MENSUAL ---\n"
             f"- ESTE MES: Ventas ${m_sales}, Gastos ${m_exp}, Neto ${m_sales - m_exp}\n"
             f"- MES PASADO: Ventas ${lm_sales}, Gastos ${lm_exp}, Neto ${lm_sales - lm_exp}\n\n"

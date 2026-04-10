@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
-import { fetchMenuEntries, createSale, fetchSales, updateSale, deleteSale, bulkActionSales } from '../../services/api';
-import { Trash2, Edit2, ChevronRight, CheckCircle2, MoreVertical, Plus, Minus, Search, ShoppingCart, Receipt, X, MapPin } from 'lucide-react';
+import { fetchMenuEntries, createSale, fetchSales, updateSale, deleteSale, bulkActionSales, fetchDashboardInsights } from '../../services/api';
+import { Trash2, Edit2, ChevronRight, CheckCircle2, MoreVertical, Plus, Minus, Search, ShoppingCart, Receipt, X, MapPin, Utensils, UtensilsCrossed } from 'lucide-react';
 import LoadingScreen from '../components/LoadingScreen';
 import Toast from '../components/Toast';
 import './Sales.css';
@@ -11,6 +11,9 @@ const Sales = () => {
     const isStandalone = location.pathname === '/tpv';
     const [currentTime, setCurrentTime] = useState(new Date());
     const [viewMode, setViewMode] = useState('tpv'); // 'tpv' or 'pending'
+    const [isKitchenModalOpen, setIsKitchenModalOpen] = useState(false);
+    const [kitchenData, setKitchenData] = useState(null);
+    const [isLoadingKitchen, setIsLoadingKitchen] = useState(false);
 
     
     useEffect(() => {
@@ -108,6 +111,18 @@ const Sales = () => {
         return () => window.removeEventListener('new-order-received', handleNewOrder);
     }, [location.state]);
     
+    const loadKitchenSummary = async () => {
+        setIsLoadingKitchen(true);
+        try {
+            const data = await fetchDashboardInsights();
+            setKitchenData(data);
+        } catch (error) {
+            console.error("Error loading kitchen summary:", error);
+        } finally {
+            setIsLoadingKitchen(false);
+        }
+    };
+
     const loadData = async () => {
         setLoading(true);
         try {
@@ -564,6 +579,29 @@ const Sales = () => {
                     onClick={() => setViewMode('pending')}
                 >
                     TICKETS PENDIENTES ({pendingTickets.length})
+                </button>
+                <button 
+                    className="kitchen-summary-btn"
+                    onClick={() => {
+                        loadKitchenSummary();
+                        setIsKitchenModalOpen(true);
+                    }}
+                    style={{ 
+                        marginLeft: 'auto', 
+                        background: '#1a1a1a', 
+                        color: '#fff', 
+                        borderRadius: '10px', 
+                        border: '1px solid #444',
+                        display: 'flex', 
+                        alignItems: 'center', 
+                        gap: '8px',
+                        padding: '10px 15px',
+                        cursor: 'pointer',
+                        fontWeight: 'bold',
+                        fontSize: '0.85rem'
+                    }}
+                >
+                    <Utensils size={16} /> ESTADO COCINA
                 </button>
             </div>
 
@@ -1112,7 +1150,66 @@ const Sales = () => {
                     </div>
                 </div>
             )}
-            {toast && <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />}
+            {/* Modal de Estado de Cocina */}
+            {isKitchenModalOpen && (
+                <div className="modal-overlay" onClick={() => setIsKitchenModalOpen(false)}>
+                    <div className="pos-modal" onClick={e => e.stopPropagation()} style={{ maxWidth: '600px', width: '95%' }}>
+                        <div className="pos-modal-header">
+                            <h2 style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                                <UtensilsCrossed size={24} /> ESTADO DE COCINA
+                            </h2>
+                            <button className="close-btn" onClick={() => setIsKitchenModalOpen(false)}><X /></button>
+                        </div>
+                        <div className="pos-modal-body" style={{ maxHeight: '70vh', overflowY: 'auto', padding: '20px' }}>
+                            {isLoadingKitchen ? (
+                                <div style={{ textAlign: 'center', padding: '40px' }}>Cargando estado...</div>
+                            ) : kitchenData ? (
+                                <div className="kitchen-status-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
+                                    <div className="kitchen-status-col">
+                                        <h4 style={{ color: '#f03e3e', borderBottom: '2px solid #f03e3e', paddingBottom: '5px', marginBottom: '15px' }}>EN COCINA ({kitchenData.kitchenPending})</h4>
+                                        <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                                            {kitchenData.kitchenPendingList.length === 0 ? (
+                                                <p style={{ opacity: 0.5, fontSize: '0.9rem' }}>No hay pedidos</p>
+                                            ) : (
+                                                kitchenData.kitchenPendingList.map(order => (
+                                                    <div key={order.id} style={{ padding: '10px', background: '#fff5f5', borderRadius: '8px', borderLeft: '4px solid #f03e3e' }}>
+                                                        <div style={{ fontWeight: 'bold' }}>#{order.id} - {order.customer}</div>
+                                                        <div style={{ fontSize: '0.75rem', color: '#888' }}>
+                                                            ⏲️ {new Date(order.created_at).toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit', timeZone: 'America/Argentina/Buenos_Aires' })}
+                                                        </div>
+                                                    </div>
+                                                ))
+                                            )}
+                                        </div>
+                                    </div>
+                                    <div className="kitchen-status-col">
+                                        <h4 style={{ color: '#37b24d', borderBottom: '2px solid #37b24d', paddingBottom: '5px', marginBottom: '15px' }}>LISTOS ({kitchenData.kitchenReady})</h4>
+                                        <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                                            {kitchenData.kitchenReadyList.length === 0 ? (
+                                                <p style={{ opacity: 0.5, fontSize: '0.9rem' }}>No hay pedidos</p>
+                                            ) : (
+                                                kitchenData.kitchenReadyList.map(order => (
+                                                    <div key={order.id} style={{ padding: '10px', background: '#ebfbee', borderRadius: '8px', borderLeft: '4px solid #37b24d' }}>
+                                                        <div style={{ fontWeight: 'bold' }}>#{order.id} - {order.customer}</div>
+                                                        <div style={{ fontSize: '0.75rem', color: '#888' }}>
+                                                            ✅ {new Date(order.updated_at).toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit', timeZone: 'America/Argentina/Buenos_Aires' })}
+                                                        </div>
+                                                    </div>
+                                                ))
+                                            )}
+                                        </div>
+                                    </div>
+                                </div>
+                            ) : (
+                                <p>No se pudo cargar la información.</p>
+                            )}
+                        </div>
+                        <div className="pos-modal-footer">
+                            <button className="confirm-btn" style={{ width: '100%' }} onClick={() => setIsKitchenModalOpen(false)}>CERRAR</button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 };
