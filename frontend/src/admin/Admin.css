@@ -144,7 +144,7 @@ select::placeholder {
     padding: 20px;
     box-shadow: 0 2px 8px rgba(0,0,0,0.05);
     max-width: 100%;
-    overflow: hidden;
+    overflow: visible; /* Allow mobile card rows to overflow correctly */
 }
 
 /* Prevent horizontal scroll on mobile */

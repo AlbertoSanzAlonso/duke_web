@@ -488,6 +488,7 @@ const Accounting = () => {
                             </button>
                         </div>
                         <div className="period-toggle">
+                            <button className={viewMode === 'all' && !startDate && !endDate ? 'active' : ''} onClick={() => { setViewMode('all'); setStartDate(''); setEndDate(''); }}>TODOS</button>
                             <button className={viewMode === 'daily' && !startDate && !endDate ? 'active' : ''} onClick={() => { setViewMode('daily'); setStartDate(''); setEndDate(''); }}>DIARIO</button>
                             <button className={viewMode === 'weekly' && !startDate && !endDate ? 'active' : ''} onClick={() => { setViewMode('weekly'); setStartDate(''); setEndDate(''); }}>SEMANAL</button>
                             <button className={viewMode === 'monthly' && !startDate && !endDate ? 'active' : ''} onClick={() => { setViewMode('monthly'); setStartDate(''); setEndDate(''); }}>MENSUAL</button>

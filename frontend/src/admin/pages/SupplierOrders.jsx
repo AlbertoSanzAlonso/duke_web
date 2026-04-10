@@ -369,7 +369,7 @@ const SupplierOrders = () => {
                         
                         <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
                             <div className="period-selector" style={{ display: 'flex', background: '#f1f3f5', padding: '4px', borderRadius: '10px' }}>
-                                {['daily', 'weekly', 'monthly'].map(mode => (
+                                {['all', 'daily', 'weekly', 'monthly'].map(mode => (
                                     <button
                                         key={mode}
                                         onClick={() => { setViewMode(mode); setStartDate(''); setEndDate(''); }}
@@ -379,7 +379,7 @@ const SupplierOrders = () => {
                                             color: viewMode === mode && !startDate && !endDate ? '#fff' : '#666'
                                         }}
                                     >
-                                        {mode === 'daily' ? 'Diario' : mode === 'weekly' ? 'Semanal' : 'Mensual'}
+                                        {mode === 'all' ? 'Todos' : mode === 'daily' ? 'Diario' : mode === 'weekly' ? 'Semanal' : 'Mensual'}
                                     </button>
                                 ))}
                             </div>
