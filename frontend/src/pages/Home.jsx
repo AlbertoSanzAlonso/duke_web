@@ -185,9 +185,13 @@ function Home() {
         const isWithinDateRange = (!entry.start_date || todayStr >= entry.start_date) && 
                                   (!entry.end_date || todayStr <= entry.end_date);
         const isAvailableToday = isScheduledToday && isWithinDateRange;
-        if (!isAvailableToday) return acc;
-
+        
         const cat = entry.category || 'Burgers';
+        
+        // Only exclude if not scheduled today AND NOT a promo
+        // Promos should be shown even if not available today (with 'No Disponible' label)
+        if (!isAvailableToday && cat !== 'Promos') return acc;
+
         if (!acc[cat]) acc[cat] = [];
         
         const daysMapRef = { 'monday': 'Lunes', 'tuesday': 'Martes', 'wednesday': 'Miércoles', 'thursday': 'Jueves', 'friday': 'Viernes', 'saturday': 'Sábado', 'sunday': 'Domingo' };
