@@ -46,12 +46,58 @@ const Manual = () => {
         'Gestión de usuarios y niveles de acceso.'
       ],
       dashboardElements: [
-        { title: 'Pedidos de Hoy', desc: 'Resumen cuantitativo de ventas del día, diferenciando tickets cobrados de pendientes.', icon: <ShoppingBag size={18} /> },
-        { title: 'Estado Cocina', desc: 'Vista rápida de la carga de trabajo en cocina (Listos vs En Cocción).', icon: <ChefHat size={18} /> },
-        { title: 'Alertas de Stock', desc: 'Indicador crítico de insumos agotados o por debajo del mínimo de seguridad.', icon: <AlertTriangle size={18} /> },
-        { title: 'Correo Corporativo', desc: 'Bandeja de entrada para consultas directas desde el formulario web.', icon: <Mail size={18} /> },
-        { title: 'Auditoría', desc: 'Historial detallado de cada acción realizada en el sistema (quién, qué y cuándo).', icon: <ClipboardList size={18} /> },
-        { title: 'Sistema', desc: 'Acceso directo a la configuración global (Horarios, Precios Delivery, GPS).', icon: <Settings size={18} /> }
+        { 
+          id: 'insights_pedidos',
+          title: 'Pedidos de Hoy', 
+          desc: 'Resumen cuantitativo de ventas del día, tickets cobrados y pendientes.', 
+          icon: <ShoppingBag size={18} />, 
+          image: '/manual/admin.webp',
+          longDesc: 'Este elemento muestra la actividad comercial del día en curso. Permite al administrador saber cuántos pedidos se han generado, cuántos ya han sido cobrados y cuántos están en espera de ser procesados o entregados.',
+          linkTo: 'pedidos' 
+        },
+        { 
+          id: 'insights_cocina',
+          title: 'Estado Cocina', 
+          desc: 'Vista rápida de la carga de trabajo en cocina (Listos vs En Cocción).', 
+          icon: <ChefHat size={18} />, 
+          image: '/manual/kitchen.webp',
+          longDesc: 'Muestra en tiempo real la eficiencia operativa del equipo de producción. Ayuda a detectar cuellos de botella si el volumen de pedidos "En Cocción" es muy superior al de "Listos".',
+          linkTo: 'cocina' 
+        },
+        { 
+          id: 'insights_stock',
+          title: 'Alertas de Stock', 
+          desc: 'Indicador crítico de insumos agotados o por debajo del mínimo.', 
+          icon: <AlertTriangle size={18} />, 
+          image: '/manual/inventario.webp',
+          longDesc: 'Notifica automáticamente cualquier ingrediente o producto que esté llegando a su límite crítico definido en el inventario. Ideal para realizar pedidos a proveedores a tiempo.',
+          linkTo: 'inventario' 
+        },
+        { 
+          id: 'insights_correo',
+          title: 'Correo Corporativo', 
+          desc: 'Bandeja de entrada para consultas directas desde el formulario web.', 
+          icon: <Mail size={18} />,
+          image: '/manual/admin.webp', // Pending real image
+          longDesc: 'Canal de comunicación directa con el cliente. Aquí se reciben los mensajes enviados desde la sección de contacto de la web pública.'
+        },
+        { 
+          id: 'insights_auditoria',
+          title: 'Auditoría', 
+          desc: 'Historial detallado de cada acción realizada en el sistema.', 
+          icon: <ClipboardList size={18} />,
+          image: '/manual/admin.webp', // Pending real image
+          longDesc: 'Registro de seguridad que almacena el "Logs" de movimientos: quién entró, qué producto editó, qué pedido eliminó, etc.'
+        },
+        { 
+          id: 'insights_sistema',
+          title: 'Sistema', 
+          desc: 'Acceso directo a la configuración global (Tarifas, Horarios, GPS).', 
+          icon: <Settings size={18} />, 
+          image: '/manual/configuracion.webp',
+          longDesc: 'Ajustes estructurales de la aplicación. Cambiar el precio base del envío o modificar el radio de entrega afecta a todo el sistema al instante.',
+          linkTo: 'configuracion' 
+        }
       ]
     },
     { 
@@ -85,6 +131,21 @@ const Manual = () => {
   ];
 
   const modules = [
+    {
+      id: 'carta',
+      title: 'Menú Online',
+      icon: <LayoutDashboard className="section-icon" />,
+      description: 'Gestión de la carta pública y precios de venta.',
+      image: '/manual/carta.webp',
+      features: [
+        'Publicación Instantánea: Elige productos del catálogo y hazlos visibles.',
+        'Gestión de Precios: Define el valor de venta al público para la web.',
+        'Filtros por Categoría: Burgers, Pachatas, Pizzas, Bebidas y Otros.',
+        'Disponibilidad: Botón para retirar de la carta productos sin stock.',
+        'Buscador: Localiza rápidamente cualquier producto publicado.'
+      ],
+      color: '#e67e22'
+    },
     {
       id: 'pedidos',
       title: 'Gestión de Pedidos',
@@ -137,6 +198,33 @@ const Manual = () => {
       icon: <Settings className="section-icon" />,
       description: 'Ajustes maestros del sistema, tarifas y personal.',
       image: '/manual/configuracion.webp',
+      subSections: [
+        {
+          title: 'Parámetros de Envío',
+          desc: 'Ajusta el precio base, el plus por kilometraje y el radio máximo de entrega (GPS). Guardar cambios aplica instantáneamente.',
+          image: '/manual/configuracion.webp'
+        },
+        {
+          title: 'Gestión de Horarios',
+          desc: 'Define las franjas horarias de atención para cada día de la semana. Puedes marcar días como cerrados o abiertos las 24hs (00:00 a 00:00).',
+          image: '/manual/horarios.webp'
+        },
+        {
+          title: 'Galería Local',
+          desc: 'Administra las fotos que aparecen en tu vitrina digital. Puedes reordenarlas arrastrando desde el icono de las flechas y añadir títulos descriptivos.',
+          image: '/manual/galeria.webp'
+        },
+        {
+          title: 'Gestión de Usuarios',
+          desc: 'Controla quién tiene acceso al sistema y con qué nivel de permisos (SuperUser, TPV, Contabilidad). Puedes crear nuevos perfiles de staff, resetear contraseñas o dar de baja accesos.',
+          image: '/manual/usuarios.webp'
+        },
+        {
+          title: 'Personalización Web',
+          desc: 'Permite editar el texto del banner deslizante (Marquee) que aparece en la web pública. Ideal para anunciar promociones del día o mensajes de bienvenida.',
+          image: '/manual/personalizacion.webp'
+        }
+      ],
       features: [
         'Parámetros de Envío: Define precio base, costo por KM y límites GPS.',
         'Gestión de Horarios: Controla la disponibilidad de la web pública por día.',
@@ -160,6 +248,18 @@ const Manual = () => {
     }
   ];
 
+  const faqs = [
+    { q: '¿Cómo cambio el horario?', a: 'Ve a Configuración > Horarios. Allí verás una tabla con los días de la semana donde puedes ajustar la franja de atención y marcar el estado como Abierto o Cerrado.' },
+    { q: '¿Cómo cambio las promos?', a: 'Accede al módulo de Promociones desde el Panel. Puedes crear nuevas promos, elegir en qué días se publican y subir una imagen dedicada para cada una.' },
+    { q: '¿Cómo cambio las imágenes de la galería?', a: 'Dentro de Configuración > Galería, puedes subir nuevas fotos del local. Usa el icono de las flechas para reordenarlas según cómo quieras que aparezcan en la web.' },
+    { q: '¿Cómo añado/quito/modifico artículos?', a: 'Para insumos de cocina y stock, usa el módulo de Inventario. Para productos definitivos del menú, usa el módulo de Productos.' },
+    { q: '¿Cómo creo un nuevo usuario?', a: 'En Configuración > Personal puedes dar de alta a nuevos miembros del equipo y asignarles permisos específicos (ej. solo Cocina o solo Contabilidad).' },
+    { q: '¿Cómo manejo tickets?', a: 'Usa el TPV para generar nuevas ventas. Los tickets pendientes aparecerán en la lista lateral para ser cobrados o editados en cualquier momento.' },
+    { q: '¿Cómo manejo pedidos al proveedor?', a: 'En Inventario > Pedidos Proveedor puedes registrar las compras realizadas. Al completar un pedido, el stock de esos insumos se incrementará automáticamente.' },
+    { q: '¿Cómo manejo pedidos de clientes?', a: 'Todos los pedidos que entran por la web aparecen en Gestión de Pedidos. Desde allí puedes ver el ticket, imprimirlo y cambiar su estado.' },
+    { q: '¿Cómo funciona la carta?', a: 'En el módulo Menú Online puedes activar o desactivar productos que ya están en tu catálogo (Productos) y asignarles el precio de venta final.' }
+  ];
+
   return (
     <div className="manual-page">
       <Helmet>
@@ -167,42 +267,60 @@ const Manual = () => {
       </Helmet>
 
       {selectedDetail && (
-        <div className="manual-modal-overlay fullscreen" onClick={() => { setSelectedDetail(null); setIsZoomed(false); }}>
+        <div className="manual-modal-overlay fullscreen" onClick={() => { setSelectedDetail(null); setDrillDown(null); setIsZoomed(false); }}>
           <div className="manual-modal-container fullscreen" onClick={e => e.stopPropagation()}>
             <div className="modal-header">
               <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
-                {selectedDetail.icon || <LayoutDashboard size={24} />}
-                <h2>{selectedDetail.name || selectedDetail.title}</h2>
+                {drillDown ? <ArrowLeft className="clickable" onClick={() => setDrillDown(null)} /> : selectedDetail.icon}
+                <h2>{drillDown ? drillDown.title : (selectedDetail.name || selectedDetail.title)}</h2>
               </div>
-              <button className="close-btn" onClick={() => { setSelectedDetail(null); setIsZoomed(false); }}><X size={24} /></button>
+              <button className="close-btn" onClick={() => { setSelectedDetail(null); setDrillDown(null); setIsZoomed(false); }}><X size={24} /></button>
             </div>
             <div className="modal-content">
-              {selectedDetail.image && (
+              {(drillDown?.image || selectedDetail.image) && (
                 <div className="modal-image-box">
                   <div className={`image-wrapper ${isZoomed ? 'zoomed' : ''}`} onClick={() => setIsZoomed(!isZoomed)}>
-                    <img src={selectedDetail.image} alt={selectedDetail.name} />
-                    <div className="zoom-hint"><Maximize2 size={20} /> Click para ampliar captura</div>
+                    <img src={drillDown ? drillDown.image : selectedDetail.image} alt="Capture" />
+                    <div className="zoom-hint"><Maximize2 size={20} /> Click para ampliar</div>
                   </div>
-                  <div className="image-caption">Captura real del sistema en funcionamiento</div>
+                  <div className="image-caption">Captura real: {drillDown ? drillDown.title : (selectedDetail.name || selectedDetail.title)}</div>
                 </div>
               )}
               <div className="modal-info">
-                <p className="detail-desc">{selectedDetail.desc || selectedDetail.description}</p>
+                <p className="detail-desc">{drillDown ? drillDown.longDesc : (selectedDetail.desc || selectedDetail.description)}</p>
                 
-                {selectedDetail.dashboardElements && (
+                {!drillDown && selectedDetail.dashboardElements && (
                   <div className="dashboard-structure">
-                    <h3>Estructura del Panel:</h3>
-                    <div className="element-grid">
+                    <h3>Elementos del Panel (Click para ver detalle):</h3>
+                    <div className="insight-drill-grid">
                       {selectedDetail.dashboardElements.map((el, i) => (
-                        <div key={i} className="element-item">
-                          <div className="el-header">
-                            {el.icon}
+                        <button key={i} className="insight-btn" onClick={() => setDrillDown(el)}>
+                          <div className="btn-icon">{el.icon}</div>
+                          <div className="btn-text">
                             <strong>{el.title}</strong>
+                            <span>{el.desc}</span>
                           </div>
-                          <p>{el.desc}</p>
-                        </div>
+                          <Maximize2 size={16} className="drill-icon" />
+                        </button>
                       ))}
                     </div>
+                  </div>
+                )}
+
+                {!drillDown && selectedDetail.subSections && (
+                  <div className="sub-sections-list">
+                    {selectedDetail.subSections.map((sub, idx) => (
+                      <div key={idx} className="manual-sub-section">
+                        <h4>{sub.title}</h4>
+                        <p>{sub.desc}</p>
+                        {sub.image && (
+                          <div className="sub-image-wrapper" onClick={() => { setSelectedDetail({...selectedDetail, image: sub.image}); setIsZoomed(true); }}>
+                            <img src={sub.image} alt={sub.title} />
+                            <div className="zoom-hint"><Maximize2 size={16} /> Ver en grande</div>
+                          </div>
+                        )}
+                      </div>
+                    ))}
                   </div>
                 )}
 
@@ -296,6 +414,18 @@ const Manual = () => {
                   </div>
                   <p className="card-desc">{module.description}</p>
                   <div className="card-action-hint">Explorar funcionalidades</div>
+                </div>
+              ))}
+            </div>
+          </section>
+
+          <section className="faq-section">
+            <h2 className="section-title">Preguntas Frecuentes (FAQ)</h2>
+            <div className="faq-grid">
+              {faqs.map((faq, i) => (
+                <div key={i} className="faq-item">
+                  <h3>{faq.q}</h3>
+                  <p>{faq.a}</p>
                 </div>
               ))}
             </div>

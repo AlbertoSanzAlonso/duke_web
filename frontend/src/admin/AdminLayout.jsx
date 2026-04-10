@@ -211,15 +211,6 @@ const AdminLayout = () => {
             </a>
           )}
           
-          <Link
-            to="/manual"
-            className="nav-item"
-            style={{ marginTop: (profile?.is_superuser || profile?.profile?.can_use_webmail) ? '5px' : '20px', borderTop: (profile?.is_superuser || profile?.profile?.can_use_webmail) ? 'none' : '1px solid rgba(255,255,255,0.1)', paddingTop: (profile?.is_superuser || profile?.profile?.can_use_webmail) ? '0' : '20px' }}
-            onClick={() => setIsMobileOpen(false)}
-          >
-            <Star size={20} color="var(--color-primary)" />
-            <span style={{ color: '#fff' }}>MANUAL DE USO</span>
-          </Link>
         </nav>
       </aside>
 
