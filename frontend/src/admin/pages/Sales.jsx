@@ -461,8 +461,8 @@ const Sales = () => {
                 <>
                     <div className="pos-main">
                         <div className="pos-left-content">
-                            <div className="pos-header" style={{ gap: '15px' }}>
-                                <div className="category-tabs" style={{ flex: 1, minWidth: 0 }}>
+                            <div className="pos-header" style={{ gap: '15px', flexWrap: 'wrap' }}>
+                                <div className="category-tabs" style={{ flex: 1, minWidth: 'min-content' }}>
                                     {categories.map(cat => (
                                         <button 
                                             key={cat} 
@@ -473,7 +473,7 @@ const Sales = () => {
                                         </button>
                                     ))}
                                 </div>
-                                <div className="search-bar" style={{ position: 'relative', width: '250px', flexShrink: 1, minWidth: '100px' }}>
+                                <div className="search-bar" style={{ position: 'relative', width: '250px', flexGrow: 1, flexShrink: 1, minWidth: '200px' }}>
                                     <Search size={18} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: '#888' }} />
                                     <input 
                                         type="text" 

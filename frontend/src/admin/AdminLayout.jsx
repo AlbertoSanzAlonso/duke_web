@@ -103,6 +103,12 @@ const AdminLayout = () => {
           }
           
           if (data.type === 'order_updated') {
+            if (!data.is_prepared && !data.is_delivered) {
+                setNotification({
+                    message: `⚠️ PEDIDO #${data.id} HA SIDO MODIFICADO`,
+                    type: 'info'
+                });
+            }
             // If it was just marked as prepared (and NOT yet delivered), notify
             if (data.is_prepared && !data.is_delivered) {
                 setNotification({

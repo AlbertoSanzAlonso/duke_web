@@ -109,6 +109,21 @@ class SaleCreateSerializer(serializers.ModelSerializer):
             SaleItem.objects.create(sale=sale, **item_data)
         return sale
 
+    def update(self, instance, validated_data):
+        items_data = validated_data.pop('items', None)
+        
+        for attr, value in validated_data.items():
+            setattr(instance, attr, value)
+        instance.save()
+
+        if items_data is not None:
+            # Recreate items from scratch to reflect accurate quantities / removals
+            instance.items.all().delete()
+            for item_data in items_data:
+                SaleItem.objects.create(sale=instance, **item_data)
+                
+        return instance
+
 class ExpenseSerializer(serializers.ModelSerializer):
     class Meta:
         model = Expense
