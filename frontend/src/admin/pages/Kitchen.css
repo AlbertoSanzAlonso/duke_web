@@ -33,7 +33,7 @@
     padding: 12px;
     background: #1a1a1a;
     border: 1px solid #333;
-    color: #888;
+    color: #fff !important;
     border-radius: 10px;
     font-weight: 700;
     cursor: pointer;
