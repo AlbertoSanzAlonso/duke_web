@@ -16,8 +16,12 @@ const Kitchen = () => {
     const [currentTime, setCurrentTime] = useState(new Date());
     const [toast, setToast] = useState(null);
     
-    // Modal state
     const [actionModal, setActionModal] = useState({ isOpen: false, order: null });
+    const activeTabRef = React.useRef(activeTab);
+
+    useEffect(() => {
+        activeTabRef.current = activeTab;
+    }, [activeTab]);
 
     const formatTime = (dateStr) => {
         if (!dateStr) return '---';
@@ -27,14 +31,13 @@ const Kitchen = () => {
     };
 
     useEffect(() => {
-        loadKitchenOrders();
         const timer = setInterval(() => setCurrentTime(new Date()), 1000);
         
         const handleNewOrder = () => {
-            console.log("Kitchen refresh triggered");
+            console.log("Kitchen refresh triggered from Event/SSE");
             loadKitchenOrders();
             // Notificamos sonido solo si estamos viendo pendientes para no confundir
-            if (activeTab === 'pending') {
+            if (activeTabRef.current === 'pending') {
                 const beep = new AudioContext();
                 const osc = beep.createOscillator();
                 const gain = beep.createGain();
@@ -62,7 +65,7 @@ const Kitchen = () => {
                 try {
                     const data = JSON.parse(event.data);
                     if (data.type === 'new_order' || data.type === 'order_updated') {
-                        window.dispatchEvent(new CustomEvent('new-order-received', { detail: data }));
+                        handleNewOrder();
                     }
                 } catch (e) {}
             };
@@ -76,6 +79,7 @@ const Kitchen = () => {
         };
         
         if (isStandalone) connectSSE();
+        loadKitchenOrders(); // Initial load
 
         window.addEventListener('new-order-received', handleNewOrder);
         return () => {
@@ -83,7 +87,7 @@ const Kitchen = () => {
             window.removeEventListener('new-order-received', handleNewOrder);
             if (es) es.close();
         };
-    }, [activeTab]);
+    }, []); // Only once at mount
 
     const loadKitchenOrders = async () => {
         try {
