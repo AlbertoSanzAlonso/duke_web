@@ -68,12 +68,22 @@ const Kitchen = () => {
             const data = await fetchSales();
             const todayStr = new Date().toLocaleDateString('en-CA', { timeZone: 'America/Argentina/Buenos_Aires' });
             
-            // Filtro por Día o estado pendiente/listo
+            // Filtro estricto de tiempo (últimas 16 horas para evitar tickets fantasma de días anteriores)
             const activeOrders = data.filter(o => {
-                const orderDate = new Date(o.date).toLocaleDateString('en-CA', { timeZone: 'America/Argentina/Buenos_Aires' });
-                const isToday = orderDate === todayStr;
-                // Mostrar si es de hoy O si aún no está entregado (esté pendiente o listo)
-                return isToday || !o.is_delivered;
+                const now = new Date();
+                const orderDate = new Date(o.date);
+                const hoursSinceCreated = (now - orderDate) / (1000 * 60 * 60);
+                
+                // 1. Si el pedido tiene más de 16 horas de antigüedad, nunca mostrar en cocina
+                if (hoursSinceCreated > 16) return false;
+                
+                // 2. Si es de las últimas 16 horas y NO está entregado, siempre mostrar (como pendiente o listo)
+                if (!o.is_delivered) return true;
+                
+                // 3. Si ESTÁ entregado, lo mostramos en historial solo durante las siguientes 6 horas desde la entrega
+                const deliveredDate = o.delivered_at ? new Date(o.delivered_at) : new Date(o.updated_at);
+                const hoursSinceDelivered = (now - deliveredDate) / (1000 * 60 * 60);
+                return hoursSinceDelivered <= 6;
             });
 
             // Separamos por estado
