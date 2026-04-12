@@ -33,21 +33,26 @@ const Kitchen = () => {
     useEffect(() => {
         const timer = setInterval(() => setCurrentTime(new Date()), 1000);
         
-        const handleNewOrder = () => {
-            console.log("Kitchen refresh triggered from Event/SSE");
+        const handleRealTime = (data) => {
+            console.log("Kitchen refresh triggered from Event/SSE:", data?.type);
             loadKitchenOrders();
-            // Notificamos sonido solo si estamos viendo pendientes para no confundir
-            if (activeTabRef.current === 'pending') {
-                const beep = new AudioContext();
-                const osc = beep.createOscillator();
-                const gain = beep.createGain();
-                osc.connect(gain);
-                gain.connect(beep.destination);
-                osc.type = 'sine';
-                osc.frequency.setValueAtTime(880, beep.currentTime);
-                gain.gain.setValueAtTime(0.05, beep.currentTime);
-                osc.start();
-                osc.stop(beep.currentTime + 0.1);
+            
+            // Sonido de alerta: SOLO para pedidos nuevos y si estamos en la pestaña de pendientes
+            if (data?.type === 'new_order' && activeTabRef.current === 'pending') {
+                try {
+                    const beep = new (window.AudioContext || window.webkitAudioContext)();
+                    const osc = beep.createOscillator();
+                    const gain = beep.createGain();
+                    osc.connect(gain);
+                    gain.connect(beep.destination);
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(880, beep.currentTime);
+                    gain.gain.setValueAtTime(0.05, beep.currentTime);
+                    osc.start();
+                    osc.stop(beep.currentTime + 0.1);
+                } catch (e) {
+                    console.error("Audio beep failed:", e);
+                }
             }
         };
 
@@ -65,7 +70,7 @@ const Kitchen = () => {
                 try {
                     const data = JSON.parse(event.data);
                     if (data.type === 'new_order' || data.type === 'order_updated') {
-                        handleNewOrder();
+                        handleRealTime(data);
                     }
                 } catch (e) {}
             };

@@ -103,21 +103,25 @@ const AdminLayout = () => {
           }
           
           if (data.type === 'order_updated') {
+            // Siempre avisar a los componentes (para refresco silencioso)
+            window.dispatchEvent(new CustomEvent('new-order-received', { detail: data }));
+
+            // No notificar visualmente (Toast) si el pedido ya está cobrado/completado
+            if (data.status === 'COMPLETED') return;
+
             if (!data.is_prepared && !data.is_delivered) {
                 setNotification({
                     message: `⚠️ PEDIDO #${data.id} HA SIDO MODIFICADO`,
                     type: 'info'
                 });
             }
-            // If it was just marked as prepared (and NOT yet delivered), notify
+            // Notificar solo si pasa a LISTO y no está ya entregado/cobrado
             if (data.is_prepared && !data.is_delivered) {
                 setNotification({
                     message: `✅ PEDIDO #${data.id} LISTO EN COCINA`,
                     type: 'success'
                 });
             }
-            // Trigger refresh in connected components
-            window.dispatchEvent(new CustomEvent('new-order-received', { detail: data }));
           }
         } catch (e) {
           // Silent for heatbeats

@@ -41,8 +41,8 @@ const Orders = () => {
         }).then(url => setQrImage(url));
         
         const handleNewOrder = (event) => {
-            console.log("Real-time (Orders): Nuevo pedido recibido, recargando...");
-            setToast({ message: "¡NUEVO PEDIDO RECIBIDO!", type: 'success' });
+            console.log("Real-time (Orders): Actualización recibida, recargando datos...");
+            // Solo recargamos silenciosamente, el AdminLayout ya muestra el Toast global si corresponde
             loadOrders();
         };
 

@@ -839,9 +839,10 @@ def OrderStreamView(request):
 
                 while True:
                     current_time = timezone.now()
-                    
+                    current_max_seen_id = last_seen_id # Snapshot to avoid catching new orders in the updated filter
+
                     # 1. New Orders
-                    new_sales = list(Sale.objects.filter(id__gt=last_seen_id).order_by('id'))
+                    new_sales = list(Sale.objects.filter(id__gt=current_max_seen_id).order_by('id'))
                     for sale in new_sales:
                         data = {
                             'type': 'new_order',
@@ -855,8 +856,8 @@ def OrderStreamView(request):
                         last_seen_id = sale.id
 
                     # 2. Updated Orders (e.g. marked as prepared)
-                    # Checking orders updated since last check, excluding the ones we just sent as "new"
-                    updated_sales = list(Sale.objects.filter(updated_at__gt=last_check_time, id__lte=last_seen_id).order_by('updated_at'))
+                    # Checking orders updated since last check, only for those already known (LTE current_max_seen_id)
+                    updated_sales = list(Sale.objects.filter(updated_at__gt=last_check_time, id__lte=current_max_seen_id).order_by('updated_at'))
                     for sale in updated_sales:
                         data = {
                             'type': 'order_updated',

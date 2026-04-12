@@ -93,10 +93,27 @@ const Sales = () => {
         loadData();
 
         // Real-time support
-        const handleNewOrder = (event) => {
-            console.log("Real-time: New order detected, refreshing pending tickets...");
-            setToast({ message: "¡NUEVO PEDIDO RECIBIDO!", type: 'success' });
-            loadData(true); // silent=true: no flash
+        const handleRealTime = (event) => {
+            const data = event.detail;
+            console.log("Real-time event received:", data.type);
+            
+            // Notification logic
+            if (isStandalone) {
+                // If we are in standalone TPV (no AdminLayout), we must show our own toasts
+                if (data.type === 'new_order') {
+                    setToast({ message: `🍔 ¡NUEVO PEDIDO! de ${data.customer} ($${data.total})`, type: 'success' });
+                } else if (data.type === 'order_updated' && data.is_prepared && !data.is_delivered) {
+                    setToast({ message: `✅ PEDIDO #${data.id} LISTO EN COCINA`, type: 'success' });
+                }
+            } else {
+                // If we are IN AdminLayout, it already handles the global toasts.
+                // We just show a local toast for new_order ONLY if we want it specifically here,
+                // but as per user request, we want to avoid "Nuevo Pedido" when it's just "Listo".
+                // So we do NOTHING here regarding toasts, AdminLayout handles it.
+            }
+
+            // Always refresh data silently
+            loadData(true);
         };
 
         // Handle navigation state from Orders.jsx
@@ -105,8 +122,8 @@ const Sales = () => {
             loadPendingSale(location.state.pendingOrder);
         }
 
-        window.addEventListener('new-order-received', handleNewOrder);
-        return () => window.removeEventListener('new-order-received', handleNewOrder);
+        window.addEventListener('new-order-received', handleRealTime);
+        return () => window.removeEventListener('new-order-received', handleRealTime);
     }, [location.state]);
     
     const handleAction = async (orderId, type) => {
