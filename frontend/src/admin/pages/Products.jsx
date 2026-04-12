@@ -15,7 +15,7 @@ const UNITS = ['unidades', 'kg', 'gramos', 'litros', 'ml', 'paquetes'];
 const INV_CATEGORIES = ['Mercadería', 'Materia Prima', 'Bebidas', 'Limpieza', 'Otros'];
 
 /* ─── Sub-componente: Panel Materia Prima ─────────────────── */
-function RawMaterialPanel({ product, onClose }) {
+function RawMaterialPanel({ product, onClose, onUpdate }) {
     const [inventoryItems, setInventoryItems] = useState([]);
     const [ingredients, setIngredients] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -75,6 +75,7 @@ function RawMaterialPanel({ product, onClose }) {
             setToast({ message: 'Ingrediente añadido', type: 'success' });
             setSelItemId(''); setSelQty(''); setSelMeasurementUnit('unidades'); setAddMode(null);
             load();
+            if (onUpdate) onUpdate(true); // Refrescar lista de productos principal de forma silenciosa
         } catch (e) {
             setToast({ message: e.message, type: 'error' });
         } finally { setSaving(false); }
@@ -114,6 +115,7 @@ function RawMaterialPanel({ product, onClose }) {
             });
             setNewQty(''); setNewMeasurementUnit('unidades'); setAddMode(null);
             load();
+            if (onUpdate) onUpdate(true);
         } catch (e) {
             setToast({ message: e.message, type: 'error' });
         } finally { setSaving(false); }
@@ -125,6 +127,7 @@ function RawMaterialPanel({ product, onClose }) {
             await deleteProductIngredient(id);
             setToast({ message: 'Ingrediente eliminado', type: 'success' });
             load();
+            if (onUpdate) onUpdate(true);
         } catch (e) { setToast({ message: e.message, type: 'error' }); }
     };
 
@@ -143,7 +146,8 @@ function RawMaterialPanel({ product, onClose }) {
         panel: { display: 'flex', flexDirection: 'column', gap: 0 },
         header: {
             display: 'flex', alignItems: 'center', gap: '12px',
-            padding: '20px 24px 16px', borderBottom: '1px solid #f0f0f0'
+            padding: '20px 60px 16px 24px', borderBottom: '1px solid #f0f0f0',
+            position: 'relative'
         },
         backBtn: {
             background: 'none', border: 'none', cursor: 'pointer',
@@ -206,7 +210,9 @@ function RawMaterialPanel({ product, onClose }) {
                 </button>
                 <div style={{ flex: 1 }} />
                 <FlaskConical size={20} color="#f03e3e" />
-                <h3 style={s.title}>Materia Prima: {product.name}</h3>
+                <h3 style={{ ...s.title, maxWidth: 'calc(100% - 120px)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                    Materia Prima: {product.name}
+                </h3>
             </div>
 
             {/* Lista de ingredientes */}
@@ -508,15 +514,15 @@ function Products() {
 
     useEffect(() => { loadProducts(); }, []);
 
-    const loadProducts = async () => {
+    const loadProducts = async (silent = false) => {
         try {
-            setLoading(true);
+            if (!silent) setLoading(true);
             const data = await fetchProducts();
             setProducts(data);
         } catch (err) {
-            setError(err.message);
+            if (!silent) setError(err.message);
         } finally {
-            setLoading(false);
+            if (!silent) setLoading(false);
         }
     };
 
@@ -705,6 +711,7 @@ function Products() {
                             <RawMaterialPanel
                                 product={rawMaterialProduct}
                                 onClose={() => setRawMaterialProduct(null)}
+                                onUpdate={loadProducts}
                             />
                         ) : (
                             /* ── Formulario producto ── */

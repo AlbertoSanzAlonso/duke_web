@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { fetchInventory, createInventoryItem, deleteInventoryItem, updateInventoryItem, fetchInventoryMovements } from '../../services/api';
 import Toast from '../components/Toast';
+import ConfirmModal from '../components/ConfirmModal';
 import { Edit2, Save, X, Trash2, Search, Download, FileText } from 'lucide-react';
 import { exportToExcel, exportToPDF } from '../../utils/exportUtils';
 import './Accounting.css';
@@ -14,6 +15,13 @@ function Inventory() {
 
     const [movements, setMovements] = useState([]);
     const [loadingMovements, setLoadingMovements] = useState(false);
+
+    // Movements UI state
+    const [movSearchTerm, setMovSearchTerm] = useState('');
+    const [movStartDate, setMovStartDate] = useState('');
+    const [movEndDate, setMovEndDate] = useState('');
+    const [movPage, setMovPage] = useState(1);
+    const movPerPage = 10;
 
     // Edit state
     const [editingItemId, setEditingItemId] = useState(null);
@@ -41,6 +49,18 @@ function Inventory() {
     const [subUnitName, setSubUnitName] = useState('unidades');
     const [subUnitsPerUnit, setSubUnitsPerUnit] = useState('1');
 
+    const [confirmConfig, setConfirmConfig] = useState({ isOpen: false, id: null });
+
+    // Global Edit Modal State (Full Detail Edit)
+    const [showEditModal, setShowEditModal] = useState(false);
+    const [itemToEdit, setItemToEdit] = useState(null);
+    const [modalData, setModalData] = useState({
+        name: '', category: '', quantity: '', min_stock: '', unit: '',
+        hasPack: false, packName: '', unitsPerPack: '',
+        hasWeight: false, weightPerUnit: '', weightUnit: '',
+        useSubUnits: false, subUnitName: '', subUnitsPerUnit: ''
+    });
+
     const defaultCategories = ['Carne', 'Verdura', 'Quesos', 'Pan', 'Bebidas', 'Salsas', 'Desechables'];
     const existingCategories = [...new Set(items.map(item => item.category).filter(Boolean))];
     const categories = [...new Set([...defaultCategories, ...existingCategories])];
@@ -62,7 +82,7 @@ function Inventory() {
             if (!silent) { setLoading(true); setLoadingMovements(true); }
             const [data, movs] = await Promise.all([
                 fetchInventory(),
-                fetchInventoryMovements(7) // fetch last 7 days by default to keep it lightweight
+                fetchInventoryMovements(30) // fetch last 30 days by default for better history view
             ]);
             setItems(data);
             setMovements(movs);
@@ -113,15 +133,47 @@ function Inventory() {
         }
     };
 
-    const handleUpdateRow = async (id) => {
+    const handleOpenEdit = (item) => {
+        setItemToEdit(item);
+        setModalData({
+            name: item.name,
+            category: item.category || '',
+            quantity: item.quantity,
+            min_stock: item.min_stock,
+            unit: item.unit,
+            hasPack: !!item.pack_name,
+            packName: item.pack_name || 'cajas',
+            unitsPerPack: item.units_per_pack || '10',
+            hasWeight: item.has_weight,
+            weightPerUnit: item.weight_per_unit || '1000',
+            weightUnit: item.weight_unit || 'g',
+            useSubUnits: item.use_sub_units,
+            subUnitName: item.sub_unit_name || 'unidades',
+            subUnitsPerUnit: item.sub_units_per_unit || '1'
+        });
+        setShowEditModal(true);
+    };
+
+    const handleUpdateFullItem = async () => {
+        if (!itemToEdit) return;
         try {
-            await updateInventoryItem(id, { 
-                quantity: parseFloat(editQuantity) || 0,
-                min_stock: parseFloat(editMinStock) || 0 
+            await updateInventoryItem(itemToEdit.id, { 
+                name: modalData.name,
+                category: modalData.category,
+                quantity: parseFloat(modalData.quantity) || 0,
+                min_stock: parseFloat(modalData.min_stock) || 0,
+                unit: modalData.unit,
+                pack_name: modalData.hasPack ? modalData.packName : null,
+                units_per_pack: modalData.hasPack ? (parseFloat(modalData.unitsPerPack) || 1) : 1,
+                has_weight: modalData.hasWeight,
+                weight_per_unit: modalData.hasWeight ? (parseFloat(modalData.weightPerUnit) || 0) : 0,
+                weight_unit: modalData.hasWeight ? modalData.weightUnit : 'g',
+                use_sub_units: modalData.useSubUnits,
+                sub_unit_name: modalData.subUnitName,
+                sub_units_per_unit: modalData.useSubUnits ? (parseFloat(modalData.subUnitsPerUnit) || 1) : 1
             });
-            setEditingItemId(null);
-            setEditQuantity('');
-            setEditMinStock('');
+            setShowEditModal(false);
+            setItemToEdit(null);
             loadInventory();
             setToast({ message: "Item actualizado con éxito", type: 'success' });
         } catch (err) {
@@ -129,14 +181,25 @@ function Inventory() {
         }
     };
 
-    const handleDelete = async (id) => {
-        if (!window.confirm("¿Seguro que quieres borrarlo del inventario?")) return;
+    const handleDelete = (id) => {
+        const item = items.find(i => i.id === id);
+        setConfirmConfig({
+            isOpen: true,
+            title: '¿Eliminar Artículo?',
+            message: `¿Estás seguro de que deseas eliminar "${item?.name}" del inventario? Esta acción no se puede deshacer.`,
+            onConfirm: () => executeDelete(id)
+        });
+    };
+
+    const executeDelete = async (id) => {
         try {
             await deleteInventoryItem(id);
             loadInventory();
-            setToast({ message: "Artículo eliminado", type: 'success' });
+            setToast({ message: "Artículo quitado del inventario", type: 'success' });
         } catch (err) {
             setToast({ message: err.message, type: 'error' });
+        } finally {
+            setConfirmConfig({ ...confirmConfig, isOpen: false });
         }
     };
 
@@ -371,7 +434,7 @@ function Inventory() {
                 </button>
             </form>
 
-            <div className="accounting-table-container">
+            <div className="accounting-table-container accounting-desktop-only">
                 {loading ? <p>Cargando inventario...</p> : error ? <p style={{ color: 'red' }}>{error}</p> : (
                     <table className="accounting-table" style={{ width: '100%', textAlign: 'left', borderCollapse: 'collapse' }}>
                         <thead>
@@ -386,7 +449,7 @@ function Inventory() {
                         <tbody>
                             {items.length === 0 ? (
                                 <tr>
-                                    <td colSpan="4" style={{ padding: '20px', textAlign: 'center' }}>No hay registros en el inventario.</td>
+                                    <td colSpan="5" style={{ padding: '20px', textAlign: 'center' }}>No hay registros en el inventario.</td>
                                 </tr>
                             ) : (
                                 items.filter(item => 
@@ -394,15 +457,13 @@ function Inventory() {
                                     (item.category || "").toLowerCase().includes(searchTerm.toLowerCase())
                                 ).map(item => {
                                     const outOfStock = parseFloat(item.quantity) <= parseFloat(item.min_stock);
-                                    const isEditing = editingItemId === item.id;
                                     
-                                    // PACK DISPLAY LOGIC
                                     const qty = parseFloat(item.quantity) || 0;
                                     const upp = parseFloat(item.units_per_pack) || 1;
                                     let stockDisplay;
-                                    let hasPacks = false;
+                                    let hasPacksDisplay = false;
                                     if (item.pack_name && upp > 1) {
-                                        hasPacks = true;
+                                        hasPacksDisplay = true;
                                         const wholePacks = Math.floor(qty / upp);
                                         const remainder = qty % upp;
                                         if (wholePacks > 0 && remainder > 0) {
@@ -421,81 +482,32 @@ function Inventory() {
                                             <td data-label="Artículo">
                                                 <strong>{item.name}</strong>
                                                 {outOfStock && <span style={{ marginLeft: '10px', color: 'white', fontSize: '9px', background: '#e03131', padding: '2px 6px', borderRadius: '10px', fontWeight: 'bold'}}>BAJO STOCK</span>}
-                                                {hasPacks && <div style={{ fontSize: '0.75rem', color: '#888', marginTop: '2px' }}>Empaque: {upp} {item.unit} / {item.pack_name}</div>}
+                                                {hasPacksDisplay && <div style={{ fontSize: '0.75rem', color: '#888', marginTop: '2px' }}>Empaque: {upp} {item.unit} / {item.pack_name}</div>}
                                                 {item.has_weight && <div style={{ fontSize: '0.75rem', color: '#0b7285', marginTop: '2px', fontWeight: 'bold' }}>Medida unit.: {Number(item.weight_per_unit)} {item.weight_unit}</div>}
                                             </td>
                                             <td data-label="Categoría" style={{ color: '#666' }}>{item.category || '-'}</td>
                                             <td data-label="Stock Actual">
-                                                {isEditing ? (
-                                                    <div style={{ display: 'flex', gap: '5px', alignItems: 'center' }}>
-                                                        <input 
-                                                            type="number" 
-                                                            step="any"
-                                                            value={editQuantity} 
-                                                            onChange={e => setEditQuantity(e.target.value)} 
-                                                            style={{ width: '100px', padding: '10px', borderRadius: '8px', border: '1px solid var(--admin-primary)', outline: 'none', fontWeight: '800', fontSize: '1.1rem', textAlign: 'center', fontFamily: 'inherit' }}
-                                                            autoFocus
-                                                        />
-                                                        <span style={{ fontSize: '0.8rem' }}>{item.unit} (base)</span>
-                                                    </div>
-                                                ) : (
-                                                    <span style={{ fontWeight: 'bold', color: hasPacks ? '#4c6ef5' : '#111' }}>{stockDisplay}</span>
-                                                )}
+                                                <span style={{ fontWeight: 'bold', color: hasPacksDisplay ? '#4c6ef5' : '#111' }}>{stockDisplay}</span>
                                             </td>
                                             <td data-label="Mínimo">
-                                                {isEditing ? (
-                                                    <input 
-                                                        type="number" 
-                                                        step="any"
-                                                        value={editMinStock} 
-                                                        onChange={e => setEditMinStock(e.target.value)} 
-                                                        style={{ width: '100px', padding: '10px', borderRadius: '8px', border: '1px solid var(--admin-primary)', outline: 'none', fontWeight: '800', fontSize: '1.1rem', textAlign: 'center', fontFamily: 'inherit' }}
-                                                    />
-                                                ) : (
-                                                    <span style={{ color: '#888' }}>{item.min_stock} {item.unit}</span>
-                                                )}
+                                                <span style={{ color: '#888' }}>{item.min_stock} {item.unit}</span>
                                             </td>
                                             <td data-label="Acciones">
                                                 <div style={{ display: 'flex', gap: '8px' }}>
-                                                    {isEditing ? (
-                                                        <>
-                                                            <button 
-                                                                onClick={() => handleUpdateRow(item.id)} 
-                                                                style={{ padding: '6px', background: '#2f9e44', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer' }}
-                                                                title="Guardar"
-                                                            >
-                                                                <Save size={16} />
-                                                            </button>
-                                                            <button 
-                                                                onClick={() => setEditingItemId(null)} 
-                                                                style={{ padding: '6px', background: '#868e96', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer' }}
-                                                                title="Cancelar"
-                                                            >
-                                                                <X size={16} />
-                                                            </button>
-                                                        </>
-                                                    ) : (
-                                                        <>
-                                                            <button 
-                                                                onClick={() => {
-                                                                    setEditingItemId(item.id);
-                                                                    setEditQuantity(item.quantity);
-                                                                    setEditMinStock(item.min_stock);
-                                                                }} 
-                                                                style={{ padding: '6px', background: '#333', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer' }}
-                                                                title="Editar Stock"
-                                                            >
-                                                                <Edit2 size={16} />
-                                                            </button>
-                                                            <button 
-                                                                onClick={() => handleDelete(item.id)} 
-                                                                style={{ padding: '6px', background: '#e03131', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer' }}
-                                                                title="Eliminar"
-                                                            >
-                                                                <Trash2 size={16} />
-                                                            </button>
-                                                        </>
-                                                    )}
+                                                    <button 
+                                                        onClick={() => handleOpenEdit(item)} 
+                                                        style={{ padding: '6px', background: '#333', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer' }}
+                                                        title="Editar Todo"
+                                                    >
+                                                        <Edit2 size={16} />
+                                                    </button>
+                                                    <button 
+                                                        onClick={() => handleDelete(item.id)} 
+                                                        style={{ padding: '6px', background: '#e03131', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer' }}
+                                                        title="Eliminar"
+                                                    >
+                                                        <Trash2 size={16} />
+                                                    </button>
                                                 </div>
                                             </td>
                                         </tr>
@@ -506,15 +518,102 @@ function Inventory() {
                     </table>
                 )}
             </div>
+
+            {/* Main Inventory - MOBILE VERSION */}
+            <div className="accounting-mobile-only">
+                {items.filter(item => 
+                    (item.name || "").toLowerCase().includes(searchTerm.toLowerCase()) ||
+                    (item.category || "").toLowerCase().includes(searchTerm.toLowerCase())
+                ).map(item => {
+                    const outOfStock = parseFloat(item.quantity) <= parseFloat(item.min_stock);
+                    const qty = parseFloat(item.quantity) || 0;
+                    const upp = parseFloat(item.units_per_pack) || 1;
+                    let stockDisplay;
+                    if (item.pack_name && upp > 1) {
+                        const wholePacks = Math.floor(qty / upp);
+                        const remainder = qty % upp;
+                        stockDisplay = wholePacks > 0 ? `${wholePacks} ${item.pack_name}${remainder > 0 ? ` + ${remainder}` : ''}` : `${qty} ${item.unit}`;
+                    } else {
+                        stockDisplay = `${qty} ${item.unit}`;
+                    }
+
+                    return (
+                        <div key={`mob-inv-${item.id}`} className="admin-card" style={{ padding: '15px', marginBottom: '10px', position: 'relative', borderLeft: outOfStock ? '4px solid #e03131' : '4px solid #2f9e44' }}>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                                <div>
+                                    <div style={{ fontSize: '1rem', fontWeight: 'bold' }}>{item.name}</div>
+                                    <div style={{ fontSize: '0.75rem', color: '#888' }}>{item.category}</div>
+                                </div>
+                                <div style={{ display: 'flex', gap: '8px' }}>
+                                    <button onClick={() => handleOpenEdit(item)} style={{ padding: '8px', background: '#333', color: 'white', border: 'none', borderRadius: '6px' }}><Edit2 size={14} /></button>
+                                    <button onClick={() => handleDelete(item.id)} style={{ padding: '8px', background: '#f5f5f5', color: '#e03131', border: 'none', borderRadius: '6px' }}><Trash2 size={14} /></button>
+                                </div>
+                            </div>
+                            <div style={{ marginTop: '12px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: '#f8f9fa', padding: '10px', borderRadius: '8px' }}>
+                                <div>
+                                    <div style={{ fontSize: '0.65rem', color: '#888', fontWeight: 'bold' }}>STOCK ACTUAL</div>
+                                    <div style={{ fontSize: '1rem', fontWeight: '900', color: outOfStock ? '#e03131' : '#111' }}>{stockDisplay}</div>
+                                </div>
+                                <div style={{ textAlign: 'right' }}>
+                                    <div style={{ fontSize: '0.65rem', color: '#888', fontWeight: 'bold' }}>MÍNIMO</div>
+                                    <div style={{ fontSize: '0.9rem', color: '#666' }}>{item.min_stock} {item.unit}</div>
+                                </div>
+                            </div>
+                        </div>
+                    );
+                })}
+            </div>
             </div>
             
             {/* Historial de Movimientos */}
             <div className="admin-card">
-                <div className="accounting-header-main" style={{ marginBottom: '20px' }}>
-                    <h2 style={{ margin: 0, fontSize: '1.2rem' }}>Historial de Consumo / Entradas (Últimos 7 días)</h2>
+                <div className="accounting-header-main" style={{ marginBottom: '20px', flexDirection: 'column', alignItems: 'flex-start', gap: '15px' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', width: '100%', alignItems: 'center' }}>
+                        <h2 style={{ margin: 0, fontSize: '1.2rem' }}>Historial de Consumo / Entradas</h2>
+                        <div style={{ display: 'flex', gap: '10px' }}>
+                            <div className="search-bar" style={{ margin: 0, width: '250px' }}>
+                                <Search size={18} />
+                                <input 
+                                    type="text" 
+                                    placeholder="Buscar producto o categoría..." 
+                                    value={movSearchTerm}
+                                    onChange={e => { setMovSearchTerm(e.target.value); setMovPage(1); }}
+                                />
+                            </div>
+                        </div>
+                    </div>
+
+                    <div style={{ display: 'flex', gap: '15px', flexWrap: 'wrap', width: '100%', background: '#f8f9fa', padding: '12px', borderRadius: '8px' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                            <span style={{ fontSize: '0.85rem', fontWeight: 'bold' }}>Desde:</span>
+                            <input 
+                                type="date" 
+                                value={movStartDate} 
+                                onChange={e => { setMovStartDate(e.target.value); setMovPage(1); }}
+                                style={{ padding: '6px', borderRadius: '6px', border: '1px solid #ccc', fontSize: '0.85rem' }}
+                            />
+                        </div>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                            <span style={{ fontSize: '0.85rem', fontWeight: 'bold' }}>Hasta:</span>
+                            <input 
+                                type="date" 
+                                value={movEndDate} 
+                                onChange={e => { setMovEndDate(e.target.value); setMovPage(1); }}
+                                style={{ padding: '6px', borderRadius: '6px', border: '1px solid #ccc', fontSize: '0.85rem' }}
+                            />
+                        </div>
+                        {(movSearchTerm || movStartDate || movEndDate) && (
+                            <button 
+                                onClick={() => { setMovSearchTerm(''); setMovStartDate(''); setMovEndDate(''); setMovPage(1); }}
+                                style={{ background: '#eee', border: 'none', padding: '6px 12px', borderRadius: '6px', cursor: 'pointer', fontSize: '0.85rem' }}
+                            >
+                                Limpiar Filtros
+                            </button>
+                        )}
+                    </div>
                 </div>
                 
-                <div className="accounting-table-container">
+                <div className="accounting-table-container accounting-desktop-only">
                     {loadingMovements ? <p>Cargando historial...</p> : (
                         <table className="accounting-table" style={{ width: '100%', textAlign: 'left', borderCollapse: 'collapse' }}>
                             <thead>
@@ -527,44 +626,236 @@ function Inventory() {
                                 </tr>
                             </thead>
                             <tbody>
-                                {movements.length === 0 ? (
-                                    <tr>
-                                        <td colSpan="5" style={{ padding: '20px', textAlign: 'center' }}>No hay movimientos recientes.</td>
-                                    </tr>
-                                ) : (
-                                    movements.map(mov => {
-                                        const isOut = mov.direction === 'OUT';
-                                        return (
-                                            <tr key={mov.id}>
-                                                <td data-label="Fecha" style={{ fontSize: '0.85rem', color: '#666' }}>
-                                                    {new Date(mov.date).toLocaleString('es-AR', { dateStyle: 'short', timeStyle: 'short' })}
+                                {(() => {
+                                    const filtered = movements.filter(mov => {
+                                        const matchSearch = mov.inventory_item_name.toLowerCase().includes(movSearchTerm.toLowerCase()) ||
+                                                            (mov.inventory_item_category || "").toLowerCase().includes(movSearchTerm.toLowerCase());
+                                        let matchDate = true;
+                                        if (movStartDate || movEndDate) {
+                                            const movDate = new Date(mov.date);
+                                            if (movStartDate) {
+                                                const start = new Date(movStartDate);
+                                                start.setHours(0,0,0,0);
+                                                if (movDate < start) matchDate = false;
+                                            }
+                                            if (movEndDate) {
+                                                const end = new Date(movEndDate);
+                                                end.setHours(23,59,59,999);
+                                                if (movDate > end) matchDate = false;
+                                            }
+                                        }
+                                        return matchSearch && matchDate;
+                                    });
+                                    const totalPages = Math.ceil(filtered.length / movPerPage);
+                                    const paginated = filtered.slice((movPage - 1) * movPerPage, movPage * movPerPage);
+                                    if (filtered.length === 0) return <tr><td colSpan="5" style={{ padding: '20px', textAlign: 'center' }}>No hay filtros.</td></tr>;
+                                    return (
+                                        <>
+                                            {paginated.map(mov => {
+                                                const isOut = mov.direction === 'OUT';
+                                                return (
+                                                    <tr key={mov.id}>
+                                                        <td style={{ fontSize: '0.85rem' }}>{new Date(mov.date).toLocaleString('es-AR', { dateStyle: 'short', timeStyle: 'short' })}</td>
+                                                        <td><strong>{mov.inventory_item_name}</strong></td>
+                                                        <td>
+                                                            <span style={{ color: isOut ? '#e03131' : '#2f9e44', fontWeight: 'bold' }}>
+                                                                {isOut ? '-' : '+'}{parseFloat(mov.quantity)} {mov.inventory_item_unit}
+                                                            </span>
+                                                        </td>
+                                                        <td>{mov.reason}</td>
+                                                        <td style={{ fontSize: '0.85rem', color: '#666' }}>{mov.description || '-'}</td>
+                                                    </tr>
+                                                );
+                                            })}
+                                            <tr>
+                                                <td colSpan="5">
+                                                    <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '20px', padding: '10px' }}>
+                                                        <button disabled={movPage === 1} onClick={() => setMovPage(prev => prev - 1)} style={{ background: 'none', border: '1px solid #ddd', padding: '5px 10px', borderRadius: '4px', cursor: movPage === 1 ? 'not-allowed' : 'pointer' }}>Anterior</button>
+                                                        <span>{movPage} de {totalPages || 1}</span>
+                                                        <button disabled={movPage === totalPages || totalPages === 0} onClick={() => setMovPage(prev => prev + 1)} style={{ background: 'none', border: '1px solid #ddd', padding: '5px 10px', borderRadius: '4px', cursor: (movPage === totalPages || totalPages === 0) ? 'not-allowed' : 'pointer' }}>Siguiente</button>
+                                                    </div>
                                                 </td>
-                                                <td data-label="Artículo"><strong>{mov.inventory_item_name}</strong></td>
-                                                <td data-label="Movimiento">
-                                                    <span style={{ 
-                                                        color: isOut ? '#e03131' : '#2f9e44', 
-                                                        fontWeight: 'bold',
-                                                        background: isOut ? '#fff5f5' : '#ebfbee',
-                                                        padding: '4px 8px',
-                                                        borderRadius: '6px'
-                                                    }}>
-                                                        {isOut ? '-' : '+'}{parseFloat(mov.quantity)} {mov.inventory_item_unit}
-                                                    </span>
-                                                </td>
-                                                <td data-label="Razón" style={{ fontSize: '0.9rem' }}>{mov.reason}</td>
-                                                <td data-label="Detalles" style={{ fontSize: '0.85rem', color: '#666' }}>{mov.description || '-'}</td>
                                             </tr>
-                                        );
-                                    })
-                                )}
+                                        </>
+                                    );
+                                })()}
                             </tbody>
                         </table>
                     )}
                 </div>
+
+                {/* Historial - MOBILE VERSION */}
+                <div className="accounting-mobile-only">
+                    {(() => {
+                        const filtered = movements.filter(mov => {
+                            const matchSearch = mov.inventory_item_name.toLowerCase().includes(movSearchTerm.toLowerCase()) ||
+                                                (mov.inventory_item_category || "").toLowerCase().includes(movSearchTerm.toLowerCase());
+                            let matchDate = true;
+                            if (movStartDate || movEndDate) {
+                                const movDate = new Date(mov.date);
+                                if (movStartDate) {
+                                    const start = new Date(movStartDate); start.setHours(0,0,0,0);
+                                    if (movDate < start) matchDate = false;
+                                }
+                                if (movEndDate) {
+                                    const end = new Date(movEndDate); end.setHours(23,59,59,999);
+                                    if (movDate > end) matchDate = false;
+                                }
+                            }
+                            return matchSearch && matchDate;
+                        });
+                        const paginated = filtered.slice((movPage - 1) * movPerPage, movPage * movPerPage);
+                        if (paginated.length === 0) return <div style={{ textAlign: 'center', padding: '20px', color: '#888' }}>Sin movimientos.</div>;
+                        return (
+                            <>
+                                {paginated.map(mov => {
+                                    const isOut = mov.direction === 'OUT';
+                                    return (
+                                        <div key={`mob-mov-${mov.id}`} style={{ background: '#fff', padding: '12px', borderBottom: '1px solid #eee' }}>
+                                            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '4px' }}>
+                                                <strong>{mov.inventory_item_name}</strong>
+                                                <span style={{ color: isOut ? '#e03131' : '#2f9e44', fontWeight: 'bold' }}>{isOut ? '-' : '+'}{parseFloat(mov.quantity)}</span>
+                                            </div>
+                                            <div style={{ fontSize: '0.8rem', color: '#666' }}>{mov.reason} • {new Date(mov.date).toLocaleDateString()}</div>
+                                        </div>
+                                    );
+                                })}
+                                <div style={{ display: 'flex', justifyContent: 'center', gap: '15px', padding: '15px' }}>
+                                    <button disabled={movPage === 1} onClick={() => setMovPage(prev => prev - 1)} style={{ background: '#333', color: '#fff', border: 'none', padding: '8px 15px', borderRadius: '6px' }}>Anterior</button>
+                                    <button disabled={movPage === Math.ceil(filtered.length / movPerPage) || filtered.length === 0} onClick={() => setMovPage(prev => prev + 1)} style={{ background: '#333', color: '#fff', border: 'none', padding: '8px 15px', borderRadius: '6px' }}>Siguiente</button>
+                                </div>
+                            </>
+                        );
+                    })()}
+                </div>
             </div>
+
+            {confirmConfig.isOpen && (
+                <ConfirmModal 
+                    title={confirmConfig.title}
+                    message={confirmConfig.message}
+                    onConfirm={confirmConfig.onConfirm}
+                    onCancel={() => setConfirmConfig({ ...confirmConfig, isOpen: false })}
+                />
+            )}
+
+            {toast && (
+                <Toast 
+                    message={toast.message} 
+                    type={toast.type} 
+                    onClose={() => setToast(null)} 
+                />
+            )}
+
+            {/* Modal de Edición Completa */}
+            {showEditModal && (
+                <div style={{
+                    position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh',
+                    background: 'rgba(0,0,0,0.8)', display: 'flex', justifyContent: 'center', alignItems: 'center',
+                    zIndex: 2000, padding: '20px', backdropFilter: 'blur(4px)'
+                }}>
+                    <div className="admin-card" style={{ 
+                        width: '100%', maxWidth: '600px', maxHeight: '95vh', overflowY: 'auto',
+                        position: 'relative', border: '1px solid #ddd', boxShadow: '0 20px 40px rgba(0,0,0,0.4)',
+                        padding: '30px'
+                    }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '25px', borderBottom: '1px solid #eee', paddingBottom: '15px' }}>
+                            <h2 style={{ margin: 0, color: 'var(--admin-primary)', textTransform: 'uppercase', letterSpacing: '1px' }}>Editar Artículo</h2>
+                            <button onClick={() => setShowEditModal(false)} style={{ background: '#eee', border: 'none', cursor: 'pointer', padding: '8px', borderRadius: '50%', display: 'flex' }}>
+                                <X size={20} />
+                            </button>
+                        </div>
+                        
+                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
+                            <div style={{ gridColumn: '1 / -1' }}>
+                                <label style={{ fontSize: '0.85rem', fontWeight: 'bold', marginBottom: '8px', display: 'block', color: '#555' }}>Nombre del Producto</label>
+                                <input type="text" value={modalData.name} onChange={e => setModalData({...modalData, name: e.target.value})} style={{ width: '100%', padding: '12px', borderRadius: '8px', border: '1px solid #ccc', fontSize: '1rem' }} />
+                            </div>
+                            
+                            <div>
+                                <label style={{ fontSize: '0.85rem', fontWeight: 'bold', marginBottom: '8px', display: 'block', color: '#555' }}>Categoría</label>
+                                <select value={modalData.category} onChange={e => setModalData({...modalData, category: e.target.value})} style={{ width: '100%', padding: '12px', borderRadius: '8px', border: '1px solid #ccc', fontSize: '1rem' }}>
+                                    {categories.map(c => <option key={c} value={c}>{c}</option>)}
+                                </select>
+                            </div>
+
+                            <div>
+                                <label style={{ fontSize: '0.85rem', fontWeight: 'bold', marginBottom: '8px', display: 'block', color: '#555' }}>Unidad de Stock</label>
+                                <select value={modalData.unit} onChange={e => setModalData({...modalData, unit: e.target.value})} style={{ width: '100%', padding: '12px', borderRadius: '8px', border: '1px solid #ccc', fontSize: '1rem' }}>
+                                    {['unidades', 'kg', 'gramos', 'litros', 'ml', 'paquetes'].map(u => <option key={u} value={u}>{u}</option>)}
+                                </select>
+                            </div>
+
+                            <div>
+                                <label style={{ fontSize: '0.85rem', fontWeight: 'bold', marginBottom: '8px', display: 'block', color: '#555' }}>Stock Actual ({modalData.unit})</label>
+                                <input type="number" step="any" value={modalData.quantity} onChange={e => setModalData({...modalData, quantity: e.target.value})} style={{ width: '100%', padding: '12px', borderRadius: '8px', border: '1px solid #ccc', fontSize: '1.2rem', fontWeight: 'bold', textAlign: 'center' }} />
+                                <div style={{ fontSize: '0.7rem', color: '#888', marginTop: '4px' }}>* Cambiar esto creará un ajuste manual en el historial.</div>
+                            </div>
+
+                            <div>
+                                <label style={{ fontSize: '0.85rem', fontWeight: 'bold', marginBottom: '8px', display: 'block', color: '#555' }}>Stock Mínimo</label>
+                                <input type="number" step="any" value={modalData.min_stock} onChange={e => setModalData({...modalData, min_stock: e.target.value})} style={{ width: '100%', padding: '12px', borderRadius: '8px', border: '1px solid #ccc', fontSize: '1.2rem', fontWeight: 'bold', textAlign: 'center' }} />
+                            </div>
+
+                            {/* Configuración de Packs */}
+                            <div style={{ gridColumn: '1 / -1', background: '#f8f9ff', padding: '15px', borderRadius: '10px', border: '1px solid #e0e6ff' }}>
+                                <label style={{ display: 'flex', alignItems: 'center', gap: '10px', fontWeight: 'bold', marginBottom: '12px', cursor: 'pointer', color: '#364fc7' }}>
+                                    <input type="checkbox" checked={modalData.hasPack} onChange={e => setModalData({...modalData, hasPack: e.target.checked})} style={{ transform: 'scale(1.2)' }} />
+                                    ¿Llega en envases / packs?
+                                </label>
+                                {modalData.hasPack && (
+                                    <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
+                                        <input type="text" placeholder="Ej: Cajas" value={modalData.packName} onChange={e => setModalData({...modalData, packName: e.target.value})} style={{ flex: 1, padding: '10px', borderRadius: '8px', border: '1px solid #ccc' }} />
+                                        <span style={{ fontSize: '0.9rem' }}>trae:</span>
+                                        <input type="number" value={modalData.unitsPerPack} onChange={e => setModalData({...modalData, unitsPerPack: e.target.value})} style={{ width: '80px', padding: '10px', borderRadius: '8px', border: '1px solid #ccc', textAlign: 'center', fontWeight: 'bold' }} />
+                                        <span style={{ fontSize: '0.9rem' }}>{modalData.unit}</span>
+                                    </div>
+                                )}
+                            </div>
+
+                            {/* Configuración de Peso */}
+                            <div style={{ gridColumn: '1 / -1', background: '#f1fbf0', padding: '15px', borderRadius: '10px', border: '1px solid #d3f9d8' }}>
+                                <label style={{ display: 'flex', alignItems: 'center', gap: '10px', fontWeight: 'bold', marginBottom: '12px', cursor: 'pointer', color: '#2b8a3e' }}>
+                                    <input type="checkbox" checked={modalData.hasWeight} onChange={e => setModalData({...modalData, hasWeight: e.target.checked})} style={{ transform: 'scale(1.2)' }} />
+                                    ¿Tiene peso/volumen fijo por unidad?
+                                </label>
+                                {modalData.hasWeight && (
+                                    <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
+                                        <input type="number" step="any" value={modalData.weightPerUnit} onChange={e => setModalData({...modalData, weightPerUnit: e.target.value})} style={{ width: '100px', padding: '10px', borderRadius: '8px', border: '1px solid #ccc', textAlign: 'center' }} />
+                                        <select value={modalData.weightUnit} onChange={e => setModalData({...modalData, weightUnit: e.target.value})} style={{ padding: '10px', borderRadius: '8px', border: '1px solid #ccc' }}>
+                                            <option value="g">Gramos (g)</option><option value="kg">Kilos (kg)</option><option value="ml">Mililitros (ml)</option><option value="l">Litros (l)</option>
+                                        </select>
+                                        <span style={{ fontSize: '0.85rem' }}>por cada {modalData.unit}</span>
+                                    </div>
+                                )}
+                            </div>
+
+                             {/* Configuración de Sub-unidades */}
+                             <div style={{ gridColumn: '1 / -1', background: '#fff5f5', padding: '15px', borderRadius: '10px', border: '1px solid #ffe3e3' }}>
+                                <label style={{ display: 'flex', alignItems: 'center', gap: '10px', fontWeight: 'bold', marginBottom: '12px', cursor: 'pointer', color: '#c92a2a' }}>
+                                    <input type="checkbox" checked={modalData.useSubUnits} onChange={e => setModalData({...modalData, useSubUnits: e.target.checked})} style={{ transform: 'scale(1.2)' }} />
+                                    ¿Configurar desglose interno (ej. fetas)?
+                                </label>
+                                {modalData.useSubUnits && (
+                                    <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
+                                        <input type="text" placeholder="Nombre (ej: fetas)" value={modalData.subUnitName} onChange={e => setModalData({...modalData, subUnitName: e.target.value})} style={{ flex: 1, padding: '10px', borderRadius: '8px', border: '1px solid #ccc' }} />
+                                        <span style={{ fontSize: '0.9rem' }}>trae:</span>
+                                        <input type="number" step="any" value={modalData.subUnitsPerUnit} onChange={e => setModalData({...modalData, subUnitsPerUnit: e.target.value})} style={{ width: '80px', padding: '10px', borderRadius: '8px', border: '1px solid #ccc', textAlign: 'center' }} />
+                                        <span style={{ fontSize: '0.9rem' }}>uds por {modalData.unit}</span>
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+
+                        <div style={{ marginTop: '30px', display: 'flex', gap: '15px' }}>
+                            <button onClick={handleUpdateFullItem} className="main-button" style={{ flex: 1, padding: '18px', fontSize: '1rem', background: 'var(--admin-primary)' }}>GUARDAR TODOS LOS CAMBIOS</button>
+                            <button onClick={() => setShowEditModal(false)} style={{ padding: '18px', background: '#eee', border: 'none', borderRadius: '8px', cursor: 'pointer', color: '#555', fontWeight: 'bold' }}>CANCELAR</button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
-
 }
 
 export default Inventory;

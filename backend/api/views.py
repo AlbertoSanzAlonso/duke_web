@@ -634,7 +634,23 @@ class InventoryItemViewSet(viewsets.ModelViewSet):
         log_action(self.request.user, 'INVENTARIO', 'CREATE', f'Nuevo item de inventario: {item.name} ({item.quantity} {item.unit})')
 
     def perform_update(self, serializer):
+        # Capture old quantity to record movement if it changes manually
+        instance = self.get_object()
+        old_quantity = instance.quantity
+        
         item = serializer.save()
+        new_quantity = item.quantity
+        
+        if old_quantity != new_quantity:
+            diff = new_quantity - old_quantity
+            InventoryMovement.objects.create(
+                inventory_item=item,
+                direction='IN' if diff > 0 else 'OUT',
+                quantity=abs(diff),
+                reason='Ajuste Manual',
+                description=f'Cambio manual del administrador ({old_quantity} -> {new_quantity})'
+            )
+            
         log_action(self.request.user, 'INVENTARIO', 'UPDATE', f'Editado item inventario: {item.name}. Stock: {item.quantity}')
 
     def perform_destroy(self, instance):
@@ -1014,6 +1030,10 @@ def AIHelpView(request):
         
         finance_history_text = "\n".join([f"- {m}: Ventas ${data['v']} | Gastos ${data['g']}" for m, data in finance_history_map.items()])
 
+        # --- MOVIMIENTOS DE INVENTARIO (Recientes) ---
+        recent_movements = InventoryMovement.objects.all()[:10]
+        mov_text = "\n".join([f"- {m.date.strftime('%d/%m %H:%M')} | {m.inventory_item_name}: {m.direction} {m.quantity} {m.inventory_item_unit} ({m.reason})" for m in recent_movements])
+
         live_context = (
             f"ESTADO DEL SISTEMA ({now.strftime('%d/%m/%y %H:%M')}):\n\n"
             f"--- PRODUCTOS MÁS VENDIDOS (ESTA SEMANA) ---\n"
@@ -1029,8 +1049,10 @@ def AIHelpView(request):
             f"--- RESUMEN MENSUAL ---\n"
             f"- ESTE MES: Ventas ${m_sales}, Gastos ${m_exp}, Neto ${m_sales - m_exp}\n"
             f"- MES PASADO: Ventas ${lm_sales}, Gastos ${lm_exp}, Neto ${lm_sales - lm_exp}\n\n"
-            f"--- HISTORIAL RECIENTE (Últimos días) ---\n"
+            f"--- HISTORIAL RECIENTE (Ventas/Gastos) ---\n"
             f"{history_text}\n\n"
+            f"--- HISTORIAL RECIENTE DE INVENTARIO ---\n"
+            f"{mov_text}\n\n"
             f"--- OPERACIONES ---\n"
             f"- Pedidos TPV pendientes: {pending_sales}\n"
             f"- Compras a proveedores pendientes: {pending_supplier_orders}\n"

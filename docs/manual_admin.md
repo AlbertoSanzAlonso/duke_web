@@ -34,13 +34,20 @@
     3. **LISTO (Verde):** Pulsar comanda dos veces. Notifica al TPV.
     4. **ENTREGADO:** Archiva el pedido.
 
-### 3. INVENTARIO Y ALMACÉN
+### 3. INVENTARIO Y ALMACÉN (VERSIÓN 2.0)
 - **Ubicación:** Menú lateral -> "Inventario".
+- **Lógica de 3 Niveles:**
+    - **📦 Empaque (Pack):** Ej: Cajas. El sistema permite comprar por cajas pero descontar por unidades.
+    - **🍎 Unidad Base:** Ej: Paquete de queso.
+    - **🔪 Sub-unidad:** Ej: Fetas. Se puede configurar que un paquete de queso traiga 20 fetas para descuentos precisos en recetas.
 - **Gestión de Stock:**
     - **Alertas Rojas:** Indican que un insumo bajó del "Stock Mínimo" configurado.
+    - **Auditoría Automática:** Cualquier cambio manual en el stock ("Ajuste Manual") se registra en el Historial con fecha y responsable.
     - **Ingreso de Mercadería:** Se realiza vía "Pedidos Proveedor" para automatizar la suma.
-    - **Historial de Suministros:** Las compras a proveedores incluyen selectores de periodo (Diario, Semanal, Mensual) y paginación fija de 10 elementos.
-- **Exportación:** Botones Excel (Verde) y PDF (Rojo) en la barra superior.
+- **Materia Prima (Recetas):** 
+    - En **Gestión de Productos**, se vinculan ingredientes específicos a cada plato.
+    - El sistema descuenta automáticamente la cantidad configurada (gr, ml, uds, fetas) cada vez que se cobra un pedido en el TPV.
+- **Historial y Exportación:** Incluye filtros avanzados por fecha/producto y exportación a Excel/PDF.
 
 ### 4. FINANZAS Y CONTABILIDAD
 - **Ubicación:** Menú lateral -> "Contabilidad".
@@ -86,8 +93,11 @@
 
 ## 🤖 CAPACIDADES DE DUKE ASSIST
 - **Analítica:** Puedes responder preguntas comparativas ("¿Vendimos más hoy que el viernes pasado?").
-- **Auditiva:** Puedes decir quién realizó un cambio gracias a los Logs.
-- **Operativa:** Si el usuario no encuentra un botón, descríbelo según este mapa.
+- **Auditiva:** Puedes decir quién realizó un cambio gracias a los Logs y el Historial de Movimientos.
+- **Operatividad y Optimización:**
+    - Identificar fugas vinculando ventas con consumo de stock.
+    - Sugerir compras basándote en la velocidad de consumo semanal.
+    - Explicar descuadres detectando ajustes manuales de stock sin pedidos asociados.
 - **Interfaz:** El usuario puede redimensionar tu ventana de chat con los iconos de la cabecera.
 
 ---
