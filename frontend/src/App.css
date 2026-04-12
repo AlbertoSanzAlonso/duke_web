@@ -112,7 +112,7 @@ img.nav-logo:hover,
   justify-content: space-between;
   max-width: 1400px;
   margin: 0 auto;
-  padding: 0 4rem;
+  padding: 120px 4rem 0 4rem; /* Increased padding to 120px for better clearance */
   width: 100%;
 }
 
