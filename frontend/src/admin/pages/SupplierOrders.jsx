@@ -27,6 +27,7 @@ const SupplierOrders = () => {
     // Manual item add state
     const [selectedItemId, setSelectedItemId] = useState('');
     const [itemQty, setItemQty] = useState('');
+    const [itemQtyMode, setItemQtyMode] = useState('pack'); // 'pack' or 'unit'
     const [itemCost, setItemCost] = useState('');
 
     // New Item Flow
@@ -78,11 +79,17 @@ const SupplierOrders = () => {
             const invItem = inventoryItems.find(i => i.id === parseInt(selectedItemId));
             if (!invItem) return;
 
+            let finalQty = parseFloat(itemQty);
+            if (itemQtyMode === 'pack' && invItem.pack_name && parseFloat(invItem.units_per_pack) > 1) {
+                finalQty = finalQty * parseFloat(invItem.units_per_pack);
+            }
+
             setOrderItems([...orderItems, {
                 item: invItem.id,
                 name: invItem.name,
-                quantity: parseFloat(itemQty),
-                cost: parseFloat(itemCost)
+                quantity: finalQty,
+                cost: parseFloat(itemCost),
+                originalInput: `${itemQty} ${itemQtyMode === 'pack' && invItem.pack_name ? invItem.pack_name : 'uds'}` // For display purposes
             }]);
         }
 
@@ -148,12 +155,18 @@ const SupplierOrders = () => {
                 weight_unit: newItemData.hasWeight ? newItemData.weightUnit : 'g'
             });
             
-            // 2. Add to order list
+            // 2. Calculate final quantity and add to order list
+            let finalQty = parseFloat(itemQty);
+            if (itemQtyMode === 'pack' && newItemData.hasPack && parseFloat(newItemData.unitsPerPack) > 1) {
+                finalQty = finalQty * parseFloat(newItemData.unitsPerPack);
+            }
+
             setOrderItems([...orderItems, {
                 item: created.id,
                 name: created.name,
-                quantity: parseFloat(itemQty),
-                cost: parseFloat(itemCost)
+                quantity: finalQty,
+                cost: parseFloat(itemCost),
+                originalInput: `${itemQty} ${itemQtyMode === 'pack' && newItemData.hasPack ? newItemData.packName : 'uds'}`
             }]);
             
             // 3. Reset and refresh
@@ -767,15 +780,39 @@ const SupplierOrders = () => {
                                     )}
 
                                     <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px' }}>
-                                        <div style={{ flex: '1 1 80px', display: 'flex', flexDirection: 'column' }}>
-                                            <input 
-                                                type="number" 
-                                                placeholder="Cant." 
-                                                step="0.1"
-                                                value={itemQty} 
-                                                onChange={e => setItemQty(e.target.value)} 
-                                                style={{ width: '100%', padding: '10px', borderRadius: '8px', fontFamily: 'inherit', fontSize: '1rem' }}
-                                            />
+                                        <div style={{ flex: '1 1 120px', display: 'flex', flexDirection: 'column' }}>
+                                            <div style={{ display: 'flex', gap: '8px' }}>
+                                                <input 
+                                                    type="number" 
+                                                    placeholder="Cant." 
+                                                    step="0.1"
+                                                    value={itemQty} 
+                                                    onChange={e => setItemQty(e.target.value)} 
+                                                    style={{ width: '100%', padding: '10px', borderRadius: '8px', fontFamily: 'inherit', fontSize: '1rem' }}
+                                                />
+                                                {(() => {
+                                                    const hasPacks = isAddingNewItem ? (newItemData.hasPack && parseFloat(newItemData.unitsPerPack) > 1) : (() => {
+                                                        const itm = inventoryItems.find(i => i.id === parseInt(selectedItemId));
+                                                        return itm?.pack_name && parseFloat(itm.units_per_pack) > 1;
+                                                    })();
+                                                    
+                                                    const packNameInfo = isAddingNewItem ? newItemData.packName : inventoryItems.find(i => i.id === parseInt(selectedItemId))?.pack_name;
+
+                                                    if (hasPacks) {
+                                                        return (
+                                                            <select 
+                                                                value={itemQtyMode} 
+                                                                onChange={e => setItemQtyMode(e.target.value)} 
+                                                                style={{ padding: '10px', borderRadius: '8px', fontFamily: 'inherit', fontSize: '0.85rem', width: '120px' }}
+                                                            >
+                                                                <option value="pack">En {packNameInfo || 'cajas'}</option>
+                                                                <option value="unit">En unidad base</option>
+                                                            </select>
+                                                        );
+                                                    }
+                                                    return null;
+                                                })()}
+                                            </div>
                                         </div>
                                         <div style={{ flex: '1 1 120px', display: 'flex', flexDirection: 'column' }}>
                                             <input 
@@ -814,7 +851,9 @@ const SupplierOrders = () => {
                                             {orderItems.map((oi, index) => (
                                                 <tr key={index}>
                                                     <td data-label="Item">{oi.name}</td>
-                                                    <td data-label="Cant.">{oi.quantity}</td>
+                                                    <td data-label="Cant.">
+                                                        {oi.originalInput ? <>{oi.originalInput}<br/><small style={{color:'#888'}}>({oi.quantity} uds base)</small></> : oi.quantity}
+                                                    </td>
                                                     <td data-label="Costo" className="txt-right">${oi.cost.toLocaleString('es-AR')}</td>
                                                     <td data-label="Acción" style={{ textAlign: 'center' }}>
                                                         <button type="button" onClick={() => removeItemFromOrder(index)} style={{ border: 'none', background: 'none', color: 'red', cursor: 'pointer' }}><Trash2 size={16} /></button>
