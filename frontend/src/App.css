@@ -112,7 +112,7 @@ img.nav-logo:hover,
   justify-content: space-between;
   max-width: 1400px;
   margin: 0 auto;
-  padding: 120px 4rem 0 4rem; /* Increased padding to 120px for better clearance */
+  padding: 140px 4rem 0 4rem; /* Increased to 140px for desktop clearance */
   width: 100%;
 }
 
@@ -1379,7 +1379,7 @@ img.nav-logo:hover,
 
 .about-hero {
   height: 50vh;
-  padding-top: 100px; /* Extra space for the fixed navbar */
+  padding-top: 140px; /* Standardized to 140px for desktop clearance */
   background: linear-gradient(rgba(0,0,0,0.7), rgba(0,0,0,0.7)), url('https://images.unsplash.com/photo-1550966842-1e96a40c6c1b?q=80&w=2071&auto=format&fit=crop');
   background-size: cover;
   background-position: center;

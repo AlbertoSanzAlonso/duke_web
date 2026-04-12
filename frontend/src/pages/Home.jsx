@@ -497,8 +497,8 @@ function Home() {
         <div className="hero-content">
           <div className="hero-text">
             <h1 className="hero-title">
-              DUKE BURGER - MÁS QUE <br />
-              <span>HAMBURGUESAS EN SAN JUAN.</span>
+              MÁS QUE <br />
+              <span>HAMBURGUESAS.</span>
             </h1>
             <p className="hero-subtitle">Sabor brutal. Espíritu Duke.</p>
             <div className="hero-actions">

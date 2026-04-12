@@ -102,7 +102,7 @@ function About() {
 
       <section className="about-hero">
         <div className="about-hero-content">
-          <h1>DUKE BURGER - SOBRE NOSOTROS</h1>
+          <h1>SOBRE NOSOTROS</h1>
           <p>HAMBURGUESERÍA ARTESANAL EN RIVADAVIA, SAN JUAN.</p>
         </div>
       </section>
