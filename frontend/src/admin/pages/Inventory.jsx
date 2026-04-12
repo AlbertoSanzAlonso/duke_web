@@ -23,6 +23,12 @@ function Inventory() {
     const [movPage, setMovPage] = useState(1);
     const movPerPage = 10;
 
+    // Inventory Filtering & Pagination
+    const [filterCategory, setFilterCategory] = useState('all');
+    const [filterLowStock, setFilterLowStock] = useState(false);
+    const [invPage, setInvPage] = useState(1);
+    const invPerPage = 10;
+
     // Edit state
     const [editingItemId, setEditingItemId] = useState(null);
     const [editQuantity, setEditQuantity] = useState('');
@@ -243,25 +249,48 @@ function Inventory() {
         <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
             <div className="admin-card">
             {toast && <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />}
-            <div className="accounting-header-main" style={{ marginBottom: '20px' }}>
-                <h2 style={{ margin: 0 }}>Inventario de Almacén</h2>
-                <div className="header-controls">
-                    <div className="controls-row">
-                        <div className="search-bar" style={{ position: 'relative', flex: 1 }}>
-                            <Search size={18} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: '#888' }} />
-                            <input 
-                                type="text" 
-                                placeholder="Buscar artículo..." 
-                                value={searchTerm}
-                                onChange={(e) => setSearchTerm(e.target.value)}
-                                style={{ padding: '10px 15px 10px 40px', borderRadius: '10px', border: '1px solid #ddd', fontSize: '0.9rem', width: '100%', background: '#fff' }}
-                            />
-                        </div>
-                        <div className="export-actions">
-                            <button onClick={handleExportExcel} className="export-btn excel" title="Excel"><Download size={20} /></button>
-                            <button onClick={handleExportPDF} className="export-btn pdf" title="PDF"><FileText size={20} /></button>
-                        </div>
+            <div className="accounting-header-main" style={{ marginBottom: '20px', flexDirection: 'column', alignItems: 'flex-start', gap: '15px' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', width: '100%', alignItems: 'center' }}>
+                    <h2 style={{ margin: 0 }}>Inventario de Almacén</h2>
+                    <div className="export-actions">
+                        <button onClick={handleExportExcel} className="export-btn excel" title="Excel"><Download size={20} /></button>
+                        <button onClick={handleExportPDF} className="export-btn pdf" title="PDF"><FileText size={20} /></button>
                     </div>
+                </div>
+
+                <div style={{ display: 'flex', gap: '15px', flexWrap: 'wrap', width: '100%', background: '#f8f9fa', padding: '12px', borderRadius: '8px', alignItems: 'center' }}>
+                    <div className="search-bar" style={{ margin: 0, flex: '1 1 250px', background: '#fff' }}>
+                        <Search size={18} />
+                        <input 
+                            type="text" 
+                            placeholder="Buscar artículo..." 
+                            value={searchTerm}
+                            onChange={(e) => { setSearchTerm(e.target.value); setInvPage(1); }}
+                        />
+                    </div>
+
+                    <select 
+                        value={filterCategory} 
+                        onChange={e => { setFilterCategory(e.target.value); setInvPage(1); }}
+                        style={{ padding: '8px 12px', borderRadius: '8px', border: '1px solid #ddd', fontSize: '0.85rem' }}
+                    >
+                        <option value="all">Todas las categorías</option>
+                        {categories.map(cat => <option key={cat} value={cat}>{cat}</option>)}
+                    </select>
+
+                    <label style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.85rem', cursor: 'pointer', fontWeight: 'bold', color: filterLowStock ? '#e03131' : '#666' }}>
+                        <input type="checkbox" checked={filterLowStock} onChange={e => { setFilterLowStock(e.target.checked); setInvPage(1); }} />
+                        Solo Stock Bajo
+                    </label>
+
+                    {(searchTerm || filterCategory !== 'all' || filterLowStock) && (
+                        <button 
+                            onClick={() => { setSearchTerm(''); setFilterCategory('all'); setFilterLowStock(false); setInvPage(1); }}
+                            style={{ background: '#eee', border: 'none', padding: '8px 15px', borderRadius: '8px', cursor: 'pointer', fontSize: '0.85rem' }}
+                        >
+                            Limpiar
+                        </button>
+                    )}
                 </div>
             </div>
             
@@ -447,73 +476,81 @@ function Inventory() {
                             </tr>
                         </thead>
                         <tbody>
-                            {items.length === 0 ? (
-                                <tr>
-                                    <td colSpan="5" style={{ padding: '20px', textAlign: 'center' }}>No hay registros en el inventario.</td>
-                                </tr>
-                            ) : (
-                                items.filter(item => 
-                                    (item.name || "").toLowerCase().includes(searchTerm.toLowerCase()) ||
-                                    (item.category || "").toLowerCase().includes(searchTerm.toLowerCase())
-                                ).map(item => {
-                                    const outOfStock = parseFloat(item.quantity) <= parseFloat(item.min_stock);
-                                    
-                                    const qty = parseFloat(item.quantity) || 0;
-                                    const upp = parseFloat(item.units_per_pack) || 1;
-                                    let stockDisplay;
-                                    let hasPacksDisplay = false;
-                                    if (item.pack_name && upp > 1) {
-                                        hasPacksDisplay = true;
-                                        const wholePacks = Math.floor(qty / upp);
-                                        const remainder = qty % upp;
-                                        if (wholePacks > 0 && remainder > 0) {
-                                            stockDisplay = `${wholePacks} ${item.pack_name} + ${Number.isInteger(remainder) ? remainder : remainder.toFixed(2)} ${item.unit}`;
-                                        } else if (wholePacks > 0) {
-                                            stockDisplay = `${wholePacks} ${item.pack_name}`;
-                                        } else {
-                                            stockDisplay = `${Number.isInteger(qty) ? qty : qty.toFixed(2)} ${item.unit}`;
-                                        }
-                                    } else {
-                                        stockDisplay = `${Number.isInteger(qty) ? qty : qty.toFixed(2)} ${item.unit}`;
-                                    }
+                            {(() => {
+                                const filtered = items.filter(item => {
+                                    const matchSearch = (item.name || "").toLowerCase().includes(searchTerm.toLowerCase());
+                                    const matchCat = filterCategory === 'all' || item.category === filterCategory;
+                                    const matchLow = !filterLowStock || (parseFloat(item.quantity) <= parseFloat(item.min_stock));
+                                    return matchSearch && matchCat && matchLow;
+                                });
+                                
+                                const totalPages = Math.ceil(filtered.length / invPerPage);
+                                const paginated = filtered.slice((invPage - 1) * invPerPage, invPage * invPerPage);
 
-                                    return (
-                                        <tr key={item.id} style={{ backgroundColor: outOfStock ? '#fff5f5' : 'transparent' }}>
-                                            <td data-label="Artículo">
-                                                <strong>{item.name}</strong>
-                                                {outOfStock && <span style={{ marginLeft: '10px', color: 'white', fontSize: '9px', background: '#e03131', padding: '2px 6px', borderRadius: '10px', fontWeight: 'bold'}}>BAJO STOCK</span>}
-                                                {hasPacksDisplay && <div style={{ fontSize: '0.75rem', color: '#888', marginTop: '2px' }}>Empaque: {upp} {item.unit} / {item.pack_name}</div>}
-                                                {item.has_weight && <div style={{ fontSize: '0.75rem', color: '#0b7285', marginTop: '2px', fontWeight: 'bold' }}>Medida unit.: {Number(item.weight_per_unit)} {item.weight_unit}</div>}
-                                            </td>
-                                            <td data-label="Categoría" style={{ color: '#666' }}>{item.category || '-'}</td>
-                                            <td data-label="Stock Actual">
-                                                <span style={{ fontWeight: 'bold', color: hasPacksDisplay ? '#4c6ef5' : '#111' }}>{stockDisplay}</span>
-                                            </td>
-                                            <td data-label="Mínimo">
-                                                <span style={{ color: '#888' }}>{item.min_stock} {item.unit}</span>
-                                            </td>
-                                            <td data-label="Acciones">
-                                                <div style={{ display: 'flex', gap: '8px' }}>
-                                                    <button 
-                                                        onClick={() => handleOpenEdit(item)} 
-                                                        style={{ padding: '6px', background: '#333', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer' }}
-                                                        title="Editar Todo"
-                                                    >
-                                                        <Edit2 size={16} />
-                                                    </button>
-                                                    <button 
-                                                        onClick={() => handleDelete(item.id)} 
-                                                        style={{ padding: '6px', background: '#e03131', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer' }}
-                                                        title="Eliminar"
-                                                    >
-                                                        <Trash2 size={16} />
-                                                    </button>
-                                                </div>
-                                            </td>
-                                        </tr>
-                                    );
-                                })
-                            )}
+                                if (filtered.length === 0) return <tr><td colSpan="5" style={{ padding: '20px', textAlign: 'center' }}>No se encontraron artículos.</td></tr>;
+                                
+                                return (
+                                    <>
+                                        {paginated.map(item => {
+                                            const outOfStock = parseFloat(item.quantity) <= parseFloat(item.min_stock);
+                                            const qty = parseFloat(item.quantity) || 0;
+                                            const upp = parseFloat(item.units_per_pack) || 1;
+                                            let stockDisplay;
+                                            let hasPacksDisplay = false;
+                                            
+                                            if (item.pack_name && upp > 1) {
+                                                hasPacksDisplay = true;
+                                                const wholePacks = Math.floor(qty / upp);
+                                                const remainder = qty % upp;
+                                                if (wholePacks > 0 && remainder > 0) {
+                                                    stockDisplay = `${wholePacks} ${item.pack_name} + ${Number.isInteger(remainder) ? remainder : remainder.toFixed(2)} ${item.unit}`;
+                                                } else if (wholePacks > 0) {
+                                                    stockDisplay = `${wholePacks} ${item.pack_name}`;
+                                                } else {
+                                                    stockDisplay = `${Number.isInteger(qty) ? qty : qty.toFixed(2)} ${item.unit}`;
+                                                }
+                                            } else {
+                                                stockDisplay = `${Number.isInteger(qty) ? qty : qty.toFixed(2)} ${item.unit}`;
+                                            }
+
+                                            return (
+                                                <tr key={item.id} style={{ backgroundColor: outOfStock ? '#fff5f5' : 'transparent' }}>
+                                                    <td data-label="Artículo">
+                                                        <strong>{item.name}</strong>
+                                                        {outOfStock && <span style={{ marginLeft: '10px', color: 'white', fontSize: '9px', background: '#e03131', padding: '2px 6px', borderRadius: '10px', fontWeight: 'bold'}}>BAJO STOCK</span>}
+                                                        {hasPacksDisplay && <div style={{ fontSize: '0.75rem', color: '#888', marginTop: '2px' }}>Empaque: {upp} {item.unit} / {item.pack_name}</div>}
+                                                        {item.has_weight && <div style={{ fontSize: '0.75rem', color: '#0b7285', marginTop: '2px', fontWeight: 'bold' }}>Medida unit.: {Number(item.weight_per_unit)} {item.weight_unit}</div>}
+                                                    </td>
+                                                    <td data-label="Categoría" style={{ color: '#666' }}>{item.category || '-'}</td>
+                                                    <td data-label="Stock Actual">
+                                                        <span style={{ fontWeight: 'bold', color: hasPacksDisplay ? '#4c6ef5' : '#111' }}>{stockDisplay}</span>
+                                                    </td>
+                                                    <td data-label="Mínimo">
+                                                        <span style={{ color: '#888' }}>{item.min_stock} {item.unit}</span>
+                                                    </td>
+                                                    <td data-label="Acciones">
+                                                        <div style={{ display: 'flex', gap: '8px' }}>
+                                                            <button onClick={() => handleOpenEdit(item)} style={{ padding: '6px', background: '#333', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer' }} title="Editar Todo"><Edit2 size={16} /></button>
+                                                            <button onClick={() => handleDelete(item.id)} style={{ padding: '6px', background: '#e03131', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer' }} title="Eliminar"><Trash2 size={16} /></button>
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                            );
+                                        })}
+                                        {totalPages > 1 && (
+                                            <tr>
+                                                <td colSpan="5">
+                                                    <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '20px', padding: '15px' }}>
+                                                        <button disabled={invPage === 1} onClick={() => setInvPage(prev => prev - 1)} style={{ background: 'none', border: '1px solid #ddd', padding: '5px 10px', borderRadius: '4px', cursor: invPage === 1 ? 'not-allowed' : 'pointer' }}>Anterior</button>
+                                                        <span style={{ fontSize: '0.9rem', fontWeight: 'bold' }}>Página {invPage} de {totalPages}</span>
+                                                        <button disabled={invPage === totalPages} onClick={() => setInvPage(prev => prev + 1)} style={{ background: 'none', border: '1px solid #ddd', padding: '5px 10px', borderRadius: '4px', cursor: invPage === totalPages ? 'not-allowed' : 'pointer' }}>Siguiente</button>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        )}
+                                    </>
+                                );
+                            })()}
                         </tbody>
                     </table>
                 )}
@@ -521,47 +558,65 @@ function Inventory() {
 
             {/* Main Inventory - MOBILE VERSION */}
             <div className="accounting-mobile-only">
-                {items.filter(item => 
-                    (item.name || "").toLowerCase().includes(searchTerm.toLowerCase()) ||
-                    (item.category || "").toLowerCase().includes(searchTerm.toLowerCase())
-                ).map(item => {
-                    const outOfStock = parseFloat(item.quantity) <= parseFloat(item.min_stock);
-                    const qty = parseFloat(item.quantity) || 0;
-                    const upp = parseFloat(item.units_per_pack) || 1;
-                    let stockDisplay;
-                    if (item.pack_name && upp > 1) {
-                        const wholePacks = Math.floor(qty / upp);
-                        const remainder = qty % upp;
-                        stockDisplay = wholePacks > 0 ? `${wholePacks} ${item.pack_name}${remainder > 0 ? ` + ${remainder}` : ''}` : `${qty} ${item.unit}`;
-                    } else {
-                        stockDisplay = `${qty} ${item.unit}`;
-                    }
-
+                {(() => {
+                    const filtered = items.filter(item => {
+                        const matchSearch = (item.name || "").toLowerCase().includes(searchTerm.toLowerCase());
+                        const matchCat = filterCategory === 'all' || item.category === filterCategory;
+                        const matchLow = !filterLowStock || (parseFloat(item.quantity) <= parseFloat(item.min_stock));
+                        return matchSearch && matchCat && matchLow;
+                    });
+                    const paginated = filtered.slice((invPage - 1) * invPerPage, invPage * invPerPage);
+                    if (paginated.length === 0) return <div style={{ textAlign: 'center', padding: '20px', color: '#888' }}>No se encontraron artículos.</div>;
+                    
                     return (
-                        <div key={`mob-inv-${item.id}`} className="admin-card" style={{ padding: '15px', marginBottom: '10px', position: 'relative', borderLeft: outOfStock ? '4px solid #e03131' : '4px solid #2f9e44' }}>
-                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                                <div>
-                                    <div style={{ fontSize: '1rem', fontWeight: 'bold' }}>{item.name}</div>
-                                    <div style={{ fontSize: '0.75rem', color: '#888' }}>{item.category}</div>
+                        <>
+                            {paginated.map(item => {
+                                const outOfStock = parseFloat(item.quantity) <= parseFloat(item.min_stock);
+                                const qty = parseFloat(item.quantity) || 0;
+                                const upp = parseFloat(item.units_per_pack) || 1;
+                                let stockDisplay;
+                                if (item.pack_name && upp > 1) {
+                                    const wholePacks = Math.floor(qty / upp);
+                                    const remainder = qty % upp;
+                                    stockDisplay = wholePacks > 0 ? `${wholePacks} ${item.pack_name}${remainder > 0 ? ` + ${remainder}` : ''}` : `${qty} ${item.unit}`;
+                                } else {
+                                    stockDisplay = `${qty} ${item.unit}`;
+                                }
+
+                                return (
+                                    <div key={`mob-inv-${item.id}`} className="admin-card" style={{ padding: '15px', marginBottom: '10px', position: 'relative', borderLeft: outOfStock ? '4px solid #e03131' : '4px solid #2f9e44' }}>
+                                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                                            <div>
+                                                <div style={{ fontSize: '1rem', fontWeight: 'bold' }}>{item.name}</div>
+                                                <div style={{ fontSize: '0.75rem', color: '#888' }}>{item.category}</div>
+                                            </div>
+                                            <div style={{ display: 'flex', gap: '8px' }}>
+                                                <button onClick={() => handleOpenEdit(item)} style={{ padding: '8px', background: '#333', color: 'white', border: 'none', borderRadius: '6px' }}><Edit2 size={14} /></button>
+                                                <button onClick={() => handleDelete(item.id)} style={{ padding: '8px', background: '#f5f5f5', color: '#e03131', border: 'none', borderRadius: '6px' }}><Trash2 size={14} /></button>
+                                            </div>
+                                        </div>
+                                        <div style={{ marginTop: '12px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: '#f8f9fa', padding: '10px', borderRadius: '8px' }}>
+                                            <div>
+                                                <div style={{ fontSize: '0.65rem', color: '#888', fontWeight: 'bold' }}>STOCK ACTUAL</div>
+                                                <div style={{ fontSize: '1rem', fontWeight: '900', color: outOfStock ? '#e03131' : '#111' }}>{stockDisplay}</div>
+                                            </div>
+                                            <div style={{ textAlign: 'right' }}>
+                                                <div style={{ fontSize: '0.65rem', color: '#888', fontWeight: 'bold' }}>MÍNIMO</div>
+                                                <div style={{ fontSize: '0.9rem', color: '#666' }}>{item.min_stock} {item.unit}</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                );
+                            })}
+                            {Math.ceil(filtered.length / invPerPage) > 1 && (
+                                <div style={{ display: 'flex', justifyContent: 'center', gap: '15px', padding: '15px' }}>
+                                    <button disabled={invPage === 1} onClick={() => setInvPage(prev => prev - 1)} style={{ background: '#333', color: '#fff', border: 'none', padding: '8px 15px', borderRadius: '6px' }}>Anterior</button>
+                                    <button disabled={invPage === Math.ceil(filtered.length / invPerPage)} onClick={() => setInvPage(prev => prev + 1)} style={{ background: '#333', color: '#fff', border: 'none', padding: '8px 15px', borderRadius: '6px' }}>Siguiente</button>
                                 </div>
-                                <div style={{ display: 'flex', gap: '8px' }}>
-                                    <button onClick={() => handleOpenEdit(item)} style={{ padding: '8px', background: '#333', color: 'white', border: 'none', borderRadius: '6px' }}><Edit2 size={14} /></button>
-                                    <button onClick={() => handleDelete(item.id)} style={{ padding: '8px', background: '#f5f5f5', color: '#e03131', border: 'none', borderRadius: '6px' }}><Trash2 size={14} /></button>
-                                </div>
-                            </div>
-                            <div style={{ marginTop: '12px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: '#f8f9fa', padding: '10px', borderRadius: '8px' }}>
-                                <div>
-                                    <div style={{ fontSize: '0.65rem', color: '#888', fontWeight: 'bold' }}>STOCK ACTUAL</div>
-                                    <div style={{ fontSize: '1rem', fontWeight: '900', color: outOfStock ? '#e03131' : '#111' }}>{stockDisplay}</div>
-                                </div>
-                                <div style={{ textAlign: 'right' }}>
-                                    <div style={{ fontSize: '0.65rem', color: '#888', fontWeight: 'bold' }}>MÍNIMO</div>
-                                    <div style={{ fontSize: '0.9rem', color: '#666' }}>{item.min_stock} {item.unit}</div>
-                                </div>
-                            </div>
-                        </div>
+                            )}
+                        </>
                     );
-                })}
+                })()}
             </div>
             </div>
             
@@ -570,20 +625,19 @@ function Inventory() {
                 <div className="accounting-header-main" style={{ marginBottom: '20px', flexDirection: 'column', alignItems: 'flex-start', gap: '15px' }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', width: '100%', alignItems: 'center' }}>
                         <h2 style={{ margin: 0, fontSize: '1.2rem' }}>Historial de Consumo / Entradas</h2>
-                        <div style={{ display: 'flex', gap: '10px' }}>
-                            <div className="search-bar" style={{ margin: 0, width: '250px' }}>
-                                <Search size={18} />
-                                <input 
-                                    type="text" 
-                                    placeholder="Buscar producto o categoría..." 
-                                    value={movSearchTerm}
-                                    onChange={e => { setMovSearchTerm(e.target.value); setMovPage(1); }}
-                                />
-                            </div>
-                        </div>
                     </div>
 
-                    <div style={{ display: 'flex', gap: '15px', flexWrap: 'wrap', width: '100%', background: '#f8f9fa', padding: '12px', borderRadius: '8px' }}>
+                    <div style={{ display: 'flex', gap: '15px', flexWrap: 'wrap', width: '100%', background: '#f8f9fa', padding: '12px', borderRadius: '8px', alignItems: 'center' }}>
+                        <div className="search-bar" style={{ margin: 0, flex: '1 1 200px', background: '#fff' }}>
+                            <Search size={18} />
+                            <input 
+                                type="text" 
+                                placeholder="Buscar artículo..." 
+                                value={movSearchTerm}
+                                onChange={e => { setMovSearchTerm(e.target.value); setMovPage(1); }}
+                            />
+                        </div>
+
                         <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                             <span style={{ fontSize: '0.85rem', fontWeight: 'bold' }}>Desde:</span>
                             <input 
@@ -732,6 +786,7 @@ function Inventory() {
 
             {confirmConfig.isOpen && (
                 <ConfirmModal 
+                    isOpen={true}
                     title={confirmConfig.title}
                     message={confirmConfig.message}
                     onConfirm={confirmConfig.onConfirm}
