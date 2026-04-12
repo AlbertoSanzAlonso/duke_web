@@ -817,17 +817,17 @@ const Sales = () => {
                                                         onClick={() => openPriceModal(item)}
                                                         className="pos-item-action-btn discount"
                                                         title="Aplicar Descuento"
-                                                        style={{ padding: '6px', background: '#333', color: 'white', borderRadius: '8px', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                                                        style={{ width: '30px', height: '30px', background: '#333', color: '#fff', borderRadius: '8px', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'all 0.2s' }}
                                                     >
-                                                        <Percent size={14} strokeWidth={3} />
+                                                        <Percent size={18} strokeWidth={2.5} color="white" />
                                                     </button>
                                                     <button 
                                                         onClick={() => updatePrice(item.menu_entry, 0)}
                                                         className="pos-item-action-btn gift"
                                                         title="Marcar como Regalo"
-                                                        style={{ padding: '6px', background: '#ae3ec9', color: 'white', borderRadius: '8px', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                                                        style={{ width: '30px', height: '30px', background: '#ae3ec9', color: '#fff', borderRadius: '8px', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'all 0.2s' }}
                                                     >
-                                                        <Gift size={14} strokeWidth={3} />
+                                                        <Gift size={18} strokeWidth={2.5} color="white" />
                                                     </button>
                                                     <button 
                                                         onClick={() => removeFromCart(item.menu_entry)} 
@@ -855,15 +855,15 @@ const Sales = () => {
                                     </div>
                                 )}
 
-                                <div className="discount-controls" style={{ background: '#f8f9fa', padding: '4px', borderRadius: '6px', marginBottom: '8px', border: '1px solid #eee' }}>
-                                    <div style={{ display: 'flex', gap: '5px' }}>
+                                <div className="discount-controls" style={{ background: '#f1f3f5', padding: '6px', borderRadius: '10px', marginBottom: '8px', border: '1px solid #eee' }}>
+                                    <div style={{ display: 'flex', gap: '6px' }}>
                                         <select 
                                             value={discountType} 
                                             onChange={e => setDiscountType(e.target.value)}
-                                            style={{ padding: '2px', borderRadius: '4px', border: '1px solid #ddd', fontSize: '0.75rem' }}
+                                            style={{ padding: '0 8px', borderRadius: '8px', border: '1px solid #dde2e5', fontSize: '0.75rem', fontWeight: 'bold', background: '#fff', height: '32px', cursor: 'pointer' }}
                                         >
-                                            <option value="fixed">$ DESC</option>
-                                            <option value="percent">% DESC</option>
+                                            <option value="fixed">$ DCTO</option>
+                                            <option value="percent">% DCTO</option>
                                         </select>
                                         <input 
                                             type="number" 
@@ -871,7 +871,7 @@ const Sales = () => {
                                             value={discountValue || ''}
                                             onChange={e => setDiscountValue(e.target.value)}
                                             className="no-arrows-input"
-                                            style={{ flex: 1, padding: '2px', borderRadius: '4px', border: '1px solid #ddd', fontSize: '0.8rem', fontWeight: 'bold' }}
+                                            style={{ flex: 1, padding: '0 12px', borderRadius: '8px', border: '1px solid #dde2e5', fontSize: '0.85rem', fontWeight: 'bold', height: '32px' }}
                                         />
                                     </div>
                                 </div>
