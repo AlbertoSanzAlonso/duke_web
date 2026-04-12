@@ -31,7 +31,11 @@ const SupplierOrders = () => {
 
     // New Item Flow
     const [isAddingNewItem, setIsAddingNewItem] = useState(false);
-    const [newItemData, setNewItemData] = useState({ name: '', unit: 'unidades', category: 'Otros' });
+    const [newItemData, setNewItemData] = useState({ 
+        name: '', unit: 'unidades', category: 'Otros',
+        hasPack: false, packName: 'cajas', unitsPerPack: '10',
+        hasWeight: false, weightPerUnit: '1000', weightUnit: 'g'
+    });
     const [selectedOrder, setSelectedOrder] = useState(null);
     const [showMinStockModal, setShowMinStockModal] = useState(false);
     const [minStockValue, setMinStockValue] = useState('0');
@@ -136,7 +140,12 @@ const SupplierOrders = () => {
                 unit: newItemData.unit,
                 category: newItemData.category,
                 quantity: 0,
-                min_stock: parseFloat(minStockValue) || 0
+                min_stock: parseFloat(minStockValue) || 0,
+                pack_name: newItemData.hasPack ? newItemData.packName : null,
+                units_per_pack: newItemData.hasPack ? (parseFloat(newItemData.unitsPerPack) || 1) : 1,
+                has_weight: newItemData.hasWeight,
+                weight_per_unit: newItemData.hasWeight ? (parseFloat(newItemData.weightPerUnit) || 0) : 0,
+                weight_unit: newItemData.hasWeight ? newItemData.weightUnit : 'g'
             });
             
             // 2. Add to order list
@@ -150,7 +159,11 @@ const SupplierOrders = () => {
             // 3. Reset and refresh
             const invData = await fetchInventory();
             setInventoryItems(invData);
-            setNewItemData({ name: '', unit: 'unidades', category: 'Otros' });
+            setNewItemData({ 
+                name: '', unit: 'unidades', category: 'Otros',
+                hasPack: false, packName: 'cajas', unitsPerPack: '10',
+                hasWeight: false, weightPerUnit: '1000', weightUnit: 'g'
+            });
             setIsAddingNewItem(false);
             setShowMinStockModal(false);
             setMinStockValue('0');
@@ -702,6 +715,42 @@ const SupplierOrders = () => {
                                                     <option value="Limpieza">Limpieza</option>
                                                     <option value="Otros">Otros</option>
                                                 </select>
+                                            </div>
+
+                                            <div style={{ background: '#fff', padding: '10px', borderRadius: '8px', border: '1px solid #ddd' }}>
+                                                <label style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.85rem', fontWeight: 'bold', cursor: 'pointer', color: '#444' }}>
+                                                    <input type="checkbox" checked={newItemData.hasPack} onChange={e => setNewItemData({ ...newItemData, hasPack: e.target.checked })} />
+                                                    ¿Llega en envases/packs?
+                                                </label>
+                                                {newItemData.hasPack && (
+                                                    <div style={{ display: 'flex', gap: '10px', marginTop: '8px', flexWrap: 'wrap' }}>
+                                                        <input type="text" placeholder="Ej: Cajas" value={newItemData.packName} onChange={e => setNewItemData({ ...newItemData, packName: e.target.value })} style={{ padding: '8px', borderRadius: '6px', border: '1px solid #ccc', flex: 1 }} />
+                                                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                                            <span style={{ fontSize: '0.8rem', whiteSpace: 'nowrap' }}>trae:</span>
+                                                            <input type="number" value={newItemData.unitsPerPack} onChange={e => setNewItemData({ ...newItemData, unitsPerPack: e.target.value })} style={{ padding: '8px', borderRadius: '6px', border: '1px solid #ccc', width: '60px' }} />
+                                                            <span style={{ fontSize: '0.8rem' }}>uds base</span>
+                                                        </div>
+                                                    </div>
+                                                )}
+                                            </div>
+
+                                            <div style={{ background: '#fff', padding: '10px', borderRadius: '8px', border: '1px solid #ddd' }}>
+                                                <label style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.85rem', fontWeight: 'bold', cursor: 'pointer', color: '#444' }}>
+                                                    <input type="checkbox" checked={newItemData.hasWeight} onChange={e => setNewItemData({ ...newItemData, hasWeight: e.target.checked })} />
+                                                    ¿Cada unidad tiene peso fijo?
+                                                </label>
+                                                {newItemData.hasWeight && (
+                                                    <div style={{ display: 'flex', gap: '10px', marginTop: '8px', alignItems: 'center', flexWrap: 'wrap' }}>
+                                                        <span style={{ fontSize: '0.8rem' }}>Pesa:</span>
+                                                        <input type="number" step="any" value={newItemData.weightPerUnit} onChange={e => setNewItemData({ ...newItemData, weightPerUnit: e.target.value })} style={{ padding: '8px', borderRadius: '6px', border: '1px solid #ccc', width: '80px' }} />
+                                                        <select value={newItemData.weightUnit} onChange={e => setNewItemData({ ...newItemData, weightUnit: e.target.value })} style={{ padding: '8px', borderRadius: '6px', border: '1px solid #ccc', flex: 1 }}>
+                                                            <option value="g">Gramos (g)</option>
+                                                            <option value="kg">Kilos (kg)</option>
+                                                            <option value="ml">Mililitros (ml)</option>
+                                                            <option value="l">Litros (l)</option>
+                                                        </select>
+                                                    </div>
+                                                )}
                                             </div>
                                         </div>
                                     ) : (
