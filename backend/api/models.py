@@ -118,14 +118,35 @@ def deduct_inventory_for_sale(sale):
             continue
         product = item.menu_entry.product
         for ingredient in product.ingredients_list.all():
-            consumed = ingredient.quantity_per_unit * item.quantity
+            inv_item = ingredient.inventory_item
+            
+            # Calculate base consumed units 
+            # (how many 'unidades' of inv_item are consumed based on the recipe measurement)
+            base_consumed_rate = float(ingredient.quantity_per_unit)
+            
+            if ingredient.measurement_unit != 'unidades' and inv_item.has_weight and inv_item.weight_per_unit > 0:
+                # Convert ingredient requirement to grams/ml
+                consumed_weight = base_consumed_rate
+                if ingredient.measurement_unit in ['kg', 'l']:
+                    consumed_weight *= 1000.0
+                
+                # Convert inv_item weight to grams/ml
+                item_weight = float(inv_item.weight_per_unit)
+                if inv_item.weight_unit in ['kg', 'l']:
+                    item_weight *= 1000.0
+                
+                # The rate is the fraction of the base unit consumed
+                base_consumed_rate = consumed_weight / item_weight
+            
+            consumed = base_consumed_rate * item.quantity
+            
             # Use F() to avoid race conditions on concurrent requests
-            InventoryItem.objects.filter(pk=ingredient.inventory_item_id).update(
+            InventoryItem.objects.filter(pk=inv_item.pk).update(
                 quantity=models.F('quantity') - consumed
             )
             movements_to_create.append(
                 InventoryMovement(
-                    inventory_item_id=ingredient.inventory_item_id,
+                    inventory_item_id=inv_item.pk,
                     direction='OUT',
                     quantity=consumed,
                     reason=f'Venta #{sale.id}',
@@ -133,7 +154,7 @@ def deduct_inventory_for_sale(sale):
                     product=product,
                     description=(
                         f'{item.quantity}× {product.name} '
-                        f'({ingredient.quantity_per_unit} {ingredient.inventory_item.unit}/ud.)'
+                        f'({ingredient.quantity_per_unit} {ingredient.measurement_unit}/ud.)'
                     ),
                 )
             )
@@ -168,8 +189,16 @@ class InventoryItem(models.Model):
     category = models.CharField(max_length=100, blank=True, null=True, db_index=True)
     quantity = models.DecimalField(max_digits=10, decimal_places=2, default=0, db_index=True)
     unit = models.CharField(max_length=50, default='unidades', help_text="Unidad base (ej: gramos, unidades)")
+    
+    # Pack configuration
     pack_name = models.CharField(max_length=50, blank=True, null=True, help_text="Nombre del contenedor (ej: 'cajas', 'packs')")
     units_per_pack = models.DecimalField(max_digits=10, decimal_places=2, default=1, help_text="Cuántas unidades base trae cada pack")
+    
+    # Weight configuration
+    has_weight = models.BooleanField(default=False, help_text="¿La unidad tiene un peso/volumen asignado?")
+    weight_per_unit = models.DecimalField(max_digits=10, decimal_places=3, default=0, help_text="Peso/Volumen de 1 unidad base")
+    weight_unit = models.CharField(max_length=10, default='g', choices=[('g','Gramos'), ('kg','Kilogramos'), ('ml','Mililitros'), ('l','Litros')])
+
     min_stock = models.DecimalField(max_digits=10, decimal_places=2, default=0, db_index=True)
     created_at = models.DateTimeField(auto_now_add=True, null=True)
     
@@ -438,8 +467,13 @@ class ProductIngredient(models.Model):
     )
     quantity_per_unit = models.DecimalField(
         max_digits=10,
-        decimal_places=3,
+        decimal_places=4,
         help_text="Cantidad del ítem de inventario consumida por cada unidad vendida del producto."
+    )
+    measurement_unit = models.CharField(
+        max_length=20, 
+        default='unidades',
+        help_text="Unidad lógica de descuento (ej: 'unidades', 'g', 'kg', 'ml', 'l')"
     )
 
     class Meta:
@@ -447,4 +481,4 @@ class ProductIngredient(models.Model):
         ordering = ['inventory_item__name']
 
     def __str__(self):
-        return f"{self.product.name} → {self.inventory_item.name} × {self.quantity_per_unit}"
+        return f"{self.product.name} → {self.inventory_item.name} × {self.quantity_per_unit} {self.measurement_unit}"

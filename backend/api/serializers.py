@@ -65,7 +65,7 @@ class ProductIngredientSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = ProductIngredient
-        fields = ['id', 'product', 'inventory_item', 'inventory_item_name', 'inventory_item_unit', 'quantity_per_unit']
+        fields = ['id', 'product', 'inventory_item', 'inventory_item_name', 'inventory_item_unit', 'quantity_per_unit', 'measurement_unit']
 
 
 class ProductSerializer(serializers.ModelSerializer):

@@ -32,6 +32,11 @@ function Inventory() {
     const [packName, setPackName] = useState('cajas');
     const [unitsPerPack, setUnitsPerPack] = useState('10');
 
+    // Weight state
+    const [hasWeight, setHasWeight] = useState(false);
+    const [weightPerUnit, setWeightPerUnit] = useState('1000');
+    const [weightUnit, setWeightUnit] = useState('g');
+
     const defaultCategories = ['Carne', 'Verdura', 'Quesos', 'Pan', 'Bebidas', 'Salsas', 'Desechables'];
     const existingCategories = [...new Set(items.map(item => item.category).filter(Boolean))];
     const categories = [...new Set([...defaultCategories, ...existingCategories])];
@@ -76,6 +81,9 @@ function Inventory() {
                 unit,
                 pack_name: hasPack ? packName : null,
                 units_per_pack: hasPack ? (parseFloat(unitsPerPack) || 1) : 1,
+                has_weight: hasWeight,
+                weight_per_unit: hasWeight ? (parseFloat(weightPerUnit) || 0) : 0,
+                weight_unit: hasWeight ? weightUnit : 'g',
                 min_stock: parseFloat(minStock) || 0
             });
             setName('');
@@ -85,6 +93,9 @@ function Inventory() {
             setHasPack(false);
             setPackName('cajas');
             setUnitsPerPack('10');
+            setHasWeight(false);
+            setWeightPerUnit('1000');
+            setWeightUnit('g');
             loadInventory();
             setToast({ message: "Artículo añadido al inventario", type: 'success' });
         } catch (err) {
@@ -277,6 +288,32 @@ function Inventory() {
                     )}
                 </div>
 
+                <div style={{ display: 'flex', gap: '15px', flexWrap: 'wrap', alignItems: 'center', background: '#fff', padding: '12px 16px', borderRadius: '8px', border: '1px solid #eaeaea', marginTop: '5px', width: '100%' }}>
+                    <label style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.85rem', fontWeight: 'bold', cursor: 'pointer', color: '#444' }}>
+                        <input type="checkbox" checked={hasWeight} onChange={e => setHasWeight(e.target.checked)} style={{ transform: 'scale(1.2)' }} />
+                        ¿Cada unidad base posee un peso fijo (ej. 1 Pollo = 1.5kg)?
+                    </label>
+
+                    {hasWeight && (
+                        <div style={{ display: 'flex', gap: '10px', alignItems: 'center', marginLeft: 'auto' }}>
+                            <span style={{ fontSize: '0.85rem', color: '#666' }}>Cada {unit} pesa/mide:</span>
+                            <input 
+                                type="number" 
+                                step="any" 
+                                value={weightPerUnit} 
+                                onChange={e => setWeightPerUnit(e.target.value)}
+                                style={{ width: '80px', padding: '6px 10px', borderRadius: '6px', border: '1px solid #ccc', fontSize: '0.85rem', textAlign: 'center', fontWeight: 'bold' }}
+                            />
+                            <select value={weightUnit} onChange={e => setWeightUnit(e.target.value)} style={{ padding: '6px', borderRadius: '6px', border: '1px solid #ccc', fontSize: '0.85rem' }}>
+                                <option value="g">Gramos (g)</option>
+                                <option value="kg">Kilos (kg)</option>
+                                <option value="ml">Mililitros (ml)</option>
+                                <option value="l">Litros (l)</option>
+                            </select>
+                        </div>
+                    )}
+                </div>
+
                 <button type="submit" className="main-button" style={{ 
                     padding: '12px 24px', 
                     background: 'var(--admin-primary)', 
@@ -346,6 +383,7 @@ function Inventory() {
                                                 <strong>{item.name}</strong>
                                                 {outOfStock && <span style={{ marginLeft: '10px', color: 'white', fontSize: '9px', background: '#e03131', padding: '2px 6px', borderRadius: '10px', fontWeight: 'bold'}}>BAJO STOCK</span>}
                                                 {hasPacks && <div style={{ fontSize: '0.75rem', color: '#888', marginTop: '2px' }}>Empaque: {upp} {item.unit} / {item.pack_name}</div>}
+                                                {item.has_weight && <div style={{ fontSize: '0.75rem', color: '#0b7285', marginTop: '2px', fontWeight: 'bold' }}>Medida unit.: {Number(item.weight_per_unit)} {item.weight_unit}</div>}
                                             </td>
                                             <td data-label="Categoría" style={{ color: '#666' }}>{item.category || '-'}</td>
                                             <td data-label="Stock Actual">

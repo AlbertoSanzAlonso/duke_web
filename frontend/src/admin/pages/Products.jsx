@@ -25,9 +25,15 @@ function RawMaterialPanel({ product, onClose }) {
     // Form: seleccionar existente
     const [selItemId, setSelItemId] = useState('');
     const [selQty, setSelQty] = useState('');
+    const [selMeasurementUnit, setSelMeasurementUnit] = useState('unidades');
     // Form: crear nuevo ítem inventario
-    const [newItem, setNewItem] = useState({ name: '', unit: 'unidades', category: 'Materia Prima', quantity: '0', min_stock: '0' });
+    const [newItem, setNewItem] = useState({ 
+        name: '', unit: 'unidades', category: 'Materia Prima', quantity: '0', min_stock: '0',
+        hasPack: false, packName: 'cajas', unitsPerPack: '10',
+        hasWeight: false, weightPerUnit: '1000', weightUnit: 'g'
+    });
     const [newQty, setNewQty] = useState('');
+    const [newMeasurementUnit, setNewMeasurementUnit] = useState('unidades');
     const [saving, setSaving] = useState(false);
     // Edición inline de cantidad
     const [editingIngredientId, setEditingIngredientId] = useState(null);
@@ -59,9 +65,14 @@ function RawMaterialPanel({ product, onClose }) {
         if (!selItemId || !selQty || parseFloat(selQty) <= 0) return;
         setSaving(true);
         try {
-            await createProductIngredient({ product: product.id, inventory_item: parseInt(selItemId), quantity_per_unit: parseFloat(selQty) });
+            await createProductIngredient({ 
+                product: product.id, 
+                inventory_item: parseInt(selItemId), 
+                quantity_per_unit: parseFloat(selQty),
+                measurement_unit: selMeasurementUnit
+            });
             setToast({ message: 'Ingrediente añadido', type: 'success' });
-            setSelItemId(''); setSelQty(''); setAddMode(null);
+            setSelItemId(''); setSelQty(''); setSelMeasurementUnit('unidades'); setAddMode(null);
             load();
         } catch (e) {
             setToast({ message: e.message, type: 'error' });
@@ -79,11 +90,25 @@ function RawMaterialPanel({ product, onClose }) {
                 category: newItem.category,
                 quantity: parseFloat(newItem.quantity) || 0,
                 min_stock: parseFloat(newItem.min_stock) || 0,
+                pack_name: newItem.hasPack ? newItem.packName : null,
+                units_per_pack: newItem.hasPack ? (parseFloat(newItem.unitsPerPack) || 1) : 1,
+                has_weight: newItem.hasWeight,
+                weight_per_unit: newItem.hasWeight ? (parseFloat(newItem.weightPerUnit) || 0) : 0,
+                weight_unit: newItem.hasWeight ? newItem.weightUnit : 'g'
             });
-            await createProductIngredient({ product: product.id, inventory_item: created.id, quantity_per_unit: parseFloat(newQty) });
-            setToast({ message: `"${created.name}" creado en inventario y enlazado`, type: 'success' });
-            setNewItem({ name: '', unit: 'unidades', category: 'Materia Prima', quantity: '0', min_stock: '0' });
-            setNewQty(''); setAddMode(null);
+            await createProductIngredient({ 
+                product: product.id, 
+                inventory_item: created.id, 
+                quantity_per_unit: parseFloat(newQty),
+                measurement_unit: newMeasurementUnit
+            });
+            setToast({ message: `"${created.name}" creado y enlazado`, type: 'success' });
+            setNewItem({ 
+                name: '', unit: 'unidades', category: 'Materia Prima', quantity: '0', min_stock: '0',
+                hasPack: false, packName: 'cajas', unitsPerPack: '10',
+                hasWeight: false, weightPerUnit: '1000', weightUnit: 'g'
+            });
+            setNewQty(''); setNewMeasurementUnit('unidades'); setAddMode(null);
             load();
         } catch (e) {
             setToast({ message: e.message, type: 'error' });
@@ -194,7 +219,7 @@ function RawMaterialPanel({ product, onClose }) {
                     ingredients.map(ing => (
                         <div key={ing.id} style={s.ingredient}>
                             <span style={s.nameCol}>{ing.inventory_item_name}</span>
-                            <span style={s.unitBadge}>{ing.inventory_item_unit}</span>
+                            <span style={s.unitBadge}>Base: {ing.inventory_item_unit}</span>
 
                             {editingIngredientId === ing.id ? (
                                 <>
@@ -215,7 +240,7 @@ function RawMaterialPanel({ product, onClose }) {
                             ) : (
                                 <>
                                     <div style={s.qtyBox}>
-                                        <span style={{ fontWeight: '700', fontSize: '0.9rem' }}>{parseFloat(ing.quantity_per_unit)}</span>
+                                        <span style={{ fontWeight: '700', fontSize: '0.9rem' }}>{parseFloat(ing.quantity_per_unit)} {(ing.measurement_unit || 'unidades')}</span>
                                         <span style={{ fontSize: '0.75rem', color: '#888' }}>/ pedido</span>
                                     </div>
                                     <button onClick={() => { setEditingIngredientId(ing.id); setEditQty(String(ing.quantity_per_unit)); }} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#555', padding: '4px' }} title="Editar cantidad">
@@ -259,16 +284,36 @@ function RawMaterialPanel({ product, onClose }) {
                             ))}
                         </select>
                         <div style={s.row}>
-                            {selItemId && (
-                                <div style={{ flex: 1 }}>
-                                    <label style={s.label}>Cantidad a descontar por pedido ({availableItems.find(i => String(i.id) === String(selItemId))?.unit || ''})</label>
-                                    <input
-                                        type="number" step="0.001" placeholder="ej. 0.2"
-                                        value={selQty} onChange={e => setSelQty(e.target.value)}
-                                        style={s.input}
-                                    />
-                                </div>
-                            )}
+                            {selItemId && (() => {
+                                const matchedItem = availableItems.find(i => String(i.id) === String(selItemId));
+                                return (
+                                    <div style={{ flex: 1 }}>
+                                        <label style={s.label}>Cantidad a descontar por pedido</label>
+                                        <div style={{ display: 'flex', gap: '8px' }}>
+                                            <input
+                                                type="number" step="any" placeholder="ej. 200"
+                                                value={selQty} onChange={e => setSelQty(e.target.value)}
+                                                style={s.input}
+                                            />
+                                            <select 
+                                                value={selMeasurementUnit} 
+                                                onChange={e => setSelMeasurementUnit(e.target.value)} 
+                                                style={{...s.select, width: '120px'}}
+                                            >
+                                                <option value="unidades">Unidades base</option>
+                                                {matchedItem?.has_weight && (
+                                                    <>
+                                                        <option value="g">Gramos (g)</option>
+                                                        <option value="kg">Kilos (kg)</option>
+                                                        <option value="ml">Mililitros (ml)</option>
+                                                        <option value="l">Litros (l)</option>
+                                                    </>
+                                                )}
+                                            </select>
+                                        </div>
+                                    </div>
+                                );
+                            })()}
                             <div style={{ flex: 0, display: 'flex', alignItems: 'flex-end', gap: '6px' }}>
                                 <button onClick={handleAddExisting} disabled={saving} style={{ ...s.btnPrimary, flex: 0, padding: '10px 16px', whiteSpace: 'nowrap' }}>
                                     {saving ? '...' : <><Check size={16} /> Añadir</>}
@@ -322,13 +367,64 @@ function RawMaterialPanel({ product, onClose }) {
                                     style={s.input}
                                 />
                             </div>
+                            <div style={{ gridColumn: '1 / -1', background: '#f8f9fa', padding: '10px', borderRadius: '8px', border: '1px solid #eee' }}>
+                                <label style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.85rem', fontWeight: 'bold', cursor: 'pointer', color: '#444' }}>
+                                    <input type="checkbox" checked={newItem.hasPack} onChange={e => setNewItem({ ...newItem, hasPack: e.target.checked })} />
+                                    ¿Llega en envases/packs?
+                                </label>
+                                {newItem.hasPack && (
+                                    <div style={{ display: 'flex', gap: '10px', marginTop: '8px' }}>
+                                        <input type="text" placeholder="Ej: Cajas" value={newItem.packName} onChange={e => setNewItem({ ...newItem, packName: e.target.value })} style={s.input} />
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                            <span style={{ fontSize: '0.8rem', whiteSpace: 'nowrap' }}>trae:</span>
+                                            <input type="number" value={newItem.unitsPerPack} onChange={e => setNewItem({ ...newItem, unitsPerPack: e.target.value })} style={{...s.input, width: '60px'}} />
+                                            <span style={{ fontSize: '0.8rem' }}>uds base</span>
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
+                            <div style={{ gridColumn: '1 / -1', background: '#f8f9fa', padding: '10px', borderRadius: '8px', border: '1px solid #eee' }}>
+                                <label style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.85rem', fontWeight: 'bold', cursor: 'pointer', color: '#444' }}>
+                                    <input type="checkbox" checked={newItem.hasWeight} onChange={e => setNewItem({ ...newItem, hasWeight: e.target.checked })} />
+                                    ¿Cada unidad tiene peso fijo?
+                                </label>
+                                {newItem.hasWeight && (
+                                    <div style={{ display: 'flex', gap: '10px', marginTop: '8px', alignItems: 'center' }}>
+                                        <span style={{ fontSize: '0.8rem' }}>Pesa:</span>
+                                        <input type="number" value={newItem.weightPerUnit} onChange={e => setNewItem({ ...newItem, weightPerUnit: e.target.value })} style={{...s.input, width: '80px'}} />
+                                        <select value={newItem.weightUnit} onChange={e => setNewItem({ ...newItem, weightUnit: e.target.value })} style={s.select}>
+                                            <option value="g">Gramos (g)</option>
+                                            <option value="kg">Kilos (kg)</option>
+                                            <option value="ml">Mililitros (ml)</option>
+                                            <option value="l">Litros (l)</option>
+                                        </select>
+                                    </div>
+                                )}
+                            </div>
                             <div style={{ gridColumn: '1 / -1' }}>
-                                <label style={s.label}>Cantidad consumida por pedido de "{product.name}"</label>
-                                <input
-                                    type="number" step="0.001" placeholder="ej. 0.05"
-                                    value={newQty} onChange={e => setNewQty(e.target.value)}
-                                    style={s.input}
-                                />
+                                <label style={s.label}>Cantidad a descontar por pedido</label>
+                                <div style={{ display: 'flex', gap: '8px' }}>
+                                    <input
+                                        type="number" step="any" placeholder="ej. 0.05"
+                                        value={newQty} onChange={e => setNewQty(e.target.value)}
+                                        style={s.input}
+                                    />
+                                    <select 
+                                        value={newMeasurementUnit} 
+                                        onChange={e => setNewMeasurementUnit(e.target.value)} 
+                                        style={{...s.select, width: '120px'}}
+                                    >
+                                        <option value="unidades">Unidades base</option>
+                                        {newItem.hasWeight && (
+                                            <>
+                                                <option value="g">Gramos (g)</option>
+                                                <option value="kg">Kilos (kg)</option>
+                                                <option value="ml">Mililitros (ml)</option>
+                                                <option value="l">Litros (l)</option>
+                                            </>
+                                        )}
+                                    </select>
+                                </div>
                             </div>
                         </div>
                         <div style={{ ...s.row, marginTop: '14px' }}>
