@@ -259,14 +259,16 @@ function RawMaterialPanel({ product, onClose }) {
                             ))}
                         </select>
                         <div style={s.row}>
-                            <div style={{ flex: 1 }}>
-                                <label style={s.label}>Cantidad consumida por pedido</label>
-                                <input
-                                    type="number" step="0.001" placeholder="ej. 0.2"
-                                    value={selQty} onChange={e => setSelQty(e.target.value)}
-                                    style={s.input}
-                                />
-                            </div>
+                            {selItemId && (
+                                <div style={{ flex: 1 }}>
+                                    <label style={s.label}>Cantidad a descontar por pedido ({availableItems.find(i => String(i.id) === String(selItemId))?.unit || ''})</label>
+                                    <input
+                                        type="number" step="0.001" placeholder="ej. 0.2"
+                                        value={selQty} onChange={e => setSelQty(e.target.value)}
+                                        style={s.input}
+                                    />
+                                </div>
+                            )}
                             <div style={{ flex: 0, display: 'flex', alignItems: 'flex-end', gap: '6px' }}>
                                 <button onClick={handleAddExisting} disabled={saving} style={{ ...s.btnPrimary, flex: 0, padding: '10px 16px', whiteSpace: 'nowrap' }}>
                                     {saving ? '...' : <><Check size={16} /> Añadir</>}

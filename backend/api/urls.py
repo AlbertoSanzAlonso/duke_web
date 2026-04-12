@@ -6,7 +6,7 @@ from .views import (ProductViewSet, MenuEntryViewSet, SaleViewSet, ExpenseViewSe
                     DeliverySettingViewSet, AdminSetupView, 
                     PasswordResetRequestView, PasswordResetConfirmView, MeView, UserViewSet,
                     ActionLogViewSet, AIHelpView, MailCheckView, MailTestView, DashboardInsightsView,
-                    HealthCheckView, ProductIngredientViewSet)
+                    HealthCheckView, ProductIngredientViewSet, InventoryMovementViewSet)
 from rest_framework.authtoken.views import obtain_auth_token
 
 router = DefaultRouter()
@@ -14,6 +14,7 @@ router.register(r'products', ProductViewSet)
 router.register(r'product-ingredients', ProductIngredientViewSet, basename='product-ingredient')
 router.register(r'menu-entries', MenuEntryViewSet)
 router.register(r'inventory', InventoryItemViewSet)
+router.register(r'inventory-movements', InventoryMovementViewSet, basename='inventory-movement')
 router.register(r'sales', SaleViewSet, basename='sale')
 router.register(r'expenses', ExpenseViewSet)
 router.register(r'supplier-orders', SupplierOrderViewSet)

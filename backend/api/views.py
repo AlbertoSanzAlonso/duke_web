@@ -9,14 +9,14 @@ from django.utils import timezone
 from datetime import timedelta
 from .models import (Product, MenuEntry, Sale, SaleItem, Expense, InventoryItem, 
                      SupplierOrder, GlobalSetting, GalleryImage, OpeningHour, DeliverySetting, 
-                     UserProfile, ActionLog, log_action, ProductIngredient)
+                     UserProfile, ActionLog, log_action, ProductIngredient, deduct_inventory_for_sale, InventoryMovement)
 from .serializers import (ProductSerializer, MenuEntrySerializer, SaleSerializer, 
                           SaleCreateSerializer, ExpenseSerializer,
                           InventoryItemSerializer, SupplierOrderSerializer, 
                           SupplierOrderCreateSerializer, GlobalSettingSerializer, 
                           GalleryImageSerializer, OpeningHourSerializer, 
                           DeliverySettingSerializer, UserSerializer, ActionLogSerializer,
-                          ProductIngredientSerializer)
+                          ProductIngredientSerializer, InventoryMovementSerializer)
 
 from .permissions import (IsAdminManager, HasTPVPermission, HasAccountingPermission,
                          HasMenuPermission, HasInventoryPermission, HasGalleryPermission, HasKitchenPermission)
@@ -546,8 +546,17 @@ class SaleViewSet(viewsets.ModelViewSet):
         sales = Sale.objects.filter(id__in=ids, status='PENDING')
         
         if action_type == 'COMPLETE':
+            # Collect before updating (we need to access items for stock deduction)
+            # .update() bypasses save() and signals, so we deduct manually first
+            sales_to_complete = list(sales.prefetch_related(
+                'items__menu_entry__product__ingredients_list__inventory_item'
+            ))
             count = sales.update(status='COMPLETED')
-            log_action(request.user, 'TPV', 'UPDATE', f'Cobro masivo de {count} tickets')
+            # Deduct stock for each completed sale (mark as deducted after)
+            for s in sales_to_complete:
+                s.status = 'COMPLETED'  # reflect new status for the helper guard
+                deduct_inventory_for_sale(s)
+            log_action(request.user, 'TPV', 'UPDATE', f'Cobro masivo de {count} tickets (stock descontado)')
             return Response({'message': f'{count} tickets cobrados con éxito.'})
         elif action_type == 'DELETE':
             count, _ = sales.delete()
@@ -576,7 +585,9 @@ class SaleViewSet(viewsets.ModelViewSet):
             # As per user request: marking as delivered also removes it from pending list in TPV
             sale.status = 'COMPLETED'
             sale.save()
-            log_action(request.user if request.user.is_authenticated else None, 'COCINA', 'UPDATE', f'Pedido #{sale.id} recogido y completado automáticamente')
+            # Deduct raw material inventory (idempotent: will skip if already deducted)
+            deduct_inventory_for_sale(sale)
+            log_action(request.user if request.user.is_authenticated else None, 'COCINA', 'UPDATE', f'Pedido #{sale.id} recogido, completado y stock descontado')
             return Response({'message': f'Pedido #{sale.id} archivado como recogido y completado.'})
         except Exception as e:
             import traceback
@@ -633,6 +644,26 @@ class InventoryItemViewSet(viewsets.ModelViewSet):
     def perform_destroy(self, instance):
         log_action(self.request.user, 'INVENTARIO', 'DELETE', f'Eliminado item inventario: {instance.name}')
         instance.delete()
+
+class InventoryMovementViewSet(viewsets.ReadOnlyModelViewSet):
+    """
+    Vista de solo lectura del historial de movimientos de inventario (Entradas y Salidas).
+    """
+    queryset = InventoryMovement.objects.select_related('inventory_item').all().order_by('-date')
+    serializer_class = InventoryMovementSerializer
+    permission_classes = [permissions.IsAuthenticated, HasInventoryPermission]
+
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        days = self.request.query_params.get('days')
+        if days:
+            try:
+                days_int = int(days)
+                cutoff = timezone.now() - timedelta(days=days_int)
+                queryset = queryset.filter(date__gte=cutoff)
+            except ValueError:
+                pass
+        return queryset[:500]
 
 class SupplierOrderViewSet(viewsets.ModelViewSet):
     queryset = SupplierOrder.objects.prefetch_related('items', 'items__item').all().order_by('-date')

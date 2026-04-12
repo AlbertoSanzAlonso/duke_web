@@ -83,9 +83,67 @@ class Sale(models.Model):
     table_number = models.CharField(max_length=255, blank=True, null=True)
     delivery_cost = models.DecimalField(max_digits=10, decimal_places=2, default=0)
     notes = models.TextField(blank=True, null=True)
+    stock_deducted = models.BooleanField(
+        default=False,
+        db_index=True,
+        help_text="Indica si ya se descontó la materia prima del inventario al completar este pedido."
+    )
     
     def __str__(self):
         return f"Sale {self.id} ({self.status}) - {self.total_amount}"
+
+
+def deduct_inventory_for_sale(sale):
+    """
+    Descuenta del inventario la materia prima consumida por cada producto de un pedido.
+    Solo actúa si el pedido está COMPLETED y aún no se descontó (stock_deducted=False).
+    Es idempotente: si se llama varias veces no duplica el descuento.
+    Registra cada descuento en InventoryMovement para historial.
+    """
+    # Guard: already deducted or not completed
+    if sale.stock_deducted or sale.status != 'COMPLETED':
+        return
+
+    # Reload items with all related data in a single (efficient) query
+    items = sale.items.select_related(
+        'menu_entry__product'
+    ).prefetch_related(
+        'menu_entry__product__ingredients_list__inventory_item'
+    ).all()
+
+    movements_to_create = []
+
+    for item in items:
+        if not item.menu_entry or not item.menu_entry.product:
+            continue
+        product = item.menu_entry.product
+        for ingredient in product.ingredients_list.all():
+            consumed = ingredient.quantity_per_unit * item.quantity
+            # Use F() to avoid race conditions on concurrent requests
+            InventoryItem.objects.filter(pk=ingredient.inventory_item_id).update(
+                quantity=models.F('quantity') - consumed
+            )
+            movements_to_create.append(
+                InventoryMovement(
+                    inventory_item_id=ingredient.inventory_item_id,
+                    direction='OUT',
+                    quantity=consumed,
+                    reason=f'Venta #{sale.id}',
+                    sale=sale,
+                    product=product,
+                    description=(
+                        f'{item.quantity}× {product.name} '
+                        f'({ingredient.quantity_per_unit} {ingredient.inventory_item.unit}/ud.)'
+                    ),
+                )
+            )
+
+    if movements_to_create:
+        InventoryMovement.objects.bulk_create(movements_to_create)
+
+    # Mark as deducted to prevent double-deduction
+    Sale.objects.filter(pk=sale.pk).update(stock_deducted=True)
+
 
 class SaleItem(models.Model):
     sale = models.ForeignKey(Sale, related_name='items', on_delete=models.CASCADE)
@@ -109,12 +167,47 @@ class InventoryItem(models.Model):
     name = models.CharField(max_length=200, db_index=True)
     category = models.CharField(max_length=100, blank=True, null=True, db_index=True)
     quantity = models.DecimalField(max_digits=10, decimal_places=2, default=0, db_index=True)
-    unit = models.CharField(max_length=50, default='unidades')
+    unit = models.CharField(max_length=50, default='unidades', help_text="Unidad base (ej: gramos, unidades)")
+    pack_name = models.CharField(max_length=50, blank=True, null=True, help_text="Nombre del contenedor (ej: 'cajas', 'packs')")
+    units_per_pack = models.DecimalField(max_digits=10, decimal_places=2, default=1, help_text="Cuántas unidades base trae cada pack")
     min_stock = models.DecimalField(max_digits=10, decimal_places=2, default=0, db_index=True)
     created_at = models.DateTimeField(auto_now_add=True, null=True)
     
     def __str__(self):
         return f"{self.name} ({self.quantity} {self.unit})"
+
+
+class InventoryMovement(models.Model):
+    """Historial de movimientos de stock: entradas (compras) y salidas (ventas)."""
+    DIRECTION_CHOICES = [
+        ('IN',  'Entrada'),
+        ('OUT', 'Salida'),
+        ('ADJ', 'Ajuste Manual'),
+    ]
+    inventory_item = models.ForeignKey(
+        InventoryItem,
+        on_delete=models.CASCADE,
+        related_name='movements',
+    )
+    direction = models.CharField(max_length=3, choices=DIRECTION_CHOICES, db_index=True)
+    quantity = models.DecimalField(max_digits=10, decimal_places=3)
+    reason = models.CharField(max_length=255, help_text="Ej: 'Venta #42', 'Compra proveedor', 'Ajuste manual'")
+    description = models.TextField(blank=True, null=True, help_text="Detalle adicional del movimiento.")
+    # Optional FK links so we know exactly which sale or product caused the movement
+    sale = models.ForeignKey(
+        'Sale', on_delete=models.SET_NULL, null=True, blank=True, related_name='stock_movements'
+    )
+    product = models.ForeignKey(
+        'Product', on_delete=models.SET_NULL, null=True, blank=True, related_name='stock_movements'
+    )
+    date = models.DateTimeField(auto_now_add=True, db_index=True)
+
+    class Meta:
+        ordering = ['-date']
+
+    def __str__(self):
+        sign = '+' if self.direction == 'IN' else '-'
+        return f"[{self.date.strftime('%d/%m/%Y %H:%M')}] {sign}{self.quantity} {self.inventory_item.name} — {self.reason}"
 
 class SupplierOrder(models.Model):
     STATUS_CHOICES = [
@@ -145,10 +238,22 @@ class SupplierOrderItem(models.Model):
         
         super().save(*args, **kwargs)
         
-        # Update Inventory stock
+        # Update Inventory stock using F() to avoid race conditions
         diff = self.quantity - old_quantity
-        self.item.quantity = models.F('quantity') + diff
-        self.item.save()
+        InventoryItem.objects.filter(pk=self.item_id).update(
+            quantity=models.F('quantity') + diff
+        )
+
+        # Register movement in history
+        if diff != 0:
+            direction = 'IN' if diff > 0 else 'OUT'
+            InventoryMovement.objects.create(
+                inventory_item=self.item,
+                direction=direction,
+                quantity=abs(diff),
+                reason=f'Compra proveedor #{self.order_id} — {self.order.supplier_name}',
+                description=f'{abs(diff)} {self.item.unit} de {self.item.name}',
+            )
 
     def __str__(self):
         return f"{self.quantity} x {self.item.name}"

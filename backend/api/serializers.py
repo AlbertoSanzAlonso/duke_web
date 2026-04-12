@@ -1,7 +1,8 @@
 from rest_framework import serializers
 from .models import (Product, MenuEntry, Sale, SaleItem, Expense, InventoryItem, 
                      SupplierOrder, SupplierOrderItem, GlobalSetting, GalleryImage,
-                     OpeningHour, DeliverySetting, UserProfile, ActionLog, ProductIngredient)
+                     OpeningHour, DeliverySetting, UserProfile, ActionLog, ProductIngredient,
+                     InventoryMovement, deduct_inventory_for_sale)
 from django.contrib.auth.models import User
 
 class ActionLogSerializer(serializers.ModelSerializer):
@@ -104,7 +105,9 @@ class SaleSerializer(serializers.ModelSerializer):
     
     class Meta:
         model = Sale
-        fields = ['id', 'total_amount', 'date', 'updated_at', 'notes', 'items', 'status', 'is_prepared', 'prepared_at', 'is_delivered', 'delivered_at', 'customer_name', 'table_number', 'delivery_cost']
+        fields = ['id', 'total_amount', 'date', 'updated_at', 'notes', 'items', 'status',
+                  'is_prepared', 'prepared_at', 'is_delivered', 'delivered_at',
+                  'customer_name', 'table_number', 'delivery_cost', 'stock_deducted']
 
 class SaleCreateSerializer(serializers.ModelSerializer):
     items = SaleItemSerializer(many=True)
@@ -118,10 +121,14 @@ class SaleCreateSerializer(serializers.ModelSerializer):
         sale = Sale.objects.create(**validated_data)
         for item_data in items_data:
             SaleItem.objects.create(sale=sale, **item_data)
+        # If the sale is created directly as COMPLETED (e.g. TPV cash sale), deduct stock immediately
+        if sale.status == 'COMPLETED':
+            deduct_inventory_for_sale(sale)
         return sale
 
     def update(self, instance, validated_data):
         items_data = validated_data.pop('items', None)
+        prev_status = instance.status
         
         for attr, value in validated_data.items():
             setattr(instance, attr, value)
@@ -132,6 +139,10 @@ class SaleCreateSerializer(serializers.ModelSerializer):
             instance.items.all().delete()
             for item_data in items_data:
                 SaleItem.objects.create(sale=instance, **item_data)
+
+        # Deduct stock if transitioning to COMPLETED for the first time
+        if prev_status != 'COMPLETED' and instance.status == 'COMPLETED':
+            deduct_inventory_for_sale(instance)
                 
         return instance
 
@@ -144,6 +155,14 @@ class InventoryItemSerializer(serializers.ModelSerializer):
     class Meta:
         model = InventoryItem
         fields = '__all__'
+
+class InventoryMovementSerializer(serializers.ModelSerializer):
+    inventory_item_name = serializers.CharField(source='inventory_item.name', read_only=True)
+    inventory_item_unit = serializers.CharField(source='inventory_item.unit', read_only=True)
+
+    class Meta:
+        model = InventoryMovement
+        fields = ['id', 'inventory_item', 'inventory_item_name', 'inventory_item_unit', 'direction', 'quantity', 'reason', 'description', 'date']
 
 class SupplierOrderItemSerializer(serializers.ModelSerializer):
     item_name = serializers.ReadOnlyField(source='item.name')
