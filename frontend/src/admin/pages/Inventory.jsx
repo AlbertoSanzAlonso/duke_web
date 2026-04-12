@@ -32,10 +32,14 @@ function Inventory() {
     const [packName, setPackName] = useState('cajas');
     const [unitsPerPack, setUnitsPerPack] = useState('10');
 
-    // Weight state
     const [hasWeight, setHasWeight] = useState(false);
     const [weightPerUnit, setWeightPerUnit] = useState('1000');
     const [weightUnit, setWeightUnit] = useState('g');
+    
+    // Sub-unit state
+    const [useSubUnits, setUseSubUnits] = useState(false);
+    const [subUnitName, setSubUnitName] = useState('unidades');
+    const [subUnitsPerUnit, setSubUnitsPerUnit] = useState('1');
 
     const defaultCategories = ['Carne', 'Verdura', 'Quesos', 'Pan', 'Bebidas', 'Salsas', 'Desechables'];
     const existingCategories = [...new Set(items.map(item => item.category).filter(Boolean))];
@@ -84,6 +88,9 @@ function Inventory() {
                 has_weight: hasWeight,
                 weight_per_unit: hasWeight ? (parseFloat(weightPerUnit) || 0) : 0,
                 weight_unit: hasWeight ? weightUnit : 'g',
+                use_sub_units: useSubUnits,
+                sub_unit_name: subUnitName,
+                sub_units_per_unit: useSubUnits ? (parseFloat(subUnitsPerUnit) || 1) : 1,
                 min_stock: parseFloat(minStock) || 0
             });
             setName('');
@@ -96,6 +103,9 @@ function Inventory() {
             setHasWeight(false);
             setWeightPerUnit('1000');
             setWeightUnit('g');
+            setUseSubUnits(false);
+            setSubUnitName('unidades');
+            setSubUnitsPerUnit('1');
             loadInventory();
             setToast({ message: "Artículo añadido al inventario", type: 'success' });
         } catch (err) {
@@ -310,6 +320,35 @@ function Inventory() {
                                 <option value="ml">Mililitros (ml)</option>
                                 <option value="l">Litros (l)</option>
                             </select>
+                        </div>
+                    )}
+                </div>
+
+                <div style={{ display: 'flex', gap: '15px', flexWrap: 'wrap', alignItems: 'center', background: '#fff', padding: '12px 16px', borderRadius: '8px', border: '1px solid #eaeaea', marginTop: '5px', width: '100%' }}>
+                    <label style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.85rem', fontWeight: 'bold', cursor: 'pointer', color: '#444' }}>
+                        <input type="checkbox" checked={useSubUnits} onChange={e => setUseSubUnits(e.target.checked)} style={{ transform: 'scale(1.2)' }} />
+                        ¿Dividir la unidad para recetas (ej. 1 Paquete = 50 Fetas)?
+                    </label>
+
+                    {useSubUnits && (
+                        <div style={{ display: 'flex', gap: '10px', alignItems: 'center', marginLeft: 'auto', flexWrap: 'wrap' }}>
+                            <span style={{ fontSize: '0.85rem', color: '#666' }}>Se divide en:</span>
+                            <input 
+                                type="text" 
+                                placeholder="Ej: fetas" 
+                                value={subUnitName} 
+                                onChange={e => setSubUnitName(e.target.value)}
+                                style={{ width: '100px', padding: '6px 10px', borderRadius: '6px', border: '1px solid #ccc', fontSize: '0.85rem' }}
+                            />
+                            <span style={{ fontSize: '0.85rem', color: '#666' }}>y trae:</span>
+                            <input 
+                                type="number" 
+                                step="any" 
+                                value={subUnitsPerUnit} 
+                                onChange={e => setSubUnitsPerUnit(e.target.value)}
+                                style={{ width: '60px', padding: '6px 10px', borderRadius: '6px', border: '1px solid #ccc', fontSize: '0.85rem', textAlign: 'center', fontWeight: 'bold' }}
+                            />
+                            <span style={{ fontSize: '0.85rem', color: '#444' }}>{subUnitName || 'unidades'} por {unit}</span>
                         </div>
                     )}
                 </div>

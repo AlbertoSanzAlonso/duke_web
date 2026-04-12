@@ -142,6 +142,10 @@ def deduct_inventory_for_sale(sale):
             if ingredient.measurement_unit == 'pack' and inv_item.pack_name and inv_item.units_per_pack > 0:
                 base_consumed_rate = base_consumed_rate * float(inv_item.units_per_pack)
             
+            # Sub-unit conversion: if recipe asks for 'sub-unit', divide by sub_units_per_unit
+            if ingredient.measurement_unit == 'sub-unit' and inv_item.use_sub_units and inv_item.sub_units_per_unit > 0:
+                base_consumed_rate = base_consumed_rate / float(inv_item.sub_units_per_unit)
+
             consumed = base_consumed_rate * item.quantity
             
             # Use F() to avoid race conditions on concurrent requests
@@ -202,6 +206,11 @@ class InventoryItem(models.Model):
     has_weight = models.BooleanField(default=False, help_text="¿La unidad tiene un peso/volumen asignado?")
     weight_per_unit = models.DecimalField(max_digits=10, decimal_places=3, default=0, help_text="Peso/Volumen de 1 unidad base")
     weight_unit = models.CharField(max_length=10, default='g', choices=[('g','Gramos'), ('kg','Kilogramos'), ('ml','Mililitros'), ('l','Litros')])
+
+    # Sub-unit configuration (Internal count breakdown)
+    use_sub_units = models.BooleanField(default=False, help_text="¿La unidad tiene un desglose interno en unidades?")
+    sub_unit_name = models.CharField(max_length=50, blank=True, null=True, help_text="Ej: fetas, unidades")
+    sub_units_per_unit = models.DecimalField(max_digits=10, decimal_places=3, default=1, help_text="Cuántas sub-unidades trae cada unidad base")
 
     min_stock = models.DecimalField(max_digits=10, decimal_places=2, default=0, db_index=True)
     created_at = models.DateTimeField(auto_now_add=True, null=True)

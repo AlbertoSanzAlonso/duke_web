@@ -35,7 +35,8 @@ const SupplierOrders = () => {
     const [newItemData, setNewItemData] = useState({ 
         name: '', unit: 'unidades', category: 'Otros',
         hasPack: false, packName: 'cajas', unitsPerPack: '10',
-        hasWeight: false, weightPerUnit: '1000', weightUnit: 'g'
+        hasWeight: false, weightPerUnit: '1000', weightUnit: 'g',
+        useSubUnits: false, subUnitName: 'unidades', subUnitsPerUnit: '1'
     });
     const [selectedOrder, setSelectedOrder] = useState(null);
     const [showMinStockModal, setShowMinStockModal] = useState(false);
@@ -152,7 +153,10 @@ const SupplierOrders = () => {
                 units_per_pack: newItemData.hasPack ? (parseFloat(newItemData.unitsPerPack) || 1) : 1,
                 has_weight: newItemData.hasWeight,
                 weight_per_unit: newItemData.hasWeight ? (parseFloat(newItemData.weightPerUnit) || 0) : 0,
-                weight_unit: newItemData.hasWeight ? newItemData.weightUnit : 'g'
+                weight_unit: newItemData.hasWeight ? newItemData.weightUnit : 'g',
+                use_sub_units: newItemData.useSubUnits,
+                sub_unit_name: newItemData.subUnitName,
+                sub_units_per_unit: newItemData.useSubUnits ? (parseFloat(newItemData.subUnitsPerUnit) || 1) : 1
             });
             
             // 2. Calculate final quantity and add to order list
@@ -762,6 +766,19 @@ const SupplierOrders = () => {
                                                             <option value="ml">Mililitros (ml)</option>
                                                             <option value="l">Litros (l)</option>
                                                         </select>
+                                                    </div>
+                                                )}
+                                            </div>
+                                            <div style={{ background: '#fff', padding: '10px', borderRadius: '8px', border: '1px solid #ddd' }}>
+                                                <label style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.85rem', fontWeight: 'bold', cursor: 'pointer', color: '#444' }}>
+                                                    <input type="checkbox" checked={newItemData.useSubUnits} onChange={e => setNewItemData({ ...newItemData, useSubUnits: e.target.checked })} />
+                                                    ¿Dividir unidad para recetas (ej. 1 bolsa = 20u)?
+                                                </label>
+                                                {newItemData.useSubUnits && (
+                                                    <div style={{ display: 'flex', gap: '10px', marginTop: '8px', alignItems: 'center', flexWrap: 'wrap' }}>
+                                                        <input type="text" placeholder="Ej: fetas" value={newItemData.subUnitName} onChange={e => setNewItemData({ ...newItemData, subUnitName: e.target.value })} style={{ padding: '8px', borderRadius: '6px', border: '1px solid #ccc', flex: 1 }} />
+                                                        <span style={{ fontSize: '0.8rem' }}>trae:</span>
+                                                        <input type="number" step="any" value={newItemData.subUnitsPerUnit} onChange={e => setNewItemData({ ...newItemData, subUnitsPerUnit: e.target.value })} style={{ padding: '8px', borderRadius: '6px', border: '1px solid #ccc', width: '60px' }} />
                                                     </div>
                                                 )}
                                             </div>

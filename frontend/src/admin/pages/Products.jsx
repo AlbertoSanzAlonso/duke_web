@@ -30,7 +30,8 @@ function RawMaterialPanel({ product, onClose }) {
     const [newItem, setNewItem] = useState({ 
         name: '', unit: 'unidades', category: 'Materia Prima', quantity: '0', min_stock: '0',
         hasPack: false, packName: 'cajas', unitsPerPack: '10',
-        hasWeight: false, weightPerUnit: '1000', weightUnit: 'g'
+        hasWeight: false, weightPerUnit: '1000', weightUnit: 'g',
+        useSubUnits: false, subUnitName: 'unidades', subUnitsPerUnit: '1'
     });
     const [newQty, setNewQty] = useState('');
     const [newMeasurementUnit, setNewMeasurementUnit] = useState('unidades');
@@ -94,7 +95,10 @@ function RawMaterialPanel({ product, onClose }) {
                 units_per_pack: newItem.hasPack ? (parseFloat(newItem.unitsPerPack) || 1) : 1,
                 has_weight: newItem.hasWeight,
                 weight_per_unit: newItem.hasWeight ? (parseFloat(newItem.weightPerUnit) || 0) : 0,
-                weight_unit: newItem.hasWeight ? newItem.weightUnit : 'g'
+                weight_unit: newItem.hasWeight ? newItem.weightUnit : 'g',
+                use_sub_units: newItem.useSubUnits,
+                sub_unit_name: newItem.subUnitName,
+                sub_units_per_unit: newItem.useSubUnits ? (parseFloat(newItem.subUnitsPerUnit) || 1) : 1
             });
             await createProductIngredient({ 
                 product: product.id, 
@@ -312,6 +316,9 @@ function RawMaterialPanel({ product, onClose }) {
                                                 {matchedItem?.pack_name && (
                                                     <option value="pack">Por {matchedItem.pack_name}</option>
                                                 )}
+                                                {matchedItem?.use_sub_units && (
+                                                    <option value="sub-unit">Por {matchedItem.sub_unit_name || 'unidades'}</option>
+                                                )}
                                             </select>
                                         </div>
                                     </div>
@@ -404,6 +411,19 @@ function RawMaterialPanel({ product, onClose }) {
                                     </div>
                                 )}
                             </div>
+                            <div style={{ gridColumn: '1 / -1', background: '#f8f9fa', padding: '10px', borderRadius: '8px', border: '1px solid #eee' }}>
+                                <label style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.85rem', fontWeight: 'bold', cursor: 'pointer', color: '#444' }}>
+                                    <input type="checkbox" checked={newItem.useSubUnits} onChange={e => setNewItem({ ...newItem, useSubUnits: e.target.checked })} />
+                                    ¿Dividir en sub-unidades (ej. fetas)?
+                                </label>
+                                {newItem.useSubUnits && (
+                                    <div style={{ display: 'flex', gap: '10px', marginTop: '8px', alignItems: 'center' }}>
+                                        <input type="text" placeholder="Ej: fetas" value={newItem.subUnitName} onChange={e => setNewItem({ ...newItem, subUnitName: e.target.value })} style={s.input} />
+                                        <span style={{ fontSize: '0.8rem' }}>trae:</span>
+                                        <input type="number" step="any" value={newItem.subUnitsPerUnit} onChange={e => setNewItem({ ...newItem, subUnitsPerUnit: e.target.value })} style={{...s.input, width: '60px'}} />
+                                    </div>
+                                )}
+                            </div>
                             <div style={{ gridColumn: '1 / -1' }}>
                                 <label style={s.label}>Cantidad a descontar por pedido</label>
                                 <div style={{ display: 'flex', gap: '8px' }}>
@@ -428,6 +448,9 @@ function RawMaterialPanel({ product, onClose }) {
                                         <option value="unidades">Uds. Base ({newItem.unit || 'uds'})</option>
                                         {newItem.hasPack && (
                                             <option value="pack">Por {newItem.packName}</option>
+                                        )}
+                                        {newItem.useSubUnits && (
+                                            <option value="sub-unit">Por {newItem.subUnitName || 'unidades'}</option>
                                         )}
                                     </select>
                                 </div>
