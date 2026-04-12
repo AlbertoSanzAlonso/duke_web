@@ -36,7 +36,28 @@ Este repositorio utiliza el motor de agentes *Antigravity* y se apoya en las sig
 ## 5. delivery-pricing-standards (Lógica de Negocio)
 ... (anterior contenido)
 
-## 6. UX de Datos y Presentación (Nuevo)
+## 6. UX de Datos y Presentación
 **Reglas:**
 - **Multiline:** Siempre usar `white-space: pre-line` en React para campos `ingredients` y `description`.
 - **Proporciones:** Modales desktop a `50vw` con imágenes en `aspect-ratio: 16/9`.
+
+## 7. Materia Prima por Producto (ProductIngredient) — Nuevo
+**Descripción:** Cada producto del catálogo puede tener una lista de ítems de inventario asociados con la cantidad consumida por pedido.
+
+**Modelo Django:** `ProductIngredient` (migración `0027`)
+- `product` → FK a `Product`
+- `inventory_item` → FK a `InventoryItem`
+- `quantity_per_unit` → Decimal (cuánto se consume por venta)
+
+**API:** `GET/POST /api/product-ingredients/` — `PATCH/DELETE /api/product-ingredients/{id}/`
+
+**Frontend:** Botón "Gestionar Materia Prima" en el modal de edición de `Products.jsx` → abre panel `RawMaterialPanel` con:
+- Lista editable de ingredientes actuales (edición inline de cantidad)
+- Añadir desde inventario existente
+- Crear nuevo ítem de inventario y enlazarlo
+
+**Nota:** Los productos existentes quedan sin ingredientes inicialmente. No hay descuento automático de stock al vender todavía.
+
+## 8. Breakpoints Responsivos Admin (Actualizado)
+- `Orders.css` y `Accounting.css`: cambio de `max-width: 900px` → `max-width: 1080px`
+- Garantiza que la vista de tarjetas móvil se active antes, evitando tablas cortadas entre 900–1080px.
