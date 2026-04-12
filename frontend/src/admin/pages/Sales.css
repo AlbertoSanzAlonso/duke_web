@@ -471,8 +471,11 @@
     display: flex;
     justify-content: space-between;
     align-items: baseline;
-    margin-bottom: 1rem;
+    margin-bottom: 0.5rem;
+    flex-wrap: wrap;
+    gap: 8px;
 }
+
 
 .total-row span {
     font-size: 1.2rem;
@@ -750,11 +753,14 @@
     border-color: #333;
 }
 
-/* Fix for small placeholder in discount inputs */
-.no-arrows-input::placeholder {
-    font-size: 2rem !important;
+/* Fix for small placeholder in discount modal */
+.modal-price-input::placeholder {
+    font-size: 1.8rem !important;
     font-weight: 900 !important;
     color: #aaa !important;
     opacity: 0.6 !important;
 }
+
+
+
 

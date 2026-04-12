@@ -85,9 +85,10 @@ const AIChat = () => {
             {/* Bubble Button */}
             {!isOpen && (
                 <button className="ai-chat-bubble" onClick={() => setIsOpen(true)}>
-                    <Bot size={24} />
+                    <Bot size={24} color="white" />
                     <span className="bubble-text">Duke Assist</span>
                 </button>
+
             )}
 
             {/* Chat Window */}

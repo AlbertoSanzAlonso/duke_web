@@ -1128,12 +1128,12 @@ const Sales = () => {
                                 <div style={{ position: 'relative' }}>
                                     <span style={{ 
                                         position: 'absolute', 
-                                        left: '18px', 
+                                        left: '15px', 
                                         top: '50%', 
                                         transform: 'translateY(-50%)', 
                                         fontWeight: '900', 
                                         color: '#333',
-                                        fontSize: '1.8rem',
+                                        fontSize: '1.5rem',
                                         zIndex: 5
                                     }}>
                                         {modalPriceType === 'percent' ? '%' : '$'}
@@ -1146,17 +1146,18 @@ const Sales = () => {
                                         placeholder="0"
                                         style={{ 
                                             width: '100%', 
-                                            padding: '20px 20px 20px 55px', 
-                                            borderRadius: '15px', 
+                                            padding: '15px 15px 15px 45px', 
+                                            borderRadius: '12px', 
                                             border: '2px solid #333', 
-                                            fontSize: '2rem', 
+                                            fontSize: '1.8rem', 
                                             fontWeight: '900',
                                             background: '#fff',
                                             outline: 'none',
                                             color: '#333'
                                         }}
-                                        className="no-arrows-input"
+                                        className="no-arrows-input modal-price-input"
                                     />
+
                                 </div>
 
                                 {modalPriceType !== 'direct' && (
