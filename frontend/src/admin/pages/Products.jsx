@@ -308,7 +308,10 @@ function RawMaterialPanel({ product, onClose }) {
                                                         <option value="l">Litros (l)</option>
                                                     </>
                                                 )}
-                                                <option value="unidades">Medida Base ({matchedItem?.unit || 'uds'})</option>
+                                                <option value="unidades">Uds. Base ({matchedItem?.unit || 'uds'})</option>
+                                                {matchedItem?.pack_name && (
+                                                    <option value="pack">Por {matchedItem.pack_name}</option>
+                                                )}
                                             </select>
                                         </div>
                                     </div>
@@ -422,7 +425,10 @@ function RawMaterialPanel({ product, onClose }) {
                                                 <option value="l">Litros (l)</option>
                                             </>
                                         )}
-                                        <option value="unidades">Medida Base ({newItem.unit || 'uds'})</option>
+                                        <option value="unidades">Uds. Base ({newItem.unit || 'uds'})</option>
+                                        {newItem.hasPack && (
+                                            <option value="pack">Por {newItem.packName}</option>
+                                        )}
                                     </select>
                                 </div>
                             </div>

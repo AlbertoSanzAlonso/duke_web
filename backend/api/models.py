@@ -138,6 +138,10 @@ def deduct_inventory_for_sale(sale):
                 # The rate is the fraction of the base unit consumed
                 base_consumed_rate = consumed_weight / item_weight
             
+            # Pack conversion: if recipe asks for 'packs', multiply by units_per_pack
+            if ingredient.measurement_unit == 'pack' and inv_item.pack_name and inv_item.units_per_pack > 0:
+                base_consumed_rate = base_consumed_rate * float(inv_item.units_per_pack)
+            
             consumed = base_consumed_rate * item.quantity
             
             # Use F() to avoid race conditions on concurrent requests
