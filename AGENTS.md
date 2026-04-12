@@ -24,9 +24,9 @@ Este proyecto se divide en dos entornos de despliegue claramente separados para 
 
 ## 7. Asistente IA y Soporte (Duke Assist)
 - **Modelo:** Llama-3.3-70b-versatile vía **Groq API**.
-- **RAG (Conocimiento):** El asistente lee dinámicamente el archivo `docs/manual_admin.md` y el estado en tiempo real de la base de datos (Inventario completo, Historial de Movimientos de Inventario, Finanzas con historial de 6 meses, Logs, Pedidos, Top Ventas Semanal).
-- **Mantenimiento:** Es OBLIGATORIO actualizar `docs/manual_admin.md` cuando se realicen cambios estructurales.
-- **Consultas Analíticas**: Duke Assist debe priorizar el uso del contexto de agregación (`top_selling`, `finance_history`) y el nuevo historial de inventario para responder preguntas sobre rendimiento de productos, patrones de consumo o comparativas mensuales.
+- **RAG (Conocimiento):** El asistente lee dinámicamente el archivo `docs/manual_admin.md` y el estado en tiempo real de la base de datos (Inventario completo con filtros activos, Historial de Movimientos, Materia Prima por Producto, Finanzas con historial de 6 meses, Logs, Pedidos, Top Ventas Semanal).
+- **Mantenimiento:** Es OBLIGATORIO actualizar `docs/manual_admin.md` cuando se realicen cambios estructurales (como las nuevas secciones de Productos y Proveedores).
+- **Consultas Analíticas**: Duke Assist debe priorizar el uso del contexto de agregación (`top_selling`, `finance_history`), el historial de inventario y el desglose de materia prima para responder preguntas sobre rendimiento de productos, fugas de stock o comparativas mensuales.
 
 ## 4. Skills Instaladas
 - `django-rest-best-practices`: Estabilidad y consistencia del backend.
