@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { fetchInventory, createInventoryItem, deleteInventoryItem, updateInventoryItem, fetchInventoryMovements } from '../../services/api';
 import Toast from '../components/Toast';
 import ConfirmModal from '../components/ConfirmModal';
@@ -22,6 +22,12 @@ function Inventory() {
     const [movEndDate, setMovEndDate] = useState('');
     const [movPage, setMovPage] = useState(1);
     const movPerPage = 10;
+
+    // Consumption Summary state
+    const [summaryPeriod, setSummaryPeriod] = useState('all'); // daily, weekly, monthly, all
+    const [summarySearch, setSummarySearch] = useState('');
+    const [summaryStartDate, setSummaryStartDate] = useState('');
+    const [summaryEndDate, setSummaryEndDate] = useState('');
 
     // Inventory Filtering & Pagination
     const [filterCategory, setFilterCategory] = useState('all');
@@ -244,6 +250,58 @@ function Inventory() {
         const lowStockCount = filtered.filter(i => parseFloat(i.quantity) <= parseFloat(i.min_stock)).length;
         exportToPDF(data, columns, `Inventario_${new Date().toISOString().split('T')[0]}`, 'Reporte de Inventario de Almacén', { label: 'Artículos con Bajo Stock', value: lowStockCount });
     };
+
+    const consumptionTotals = useMemo(() => {
+        let filteredMovs = movements.filter(m => m.direction === 'OUT');
+        
+        const now = new Date();
+        now.setHours(23, 59, 59, 999);
+        
+        if (summaryPeriod === 'daily') {
+            const start = new Date();
+            start.setHours(0, 0, 0, 0);
+            filteredMovs = filteredMovs.filter(m => new Date(m.date) >= start);
+        } else if (summaryPeriod === 'weekly') {
+            const start = new Date();
+            start.setDate(start.getDate() - 7);
+            start.setHours(0, 0, 0, 0);
+            filteredMovs = filteredMovs.filter(m => new Date(m.date) >= start);
+        } else if (summaryPeriod === 'monthly') {
+            const start = new Date();
+            start.setMonth(start.getMonth() - 1);
+            start.setHours(0, 0, 0, 0);
+            filteredMovs = filteredMovs.filter(m => new Date(m.date) >= start);
+        } else if (summaryStartDate || summaryEndDate) {
+            if (summaryStartDate) {
+                const s = new Date(summaryStartDate);
+                s.setHours(0,0,0,0);
+                filteredMovs = filteredMovs.filter(m => new Date(m.date) >= s);
+            }
+            if (summaryEndDate) {
+                const e = new Date(summaryEndDate);
+                e.setHours(23,59,59,999);
+                filteredMovs = filteredMovs.filter(m => new Date(m.date) <= e);
+            }
+        }
+
+        const totals = {};
+        filteredMovs.forEach(m => {
+            const name = m.inventory_item_name;
+            if (!totals[name]) {
+                totals[name] = { 
+                    name, 
+                    amount: 0, 
+                    unit: m.inventory_item_unit, 
+                    category: m.inventory_item_category 
+                };
+            }
+            totals[name].amount += parseFloat(m.quantity);
+        });
+
+        return Object.values(totals).filter(t => 
+            t.name.toLowerCase().includes(summarySearch.toLowerCase())
+        ).sort((a, b) => b.amount - a.amount);
+    }, [movements, summaryPeriod, summarySearch, summaryStartDate, summaryEndDate]);
 
     return (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
@@ -781,6 +839,113 @@ function Inventory() {
                             </>
                         );
                     })()}
+                </div>
+            </div>
+
+            {/* Resumen de Consumo Acumulado */}
+            <div className="admin-card">
+                <div className="accounting-header-main" style={{ marginBottom: '20px', flexDirection: 'column', alignItems: 'flex-start', gap: '15px' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', width: '100%', alignItems: 'center' }}>
+                        <h2 style={{ margin: 0, fontSize: '1.2rem', color: '#e03131' }}>Resumen de Consumo (Acumulados)</h2>
+                    </div>
+
+                    <div style={{ display: 'flex', gap: '15px', flexWrap: 'wrap', width: '100%', background: '#f8f9fa', padding: '15px', borderRadius: '12px', alignItems: 'center' }}>
+                        <div className="search-bar" style={{ flex: '1 1 200px' }}>
+                            <Search size={18} />
+                            <input 
+                                type="text" 
+                                placeholder="Filtrar por material..." 
+                                value={summarySearch}
+                                onChange={e => setSummarySearch(e.target.value)}
+                            />
+                        </div>
+
+                        <div className="period-selector" style={{ display: 'flex', gap: '5px', background: '#fff', padding: '4px', borderRadius: '10px', border: '1px solid #ddd' }}>
+                            {[
+                                { id: 'all', label: 'TODOS' },
+                                { id: 'daily', label: 'DIARIO' },
+                                { id: 'weekly', label: 'SEMANAL' },
+                                { id: 'monthly', label: 'MENSUAL' }
+                            ].map(p => (
+                                <button
+                                    key={p.id}
+                                    type="button"
+                                    onClick={() => { setSummaryPeriod(p.id); setSummaryStartDate(''); setSummaryEndDate(''); }}
+                                    style={{
+                                        padding: '6px 12px',
+                                        borderRadius: '8px',
+                                        border: 'none',
+                                        fontSize: '0.75rem',
+                                        fontWeight: 'bold',
+                                        cursor: 'pointer',
+                                        background: summaryPeriod === p.id && !summaryStartDate ? '#333' : 'transparent',
+                                        color: summaryPeriod === p.id && !summaryStartDate ? '#fff' : '#666',
+                                        transition: 'all 0.2s'
+                                    }}
+                                >
+                                    {p.label}
+                                </button>
+                            ))}
+                        </div>
+
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                            <input 
+                                type="date" 
+                                value={summaryStartDate} 
+                                onChange={e => { setSummaryStartDate(e.target.value); setSummaryPeriod(''); }}
+                                style={{ padding: '6px 10px', borderRadius: '8px', border: '1px solid #ddd', fontSize: '0.8rem' }}
+                            />
+                            <span style={{ fontSize: '0.8rem', color: '#888' }}>→</span>
+                            <input 
+                                type="date" 
+                                value={summaryEndDate} 
+                                onChange={e => { setSummaryEndDate(e.target.value); setSummaryPeriod(''); }}
+                                style={{ padding: '6px 10px', borderRadius: '8px', border: '1px solid #ddd', fontSize: '0.8rem' }}
+                            />
+                        </div>
+                    </div>
+                </div>
+
+                <div className="summary-grid" style={{ 
+                    display: 'grid', 
+                    gridTemplateColumns: 'repeat(auto-fill, minmax(150px, 1fr))', 
+                    gap: '12px',
+                    padding: '5px'
+                }}>
+                    {consumptionTotals.length === 0 ? (
+                        <div style={{ gridColumn: '1/-1', textAlign: 'center', padding: '40px', color: '#999', fontSize: '0.9rem' }}>
+                            No hay consumo registrado en este periodo.
+                        </div>
+                    ) : (
+                        consumptionTotals.map(t => (
+                            <div key={`sum-${t.name}`} style={{ 
+                                background: '#fff', 
+                                padding: '15px', 
+                                borderRadius: '15px', 
+                                border: '1px solid #eee',
+                                display: 'flex',
+                                flexDirection: 'column',
+                                alignItems: 'center',
+                                textAlign: 'center',
+                                boxShadow: '0 2px 4px rgba(0,0,0,0.02)'
+                            }}>
+                                <span style={{ fontSize: '0.65rem', color: '#888', fontWeight: 'bold', textTransform: 'uppercase', marginBottom: '4px' }}>{t.category || 'Varios'}</span>
+                                <span style={{ fontSize: '0.9rem', fontWeight: 'bold', color: '#333', marginBottom: '8px', lineHeight: '1.2' }}>{t.name}</span>
+                                <div style={{ 
+                                    background: '#fff5f5', 
+                                    color: '#e03131', 
+                                    padding: '6px 12px', 
+                                    borderRadius: '10px',
+                                    fontSize: '1.1rem',
+                                    fontWeight: '900',
+                                    fontFamily: "'Bebas Neue', sans-serif",
+                                    letterSpacing: '0.5px'
+                                }}>
+                                    {t.amount % 1 === 0 ? t.amount : t.amount.toFixed(2)} <small style={{ fontSize: '0.7rem', fontWeight: '500' }}>{t.unit}</small>
+                                </div>
+                            </div>
+                        ))
+                    )}
                 </div>
             </div>
 
