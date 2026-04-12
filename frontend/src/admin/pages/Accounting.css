@@ -17,15 +17,34 @@
     font-size: 1.1rem;
 }
 
-.search-bar input {
-    transition: all 0.2s ease;
-    outline: none;
+.search-bar {
+    display: flex;
+    align-items: center;
+    gap: 10px;
     background: #fff;
+    padding: 0 15px;
+    border-radius: 12px;
+    border: 1px solid #ddd;
+    transition: all 0.2s ease;
 }
 
-.search-bar input:focus {
+.search-bar:focus-within {
     border-color: var(--admin-primary) !important;
-    box-shadow: 0 4px 12px rgba(240, 62, 62, 0.1);
+    box-shadow: 0 4px 12px rgba(240, 62, 62, 0.08);
+}
+
+.search-bar input {
+    border: none !important;
+    background: transparent !important;
+    padding: 10px 0 !important;
+    font-size: 0.9rem;
+    flex: 1;
+    color: #333 !important;
+    outline: none !important;
+}
+
+.search-bar svg {
+    color: #888;
 }
 
 .period-toggle {

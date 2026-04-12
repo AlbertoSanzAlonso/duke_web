@@ -259,7 +259,7 @@ function Inventory() {
                 </div>
 
                 <div style={{ display: 'flex', gap: '15px', flexWrap: 'wrap', width: '100%', background: '#f8f9fa', padding: '12px', borderRadius: '8px', alignItems: 'center' }}>
-                    <div className="search-bar" style={{ margin: 0, flex: '1 1 250px', background: '#fff' }}>
+                    <div className="search-bar" style={{ flex: '1 1 250px' }}>
                         <Search size={18} />
                         <input 
                             type="text" 
@@ -628,7 +628,7 @@ function Inventory() {
                     </div>
 
                     <div style={{ display: 'flex', gap: '15px', flexWrap: 'wrap', width: '100%', background: '#f8f9fa', padding: '12px', borderRadius: '8px', alignItems: 'center' }}>
-                        <div className="search-bar" style={{ margin: 0, flex: '1 1 200px', background: '#fff' }}>
+                        <div className="search-bar" style={{ flex: '1 1 200px' }}>
                             <Search size={18} />
                             <input 
                                 type="text" 
@@ -644,7 +644,7 @@ function Inventory() {
                                 type="date" 
                                 value={movStartDate} 
                                 onChange={e => { setMovStartDate(e.target.value); setMovPage(1); }}
-                                style={{ padding: '6px', borderRadius: '6px', border: '1px solid #ccc', fontSize: '0.85rem' }}
+                                style={{ padding: '8px 12px', borderRadius: '12px', border: '1px solid #ddd', fontSize: '0.85rem' }}
                             />
                         </div>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
@@ -653,7 +653,7 @@ function Inventory() {
                                 type="date" 
                                 value={movEndDate} 
                                 onChange={e => { setMovEndDate(e.target.value); setMovPage(1); }}
-                                style={{ padding: '6px', borderRadius: '6px', border: '1px solid #ccc', fontSize: '0.85rem' }}
+                                style={{ padding: '8px 12px', borderRadius: '12px', border: '1px solid #ddd', fontSize: '0.85rem' }}
                             />
                         </div>
                         {(movSearchTerm || movStartDate || movEndDate) && (
