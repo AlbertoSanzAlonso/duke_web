@@ -4,8 +4,8 @@ import { fetchMenuEntries, createSale, fetchSales, updateSale, deleteSale, bulkA
 import { Trash2, Edit2, ChevronRight, CheckCircle2, MoreVertical, Plus, Minus, Search, ShoppingCart, Receipt, X, MapPin, Utensils, UtensilsCrossed, History, Gift, Percent } from 'lucide-react';
 import LoadingScreen from '../components/LoadingScreen';
 import Toast from '../components/Toast';
-import AIChat from '../components/AIChat';
 import DigitalClock from '../components/DigitalClock';
+
 import './Sales.css';
 
 const Sales = () => {
@@ -1322,10 +1322,10 @@ const Sales = () => {
                     </div>
                 </div>
             )}
-            <AIChat />
         </div>
     );
 };
+
 
 
 export default Sales;
