@@ -9,13 +9,14 @@ from django.utils import timezone
 from datetime import timedelta
 from .models import (Product, MenuEntry, Sale, SaleItem, Expense, InventoryItem, 
                      SupplierOrder, GlobalSetting, GalleryImage, OpeningHour, DeliverySetting, 
-                     UserProfile, ActionLog, log_action)
+                     UserProfile, ActionLog, log_action, ProductIngredient)
 from .serializers import (ProductSerializer, MenuEntrySerializer, SaleSerializer, 
                           SaleCreateSerializer, ExpenseSerializer,
                           InventoryItemSerializer, SupplierOrderSerializer, 
                           SupplierOrderCreateSerializer, GlobalSettingSerializer, 
                           GalleryImageSerializer, OpeningHourSerializer, 
-                          DeliverySettingSerializer, UserSerializer, ActionLogSerializer)
+                          DeliverySettingSerializer, UserSerializer, ActionLogSerializer,
+                          ProductIngredientSerializer)
 
 from .permissions import (IsAdminManager, HasTPVPermission, HasAccountingPermission,
                          HasMenuPermission, HasInventoryPermission, HasGalleryPermission, HasKitchenPermission)
@@ -431,7 +432,7 @@ def PasswordResetConfirmView(request):
 
 class ProductViewSet(viewsets.ModelViewSet):
     # Safety fallback to -id until all migrations are applied
-    queryset = Product.objects.all().order_by('-id')
+    queryset = Product.objects.prefetch_related('ingredients_list', 'ingredients_list__inventory_item').all().order_by('-id')
     serializer_class = ProductSerializer
     
     def get_permissions(self):
@@ -456,6 +457,29 @@ class ProductViewSet(viewsets.ModelViewSet):
         instance.delete()
         from django.core.cache import cache
         cache.delete("menu_list_public")
+
+
+class ProductIngredientViewSet(viewsets.ModelViewSet):
+    """CRUD de ingredientes (materia prima) asociados a un producto del catálogo."""
+    serializer_class = ProductIngredientSerializer
+    permission_classes = [permissions.IsAuthenticated, HasMenuPermission]
+
+    def get_queryset(self):
+        return ProductIngredient.objects.select_related('inventory_item').all()
+
+    def perform_create(self, serializer):
+        ingredient = serializer.save()
+        log_action(
+            self.request.user, 'PRODUCTOS', 'UPDATE',
+            f'Añadida materia prima "{ingredient.inventory_item.name}" al producto "{ingredient.product.name}"'
+        )
+
+    def perform_destroy(self, instance):
+        log_action(
+            self.request.user, 'PRODUCTOS', 'UPDATE',
+            f'Eliminada materia prima "{instance.inventory_item.name}" del producto "{instance.product.name}"'
+        )
+        instance.delete()
 
 class MenuEntryViewSet(viewsets.ModelViewSet):
     queryset = MenuEntry.objects.select_related('product').all().order_by('product__name')

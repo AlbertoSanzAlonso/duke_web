@@ -21,7 +21,7 @@ const Toast = ({ message, type = 'success', onClose, duration = 3000 }) => {
             display: 'flex',
             alignItems: 'center',
             gap: '12px',
-            zIndex: 10000,
+            zIndex: 10100,
             animation: 'slideIn 0.3s ease-out',
             fontWeight: '600'
         },

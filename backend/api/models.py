@@ -314,3 +314,32 @@ def log_action(user, module, action_type, description):
         )
     except Exception as e:
         print(f"Error logging action: {e}")
+
+
+class ProductIngredient(models.Model):
+    """
+    Links a Product (catalogue recipe) to an InventoryItem,
+    storing how much of that item is consumed each time the product is sold.
+    """
+    product = models.ForeignKey(
+        Product,
+        on_delete=models.CASCADE,
+        related_name='ingredients_list'
+    )
+    inventory_item = models.ForeignKey(
+        InventoryItem,
+        on_delete=models.CASCADE,
+        related_name='used_in_products'
+    )
+    quantity_per_unit = models.DecimalField(
+        max_digits=10,
+        decimal_places=3,
+        help_text="Cantidad del ítem de inventario consumida por cada unidad vendida del producto."
+    )
+
+    class Meta:
+        unique_together = ('product', 'inventory_item')
+        ordering = ['inventory_item__name']
+
+    def __str__(self):
+        return f"{self.product.name} → {self.inventory_item.name} × {self.quantity_per_unit}"

@@ -428,12 +428,35 @@
     color: #333 !important;
 }
 
+.pos-item-action-btn {
+    transition: all 0.2s ease;
+}
+
+.pos-item-action-btn:hover {
+    transform: scale(1.1);
+    filter: brightness(1.2);
+}
+
+.pos-item-action-btn.discount:hover {
+    background-color: #000 !important;
+}
+
+.pos-item-action-btn.gift:hover {
+    background-color: #9c36b5 !important;
+}
+
 .delete-item-btn {
     margin-left: auto;
     color: #dc3545 !important;
     font-size: 1.2rem;
     border: none !important;
     background: none !important;
+    transition: transform 0.2s ease;
+}
+
+.delete-item-btn:hover {
+    transform: scale(1.2);
+    color: #c82333 !important;
 }
 
 /* Footer del Ticket */

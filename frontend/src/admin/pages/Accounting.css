@@ -384,7 +384,7 @@
 }
 
 /* RESPONSIVIDAD MÓVIL (CONTABILIDAD E INVENTARIO) */
-@media (max-width: 900px) {
+@media (max-width: 1080px) {
     .accounting-form .form-row {
         grid-template-columns: 1fr !important;
     }
@@ -600,7 +600,7 @@
 .accounting-mobile-only { display: none; }
 .accounting-desktop-only { display: block; }
 
-@media (max-width: 900px) {
+@media (max-width: 1080px) {
     .accounting-desktop-only { display: none !important; }
     .accounting-mobile-only  { display: block !important; }
 }

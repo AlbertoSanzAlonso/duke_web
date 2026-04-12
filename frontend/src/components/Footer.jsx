@@ -11,6 +11,11 @@ const Footer = () => {
             <p>© 2025 DUKE BURGER. SAN JUAN, ARGENTINA.</p>
           </div>
           <div className="footer-links">
+            <h3>PÁGINAS</h3>
+            <div className="social-icons-footer" style={{ flexDirection: 'column', alignItems: 'flex-start', gap: '8px', marginBottom: '15px' }}>
+              <a href="/" style={{ fontSize: '0.9rem', textDecoration: 'none', color: '#888' }}>CARTA</a>
+              <a href="/nosotros" style={{ fontSize: '0.9rem', textDecoration: 'none', color: '#ccc', fontWeight: 'bold' }}>NOSOTROS</a>
+            </div>
             <h3>SOCIAL</h3>
             <div className="social-icons-footer">
               <a href="https://www.instagram.com/dukeburger.sj" target="_blank" rel="noopener noreferrer">

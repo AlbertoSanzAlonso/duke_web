@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo, useCallback, useTransition } from 'react';
 import { useLocation } from 'react-router-dom';
 import { fetchMenuEntries, createSale, fetchSales, updateSale, deleteSale, bulkActionSales, fetchDashboardInsights, markSaleAsPrepared, markSaleAsDelivered, revertSalePrepared, revertSaleDelivery } from '../../services/api';
-import { Trash2, Edit2, ChevronRight, CheckCircle2, MoreVertical, Plus, Minus, Search, ShoppingCart, Receipt, X, MapPin, Utensils, UtensilsCrossed, History } from 'lucide-react';
+import { Trash2, Edit2, ChevronRight, CheckCircle2, MoreVertical, Plus, Minus, Search, ShoppingCart, Receipt, X, MapPin, Utensils, UtensilsCrossed, History, Gift, Percent } from 'lucide-react';
 import LoadingScreen from '../components/LoadingScreen';
 import Toast from '../components/Toast';
 import DigitalClock from '../components/DigitalClock';
@@ -767,10 +767,10 @@ const Sales = () => {
                                     <div className="empty-cart-msg" style={{ fontSize: '0.8rem', marginTop: '1rem' }}>No hay productos en el ticket</div>
                                 ) : (
                                     cart.map(item => (
-                                        <div key={item.menu_entry} className="ticket-item" style={{ padding: '6px 0', borderBottom: '1px solid #eee' }}>
+                                        <div key={item.menu_entry} className="ticket-item" style={{ padding: '12px 0', borderBottom: '1px solid #f1f3f5' }}>
                                             <div className="item-details" style={{ marginBottom: '2px', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                                                <div style={{ display: 'flex', flexDirection: 'column' }}>
-                                                    <span className="item-name" style={{ fontSize: '0.85rem', fontWeight: '600' }}>{item.name}</span>
+                                                <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
+                                                    <span className="item-name" style={{ fontSize: '1rem', fontWeight: '700', letterSpacing: '0.2px' }}>{item.name}</span>
                                                     {parseFloat(item.price) < parseFloat(item.originalPrice) && (
                                                         <span style={{ fontSize: '0.7rem', color: '#f03e3e', fontWeight: 'bold' }}>
                                                             Desc: −${(parseFloat(item.originalPrice) - parseFloat(item.price)).toLocaleString('es-AR')}
@@ -778,7 +778,7 @@ const Sales = () => {
                                                     )}
                                                 </div>
                                                 <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end' }}>
-                                                    <span className="item-subtotal" style={{ fontSize: '0.85rem', fontWeight: '900' }}>
+                                                    <span className="item-subtotal" style={{ fontSize: '1.05rem', fontWeight: '900' }}>
                                                         ${(parseFloat(item.price) * item.quantity).toLocaleString('es-AR')}
                                                     </span>
                                                     {parseFloat(item.price) < parseFloat(item.originalPrice) && (
@@ -788,27 +788,36 @@ const Sales = () => {
                                                     )}
                                                 </div>
                                             </div>
-                                            <div className="item-controls" style={{ display: 'flex', alignItems: 'center', gap: '4px', justifyContent: 'space-between', marginTop: '4px' }}>
-                                                <div style={{ display: 'flex', alignItems: 'center', background: '#f1f3f5', borderRadius: '4px' }}>
-                                                    <button onClick={() => updateQuantity(item.menu_entry, -1)} style={{ background: 'transparent', border: 'none', padding: '1px 6px', fontSize: '1rem', cursor: 'pointer' }}>−</button>
-                                                    <span className="item-qty" style={{ fontWeight: '800', width: '15px', textAlign: 'center', fontSize: '0.75rem' }}>{item.quantity}</span>
-                                                    <button onClick={() => updateQuantity(item.menu_entry, 1)} style={{ background: 'transparent', border: 'none', padding: '1px 6px', fontSize: '1rem', cursor: 'pointer' }}>+</button>
+                                            <div className="item-controls" style={{ display: 'flex', alignItems: 'center', gap: '8px', justifyContent: 'space-between', marginTop: '8px' }}>
+                                                <div style={{ display: 'flex', alignItems: 'center', background: '#f1f3f5', borderRadius: '6px', padding: '2px' }}>
+                                                    <button onClick={() => updateQuantity(item.menu_entry, -1)} style={{ background: 'transparent', border: 'none', padding: '2px 8px', fontSize: '1.2rem', cursor: 'pointer', fontWeight: 'bold' }}>−</button>
+                                                    <span className="item-qty" style={{ fontWeight: '900', width: '25px', textAlign: 'center', fontSize: '1rem' }}>{item.quantity}</span>
+                                                    <button onClick={() => updateQuantity(item.menu_entry, 1)} style={{ background: 'transparent', border: 'none', padding: '2px 8px', fontSize: '1.2rem', cursor: 'pointer', fontWeight: 'bold' }}>+</button>
                                                 </div>
                                                 
-                                                <div style={{ display: 'flex', gap: '2px', alignItems: 'center' }}>
+                                                <div style={{ display: 'flex', gap: '6px', alignItems: 'center' }}>
                                                     <button 
                                                         onClick={() => openPriceModal(item)}
-                                                        style={{ padding: '3px 6px', background: '#333', color: 'white', borderRadius: '4px', border: 'none', cursor: 'pointer', fontSize: '0.6rem'}}
+                                                        className="pos-item-action-btn discount"
+                                                        title="Aplicar Descuento"
+                                                        style={{ padding: '6px', background: '#333', color: 'white', borderRadius: '8px', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
                                                     >
-                                                        <Edit2 size={10} />
+                                                        <Percent size={14} strokeWidth={3} />
                                                     </button>
                                                     <button 
                                                         onClick={() => updatePrice(item.menu_entry, 0)}
-                                                        style={{ padding: '3px 6px', background: '#fa5252', color: 'white', borderRadius: '4px', border: 'none', cursor: 'pointer', fontSize: '0.65rem'}}
+                                                        className="pos-item-action-btn gift"
+                                                        title="Marcar como Regalo"
+                                                        style={{ padding: '6px', background: '#ae3ec9', color: 'white', borderRadius: '8px', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
                                                     >
-                                                        🎁
+                                                        <Gift size={14} strokeWidth={3} />
                                                     </button>
-                                                    <button onClick={() => removeFromCart(item.menu_entry)} style={{ marginLeft: '4px', background: 'none', border: 'none', color: '#ff4d4d', cursor: 'pointer', fontSize: '1rem', fontWeight: 'bold'}}>×</button>
+                                                    <button 
+                                                        onClick={() => removeFromCart(item.menu_entry)} 
+                                                        style={{ marginLeft: '4px', background: 'rgba(255, 77, 77, 0.1)', border: 'none', color: '#ff4d4d', cursor: 'pointer', padding: '6px', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                                                    >
+                                                        <Trash2 size={16} />
+                                                    </button>
                                                 </div>
                                             </div>
                                         </div>
@@ -996,7 +1005,7 @@ const Sales = () => {
 
             {/* Custom Confirmation Modal */}
             {deletingTicketId && (
-                <div className="modal-overlay" style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.85)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 5000, padding: '20px' }}>
+                <div className="modal-overlay" style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.85)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 10001, padding: '20px' }}>
                     <div className="admin-modal" style={{ background: '#fff', width: '100%', maxWidth: '400px', borderRadius: '15px', overflow: 'hidden', textAlign: 'center' }}>
                         <div style={{ padding: '30px' }}>
                             <div style={{ width: '60px', height: '60px', background: '#fff5f5', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 20px', color: '#f03e3e', fontSize: '2rem' }}>!</div>
@@ -1025,7 +1034,7 @@ const Sales = () => {
 
             {/* Bulk Actions Confirmation Modal */}
             {bulkConfirm.isOpen && (
-                <div className="modal-overlay" style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.92)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 7000, padding: '20px', backdropFilter: 'blur(5px)' }}>
+                <div className="modal-overlay" style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.92)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 10001, padding: '20px', backdropFilter: 'blur(5px)' }}>
                     <div className="admin-card" style={{ width: '100%', maxWidth: '400px', border: '1px solid #333' }}>
                         <div style={{ padding: '30px', textAlign: 'center' }}>
                             <div style={{ 
@@ -1075,7 +1084,7 @@ const Sales = () => {
 
             {/* Price Adjustment Modal */}
             {priceModal.isOpen && (
-                <div className="modal-overlay" style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.85)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 6000, padding: '20px' }}>
+                <div className="modal-overlay" style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.85)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 10001, padding: '20px' }}>
                     <div className="admin-modal" style={{ background: '#fff', width: '100%', maxWidth: '350px', borderRadius: '15px', overflow: 'hidden' }}>
                         <div style={{ padding: '20px' }}>
                             <h3 style={{ margin: '0 0 5px 0', fontSize: '1.2rem' }}>Ajustar Precio</h3>
@@ -1164,7 +1173,7 @@ const Sales = () => {
             )}
             {/* Modal de Estado de Cocina (Reutilizado del Dashboard) */}
             {isKitchenModalOpen && (
-                <div className="modal-overlay" onClick={() => setIsKitchenModalOpen(false)} style={{ zIndex: 5000 }}>
+                <div className="modal-overlay" onClick={() => setIsKitchenModalOpen(false)} style={{ zIndex: 10001 }}>
                     <div className="admin-card modal-content" onClick={e => e.stopPropagation()} style={{ 
                         width: '95%', maxWidth: '550px', maxHeight: '90vh', display: 'flex', flexDirection: 'column', 
                         padding: '0', overflow: 'hidden', borderRadius: '20px', position: 'relative', background: '#fff'
@@ -1236,7 +1245,7 @@ const Sales = () => {
                         </div>
 
                         {actionOrder && (
-                            <div className="modal-overlay" style={{ background: 'rgba(0,0,0,0.6)', zIndex: 6000 }} onClick={() => setActionOrder(null)}>
+                            <div className="modal-overlay" style={{ background: 'rgba(0,0,0,0.6)', zIndex: 10002 }} onClick={() => setActionOrder(null)}>
                                 <div className="admin-card" onClick={e => e.stopPropagation()} style={{ width: '90%', maxWidth: '350px', padding: '0', borderRadius: '15px', overflow: 'hidden', background: '#fff' }}>
                                     <div style={{ padding: '20px', background: '#1a1b1e', color: '#fff' }}>
                                         <h3 style={{ margin: 0, color: '#fff' }}>Pedido #{actionOrder.id}</h3>
@@ -1270,7 +1279,7 @@ const Sales = () => {
             )}
 
             {showDeliveredModal && (
-                <div className="modal-overlay" onClick={() => setShowDeliveredModal(false)} style={{ zIndex: 5000 }}>
+                <div className="modal-overlay" onClick={() => setShowDeliveredModal(false)} style={{ zIndex: 10002 }}>
                     <div className="admin-card modal-content" onClick={e => e.stopPropagation()} style={{ width: '90%', maxWidth: '500px', maxHeight: '80vh', display: 'flex', flexDirection: 'column', padding: '0', overflow: 'hidden', borderRadius: '20px', background: '#fff' }}>
                         <div style={{ padding: '20px', borderBottom: '1px solid #eee', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: '#f8f9fa' }}>
                             <h3 style={{ margin: 0, color: '#333' }}>📦 Recogidos (Hoy)</h3>

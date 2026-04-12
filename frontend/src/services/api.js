@@ -149,6 +149,43 @@ export const updateProduct = async (id, productData) => {
     return await response.json();
 };
 
+// PRODUCT INGREDIENTS (Materia Prima)
+export const fetchProductIngredients = async (productId) => {
+    const response = await fetch(`${API_URL}/product-ingredients/?product=${productId}`, { headers: getHeaders() });
+    if (!response.ok) return handleResponseError(response);
+    const data = await response.json();
+    return data.filter ? data.filter(i => i.product === productId) : data;
+};
+
+export const createProductIngredient = async (data) => {
+    const response = await fetch(`${API_URL}/product-ingredients/`, {
+        method: 'POST',
+        headers: getHeaders('application/json'),
+        body: JSON.stringify(data)
+    });
+    if (!response.ok) return handleResponseError(response);
+    return await response.json();
+};
+
+export const updateProductIngredient = async (id, data) => {
+    const response = await fetch(`${API_URL}/product-ingredients/${id}/`, {
+        method: 'PATCH',
+        headers: getHeaders('application/json'),
+        body: JSON.stringify(data)
+    });
+    if (!response.ok) return handleResponseError(response);
+    return await response.json();
+};
+
+export const deleteProductIngredient = async (id) => {
+    const response = await fetch(`${API_URL}/product-ingredients/${id}/`, {
+        method: 'DELETE',
+        headers: getHeaders()
+    });
+    if (!response.ok) return handleResponseError(response);
+    return true;
+};
+
 // CARTA (MENU ENTRIES)
 export const fetchMenuEntries = async () => {
     const response = await fetch(`${API_URL}/menu-entries/`, { headers: getHeaders() });
