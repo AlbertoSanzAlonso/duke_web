@@ -83,13 +83,18 @@ const Kitchen = () => {
             };
         };
         
+        const handleRealTimeEvent = (event) => {
+            const data = event.detail;
+            handleRealTime(data);
+        };
+
         if (isStandalone) connectSSE();
         loadKitchenOrders(); // Initial load
 
-        window.addEventListener('new-order-received', handleNewOrder);
+        window.addEventListener('new-order-received', handleRealTimeEvent);
         return () => {
             clearInterval(timer);
-            window.removeEventListener('new-order-received', handleNewOrder);
+            window.removeEventListener('new-order-received', handleRealTimeEvent);
             if (es) es.close();
         };
     }, []); // Only once at mount
