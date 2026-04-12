@@ -1103,12 +1103,12 @@ const Sales = () => {
             {priceModal.isOpen && (
                 <div className="modal-overlay" style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.85)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 10001, padding: '20px' }}>
                     <div className="admin-modal" style={{ background: '#fff', width: '100%', maxWidth: '350px', borderRadius: '15px', overflow: 'hidden' }}>
-                        <div style={{ padding: '20px' }}>
-                            <h3 style={{ margin: '0 0 5px 0', fontSize: '1.2rem' }}>Ajustar Precio</h3>
-                            <p style={{ margin: '0 0 15px 0', color: '#666', fontSize: '0.9rem' }}>{priceModal.item?.name}</p>
+                        <div style={{ padding: '25px' }}>
+                            <h3 style={{ margin: '0 0 5px 0', fontSize: '1.4rem', fontFamily: "'Bebas Neue', sans-serif", letterSpacing: '1px' }}>AJUSTAR PRECIO</h3>
+                            <p style={{ margin: '0 0 20px 0', color: '#888', fontSize: '0.9rem', fontWeight: 'bold', textTransform: 'uppercase' }}>{priceModal.item?.name}</p>
                             
                             <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
-                                <div className="modal-price-selector" style={{ display: 'flex', gap: '5px' }}>
+                                <div className="modal-price-selector" style={{ display: 'flex', gap: '8px' }}>
                                     {[
                                         { id: 'direct', label: 'PRECIO FIN' },
                                         { id: 'fixed', label: '$ DESC' },
@@ -1127,12 +1127,12 @@ const Sales = () => {
                                 <div style={{ position: 'relative' }}>
                                     <span style={{ 
                                         position: 'absolute', 
-                                        left: '16px', 
-                                        top: '50.5%', 
+                                        left: '18px', 
+                                        top: '50%', 
                                         transform: 'translateY(-50%)', 
                                         fontWeight: '900', 
                                         color: '#333',
-                                        fontSize: '1.4rem',
+                                        fontSize: '1.8rem',
                                         zIndex: 5
                                     }}>
                                         {modalPriceType === 'percent' ? '%' : '$'}
@@ -1142,28 +1142,29 @@ const Sales = () => {
                                         autoFocus
                                         value={modalPriceValue}
                                         onChange={e => setModalPriceValue(e.target.value)}
+                                        placeholder="0"
                                         style={{ 
                                             width: '100%', 
-                                            padding: '15px 15px 15px 48px', 
-                                            borderRadius: '12px', 
+                                            padding: '20px 20px 20px 55px', 
+                                            borderRadius: '15px', 
                                             border: '2px solid #333', 
-                                            fontSize: '1.4rem', 
+                                            fontSize: '2rem', 
                                             fontWeight: '900',
-                                            background: '#ffffff',
-                                            outline: 'none'
+                                            background: '#fff',
+                                            outline: 'none',
+                                            color: '#333'
                                         }}
-                                        placeholder="0"
-                                        className="no-arrows-input modal-price-input"
+                                        className="no-arrows-input"
                                     />
                                 </div>
 
                                 {modalPriceType !== 'direct' && (
                                     <div style={{ background: '#fff5f5', padding: '10px', borderRadius: '8px', textAlign: 'center' }}>
                                         <span style={{ fontSize: '0.8rem', color: '#666' }}>Precio resultante: </span>
-                                        <strong style={{ fontSize: '1rem', color: '#f03e3e' }}>
+                                        <strong style={{ fontSize: '1.1rem', color: '#f03e3e' }}>
                                             ${(modalPriceType === 'fixed' 
-                                                ? Math.max(0, priceModal.item.originalPrice - (parseFloat(modalPriceValue) || 0))
-                                                : Math.max(0, priceModal.item.originalPrice * (1 - (parseFloat(modalPriceValue || 0) / 100)))
+                                                ? Math.max(0, (priceModal.item?.originalPrice || 0) - (parseFloat(modalPriceValue) || 0))
+                                                : Math.max(0, (priceModal.item?.originalPrice || 0) * (1 - (parseFloat(modalPriceValue || 0) / 100)))
                                             ).toLocaleString('es-AR')}
                                         </strong>
                                     </div>
@@ -1172,7 +1173,7 @@ const Sales = () => {
                                 <div style={{ display: 'flex', gap: '10px', marginTop: '10px' }}>
                                     <button 
                                         onClick={() => setPriceModal({ isOpen: false, item: null })}
-                                        style={{ flex: 1, padding: '12px', background: '#f8f9fa', border: 'none', borderRadius: '10px', fontWeight: 'bold', cursor: 'pointer' }}
+                                        style={{ flex: 1, padding: '12px', background: '#f8f9fa', border: 'none', borderRadius: '10px', fontWeight: 'bold', cursor: 'pointer', color: '#333' }}
                                     >
                                         CANCELAR
                                     </button>
