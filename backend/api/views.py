@@ -582,13 +582,9 @@ class SaleViewSet(viewsets.ModelViewSet):
             sale = self.get_object()
             sale.is_delivered = True
             sale.delivered_at = timezone.now()
-            # As per user request: marking as delivered also removes it from pending list in TPV
-            sale.status = 'COMPLETED'
             sale.save()
-            # Deduct raw material inventory (idempotent: will skip if already deducted)
-            deduct_inventory_for_sale(sale)
-            log_action(request.user if request.user.is_authenticated else None, 'COCINA', 'UPDATE', f'Pedido #{sale.id} recogido, completado y stock descontado')
-            return Response({'message': f'Pedido #{sale.id} archivado como recogido y completado.'})
+            log_action(request.user if request.user.is_authenticated else None, 'COCINA', 'UPDATE', f'Pedido #{sale.id} avisado como listo/recogido')
+            return Response({'message': f'Pedido #{sale.id} marcado como listo/recogido por cocina.'})
         except Exception as e:
             import traceback
             print(traceback.format_exc()) # Log to server console
