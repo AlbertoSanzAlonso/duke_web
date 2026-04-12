@@ -627,6 +627,8 @@
     .ticket-items::-webkit-scrollbar-thumb:hover,
     .pending-list-container::-webkit-scrollbar-thumb:hover {
         background: #aaa;
+    }
+
     /* Ticket Footer */
 .ticket-footer {
     padding: 1rem 1.5rem;
@@ -747,3 +749,12 @@
     color: white !important;
     border-color: #333;
 }
+
+/* Fix for small placeholder in discount inputs */
+.no-arrows-input::placeholder {
+    font-size: 2rem !important;
+    font-weight: 900 !important;
+    color: #aaa !important;
+    opacity: 0.6 !important;
+}
+

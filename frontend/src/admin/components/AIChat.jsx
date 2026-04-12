@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Bot, Send, X, MessageSquare, Terminal, Maximize2, Minimize2 } from 'lucide-react';
+import './AIChat.css';
 
 const AIChat = () => {
     const [isOpen, setIsOpen] = useState(() => {
