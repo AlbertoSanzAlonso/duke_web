@@ -300,7 +300,6 @@ function RawMaterialPanel({ product, onClose }) {
                                                 onChange={e => setSelMeasurementUnit(e.target.value)} 
                                                 style={{...s.select, width: '120px'}}
                                             >
-                                                <option value="unidades">Unidades base</option>
                                                 {matchedItem?.has_weight && (
                                                     <>
                                                         <option value="g">Gramos (g)</option>
@@ -309,6 +308,7 @@ function RawMaterialPanel({ product, onClose }) {
                                                         <option value="l">Litros (l)</option>
                                                     </>
                                                 )}
+                                                <option value="unidades">Medida Base ({matchedItem?.unit || 'uds'})</option>
                                             </select>
                                         </div>
                                     </div>
@@ -414,7 +414,6 @@ function RawMaterialPanel({ product, onClose }) {
                                         onChange={e => setNewMeasurementUnit(e.target.value)} 
                                         style={{...s.select, width: '120px'}}
                                     >
-                                        <option value="unidades">Unidades base</option>
                                         {newItem.hasWeight && (
                                             <>
                                                 <option value="g">Gramos (g)</option>
@@ -423,6 +422,7 @@ function RawMaterialPanel({ product, onClose }) {
                                                 <option value="l">Litros (l)</option>
                                             </>
                                         )}
+                                        <option value="unidades">Medida Base ({newItem.unit || 'uds'})</option>
                                     </select>
                                 </div>
                             </div>
