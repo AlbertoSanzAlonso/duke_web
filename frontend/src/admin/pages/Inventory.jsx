@@ -62,6 +62,7 @@ function Inventory() {
     const [subUnitName, setSubUnitName] = useState('unidades');
     const [subUnitsPerUnit, setSubUnitsPerUnit] = useState('1');
 
+    const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
     const [confirmConfig, setConfirmConfig] = useState({ isOpen: false, id: null });
 
     // Global Edit Modal State (Full Detail Edit)
@@ -143,6 +144,7 @@ function Inventory() {
             setSubUnitsPerUnit('1');
             loadInventory();
             setToast({ message: "Artículo añadido al inventario", type: 'success' });
+            setIsCreateModalOpen(false);
         } catch (err) {
             setToast({ message: err.message, type: 'error' });
         }
@@ -303,11 +305,20 @@ function Inventory() {
             <div className="admin-card">
             {toast && <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />}
             <div className="accounting-header-main" style={{ marginBottom: '20px', flexDirection: 'column', alignItems: 'flex-start', gap: '15px' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', width: '100%', alignItems: 'center' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', width: '100%', alignItems: 'center', gap: '15px', flexWrap: 'wrap' }}>
                     <h2 style={{ margin: 0 }}>Inventario de Almacén</h2>
-                    <div className="export-actions">
-                        <button onClick={handleExportExcel} className="export-btn excel" title="Excel"><Download size={20} /></button>
-                        <button onClick={handleExportPDF} className="export-btn pdf" title="PDF"><FileText size={20} /></button>
+                    <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
+                        <button 
+                            onClick={() => setIsCreateModalOpen(true)}
+                            className="add-movement-btn"
+                            style={{ background: 'var(--admin-primary)', height: '44px' }}
+                        >
+                            + NUEVO ARTÍCULO
+                        </button>
+                        <div className="export-actions">
+                            <button onClick={handleExportExcel} className="export-btn excel" title="Excel"><Download size={20} /></button>
+                            <button onClick={handleExportPDF} className="export-btn pdf" title="PDF"><FileText size={20} /></button>
+                        </div>
                     </div>
                 </div>
 
@@ -347,174 +358,157 @@ function Inventory() {
                 </div>
             </div>
             
-            <form onSubmit={handleCreate} style={{ display: 'flex', gap: '15px', marginBottom: '30px', flexDirection: 'column', background: '#f8f9fa', padding: '20px', borderRadius: '12px', border: '1px solid #eee' }}>
-                <div style={{ display: 'flex', gap: '15px', flexWrap: 'wrap', alignItems: 'flex-end', width: '100%' }}>
-                    <div style={{ flex: '1 1 200px' }}>
-                        <label style={{ fontSize: '0.75rem', fontWeight: 'bold', display: 'block', marginBottom: '4px' }}>NUEVO ARTÍCULO</label>
-                        <input 
-                            type="text" 
-                            placeholder="Ej: Tomate, Carne..." 
-                            value={name} 
-                            onChange={e => setName(e.target.value)} 
-                            required 
-                            style={{ width: '100%', padding: '8px 12px', borderRadius: '8px', border: '1px solid #ddd', boxSizing: 'border-box', fontSize: '0.9rem', height: '38px' }}
-                        />
-                    </div>
-                    
-                    <div style={{ flex: '1 1 180px' }}>
-                        <label style={{ fontSize: '0.75rem', fontWeight: 'bold', display: 'block', marginBottom: '4px' }}>CATEGORÍA</label>
-                        <input 
-                            list="inventory-categories"
-                            placeholder="Elegir o escribir..."
-                            value={category} 
-                            onChange={e => setCategory(e.target.value)}
-                            style={{ width: '100%', padding: '8px 12px', borderRadius: '8px', border: '1px solid #ddd', boxSizing: 'border-box', fontSize: '0.9rem', height: '38px' }}
-                        />
-                        <datalist id="inventory-categories">
-                            {categories.map(cat => (
-                                <option key={cat} value={cat} />
-                            ))}
-                        </datalist>
-                    </div>
+            {isCreateModalOpen && (
+                <div className="modal-overlay users-modal-overlay">
+                    <div className="modal-content" style={{ 
+                        maxWidth: '700px', 
+                        width: '95%', 
+                        background: '#fff', 
+                        color: '#333', 
+                        padding: '25px', 
+                        borderRadius: '16px', 
+                        boxShadow: '0 20px 40px rgba(0,0,0,0.2)', 
+                        position: 'relative',
+                        maxHeight: '90vh',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        overflow: 'hidden'
+                    }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px', borderBottom: '1px solid #eee', paddingBottom: '15px' }}>
+                            <h3 style={{ margin: 0, fontSize: '1.4rem', fontWeight: 'bold' }}>Añadir Nuevo Artículo</h3>
+                            <button onClick={() => setIsCreateModalOpen(false)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#888' }}><X size={24} /></button>
+                        </div>
 
-                    <div style={{ flex: '1 1 100px' }}>
-                        <label style={{ fontSize: '0.75rem', fontWeight: 'bold', display: 'block', marginBottom: '4px', textTransform: 'uppercase' }}>Inicial (En Uds/Base)</label>
-                        <input 
-                            type="number" 
-                            step="any" 
-                            placeholder="Cant." 
-                            value={quantity} 
-                            onChange={e => setQuantity(e.target.value)} 
-                            style={{ width: '100%', padding: '8px 12px', borderRadius: '8px', border: '1px solid #ddd', boxSizing: 'border-box', fontSize: '0.95rem', textAlign: 'center', fontWeight: '800', height: '38px' }}
-                        />
-                    </div>
+                        <form onSubmit={handleCreate} style={{ margin: '0', flex: 1, overflowY: 'auto', paddingRight: '5px', display: 'flex', flexDirection: 'column', gap: '20px' }}>
+                            <div className="form-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 280px), 1fr))', gap: '15px' }}>
+                                <div className="form-group">
+                                    <label style={{ fontSize: '0.85rem', fontWeight: 'bold', color: '#444' }}>NOMBRE DEL ARTÍCULO</label>
+                                    <input 
+                                        type="text" 
+                                        placeholder="Ej: Tomate, Carne..." 
+                                        value={name} 
+                                        onChange={e => setName(e.target.value)} 
+                                        required 
+                                        style={{ padding: '12px', borderRadius: '10px', border: '2px solid #f1f3f5', fontSize: '1rem' }}
+                                    />
+                                </div>
+                                
+                                <div className="form-group">
+                                    <label style={{ fontSize: '0.85rem', fontWeight: 'bold', color: '#444' }}>CATEGORÍA</label>
+                                    <input 
+                                        list="inventory-categories-modal"
+                                        placeholder="Elegir o escribir..."
+                                        value={category} 
+                                        onChange={e => setCategory(e.target.value)}
+                                        style={{ padding: '12px', borderRadius: '10px', border: '2px solid #f1f3f5', fontSize: '1rem' }}
+                                    />
+                                    <datalist id="inventory-categories-modal">
+                                        {categories.map(cat => <option key={cat} value={cat} />)}
+                                    </datalist>
+                                </div>
 
-                    <div style={{ flex: '1 1 100px' }}>
-                        <label style={{ fontSize: '0.75rem', fontWeight: 'bold', display: 'block', marginBottom: '4px' }}>UNIDAD BASE</label>
-                        <select value={unit} onChange={e => setUnit(e.target.value)} style={{ width: '100%', padding: '0 12px', borderRadius: '8px', border: '1px solid #ddd', boxSizing: 'border-box', fontSize: '0.9rem', height: '38px' }}>
-                            <option value="unidades">Unidades</option>
-                            <option value="kg">KG</option>
-                            <option value="litros">Litros</option>
-                        </select>
-                    </div>
+                                <div className="form-group">
+                                    <label style={{ fontSize: '0.85rem', fontWeight: 'bold', color: '#444' }}>STOCK INICIAL (Unidades Base)</label>
+                                    <input 
+                                        type="number" 
+                                        step="any" 
+                                        value={quantity} 
+                                        onChange={e => setQuantity(e.target.value)} 
+                                        style={{ padding: '12px', borderRadius: '10px', border: '2px solid #f1f3f5', fontSize: '1rem', fontWeight: 'bold' }}
+                                    />
+                                </div>
 
-                    <div style={{ flex: '1 1 100px' }}>
-                        <label style={{ fontSize: '0.75rem', fontWeight: 'bold', display: 'block', marginBottom: '4px' }}>MÍNIMO (En Uds/Base)</label>
-                        <input 
-                            type="number" 
-                            step="any" 
-                            value={minStock} 
-                            onChange={e => setMinStock(e.target.value)} 
-                            style={{ width: '100%', padding: '8px 12px', borderRadius: '8px', border: '1px solid #ddd', boxSizing: 'border-box', fontSize: '0.95rem', textAlign: 'center', fontWeight: '800', height: '38px' }}
-                        />
-                    </div>
-                </div>
+                                <div className="form-group">
+                                    <label style={{ fontSize: '0.85rem', fontWeight: 'bold', color: '#444' }}>UNIDAD BASE</label>
+                                    <select value={unit} onChange={e => setUnit(e.target.value)} style={{ padding: '12px', borderRadius: '10px', border: '2px solid #f1f3f5', fontSize: '1rem' }}>
+                                        <option value="unidades">Unidades</option>
+                                        <option value="kg">KG</option>
+                                        <option value="litros">Litros</option>
+                                    </select>
+                                </div>
 
-                <div style={{ display: 'flex', gap: '15px', flexWrap: 'wrap', alignItems: 'center', background: '#fff', padding: '12px 16px', borderRadius: '8px', border: '1px solid #eaeaea', marginTop: '5px' }}>
-                    <label style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.85rem', fontWeight: 'bold', cursor: 'pointer', color: '#444' }}>
-                        <input type="checkbox" checked={hasPack} onChange={e => setHasPack(e.target.checked)} style={{ transform: 'scale(1.2)' }} />
-                        ¿Este artículo llega agrupado en cajas o packs?
-                    </label>
-
-                    {hasPack && (
-                        <div style={{ display: 'flex', gap: '10px', alignItems: 'flex-end', marginLeft: 'auto' }}>
-                            <div>
-                                <label style={{ fontSize: '0.7rem', fontWeight: 'bold', display: 'block', marginBottom: '2px', color: '#666' }}>TIPO DE ENVASE</label>
-                                <input 
-                                    type="text" 
-                                    placeholder="Ej: Cajas, Packs..." 
-                                    value={packName} 
-                                    onChange={e => setPackName(e.target.value)}
-                                    style={{ width: '120px', padding: '6px 10px', borderRadius: '6px', border: '1px solid #ccc', fontSize: '0.85rem' }}
-                                />
+                                <div className="form-group">
+                                    <label style={{ fontSize: '0.85rem', fontWeight: 'bold', color: '#444' }}>STOCK MÍNIMO</label>
+                                    <input 
+                                        type="number" 
+                                        step="any" 
+                                        value={minStock} 
+                                        onChange={e => setMinStock(e.target.value)} 
+                                        style={{ padding: '12px', borderRadius: '10px', border: '2px solid #f1f3f5', fontSize: '1rem', fontWeight: 'bold' }}
+                                    />
+                                </div>
                             </div>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                                <span style={{ fontSize: '0.85rem', color: '#666' }}>Cada {packName || 'pack'} trae:</span>
-                                <input 
-                                    type="number" 
-                                    step="any" 
-                                    value={unitsPerPack} 
-                                    onChange={e => setUnitsPerPack(e.target.value)}
-                                    style={{ width: '70px', padding: '6px 10px', borderRadius: '6px', border: '1px solid #ccc', fontSize: '0.85rem', textAlign: 'center', fontWeight: 'bold' }}
-                                />
-                                <span style={{ fontSize: '0.85rem', color: '#666' }}>{unit}</span>
+
+                            <div style={{ background: '#f8f9fa', padding: '15px', borderRadius: '12px', border: '1px solid #eee' }}>
+                                <label style={{ display: 'flex', alignItems: 'center', gap: '10px', fontSize: '0.9rem', fontWeight: '700', cursor: 'pointer', marginBottom: hasPack ? '15px' : '0' }}>
+                                    <input type="checkbox" checked={hasPack} onChange={e => setHasPack(e.target.checked)} />
+                                    ¿Llega en cajas/packs?
+                                </label>
+                                {hasPack && (
+                                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px' }}>
+                                        <div className="form-group">
+                                            <label style={{ fontSize: '0.75rem', fontWeight: 'bold' }}>TIPO DE ENVASE</label>
+                                            <input type="text" value={packName} onChange={e => setPackName(e.target.value)} style={{ padding: '10px', borderRadius: '8px', border: '1px solid #ddd' }} />
+                                        </div>
+                                        <div className="form-group">
+                                            <label style={{ fontSize: '0.75rem', fontWeight: 'bold' }}>CANTIDAD POR {packName.toUpperCase()}</label>
+                                            <input type="number" step="any" value={unitsPerPack} onChange={e => setUnitsPerPack(e.target.value)} style={{ padding: '10px', borderRadius: '8px', border: '1px solid #ddd' }} />
+                                        </div>
+                                    </div>
+                                )}
                             </div>
-                        </div>
-                    )}
+
+                            <div style={{ background: '#f8f9fa', padding: '15px', borderRadius: '12px', border: '1px solid #eee' }}>
+                                <label style={{ display: 'flex', alignItems: 'center', gap: '10px', fontSize: '0.9rem', fontWeight: '700', cursor: 'pointer', marginBottom: hasWeight ? '15px' : '0' }}>
+                                    <input type="checkbox" checked={hasWeight} onChange={e => setHasWeight(e.target.checked)} />
+                                    ¿Tiene peso/medida fija por unidad?
+                                </label>
+                                {hasWeight && (
+                                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px' }}>
+                                        <div className="form-group">
+                                            <label style={{ fontSize: '0.75rem', fontWeight: 'bold' }}>CANTIDAD/PESO</label>
+                                            <input type="number" step="any" value={weightPerUnit} onChange={e => setWeightPerUnit(e.target.value)} style={{ padding: '10px', borderRadius: '8px', border: '1px solid #ddd' }} />
+                                        </div>
+                                        <div className="form-group">
+                                            <label style={{ fontSize: '0.75rem', fontWeight: 'bold' }}>UNIDAD DE MEDIDA</label>
+                                            <select value={weightUnit} onChange={e => setWeightUnit(e.target.value)} style={{ padding: '10px', borderRadius: '8px', border: '1px solid #ddd' }}>
+                                                <option value="g">Gramos (g)</option>
+                                                <option value="kg">Kilos (kg)</option>
+                                                <option value="ml">Mililitros (ml)</option>
+                                                <option value="l">Litros (l)</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
+
+                            <div style={{ background: '#f8f9fa', padding: '15px', borderRadius: '12px', border: '1px solid #eee' }}>
+                                <label style={{ display: 'flex', alignItems: 'center', gap: '10px', fontSize: '0.9rem', fontWeight: '700', cursor: 'pointer', marginBottom: useSubUnits ? '15px' : '0' }}>
+                                    <input type="checkbox" checked={useSubUnits} onChange={e => setUseSubUnits(e.target.checked)} />
+                                    ¿Dividir en sub-unidades para recetas?
+                                </label>
+                                {useSubUnits && (
+                                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px' }}>
+                                        <div className="form-group">
+                                            <label style={{ fontSize: '0.75rem', fontWeight: 'bold' }}>NOMBRE SUB-UNIDAD</label>
+                                            <input type="text" value={subUnitName} onChange={e => setSubUnitName(e.target.value)} style={{ padding: '10px', borderRadius: '8px', border: '1px solid #ddd' }} />
+                                        </div>
+                                        <div className="form-group">
+                                            <label style={{ fontSize: '0.75rem', fontWeight: 'bold' }}>CANTIDAD POR {unit.toUpperCase()}</label>
+                                            <input type="number" step="any" value={subUnitsPerUnit} onChange={e => setSubUnitsPerUnit(e.target.value)} style={{ padding: '10px', borderRadius: '8px', border: '1px solid #ddd' }} />
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
+
+                            <div style={{ display: 'flex', gap: '10px', marginTop: '10px' }}>
+                                <button type="button" onClick={() => setIsCreateModalOpen(false)} style={{ flex: 1, padding: '14px', borderRadius: '10px', border: '1px solid #ddd', background: '#f1f3f5', fontWeight: 'bold', cursor: 'pointer' }}>CANCELAR</button>
+                                <button type="submit" style={{ flex: 2, padding: '14px', borderRadius: '10px', border: 'none', background: 'var(--admin-primary)', color: 'white', fontWeight: 'bold', cursor: 'pointer' }}>AÑADIR ARTÍCULO</button>
+                            </div>
+                        </form>
+                    </div>
                 </div>
-
-                <div style={{ display: 'flex', gap: '15px', flexWrap: 'wrap', alignItems: 'center', background: '#fff', padding: '12px 16px', borderRadius: '8px', border: '1px solid #eaeaea', marginTop: '5px', width: '100%' }}>
-                    <label style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.85rem', fontWeight: 'bold', cursor: 'pointer', color: '#444' }}>
-                        <input type="checkbox" checked={hasWeight} onChange={e => setHasWeight(e.target.checked)} style={{ transform: 'scale(1.2)' }} />
-                        ¿Cada unidad base posee un peso fijo (ej. 1 Pollo = 1.5kg)?
-                    </label>
-
-                    {hasWeight && (
-                        <div style={{ display: 'flex', gap: '10px', alignItems: 'center', marginLeft: 'auto' }}>
-                            <span style={{ fontSize: '0.85rem', color: '#666' }}>Cada {unit} pesa/mide:</span>
-                            <input 
-                                type="number" 
-                                step="any" 
-                                value={weightPerUnit} 
-                                onChange={e => setWeightPerUnit(e.target.value)}
-                                style={{ width: '80px', padding: '6px 10px', borderRadius: '6px', border: '1px solid #ccc', fontSize: '0.85rem', textAlign: 'center', fontWeight: 'bold' }}
-                            />
-                            <select value={weightUnit} onChange={e => setWeightUnit(e.target.value)} style={{ padding: '6px', borderRadius: '6px', border: '1px solid #ccc', fontSize: '0.85rem' }}>
-                                <option value="g">Gramos (g)</option>
-                                <option value="kg">Kilos (kg)</option>
-                                <option value="ml">Mililitros (ml)</option>
-                                <option value="l">Litros (l)</option>
-                            </select>
-                        </div>
-                    )}
-                </div>
-
-                <div style={{ display: 'flex', gap: '15px', flexWrap: 'wrap', alignItems: 'center', background: '#fff', padding: '12px 16px', borderRadius: '8px', border: '1px solid #eaeaea', marginTop: '5px', width: '100%' }}>
-                    <label style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.85rem', fontWeight: 'bold', cursor: 'pointer', color: '#444' }}>
-                        <input type="checkbox" checked={useSubUnits} onChange={e => setUseSubUnits(e.target.checked)} style={{ transform: 'scale(1.2)' }} />
-                        ¿Dividir la unidad para recetas (ej. 1 Paquete = 50 Fetas)?
-                    </label>
-
-                    {useSubUnits && (
-                        <div style={{ display: 'flex', gap: '10px', alignItems: 'center', marginLeft: 'auto', flexWrap: 'wrap' }}>
-                            <span style={{ fontSize: '0.85rem', color: '#666' }}>Se divide en:</span>
-                            <input 
-                                type="text" 
-                                placeholder="Ej: fetas" 
-                                value={subUnitName} 
-                                onChange={e => setSubUnitName(e.target.value)}
-                                style={{ width: '100px', padding: '6px 10px', borderRadius: '6px', border: '1px solid #ccc', fontSize: '0.85rem' }}
-                            />
-                            <span style={{ fontSize: '0.85rem', color: '#666' }}>y trae:</span>
-                            <input 
-                                type="number" 
-                                step="any" 
-                                value={subUnitsPerUnit} 
-                                onChange={e => setSubUnitsPerUnit(e.target.value)}
-                                style={{ width: '60px', padding: '6px 10px', borderRadius: '6px', border: '1px solid #ccc', fontSize: '0.85rem', textAlign: 'center', fontWeight: 'bold' }}
-                            />
-                            <span style={{ fontSize: '0.85rem', color: '#444' }}>{subUnitName || 'unidades'} por {unit}</span>
-                        </div>
-                    )}
-                </div>
-
-                <button type="submit" className="main-button" style={{ 
-                    padding: '12px 24px', 
-                    background: 'var(--admin-primary)', 
-                    color: 'white', 
-                    border: 'none', 
-                    borderRadius: '8px', 
-                    cursor: 'pointer', 
-                    fontWeight: '900',
-                    fontSize: '0.8rem',
-                    letterSpacing: '1px',
-                    transition: 'all 0.2s ease',
-                    marginTop: '5px',
-                    alignSelf: 'flex-end'
-                }}>
-                    AÑADIR AL INVENTARIO
-                </button>
-            </form>
+            )}
 
             <div className="accounting-table-container accounting-desktop-only">
                 {loading ? <p>Cargando inventario...</p> : error ? <p style={{ color: 'red' }}>{error}</p> : (

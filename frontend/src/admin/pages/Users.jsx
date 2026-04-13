@@ -205,8 +205,7 @@ const Users = () => {
                         cursor: 'pointer',
                         transition: 'all 0.3s ease',
                         textTransform: 'uppercase',
-                        letterSpacing: '1px',
-                        marginBottom: '10px'
+                        letterSpacing: '1px'
                     }}
                 >
                     <UserPlus size={20} /> NUEVO USUARIO
@@ -221,7 +220,7 @@ const Users = () => {
                         placeholder="Buscar por nombre o email..." 
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
-                        style={{ padding: '15px 15px 15px 48px', borderRadius: '12px', border: '1px solid #ddd', width: '100%', fontSize: '1rem', background: '#fff' }}
+                        style={{ padding: '15px 15px 15px 60px', borderRadius: '12px', border: '1px solid #ddd', width: '100%', fontSize: '1rem', background: '#fff' }}
                     />
                 </div>
 
@@ -525,6 +524,11 @@ const Users = () => {
                     }
                     .users-page-content {
                         padding: 10px !important;
+                    }
+                    .new-user-btn {
+                        margin-top: 15px !important;
+                        width: 100%;
+                        justify-content: center;
                     }
                 }
             `}</style>

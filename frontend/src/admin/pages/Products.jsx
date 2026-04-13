@@ -184,7 +184,7 @@ function RawMaterialPanel({ product, onClose, onUpdate }) {
         label: { fontSize: '0.72rem', fontWeight: '800', color: '#888', textTransform: 'uppercase', marginBottom: '4px', display: 'block' },
         input: { width: '100%', padding: '10px 12px', borderRadius: '8px', border: '1px solid #ddd', fontSize: '0.95rem', fontFamily: 'inherit' },
         select: { width: '100%', padding: '10px 12px', borderRadius: '8px', border: '1px solid #ddd', fontSize: '0.95rem', background: '#fff', fontFamily: 'inherit' },
-        row: { display: 'flex', gap: '10px', marginTop: '10px' },
+        row: { display: 'flex', gap: '10px', marginTop: '10px', flexWrap: 'wrap', alignItems: 'flex-end' },
         btnPrimary: {
             flex: 1, padding: '11px', background: '#333', color: '#fff',
             border: 'none', borderRadius: '10px', fontWeight: '800',
@@ -298,7 +298,7 @@ function RawMaterialPanel({ product, onClose, onUpdate }) {
                             {selItemId && (() => {
                                 const matchedItem = availableItems.find(i => String(i.id) === String(selItemId));
                                 return (
-                                    <div style={{ flex: 1 }}>
+                                    <div style={{ flex: '1 1 200px' }}>
                                         <label style={s.label}>Cantidad a descontar por pedido</label>
                                         <div style={{ display: 'flex', gap: '8px' }}>
                                             <input
@@ -331,7 +331,7 @@ function RawMaterialPanel({ product, onClose, onUpdate }) {
                                     </div>
                                 );
                             })()}
-                            <div style={{ flex: 0, display: 'flex', alignItems: 'flex-end', gap: '6px' }}>
+                            <div style={{ flex: '1 1 120px', display: 'flex', alignItems: 'flex-end', gap: '6px' }}>
                                 <button onClick={handleAddExisting} disabled={saving} style={{ ...s.btnPrimary, flex: 0, padding: '10px 16px', whiteSpace: 'nowrap' }}>
                                     {saving ? '...' : <><Check size={16} /> Añadir</>}
                                 </button>
@@ -347,7 +347,7 @@ function RawMaterialPanel({ product, onClose, onUpdate }) {
                 {addMode === 'new-item' && (
                     <div style={s.addBar}>
                         <p style={{ margin: '0 0 12px', fontWeight: '800', fontSize: '0.85rem', color: '#ae3ec9' }}>✦ NUEVO ÍTEM DE INVENTARIO</p>
-                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
+                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '12px' }}>
                             <div style={{ gridColumn: '1 / -1' }}>
                                 <label style={s.label}>Nombre del producto</label>
                                 <input
@@ -433,7 +433,7 @@ function RawMaterialPanel({ product, onClose, onUpdate }) {
                             </div>
                             <div style={{ gridColumn: '1 / -1' }}>
                                 <label style={s.label}>Cantidad a descontar por pedido</label>
-                                <div style={{ display: 'flex', gap: '8px' }}>
+                                <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
                                     <input
                                         type="number" step="any" placeholder="ej. 0.05"
                                         value={newQty} onChange={e => setNewQty(e.target.value)}

@@ -1130,8 +1130,10 @@
 
 .workflow-timeline.large {
     max-width: 1400px;
-    margin: 0 auto;
-    justify-content: center; /* Center cards horizontally within the row if they don't fill it */
+    margin: 3rem auto 0;
+    justify-content: center;
+    justify-items: center;
+    width: 100%;
 }
 
 /* Specific Header Centering for Workflow */
