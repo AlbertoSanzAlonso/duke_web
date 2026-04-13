@@ -152,17 +152,18 @@ def deduct_inventory_for_sale(sale):
 
             consumed = base_consumed_rate * item.quantity
             
+            # Update stock
             InventoryItem.objects.filter(pk=inv_item.pk).update(
                 quantity=models.F('quantity') - consumed
             )
             
-            consumption, _ = InventoryDailyConsumption.objects.get_or_create(
+            # Create movement to keep history and trigger signal for daily consumption
+            InventoryMovement.objects.create(
                 inventory_item=inv_item,
-                date=today,
-                defaults={'quantity': 0}
-            )
-            InventoryDailyConsumption.objects.filter(pk=consumption.pk).update(
-                quantity=models.F('quantity') + consumed
+                direction='OUT',
+                quantity=consumed,
+                reason=f'Venta #{sale.id}',
+                description=f'{item.quantity}x {product.name} ({consumed} {inv_item.unit}/ud.)',
             )
 
     # Note: Using update() to avoid recursion if Sale.save() calls this

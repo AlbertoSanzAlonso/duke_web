@@ -85,7 +85,7 @@ const AIChat = () => {
             {/* Bubble Button */}
             {!isOpen && (
                 <button className="ai-chat-bubble" onClick={() => setIsOpen(true)}>
-                    <Bot size={24} color="#fff" strokeWidth={2.5} />
+                    <img src="/brand/duke burger 2 negativo.png" alt="Duke Assistant" style={{ width: '28px', height: '28px', objectFit: 'contain' }} />
                     <span className="bubble-text">Duke Assist</span>
                 </button>
 

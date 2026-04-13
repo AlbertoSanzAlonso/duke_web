@@ -46,6 +46,14 @@ class SaleViewSet(viewsets.ModelViewSet):
             count, _ = sales.delete()
             log_action(request.user, 'TPV', 'DELETE', f'Eliminación masiva de {count} tickets')
             return Response({'message': f'{count} tickets eliminados.'})
+        elif action_type == 'PREPARE':
+            count = Sale.objects.filter(id__in=ids).update(is_prepared=True, prepared_at=timezone.now())
+            log_action(request.user, 'COCINA', 'UPDATE', f'Marcado masivo como PREPARADO de {count} tickets')
+            return Response({'message': f'{count} tickets marcados como listos.'})
+        elif action_type == 'DELIVER':
+            count = Sale.objects.filter(id__in=ids).update(is_delivered=True, delivered_at=timezone.now())
+            log_action(request.user, 'COCINA', 'UPDATE', f'Marcado masivo como ENTREGADO de {count} tickets')
+            return Response({'message': f'{count} tickets marcados como entregados.'})
         return Response({'error': 'Operación no válida'}, status=400)
         
     @action(detail=True, methods=['post'], url_path='mark-prepared')

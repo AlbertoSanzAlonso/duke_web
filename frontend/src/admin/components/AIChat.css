@@ -9,8 +9,8 @@
 
 @media (max-width: 992px) {
     .ai-chat-wrapper {
-        bottom: 40px; /* Alineado con el botón del ticket TPV */
-        left: 1.5rem;
+        bottom: 70px; /* Más margen para no tapar contenido */
+        left: 25px;
     }
 }
 

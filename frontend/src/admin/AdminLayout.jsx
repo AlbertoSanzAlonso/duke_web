@@ -154,7 +154,7 @@ const AdminLayout = () => {
     { name: '1. Inventario', path: '/admin/inventario', icon: <Boxes size={20} />, perm: 'can_use_inventory' },
     { name: '2. Productos', path: '/admin/productos', icon: <Package size={20} />, perm: 'can_use_menu' },
     { name: '3. Carta', path: '/admin/carta', icon: <UtensilsCrossed size={20} />, perm: 'can_use_menu' },
-    { name: '4. Promos', path: '/admin/promos', icon: <Star size={20} fill="#fcc419" color="#fcc419" />, perm: 'can_use_promos' },
+    { name: '4. Promos', path: '/admin/star', icon: <Star size={20} fill="#fcc419" color="#fcc419" />, perm: 'can_use_promos' },
     
     { type: 'separator' },
     
@@ -177,7 +177,7 @@ const AdminLayout = () => {
 
       <aside className={`sidebar ${isMobileOpen ? 'open' : ''}`}>
         <div className="sidebar-header">
-          <Link to="/" target="_blank" rel="noopener noreferrer" title="Ir a la Web principal (Nueva pestaña)" onClick={() => setIsMobileOpen(false)} style={{ position: 'relative' }}>
+          <Link to="/" target="_blank" rel="noopener noreferrer" title="Ir a la Web principal (Nueva pestaña)" onClick={() => setIsMobileOpen(false)} style={{ position: 'relative', cursor: 'pointer' }}>
             <img src="/brand/duke burger 1 negativo.png" alt="Duke Admin Logo" style={{ height: '60px', objectFit: 'contain', cursor: 'pointer' }} />
             {/* SSE Status Indicator */}
             <div

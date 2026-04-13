@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { fetchSales, markSaleAsPrepared, markSaleAsDelivered, revertSaleDelivery, revertSalePrepared, deleteSale } from '../../services/api';
-import { Utensils, Clock, CheckCircle, Package, History, ArrowLeftRight, Settings } from 'lucide-react';
+import { fetchSales, markSaleAsPrepared, markSaleAsDelivered, revertSaleDelivery, revertSalePrepared, deleteSale, bulkActionSales } from '../../services/api';
+import { Utensils, Clock, CheckCircle, Package, History, ArrowLeftRight, Settings, Trash2, CheckSquare, Square, X, Check } from 'lucide-react';
 import LoadingScreen from '../components/LoadingScreen';
 import Toast from '../components/Toast';
+import ConfirmModal from '../components/ConfirmModal';
 import './Kitchen.css';
 
 const Kitchen = () => {
@@ -17,10 +18,17 @@ const Kitchen = () => {
     const [toast, setToast] = useState(null);
     
     const [actionModal, setActionModal] = useState({ isOpen: false, order: null });
+    const [confirmDelete, setConfirmDelete] = useState({ isOpen: false, order: null, isBulk: false });
+    
+    // Selection state
+    const [selectedIds, setSelectedIds] = useState([]);
+    
     const activeTabRef = React.useRef(activeTab);
 
     useEffect(() => {
         activeTabRef.current = activeTab;
+        // Clear selection when changing tabs
+        setSelectedIds([]);
     }, [activeTab]);
 
     const formatTime = (dateStr) => {
@@ -37,7 +45,6 @@ const Kitchen = () => {
             console.log("Kitchen refresh triggered from Event/SSE:", data?.type);
             loadKitchenOrders();
             
-            // Sonido de alerta: SOLO para pedidos nuevos y si estamos en la pestaña de pendientes
             if (data?.type === 'new_order' && activeTabRef.current === 'pending') {
                 try {
                     const beep = new (window.AudioContext || window.webkitAudioContext)();
@@ -56,14 +63,12 @@ const Kitchen = () => {
             }
         };
 
-        // SSE Connection for isolated Kitchen view
         let es = null;
         const isStandalone = window.location.pathname === '/cocina';
         
         const connectSSE = () => {
             const token = sessionStorage.getItem('duke_admin_token');
             const sseUrl = `${import.meta.env.VITE_API_URL || ''}/api/orders-stream/?token=${token ? token.trim() : ''}`;
-            console.log("SSE Standalone Kitchen: Connecting to", sseUrl);
             es = new EventSource(sseUrl, { withCredentials: true });
             
             es.onmessage = (event) => {
@@ -78,7 +83,7 @@ const Kitchen = () => {
             es.onerror = () => {
                 if (es) {
                     es.close();
-                    setTimeout(connectSSE, 10000); // Reintento robusto
+                    setTimeout(connectSSE, 10000);
                 }
             };
         };
@@ -89,7 +94,7 @@ const Kitchen = () => {
         };
 
         if (isStandalone) connectSSE();
-        loadKitchenOrders(); // Initial load
+        loadKitchenOrders();
 
         window.addEventListener('new-order-received', handleRealTimeEvent);
         return () => {
@@ -97,49 +102,34 @@ const Kitchen = () => {
             window.removeEventListener('new-order-received', handleRealTimeEvent);
             if (es) es.close();
         };
-    }, []); // Only once at mount
+    }, []);
 
     const loadKitchenOrders = async () => {
         try {
             const data = await fetchSales();
-            const todayStr = new Date().toLocaleDateString('en-CA', { timeZone: 'America/Argentina/Buenos_Aires' });
+            const now = new Date();
             
-            // Filtro estricto de tiempo (últimas 16 horas para evitar tickets fantasma de días anteriores)
             const activeOrders = data.filter(o => {
-                const now = new Date();
                 const orderDate = new Date(o.date);
                 const hoursSinceCreated = (now - orderDate) / (1000 * 60 * 60);
-                
-                // 1. Si el pedido tiene más de 16 horas de antigüedad, nunca mostrar en cocina
                 if (hoursSinceCreated > 16) return false;
-                
-                // 2. Si es de las últimas 16 horas y NO está entregado, siempre mostrar (como pendiente o listo)
                 if (!o.is_delivered) return true;
-                
-                // 3. Si ESTÁ entregado, lo mostramos en historial solo durante las siguientes 6 horas desde la entrega
-                const deliveredDate = o.delivered_at ? new Date(o.delivered_at) : 
-                                      (o.updated_at ? new Date(o.updated_at) : new Date(o.date));
-                                      
-                // Protección contra fechas inválidas
-                if (isNaN(deliveredDate.getTime())) return true; // Mostrar por defecto si hay un fallo de parseo
-                
+                const deliveredDate = o.delivered_at ? new Date(o.delivered_at) : (o.updated_at ? new Date(o.updated_at) : new Date(o.date));
+                if (isNaN(deliveredDate.getTime())) return true;
                 const hoursSinceDelivered = (now - deliveredDate) / (1000 * 60 * 60);
                 return hoursSinceDelivered <= 6;
             });
 
-            // Separamos por estado
             const pending = activeOrders.filter(o => !o.is_prepared);
             const ready = activeOrders.filter(o => o.is_prepared && !o.is_delivered);
             const collected = activeOrders.filter(o => o.is_prepared && o.is_delivered);
             
             setPendingOrders(pending.sort((a, b) => new Date(a.date) - new Date(b.date))); 
-            
             setReadyOrders(ready.sort((a, b) => {
                 const dateA = a.prepared_at ? new Date(a.prepared_at) : (a.updated_at ? new Date(a.updated_at) : new Date(a.date));
                 const dateB = b.prepared_at ? new Date(b.prepared_at) : (b.updated_at ? new Date(b.updated_at) : new Date(b.date));
                 return dateB - dateA;
             })); 
-            
             setCollectedOrders(collected.sort((a, b) => {
                 const dateA = a.delivered_at ? new Date(a.delivered_at) : (a.updated_at ? new Date(a.updated_at) : new Date(a.date));
                 const dateB = b.delivered_at ? new Date(b.delivered_at) : (b.updated_at ? new Date(b.updated_at) : new Date(b.date));
@@ -177,6 +167,44 @@ const Kitchen = () => {
         }
     };
 
+    const toggleSelect = (orderId, e) => {
+        e.stopPropagation();
+        setSelectedIds(prev => 
+            prev.includes(orderId) ? prev.filter(id => id !== orderId) : [...prev, orderId]
+        );
+    };
+
+    const handleBulkAction = async (action) => {
+        if (selectedIds.length === 0) return;
+        
+        if (action === 'DELETE') {
+            setConfirmDelete({ isOpen: true, isBulk: true, order: null });
+            return;
+        }
+
+        try {
+            let backendAction = action; // 'PREPARE' or 'DELIVER'
+            await bulkActionSales(selectedIds, backendAction);
+            setToast({ message: `${selectedIds.length} pedidos actualizados`, type: 'success' });
+            setSelectedIds([]);
+            loadKitchenOrders();
+        } catch (err) {
+            setToast({ message: err.message, type: 'error' });
+        }
+    };
+
+    const executeBulkDelete = async () => {
+        try {
+            await bulkActionSales(selectedIds, 'DELETE');
+            setToast({ message: `${selectedIds.length} pedidos eliminados`, type: 'success' });
+            setSelectedIds([]);
+            setConfirmDelete({ isOpen: false, order: null, isBulk: false });
+            loadKitchenOrders();
+        } catch (err) {
+            setToast({ message: err.message, type: 'error' });
+        }
+    };
+
     if (loading) return <LoadingScreen />;
 
     const getDisplayOrders = () => {
@@ -192,33 +220,44 @@ const Kitchen = () => {
             <header className="kitchen-header">
                 <div className="header-top">
                     <h1><Utensils size={40} /> COCINA DUKE</h1>
-                    <div className="kitchen-clock" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <div className="kitchen-clock">
                         <Clock size={20} />
                         {currentTime.toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit', second: '2-digit', timeZone: 'America/Argentina/Buenos_Aires' })}
                     </div>
                 </div>
                 
                 <div className="kitchen-nav">
-                    <button 
-                        className={`nav-item ${activeTab === 'pending' ? 'active' : ''}`} 
-                        onClick={() => setActiveTab('pending')}
-                    >
+                    <button className={`nav-item ${activeTab === 'pending' ? 'active' : ''}`} onClick={() => setActiveTab('pending')}>
                         PENDIENTES ({pendingOrders.length})
                     </button>
-                    <button 
-                        className={`nav-item ${activeTab === 'ready' ? 'active' : ''}`} 
-                        onClick={() => setActiveTab('ready')}
-                    >
+                    <button className={`nav-item ${activeTab === 'ready' ? 'active' : ''}`} onClick={() => setActiveTab('ready')}>
                         LISTOS ({readyOrders.length})
                     </button>
-                    <button 
-                        className={`nav-item ${activeTab === 'collected' ? 'active' : ''}`} 
-                        onClick={() => setActiveTab('collected')}
-                    >
+                    <button className={`nav-item ${activeTab === 'collected' ? 'active' : ''}`} onClick={() => setActiveTab('collected')}>
                         RECOGIDOS ({collectedOrders.length})
                     </button>
                 </div>
             </header>
+
+            {/* Floating Bulk Action Bar */}
+            {selectedIds.length > 0 && (
+                <div className="bulk-action-bar">
+                    <div className="selection-info">
+                        <CheckSquare size={20} />
+                        <span>{selectedIds.length} seleccionados</span>
+                    </div>
+                    <div className="action-buttons">
+                        {activeTab === 'pending' && (
+                            <button onClick={() => handleBulkAction('PREPARE')} className="bulk-btn ready"><Check size={20} /> LISTOS</button>
+                        )}
+                        {(activeTab === 'pending' || activeTab === 'ready') && (
+                            <button onClick={() => handleBulkAction('DELIVER')} className="bulk-btn picked"><Package size={20} /> RECOGIDOS</button>
+                        )}
+                        <button onClick={() => handleBulkAction('DELETE')} className="bulk-btn delete"><Trash2 size={20} /> ELIMINAR</button>
+                        <button onClick={() => setSelectedIds([])} className="bulk-btn cancel"><X size={20} /></button>
+                    </div>
+                </div>
+            )}
 
             <div className="kitchen-grid">
                 {currentDisplay.length === 0 ? (
@@ -231,100 +270,119 @@ const Kitchen = () => {
                         </h2>
                     </div>
                 ) : (
-                    currentDisplay.map(order => (
-                        <div 
-                            key={order.id} 
-                            className={`kitchen-card ${activeTab === 'pending' ? 'new-order' : (activeTab === 'ready' ? 'ready-card' : 'collected-card')}`}
-                            onClick={() => setActionModal({ isOpen: true, order })}
-                            style={{ cursor: 'pointer' }}
-                        >
-                            <div className="kitchen-card-header">
-                                <span className="ticket-number">#{order.id}</span>
-                                <span className="ticket-time">
-                                    <Clock size={14} style={{ marginRight: '5px' }} /> 
-                                    {formatTime(order.date)}
-                                    {order.is_prepared && (
-                                        <> | <span className="prepared-time">LISTO: {formatTime(order.prepared_at || order.updated_at)}</span></>
-                                    )}
-                                </span>
-                            </div>
-                            <div className="kitchen-card-body">
-                                <div className="customer-info">
-                                    <span className="customer-name">{order.customer_name || 'Particular'}</span>
-                                    {order.customer_name?.includes('(Ampl. #') && (
-                                        <div style={{ background: '#ff922b', color: '#fff', fontSize: '0.65rem', fontWeight: '900', padding: '2px 6px', borderRadius: '4px', marginTop: '4px', display: 'inline-block' }}>AMPLIACIÓN</div>
-                                    )}
-                                    {order.table_number && <span className="table-info">{order.table_number}</span>}
+                    currentDisplay.map(order => {
+                        const isSelected = selectedIds.includes(order.id);
+                        return (
+                            <div 
+                                key={order.id} 
+                                className={`kitchen-card ${isSelected ? 'selected' : ''} ${activeTab === 'pending' ? 'new-order' : (activeTab === 'ready' ? 'ready-card' : 'collected-card')}`}
+                                onClick={() => setActionModal({ isOpen: true, order })}
+                            >
+                                <div className="selection-overlay" onClick={(e) => toggleSelect(order.id, e)}>
+                                    {isSelected ? <CheckSquare size={28} color="var(--admin-primary)" /> : <Square size={28} />}
                                 </div>
-                                <div className="items-list-kitchen">
-                                    {order.items.map(item => (
-                                        <div key={item.id} className="kitchen-item">
-                                            <div style={{ display: 'flex', alignItems: 'center' }}>
-                                                <span className="item-qty">{item.quantity}</span>
-                                                <span className="item-name">{item.entry_name}</span>
-                                            </div>
-                                        </div>
-                                    ))}
+
+                                <div className="kitchen-card-header">
+                                    <span className="ticket-number">#{order.id}</span>
+                                    <span className="ticket-time">
+                                        <Clock size={14} style={{ marginRight: '5px' }} /> 
+                                        {formatTime(order.date)}
+                                        {order.is_prepared && (
+                                            <> | <span className="prepared-time">LISTO: {formatTime(order.prepared_at || order.updated_at)}</span></>
+                                        )}
+                                    </span>
                                 </div>
-                                {order.notes && (
-                                    <div className="order-notes">
-                                        <strong>NOTAS:</strong> {order.notes}
+                                <div className="kitchen-card-body">
+                                    <div className="customer-info">
+                                        <span className="customer-name">{order.customer_name || 'Particular'}</span>
+                                        {order.customer_name?.includes('(Ampl. #') && (
+                                            <div className="ampliacion-badge">AMPLIACIÓN</div>
+                                        )}
+                                        {order.table_number && <span className="table-info">{order.table_number}</span>}
                                     </div>
-                                )}
-                            </div>
-                            <div className="kitchen-card-footer">
-                                <div className="card-hint">
-                                    <Settings size={18} /> Pulsa para gestionar opciones
+                                    <div className="items-list-kitchen">
+                                        {order.items.map(item => (
+                                            <div key={item.id} className="kitchen-item">
+                                                <div style={{ display: 'flex', alignItems: 'center' }}>
+                                                    <span className="item-qty">{item.quantity}</span>
+                                                    <span className="item-name">{item.entry_name}</span>
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                    {order.notes && (
+                                        <div className="order-notes">
+                                            <strong>NOTAS:</strong> {order.notes}
+                                        </div>
+                                    )}
+                                </div>
+                                <div className="kitchen-card-footer">
+                                    <div className="card-hint">
+                                        <Settings size={18} /> Pulsa para opciones
+                                    </div>
                                 </div>
                             </div>
-                        </div>
-                    ))
+                        );
+                    })
                 )}
             </div>
 
             {toast && <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />}
             
+            {/* Action Menu Modal */}
             {actionModal.isOpen && actionModal.order && (
-                <div className="modal-overlay">
-                    <div className="admin-modal kitchen-options-modal" style={{ maxWidth: '400px' }}>
-                        <div className="modal-content" style={{ padding: '25px', textAlign: 'center', background: '#fff', color: '#333', borderRadius: '16px' }}>
-                            <h3 style={{ margin: '0 0 20px', fontSize: '1.5rem', fontWeight: '900' }}>
-                                GESTIÓN TICKET #{actionModal.order.id}
-                            </h3>
+                <div className="modal-overlay" onClick={() => setActionModal({ isOpen: false, order: null })}>
+                    <div className="admin-modal kitchen-options-modal" onClick={e => e.stopPropagation()}>
+                        <div className="modal-content">
+                            <h3 className="modal-title">GESTIÓN TICKET #{actionModal.order.id}</h3>
                             
-                            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                            <div className="modal-actions-list">
                                 {activeTab === 'pending' && (
                                     <>
-                                        <button onClick={() => handleAction('TO_READY', actionModal.order)} style={{ padding: '15px', background: '#2b8a3e', color: '#fff', border: 'none', borderRadius: '10px', fontWeight: 'bold', fontSize: '1.1rem', cursor: 'pointer' }}>MARCAR COMO LISTO</button>
-                                        <button onClick={() => handleAction('TO_COLLECTED', actionModal.order)} style={{ padding: '15px', background: '#4dabf7', color: '#fff', border: 'none', borderRadius: '10px', fontWeight: 'bold', fontSize: '1.1rem', cursor: 'pointer' }}>MARCAR COMO ESTUVO RECOGIDO DIRECTAMENTE</button>
+                                        <button onClick={() => handleAction('TO_READY', actionModal.order)} className="action-btn ready">MARCAR COMO LISTO</button>
+                                        <button onClick={() => handleAction('TO_COLLECTED', actionModal.order)} className="action-btn collected">MARCAR COMO RECOGIDO</button>
                                     </>
                                 )}
                                 
                                 {activeTab === 'ready' && (
                                     <>
-                                        <button onClick={() => handleAction('TO_COLLECTED', actionModal.order)} style={{ padding: '15px', background: '#4dabf7', color: '#fff', border: 'none', borderRadius: '10px', fontWeight: 'bold', fontSize: '1.1rem', cursor: 'pointer' }}>MARCAR COMO RECOGIDO</button>
-                                        <button onClick={() => handleAction('TO_PENDING', actionModal.order)} style={{ padding: '15px', background: '#f59f00', color: '#fff', border: 'none', borderRadius: '10px', fontWeight: 'bold', fontSize: '1.1rem', cursor: 'pointer' }}>VOLVER A PENDIENTE (En Cocción)</button>
+                                        <button onClick={() => handleAction('TO_COLLECTED', actionModal.order)} className="action-btn collected">MARCAR COMO RECOGIDO</button>
+                                        <button onClick={() => handleAction('TO_PENDING', actionModal.order)} className="action-btn pending">VOLVER A PENDIENTE</button>
                                     </>
                                 )}
                                 
                                 {activeTab === 'collected' && (
                                     <>
-                                        <button onClick={() => handleAction('REVERT_COLLECTED', actionModal.order)} style={{ padding: '15px', background: '#2b8a3e', color: '#fff', border: 'none', borderRadius: '10px', fontWeight: 'bold', fontSize: '1.1rem', cursor: 'pointer' }}>VOLVER A LISTO (No fue entregado)</button>
-                                        <button onClick={() => handleAction('TO_PENDING', actionModal.order)} style={{ padding: '15px', background: '#f59f00', color: '#fff', border: 'none', borderRadius: '10px', fontWeight: 'bold', fontSize: '1.1rem', cursor: 'pointer' }}>VOLVER A PENDIENTE (En Cocción)</button>
+                                        <button onClick={() => handleAction('REVERT_COLLECTED', actionModal.order)} className="action-btn ready">VOLVER A LISTO</button>
+                                        <button onClick={() => handleAction('TO_PENDING', actionModal.order)} className="action-btn pending">VOLVER A PENDIENTE</button>
                                     </>
                                 )}
                                 
-                                <button onClick={() => {
-                                    if(window.confirm('¿Estás SEGURO de que quieres eliminar este ticket permanentemente? Esta acción destruirá el pedido y no se cobrará.')) {
-                                        handleAction('DELETE', actionModal.order);
-                                    }
-                                }} style={{ padding: '15px', background: '#f03e3e', color: '#fff', border: 'none', borderRadius: '10px', fontWeight: 'bold', fontSize: '1.1rem', cursor: 'pointer', marginTop: '10px' }}>ELIMINAR TICKET</button>
+                                <button onClick={() => setConfirmDelete({ isOpen: true, order: actionModal.order, isBulk: false })} className="action-btn delete">ELIMINAR TICKET</button>
                                 
-                                <button onClick={() => setActionModal({ isOpen: false, order: null })} style={{ padding: '15px', background: '#f1f3f5', color: '#333', border: '1px solid #ccc', borderRadius: '10px', fontWeight: 'bold', fontSize: '1.1rem', cursor: 'pointer', marginTop: '10px' }}>CANCELAR</button>
+                                <button onClick={() => setActionModal({ isOpen: false, order: null })} className="action-btn cancel">CERRAR</button>
                             </div>
                         </div>
                     </div>
                 </div>
+            )}
+
+            {/* Single/Bulk Delete Confirmation */}
+            {confirmDelete.isOpen && (
+                <ConfirmModal
+                    isOpen={true}
+                    title={confirmDelete.isBulk ? '¿ELIMINAR SELECCIONADOS?' : '¿ELIMINAR TICKET?'}
+                    message={confirmDelete.isBulk 
+                        ? `¿Estás seguro de eliminar permanentemente estos ${selectedIds.length} tickets de cocina? No se cobrarán.`
+                        : `¿Estás seguro de eliminar permanentemente el ticket #${confirmDelete.order?.id}? Esta acción destruirá el pedido.`
+                    }
+                    onConfirm={() => {
+                        if (confirmDelete.isBulk) executeBulkDelete();
+                        else handleAction('DELETE', confirmDelete.order);
+                        setConfirmDelete({ isOpen: false, order: null, isBulk: false });
+                    }}
+                    onCancel={() => setConfirmDelete({ isOpen: false, order: null, isBulk: false })}
+                />
             )}
         </div>
     );
