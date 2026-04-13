@@ -470,7 +470,7 @@ const Accounting = () => {
                         <p>Análisis financiero detallado</p>
                     </div>
                     <div className="header-controls">
-                        <div className="controls-row">
+                        <div className="controls-row" style={{ display: 'flex', flexWrap: 'wrap', gap: '10px' }}>
                             <div className="date-quick-filters" style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
                                 <input 
                                     type="date" 
@@ -497,16 +497,6 @@ const Accounting = () => {
                                     </button>
                                 )}
                             </div>
-                            <div className="search-bar" style={{ position: 'relative', flex: 1 }}>
-                                <Search size={18} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: '#888' }} />
-                                <input 
-                                    type="text" 
-                                    placeholder="Buscar..." 
-                                    defaultValue={searchTerm}
-                                    onChange={(e) => startTransition(() => setSearchTerm(e.target.value))}
-                                    style={{ padding: '10px 15px 10px 55px', borderRadius: '10px', border: '1px solid #ddd', minWidth: '150px', fontSize: '0.9rem', width: '100%' }}
-                                />
-                            </div>
                             <button 
                                 onClick={() => setShowAdvancedFilters(!showAdvancedFilters)}
                                 className="filter-toggle-btn"
@@ -515,16 +505,38 @@ const Accounting = () => {
                                 <Filter size={18} style={{ color: showAdvancedFilters ? '#ffffff' : '#333' }} />
                                 <span className="hide-mobile" style={{ color: showAdvancedFilters ? '#ffffff' : '#333' }}>Categorías</span>
                             </button>
-                            <div className="export-actions">
+                            <div className="export-actions" style={{ display: 'flex', gap: '8px' }}>
                                 <button onClick={handleExportExcel} className="export-btn excel" title="Excel"><Download size={18} /></button>
                                 <button onClick={handleExportPDF} className="export-btn pdf" title="PDF"><FileText size={18} /></button>
                             </div>
                             <button 
                                 onClick={() => { setMovementType('EXPENSE'); setIsAddModalOpen(true); }}
                                 className="add-movement-btn"
+                                style={{ marginLeft: 'auto' }}
                             >
                                 <Plus size={18} /> <span className="btn-text">NUEVO MOVIMIENTO</span>
                             </button>
+                        </div>
+                        
+                        <div className="search-row" style={{ marginTop: '15px' }}>
+                            <div className="search-bar" style={{ position: 'relative', width: '100%', maxWidth: '100%' }}>
+                                <Search size={18} style={{ position: 'absolute', left: '16px', top: '50%', transform: 'translateY(-50%)', color: '#888' }} />
+                                <input 
+                                    type="text" 
+                                    placeholder="Buscar por descripción, importe o categoría..." 
+                                    defaultValue={searchTerm}
+                                    onChange={(e) => startTransition(() => setSearchTerm(e.target.value))}
+                                    style={{ 
+                                        padding: '12px 15px 12px 55px', 
+                                        borderRadius: '12px', 
+                                        border: '1px solid #eee', 
+                                        fontSize: '0.95rem', 
+                                        width: '100%',
+                                        background: '#fff',
+                                        boxShadow: '0 2px 5px rgba(0,0,0,0.02)'
+                                    }}
+                                />
+                            </div>
                         </div>
                         <div className="period-toggle">
                             <button className={viewMode === 'all' && !startDate && !endDate ? 'active' : ''} onClick={() => { setViewMode('all'); setStartDate(''); setEndDate(''); }}>TODOS</button>
