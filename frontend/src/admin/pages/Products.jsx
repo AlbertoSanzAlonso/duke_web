@@ -696,7 +696,7 @@ function Products() {
                         placeholder="Buscar en catálogo..."
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
-                        style={{ padding: '12px 15px 12px 40px', borderRadius: '12px', border: '1px solid #ddd', fontSize: '0.95rem', width: '100%' }}
+                        style={{ padding: '12px 15px 12px 55px', borderRadius: '12px', border: '1px solid #ddd', fontSize: '0.95rem', width: '100%' }}
                     />
                 </div>
             </div>

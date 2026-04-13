@@ -131,7 +131,7 @@ function MenuList() {
                         placeholder="Buscar en la carta..." 
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
-                        style={{ padding: '10px 15px 10px 40px', borderRadius: '10px', border: '1px solid #ddd', fontSize: '0.9rem', width: '100%' }}
+                        style={{ padding: '10px 15px 10px 55px', borderRadius: '10px', border: '1px solid #ddd', fontSize: '0.9rem', width: '100%' }}
                     />
                 </div>
             </div>

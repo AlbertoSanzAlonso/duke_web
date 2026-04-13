@@ -20,9 +20,9 @@
 .search-bar {
     display: flex;
     align-items: center;
-    gap: 10px;
+    gap: 15px;
     background: #fff;
-    padding: 0 15px;
+    padding: 0 20px;
     border-radius: 12px;
     border: 1px solid #ddd;
     transition: all 0.2s ease;
@@ -508,10 +508,10 @@
     background: #fff;
     border: 1px solid #ddd;
     border-radius: 12px;
-    padding: 0 15px;
+    padding: 0 20px;
     display: flex;
     align-items: center;
-    gap: 10px;
+    gap: 15px;
 }
 
 .history-filters .search-box input,

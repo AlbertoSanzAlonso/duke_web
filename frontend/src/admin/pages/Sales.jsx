@@ -658,7 +658,7 @@ const Sales = () => {
                                         placeholder="Buscar producto o categoría..." 
                                         defaultValue={searchTerm}
                                         onChange={(e) => startTransition(() => setSearchTerm(e.target.value))}
-                                        style={{ padding: '12px 15px 12px 40px', borderRadius: '10px', border: '1px solid #ddd', fontSize: '0.95rem', width: '100%', background: '#fff' }}
+                                        style={{ padding: '12px 15px 12px 55px', borderRadius: '10px', border: '1px solid #ddd', fontSize: '0.95rem', width: '100%', background: '#fff' }}
                                     />
                                 </div>
                             </div>

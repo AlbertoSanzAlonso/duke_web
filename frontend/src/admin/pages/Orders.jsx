@@ -188,7 +188,7 @@ const Orders = () => {
                             placeholder="Buscar por ID, nombre o mesa..." 
                             defaultValue={searchTerm}
                             onChange={(e) => startTransition(() => setSearchTerm(e.target.value))}
-                            style={{ padding: '10px 15px 10px 40px', borderRadius: '10px', border: '1px solid #ddd', fontSize: '0.9rem', width: '100%', background: '#fff' }}
+                            style={{ padding: '10px 15px 10px 55px', borderRadius: '10px', border: '1px solid #ddd', fontSize: '0.9rem', width: '100%', background: '#fff' }}
                         />
                     </div>
                     <div style={{ display: 'flex', gap: '8px' }}>
