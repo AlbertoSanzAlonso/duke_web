@@ -99,5 +99,9 @@ Este proyecto se divide en dos entornos de despliegue claramente separados para 
 - **`!important` en estilos inline React**: Los estilos inline de React NO admiten `!important`. `color: '#fff !important'` es ignorado — el motor de estilo lo descarta silenciosamente. Usar siempre `color: '#fff'` y resolver conflictos a nivel CSS.
 - **Transformaciones CSS de tabla**: Cambiar `display: block` en `<table>/<tbody>/<tr>/<td>` para layout responsive es inestable en Safari/Chrome mobile. La fila colapsa a altura 0. Usar **renderizado dual JSX** en su lugar.
 
+## 9. Gestión de Medios y Resiliencia de Imágenes (Crítico)
+- **Resolución de URLs**: Es OBLIGATORIO utilizar la función `getMediaUrl(path)` proveniente de `api.js` para renderizar cualquier imagen dinámica (productos, galería, avatares). Esta función normaliza las rutas relativas del backend concatenando `VITE_API_URL` y eliminando el sufijo `/api/`.
+- **Mecanismos de Fallback**: Todo elemento `<img>` que cargue contenido del servidor DEBE implementar el atributo `onError` para sustituir imágenes fallidas por el recurso `/brand/duke burger 3.png`, garantizando que nunca se muestren iconos de "imagen rota".
+
 ---
 *Mantener la coherencia visual con la marca Duke Burger (Negros profundos, Rojos vibrantes, Tipografía Bebas Neue).*

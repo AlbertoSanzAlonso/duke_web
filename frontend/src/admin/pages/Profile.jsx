@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { fetchMe, updateMe } from '../../services/api';
+import { fetchMe, updateMe, getMediaUrl } from '../../services/api';
 import LoadingScreen from '../components/LoadingScreen';
 import Toast from '../components/Toast';
 import { User, Camera, Key, Save } from 'lucide-react';
@@ -32,17 +32,7 @@ const Profile = () => {
             setLastName(data.last_name || '');
             setEmail(data.email || '');
             
-            // Helper to get full URL
-            const getFullAvatarUrl = (url) => {
-                if (!url) return null;
-                if (url.startsWith('http') || url.startsWith('blob:')) return url;
-                let baseUrl = import.meta.env.VITE_API_URL || 'http://localhost:8000';
-                baseUrl = baseUrl.replace(/\/api\/?$/, '').replace(/\/$/, '');
-                const formattedUrl = url.startsWith('/') ? url : `/${url}`;
-                return `${baseUrl}${formattedUrl}`;
-            };
-            
-            setPreviewUrl(getFullAvatarUrl(data.profile?.avatar));
+            setPreviewUrl(getMediaUrl(data.profile?.avatar));
         } catch (error) {
             setToast({ message: "Error al cargar datos", type: 'error' });
         } finally {

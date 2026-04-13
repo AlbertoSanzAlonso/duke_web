@@ -2,7 +2,8 @@ import React, { useState, useEffect, useCallback } from 'react';
 import {
     fetchProducts, createProduct, deleteProduct, updateProduct,
     fetchInventory, createInventoryItem,
-    fetchProductIngredients, createProductIngredient, updateProductIngredient, deleteProductIngredient
+    fetchProductIngredients, createProductIngredient, updateProductIngredient, deleteProductIngredient,
+    getMediaUrl
 } from '../../services/api';
 import { Search, FlaskConical, Plus, Trash2, Pencil, Check, X, ChevronLeft, PackagePlus } from 'lucide-react';
 import Toast from '../components/Toast';
@@ -854,7 +855,15 @@ function Products() {
                                         </div>
                                     )}
                                     {prod.image ? (
-                                        <img src={prod.image} alt={prod.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                                        <img 
+                                            src={getMediaUrl(prod.image)} 
+                                            alt={prod.name} 
+                                            style={{ width: '100%', height: '100%', objectFit: 'cover' }} 
+                                            onError={(e) => {
+                                                e.target.onerror = null; 
+                                                e.target.src = '/brand/duke burger 3.png'; // Fallback a logo
+                                            }}
+                                        />
                                     ) : (
                                         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', color: '#999' }}>
                                             <span style={{ fontSize: '3rem' }}>🍔</span>

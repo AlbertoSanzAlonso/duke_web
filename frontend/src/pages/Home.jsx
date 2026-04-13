@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { Link } from 'react-router-dom';
 import { Menu, X, ShoppingCart, Minus, Plus, MessageCircle, MapPin, Instagram, Facebook, ChevronDown, Phone } from 'lucide-react';
-import { fetchMenuEntries, createSale, fetchOpeningHours } from '../services/api';
+import { fetchMenuEntries, createSale, fetchOpeningHours, getMediaUrl } from '../services/api';
 import Toast from '../admin/components/Toast';
 import Footer from '../components/Footer';
 import FloatingContact from '../components/FloatingContact';
@@ -586,7 +586,14 @@ function Home() {
                 >
                   {item.image && (
                     <div className="card-image-container">
-                      <img src={item.image} alt={item.name} />
+                      <img 
+                        src={getMediaUrl(item.image)} 
+                        alt={item.name} 
+                        onError={(e) => {
+                          e.target.onerror = null;
+                          e.target.src = '/brand/duke burger 3.png';
+                        }}
+                      />
                     </div>
                   )}
                   <div className="card-info">

@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { fetchMe, logout } from '../../services/api';
+import { fetchMe, logout, getMediaUrl } from '../../services/api';
 import { User, LogOut, Settings, ChevronDown } from 'lucide-react';
 
 const UserDropdown = () => {
@@ -20,17 +20,6 @@ const UserDropdown = () => {
         return () => document.removeEventListener('mousedown', handleClickOutside);
     }, []);
 
-    const getFullAvatarUrl = (url) => {
-        if (!url) return null;
-        if (url.startsWith('http') || url.startsWith('blob:')) return url;
-        
-        let baseUrl = import.meta.env.VITE_API_URL || 'http://localhost:8000';
-        baseUrl = baseUrl.replace(/\/api\/?$/, '').replace(/\/$/, '');
-        
-        const formattedUrl = url.startsWith('/') ? url : `/${url}`;
-        return `${baseUrl}${formattedUrl}`;
-    };
-
     const loadMe = async () => {
         try {
             const data = await fetchMe();
@@ -46,7 +35,7 @@ const UserDropdown = () => {
         navigate('/login');
     };
 
-    const finalAvatarUrl = getFullAvatarUrl(me?.profile?.avatar);
+    const finalAvatarUrl = getMediaUrl(me?.profile?.avatar);
     const displayName = me?.first_name ? `${me.first_name} ${me.last_name || ''}` : (me?.username || 'Admin');
 
     return (

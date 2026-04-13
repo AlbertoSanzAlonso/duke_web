@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Search } from 'lucide-react';
-import { fetchMenuEntries, createMenuEntry, deleteMenuEntry, updateMenuEntry, fetchProducts } from '../../services/api';
+import { fetchMenuEntries, createMenuEntry, deleteMenuEntry, updateMenuEntry, fetchProducts, getMediaUrl } from '../../services/api';
 import Toast from '../components/Toast';
 
 function MenuList() {
@@ -278,7 +278,15 @@ function MenuList() {
                                 }}>
                                 <div style={{ width: '100%', height: '220px', backgroundColor: '#f0f0f0', display: 'flex', justifyContent: 'center', alignItems: 'center', position: 'relative' }}>
                                     {entry.product?.image ? (
-                                        <img src={entry.product.image} alt={entry.product.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                                        <img 
+                                            src={getMediaUrl(entry.product.image)} 
+                                            alt={entry.product.name} 
+                                            style={{ width: '100%', height: '100%', objectFit: 'cover' }} 
+                                            onError={(e) => {
+                                                e.target.onerror = null; 
+                                                e.target.src = '/brand/duke burger 3.png';
+                                            }}
+                                        />
                                     ) : (
                                         <span style={{ color: '#999', fontSize: '0.9rem' }}>Sin Fotografía</span>
                                     )}

@@ -185,8 +185,8 @@ const Manual = () => {
       {isWorkflowOpen && (
         <div className="manual-modal-overlay fullscreen workflow-modal" onClick={() => setIsWorkflowOpen(false)}>
           <div className="manual-modal-container fullscreen" onClick={e => e.stopPropagation()}>
-            <div className="modal-header">
-              <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
+            <div className="modal-header workflow-modal-header">
+              <div className="workflow-header-title">
                 <PlayCircle className="workflow-title-icon" />
                 <h2>Flujo de Trabajo: Vida del Producto</h2>
               </div>

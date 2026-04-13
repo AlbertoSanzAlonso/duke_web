@@ -18,7 +18,7 @@ import {
 } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 
-import { fetchGalleryImages, createGalleryImage, deleteGalleryImage, updateGalleryImage } from '../../services/api';
+import { fetchGalleryImages, createGalleryImage, deleteGalleryImage, updateGalleryImage, getMediaUrl } from '../../services/api';
 import LoadingScreen from '../components/LoadingScreen';
 import Toast from '../components/Toast';
 import ImageCropperModal from '../components/ImageCropperModal';
@@ -50,7 +50,15 @@ const SortableItem = ({ img, confirmDelete, handleToggleActive, handleUpdateTitl
     return (
         <div ref={setNodeRef} style={style}>
             <div style={{ height: '220px', background: '#eee', position: 'relative' }}>
-                <img src={img.image} alt={img.title} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                <img 
+                    src={getMediaUrl(img.image)} 
+                    alt={img.title} 
+                    style={{ width: '100%', height: '100%', objectFit: 'cover' }} 
+                    onError={(e) => {
+                        e.target.onerror = null;
+                        e.target.src = '/brand/duke burger 3.png';
+                    }}
+                />
                 
                 <div style={{ position: 'absolute', top: '10px', right: '10px', zIndex: 10, display: 'flex', gap: '8px' }}>
                     <button 

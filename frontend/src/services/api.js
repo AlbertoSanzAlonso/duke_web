@@ -7,6 +7,14 @@ if (!base_api_url.toLowerCase().endsWith('/api')) {
 }
 const API_URL = base_api_url;
 
+export const getMediaUrl = (path) => {
+    if (!path) return null;
+    if (path.startsWith('http')) return path;
+    // Si llegamos aquí, es una ruta relativa. Usamos VITE_API_URL quitando el sufijo /api si existe
+    const base = (import.meta.env.VITE_API_URL || 'http://localhost:8000').replace(/\/api\/?$/, "");
+    return `${base}${path.startsWith('/') ? '' : '/'}${path}`;
+};
+
 const getHeaders = (contentType = null) => {
     const headers = {};
     if (contentType) headers['Content-Type'] = contentType;

@@ -1131,6 +1131,33 @@
 .workflow-timeline.large {
     max-width: 1400px;
     margin: 0 auto;
+    justify-content: center; /* Center cards horizontally within the row if they don't fill it */
+}
+
+/* Specific Header Centering for Workflow */
+.workflow-modal-header {
+    justify-content: center !important;
+    position: relative;
+}
+
+.workflow-header-title {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    z-index: 1;
+}
+
+.workflow-modal-header .close-btn {
+    position: absolute;
+    right: 2rem;
+    top: 50%;
+    transform: translateY(-50%);
+}
+
+@media (max-width: 768px) {
+    .workflow-modal-header .close-btn {
+        right: 1rem;
+    }
 }
 
 .faq-section {
