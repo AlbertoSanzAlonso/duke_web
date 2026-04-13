@@ -18,7 +18,8 @@
 ## 🍱 MÓDULOS DE GESTIÓN
 
 ### 1. TPV (TERMINAL PUNTO DE VENTA)
-- **Ubicación:** Menú lateral -> "TPV". 
+- **Ubicación:** Menú lateral -> "TPV" (Acceso rápido).
+- **Flujo de Trabajo:** Se recomienda seguir el orden de la barra lateral (1. Inventario -> 2. Productos -> 3. Carta -> 4. Promos) para asegurar que la venta descuente correctamente.
 - **Funciones:** Venta presencial, cobro de pedidos web.
 - **Controles:**
     - **Carrito (Derecha):** Aplicar "Regalo" (Cortesía $0) o "Descuento" (%) por línea.
@@ -35,27 +36,25 @@
     4. **ENTREGADO:** Archiva el pedido.
 
 ### 3. PRODUCTOS Y MATERIA PRIMA (EL RECETARIO)
-- **Ubicación:** Menú lateral -> "Productos".
+- **Ubicación:** Menú lateral -> "2. Productos".
 - **Concepto de Materia Prima:**
     - Cada producto (ej: Burger "La Duke") tiene asociada una lista de **ingredientes** extraídos del Inventario.
     - **Gestión:** Botón "Materia Prima" en cada producto para definir qué y cuánto consume.
 - **Impacto en Inventario (Flujo Automático):**
-    - **Venta:** Al marcar un pedido como **COMPLETADO/COBRADO** en el TPV, el sistema descuenta automáticamente los ingredientes de los niveles de stock.
-    - **Trazabilidad:** Estos descuentos aparecen en el historial de movimientos de inventario con el motivo "Venta (TPV)".
+    - **Venta:** Al marcar un pedido como **COMPLETADO/COBRADO** en el TPV, el sistema genera un **Consumo Diario** acumulado.
+    - **Trazabilidad:** El inventario se descuenta en tiempo real, pero el historial se agrupa por día para facilitar la lectura de mermas y gastos.
     - **Sincronización:** Si se elimina un ingrediente de un producto, los cambios afectan a las ventas futuras, no a las pasadas.
 
-### 4. INVENTARIO Y ALMACÉN (VERSIÓN 2.5)
-- **Ubicación:** Menú lateral -> "Inventario".
-- **Navegación y Filtros:**
-    - **Paginación:** Los artículos se muestran de 10 en 10 para mayor fluidez.
-    - **Filtros Avanzados:** Permite filtrar por **Categoría** y por estado de **Stock Bajo** (resaltado en rojo).
-    - **Buscador Inteligente:** Filtra por nombre en tiempo real.
+### 4. INVENTARIO Y ALMACÉN (VERSIÓN 3.0)
+- **Ubicación:** Menú lateral -> "1. Inventario".
+- **Flujo de Consumo:**
+    - El historial ya no muestra cada venta individual, sino un **Total Diario de Consumo** por cada ítem. Esto permite ver rápidamente cuánto se gastó de cada insumo al final de la jornada.
 - **Lógica de 3 Niveles:**
     - **📦 Empaque (Pack):** Ej: Cajas. El sistema permite comprar por cajas pero descontar por unidades.
     - **🍎 Unidad Base:** Ej: Paquete de queso.
     - **🔪 Sub-unidad:** Ej: Fetas. Se puede configurar que un paquete de queso traiga 20 fetas para descuentos precisos en recetas.
 - **Auditoría:**
-    - **Ajustes Manuales:** Cualquier cambio directo en la cantidad abre un modal de confirmación y genera un registro de auditoría obligatorio registrado en el Historial de Movimientos.
+    - **Ajustes Manuales:** Los movimientos manuales (compras o mermas) siguen apareciendo en el "Historial de Movimientos" para control de staff.
     - **Alertas:** El indicador "BAJO STOCK" se activa automáticamente cuando la cantidad es menor o igual al mínimo definido.
 
 ### 5. PROVEEDORES Y GESTIÓN DE COMPRAS
@@ -85,11 +84,12 @@
 - **Auditoría:** Todas las acciones están vinculadas al usuario que inició sesión.
 
 ### 8. PERFIL PERSONAL
-- **Ubicación:** Menú desplegable en la **Esquina Superior Derecha** (Donde aparece el nombre/avatar).
+- **Ubicación:** Menú desplegable en la **Esquina Superior Derecha**.
+- **Identidad:** Si no tienes foto de perfil, verás el logo redondo de Duke Burger por defecto.
 - **Acciones:**
-    - **Avatar:** Cambiar la foto que te identifica en el sistema.
+    - **Avatar:** Al subir una foto, usa el icono de la cámara que flota sobre el marco.
     - **Credenciales:** Actualizar correo electrónico y contraseña personal.
-    - **Cierre de Sesión:** Botón "Cerrar Sesión" para proteger tu cuenta al final del turno.
+    - **Cierre de Sesión:** Limpia sesión y bloquea el acceso.
 
 ### 9. GESTIÓN DE INCIDENCIAS
 - **Modificaciones:** Al editar un pedido en el panel, el ticket digital (link de WhatsApp) se actualiza instantáneamente para el cliente. No requiere nuevo link.

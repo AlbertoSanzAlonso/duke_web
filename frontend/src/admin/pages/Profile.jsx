@@ -90,25 +90,24 @@ const Profile = () => {
             <div className="admin-card" style={{ maxWidth: '800px', margin: '0 auto' }}>
                 <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '30px' }}>
                     
-                    {/* Avatar Section */}
                     <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '15px' }}>
-                        <div style={{ 
-                            width: '120px', height: '120px', borderRadius: '50%', overflow: 'hidden', 
-                            background: '#f8f9fa', border: '4px solid #fff', boxShadow: '0 4px 15px rgba(0,0,0,0.1)',
-                            position: 'relative'
-                        }}>
-                            {previewUrl ? (
-                                <img src={previewUrl} alt="Avatar" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                            ) : (
-                                <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#adb5bd' }}>
-                                    <User size={60} />
-                                </div>
-                            )}
+                        <div style={{ position: 'relative' }}>
+                            <div style={{ 
+                                width: '120px', height: '120px', borderRadius: '50%', overflow: 'hidden', 
+                                background: '#f8f9fa', border: '4px solid #fff', boxShadow: '0 4px 15px rgba(0,0,0,0.1)'
+                            }}>
+                                {previewUrl ? (
+                                    <img src={previewUrl} alt="Avatar" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                                ) : (
+                                    <img src="/brand/logo_negro.png" alt="Default Avatar" style={{ width: '100%', height: '100%', objectFit: 'contain', padding: '15px' }} />
+                                )}
+                            </div>
                             <label style={{ 
                                 position: 'absolute', bottom: '0', right: '0', background: '#f03e3e', color: 'white',
-                                padding: '8px', borderRadius: '50%', cursor: 'pointer', display: 'flex'
+                                padding: '10px', borderRadius: '50%', cursor: 'pointer', display: 'flex',
+                                boxShadow: '0 2px 10px rgba(0,0,0,0.2)', border: '2px solid #fff', zIndex: 5
                             }}>
-                                <Camera size={18} />
+                                <Camera size={20} />
                                 <input type="file" onChange={handleAvatarChange} style={{ display: 'none' }} accept="image/*" />
                             </label>
                         </div>

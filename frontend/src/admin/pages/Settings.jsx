@@ -174,9 +174,6 @@ const Settings = () => {
                     <button onClick={() => handleTabChange('users')} className={`tab-btn ${activeTab === 'users' ? 'active' : ''}`} style={{ ...tabBtnStyle(activeTab === 'users'), width: '100%' }}>
                         <UsersIcon size={18} /> Personal
                     </button>
-                    <button onClick={() => handleTabChange('custom')} className={`tab-btn ${activeTab === 'custom' ? 'active' : ''}`} style={{ ...tabBtnStyle(activeTab === 'custom'), width: '100%' }}>
-                        <Save size={18} /> Otros
-                    </button>
                 </div>
             </div>
 
@@ -297,30 +294,6 @@ const Settings = () => {
                     </div>
                 )}
 
-                {activeTab === 'custom' && (
-                    <div className="tab-content">
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '15px', marginBottom: '25px', borderBottom: '1px solid #eee', paddingBottom: '15px' }}>
-                            <Save size={32} color="#f03e3e" />
-                            <h2 style={{ margin: 0, fontSize: '1.5rem' }}>Personalización Web</h2>
-                        </div>
-                        <div className="setting-field" style={{ background: '#fff9db', padding: '20px', borderRadius: '12px', border: '1px solid #ffe066' }}>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '10px' }}>
-                                <AlertTriangle size={20} color="#f08c00" />
-                                <label style={{ ...labelStyle, margin: 0, color: '#f08c00' }}>Texto del Banner (Marquee)</label>
-                            </div>
-                            <textarea 
-                                value={deliveryRates.marquee_text || ''} 
-                                onChange={e => handleRateChange('marquee_text', e.target.value)} 
-                                style={{ ...inputStyle(false), height: '100px', resize: 'vertical', fontSize: '1.1rem', background: '#fff' }}
-                                placeholder="Ej: BURGER - PACHATA - LOMO - PIZZA - BEBIDA - SAN JUAN"
-                            />
-                            <p style={{ fontSize: '0.8rem', color: '#888', marginTop: '8px' }}>Este texto se desplazará continuamente en la parte superior e inferior de la web pública.</p>
-                        </div>
-                        <button onClick={saveGeneralSettings} style={saveButtonStyle} disabled={isSaving}>
-                            <Save size={20} /> {isSaving ? 'GUARDANDO...' : 'GUARDAR CAMBIOS GENERALES'}
-                        </button>
-                    </div>
-                )}
 
                 {activeTab === 'gallery' && (
                     <div className="tab-content" style={{ padding: '0' }}>

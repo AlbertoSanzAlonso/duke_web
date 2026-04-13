@@ -20,11 +20,12 @@ Este repositorio utiliza el motor de agentes *Antigravity* y se apoya en las sig
 - Al diseñar o modificar esquemas de tablas.
 - Al escribir consultas complejas para el TPV o inventario.
 - Para asegurar el uso correcto de índices y políticas RLS (Row Level Security).
+**Nota: Arquitectura Modular (Abril 2026):** El backend se ha dividido en paquetes (`api/models/`, `api/views/`, `api/serializers/`). Las consultas directas deben referenciar los modelos importados desde `api.models`.
 
-## 3. Automatización de Medios (Procesamiento Interno)
-**Funcionalidad:** Conversión automática a WebP.
-- Implementada en `backend/api/models.py`.
-- Todas las imágenes subidas al modelo `Product` se procesan para optimizar el peso sin perder calidad visual.
+## 3. Automatización de Medios e Inventario (Procesamiento Interno)
+**Funcionalidad:** 
+- **Imágenes:** Conversión automática a WebP en el backend para optimización de carga.
+- **Inventario (Optimización):** Implementación de `InventoryDailyConsumption`. El sistema ya no genera un registro por cada venta individual, sino que agrega el consumo por producto y día, reduciendo drásticamente el peso de la base de datos y mejorando el rendimiento de las consultas analíticas de Duke Assist.
 
 ## 4. Gestión de Infraestructura (Coolify + Vercel)
 **Estrategia:** 

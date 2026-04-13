@@ -147,17 +147,24 @@ const AdminLayout = () => {
   const allMenuItems = [
     { name: 'Dashboard', path: '/admin', icon: <LayoutDashboard size={20} />, public: true },
     { name: 'TPV', path: '/admin/tpv', icon: <ShoppingCart size={20} />, perm: 'can_use_tpv' },
-    { name: 'Pedidos Clientes', path: '/admin/pedidos-clientes', icon: <TrendingUp size={20} />, perm: 'can_use_tpv' },
-    { name: 'Productos', path: '/admin/productos', icon: <Package size={20} />, perm: 'can_use_menu' },
-    { name: 'Carta', path: '/admin/carta', icon: <UtensilsCrossed size={20} />, perm: 'can_use_menu' },
-    { name: 'Promos', path: '/admin/promos', icon: <Star size={20} fill="#fcc419" color="#fcc419" />, perm: 'can_use_promos' },
-    { name: 'Inventario', path: '/admin/inventario', icon: <Boxes size={20} />, perm: 'can_use_inventory' },
-    { name: 'Pedidos Proveedor', path: '/admin/pedidos', icon: <Truck size={20} />, perm: 'can_use_inventory' },
-    { name: 'Contabilidad', path: '/admin/contabilidad', icon: <TrendingUp size={20} />, perm: 'can_use_accounting' },
     { name: 'Cocina', path: '/admin/cocina', icon: <Utensils size={20} />, perm: 'can_use_kitchen' },
+    
+    { type: 'separator' },
+    
+    { name: '1. Inventario', path: '/admin/inventario', icon: <Boxes size={20} />, perm: 'can_use_inventory' },
+    { name: '2. Productos', path: '/admin/productos', icon: <Package size={20} />, perm: 'can_use_menu' },
+    { name: '3. Carta', path: '/admin/carta', icon: <UtensilsCrossed size={20} />, perm: 'can_use_menu' },
+    { name: '4. Promos', path: '/admin/promos', icon: <Star size={20} fill="#fcc419" color="#fcc419" />, perm: 'can_use_promos' },
+    
+    { type: 'separator' },
+    
+    { name: 'Pedidos al Proveedor', path: '/admin/pedidos', icon: <Truck size={20} />, perm: 'can_use_inventory' },
+    { name: 'Contabilidad', path: '/admin/contabilidad', icon: <TrendingUp size={20} />, perm: 'can_use_accounting' },
+    { name: 'Pedidos Clientes', path: '/admin/pedidos-clientes', icon: <TrendingUp size={20} />, perm: 'can_use_tpv' },
   ];
 
   const menuItems = allMenuItems.filter(item => {
+    if (item.type === 'separator') return true;
     if (item.public || !profile) return true;
     if (profile.is_superuser) return true;
     return profile.profile?.[item.perm];
@@ -189,18 +196,23 @@ const AdminLayout = () => {
           </button>
         </div>
         <nav className="sidebar-nav">
-          {menuItems.map((item) => (
-            <NavLink
-              onClick={() => setIsMobileOpen(false)}
-              key={item.path}
-              to={item.path}
-              end={item.path === '/admin'}
-              className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}
-            >
-              {item.icon}
-              <span>{item.name}</span>
-            </NavLink>
-          ))}
+          {menuItems.map((item, idx) => {
+            if (item.type === 'separator') {
+              return <div key={`sep-${idx}`} className="sidebar-separator" style={{ height: '1px', background: 'rgba(255,255,255,0.1)', margin: '15px 10px' }} />;
+            }
+            return (
+              <NavLink
+                onClick={() => setIsMobileOpen(false)}
+                key={item.path}
+                to={item.path}
+                end={item.path === '/admin'}
+                className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}
+              >
+                {item.icon}
+                <span>{item.name}</span>
+              </NavLink>
+            );
+          })}
 
           {(profile?.is_superuser || profile?.profile?.can_use_webmail) && (
             <a

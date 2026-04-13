@@ -155,6 +155,12 @@ export const fetchInventoryMovements = async (days = 30) => {
     return await response.json();
 };
 
+export const fetchInventoryDailyConsumption = async (days = 30) => {
+    const response = await fetch(`${API_URL}/inventory-daily-consumption/?days=${days}`, { headers: getHeaders() });
+    if (!response.ok) return handleResponseError(response);
+    return await response.json();
+};
+
 // PRODUCT INGREDIENTS (Materia Prima)
 export const fetchProductIngredients = async (productId) => {
     const response = await fetch(`${API_URL}/product-ingredients/?product=${productId}`, { headers: getHeaders() });

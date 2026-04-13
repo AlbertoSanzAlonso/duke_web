@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { fetchInventory, createInventoryItem, deleteInventoryItem, updateInventoryItem, fetchInventoryMovements } from '../../services/api';
+import { fetchInventory, createInventoryItem, deleteInventoryItem, updateInventoryItem, fetchInventoryMovements, fetchInventoryDailyConsumption } from '../../services/api';
 import Toast from '../components/Toast';
 import ConfirmModal from '../components/ConfirmModal';
 import { Edit2, Save, X, Trash2, Search, Download, FileText } from 'lucide-react';
@@ -14,6 +14,7 @@ function Inventory() {
     const [searchTerm, setSearchTerm] = useState('');
 
     const [movements, setMovements] = useState([]);
+    const [dailyConsumptions, setDailyConsumptions] = useState([]);
     const [loadingMovements, setLoadingMovements] = useState(false);
 
     // Movements UI state
@@ -92,12 +93,14 @@ function Inventory() {
     const loadInventory = async (silent = false) => {
         try {
             if (!silent) { setLoading(true); setLoadingMovements(true); }
-            const [data, movs] = await Promise.all([
+            const [data, movs, cons] = await Promise.all([
                 fetchInventory(),
-                fetchInventoryMovements(30) // fetch last 30 days by default for better history view
+                fetchInventoryMovements(30),
+                fetchInventoryDailyConsumption(30)
             ]);
             setItems(data);
             setMovements(movs);
+            setDailyConsumptions(cons);
         } catch (err) {
             setError(err.message);
         } finally {
@@ -252,56 +255,48 @@ function Inventory() {
     };
 
     const consumptionTotals = useMemo(() => {
-        let filteredMovs = movements.filter(m => m.direction === 'OUT');
-        
-        const now = new Date();
-        now.setHours(23, 59, 59, 999);
+        let filteredCons = [...dailyConsumptions];
         
         if (summaryPeriod === 'daily') {
-            const start = new Date();
-            start.setHours(0, 0, 0, 0);
-            filteredMovs = filteredMovs.filter(m => new Date(m.date) >= start);
+            const today = new Date().toISOString().split('T')[0];
+            filteredCons = filteredCons.filter(c => c.date === today);
         } else if (summaryPeriod === 'weekly') {
             const start = new Date();
             start.setDate(start.getDate() - 7);
-            start.setHours(0, 0, 0, 0);
-            filteredMovs = filteredMovs.filter(m => new Date(m.date) >= start);
+            filteredCons = filteredCons.filter(c => new Date(c.date) >= start);
         } else if (summaryPeriod === 'monthly') {
             const start = new Date();
             start.setMonth(start.getMonth() - 1);
-            start.setHours(0, 0, 0, 0);
-            filteredMovs = filteredMovs.filter(m => new Date(m.date) >= start);
+            filteredCons = filteredCons.filter(c => new Date(c.date) >= start);
         } else if (summaryStartDate || summaryEndDate) {
             if (summaryStartDate) {
                 const s = new Date(summaryStartDate);
-                s.setHours(0,0,0,0);
-                filteredMovs = filteredMovs.filter(m => new Date(m.date) >= s);
+                filteredCons = filteredCons.filter(c => new Date(c.date) >= s);
             }
             if (summaryEndDate) {
                 const e = new Date(summaryEndDate);
-                e.setHours(23,59,59,999);
-                filteredMovs = filteredMovs.filter(m => new Date(m.date) <= e);
+                filteredCons = filteredCons.filter(c => new Date(c.date) <= e);
             }
         }
 
         const totals = {};
-        filteredMovs.forEach(m => {
-            const name = m.inventory_item_name;
+        filteredCons.forEach(c => {
+            const name = c.inventory_item_name;
             if (!totals[name]) {
                 totals[name] = { 
                     name, 
                     amount: 0, 
-                    unit: m.inventory_item_unit, 
-                    category: m.inventory_item_category 
+                    unit: c.inventory_item_unit, 
+                    category: c.inventory_item_category 
                 };
             }
-            totals[name].amount += parseFloat(m.quantity);
+            totals[name].amount += parseFloat(c.quantity);
         });
 
         return Object.values(totals).filter(t => 
             t.name.toLowerCase().includes(summarySearch.toLowerCase())
         ).sort((a, b) => b.amount - a.amount);
-    }, [movements, summaryPeriod, summarySearch, summaryStartDate, summaryEndDate]);
+    }, [dailyConsumptions, summaryPeriod, summarySearch, summaryStartDate, summaryEndDate]);
 
     return (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
@@ -682,7 +677,7 @@ function Inventory() {
             <div className="admin-card">
                 <div className="accounting-header-main" style={{ marginBottom: '20px', flexDirection: 'column', alignItems: 'flex-start', gap: '15px' }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', width: '100%', alignItems: 'center' }}>
-                        <h2 style={{ margin: 0, fontSize: '1.2rem' }}>Historial de Consumo / Entradas</h2>
+                        <h2 style={{ margin: 0, fontSize: '1.2rem' }}>Historial: Compras y Ajustes</h2>
                     </div>
 
                     <div style={{ display: 'flex', gap: '15px', flexWrap: 'wrap', width: '100%', background: '#f8f9fa', padding: '12px', borderRadius: '8px', alignItems: 'center' }}>
