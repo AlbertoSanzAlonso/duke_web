@@ -141,7 +141,7 @@ const Dashboard = () => {
                     }}
                 >
                     <div className="stat-icon-box icon-gray">
-                        <Utensils size={24} color={data.kitchenReady > 0 ? 'var(--admin-primary)' : ''} />
+                        <Utensils size={24} color={data.kitchenReady > 0 ? 'var(--admin-primary)' : 'inherit'} />
                     </div>
                     <div className="stat-content">
                         <div className="stat-label">Estado Cocina</div>
