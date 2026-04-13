@@ -37,15 +37,21 @@ export const exportToPDF = (data, columns, fileName, title, summary = null) => {
     doc.setFontSize(10);
     doc.text(`Fecha de exportación: ${new Date().toLocaleString('es-AR')}`, 14, 38);
 
+    let currentY = 46;
     if (summary) {
-        doc.setFontSize(12);
+        doc.setFontSize(11);
         doc.setTextColor(0, 0, 0);
-        doc.text(`${summary.label}: ${summary.value}`, 14, 46);
+        const summaryItems = Array.isArray(summary) ? summary : [summary];
+        summaryItems.forEach(item => {
+            doc.text(`${item.label}: ${item.value}`, 14, currentY);
+            currentY += 7;
+        });
+        currentY += 3; // Space before table
     }
 
     // Table
     autoTable(doc, {
-        startY: summary ? 52 : 44,
+        startY: currentY,
         head: [columns.map(col => col.header)],
         body: data.map(item => columns.map(col => {
             const val = item[col.dataKey];

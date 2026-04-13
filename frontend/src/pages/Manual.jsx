@@ -23,7 +23,8 @@ import {
   Mail,
   ClipboardList,
   Settings,
-  HelpCircle
+  HelpCircle,
+  Truck
 } from 'lucide-react';
 import './Manual.css';
 
@@ -249,139 +250,71 @@ const Manual = () => {
     }
   ];
 
+  const productWorkflowSteps = [
+    {
+      title: '1. Inventariado de Almacén',
+      desc: 'Creación de insumos base en el inventario. Define la unidad de medida y pack (ej: Cajas de queso, 40 unidades por caja) y carga el stock inicial disponible.',
+      icon: <Package size={24} />,
+      color: '#2ecc71'
+    },
+    {
+      title: '2. Definición de Recetas',
+      desc: 'Asocia los insumos a tus Productos del catálogo. Especifica qué y cuánto consume cada plato (ej: Burger Duke = 2u queso + 0.3kg carne).',
+      icon: <ClipboardList size={24} />,
+      color: '#3498db'
+    },
+    {
+      title: '3. Publicación en Carta',
+      desc: 'Elige qué productos del catálogo quieres vender online, asígnales un precio y mantenlos activos para que aparezcan en la web del cliente.',
+      icon: <LayoutDashboard size={24} />,
+      color: '#e67e22'
+    },
+    {
+      title: '4. Recepción de Pedido',
+      desc: 'Cuando un cliente pide desde la web o el TPV, el pedido entra instantáneamente en Cocina ("En Cocción") y queda registrado en el TPV como pendiente.',
+      icon: <Smartphone size={24} />,
+      color: '#e74c3c'
+    },
+    {
+      title: '5. Cocción y Despacho',
+      desc: 'Cocina marca como "Listo" al terminar. Desde el TPV o Cocina se marca como "Recogido", indicando que el producto salió hacia el cliente.',
+      icon: <ChefHat size={24} />,
+      color: '#27ae60'
+    },
+    {
+      title: '6. Deducción Automática',
+      desc: 'Al marcarse como cobrado en el TPV, el sistema descuenta automáticamente la materia prima del inventario según la receta definida.',
+      icon: <TrendingUp size={24} />,
+      color: '#9b59b6'
+    },
+    {
+      title: '7. Reposición de Stock',
+      desc: 'Registra la compra en "Pedidos al Proveedor". El stock se sumará solo. Puedes crear materiales nuevos desde allí si no existen.',
+      icon: <Truck size={24} />,
+      color: '#16a085'
+    },
+    {
+      title: '8. Auditoría y Gastos',
+      desc: 'Consulta el historial de ventas en "Pedidos Clientes" y los gastos operativos en "Contabilidad" para un balance financiero total.',
+      icon: <TrendingUp size={24} />,
+      color: '#2c3e50'
+    }
+  ];
+
   const faqs = [
     { 
       q: '¿Cómo gestiono los permisos de mi equipo?', 
       a: 'Asigna roles específicos para cada función en el local.',
-      longDesc: 'Desde Configuración > Personal, puedes editar cada usuario y asignarle un Nivel de Acceso: 1. SUPERUSER (Acceso total), 2. TPV (Solo ventas), 3. COCINA (Solo monitor), 4. CONTABILIDAD (Solo finanzas). Esto protege la información sensible y evita que empleados toquen configuraciones críticas.',
+      longDesc: 'Desde Configuración > Personal, puedes editar cada usuario y asignarle un Nivel de Acceso específico.',
       example: 'Un cajero nuevo solo necesita el rol "TPV". Así podrá cobrar, pero no podrá ver los balances de ganancias del mes.',
       linkTo: 'configuracion'
     },
     { 
-      q: '¿Cómo personalizo mi perfil?', 
-      a: 'Cambia tu avatar, correo y contraseña en segundos.',
-      longDesc: 'En la esquina superior derecha de cualquier pantalla verás tu nombre y avatar. Al pulsar allí se despliega el Menú de Usuario. Puedes subir una foto personalizada, cambiar tu correo electrónico de acceso y actualizar tu contraseña de seguridad.',
-      example: 'Pulsa sobre tu nombre arriba a la derecha, elige "Mi Perfil" y sube una foto tuya para que el staff te reconozca en los logs de auditoría.',
-      linkTo: 'admin'
-    },
-    { 
-      q: '¿Cómo funcionan las Promociones y Banners?', 
-      a: 'Programa ofertas automáticas por día de la semana.',
-      longDesc: 'En el módulo de Promociones puedes crear ofertas y asignarles días específicos (ej: Martes y Jueves). En la web del cliente, estas promos aparecerán resaltadas en la parte superior. Si una promo no tiene el día actual marcado, desaparecerá automáticamente de la vista del público.',
-      example: 'Creas una "Promo Amigos" con 20% OFF solo para los viernes. El viernes a las 00:00 el sistema la publica sola y el sábado a las 00:00 la quita sin que hagas nada.',
-      linkTo: 'asistente'
-    },
-    { 
-      q: '¿Cómo afecta el Horario al cliente?', 
-      a: 'Control total sobre cuándo se pueden recibir pedidos web.',
-      longDesc: 'Si el local está fuera de horario (ej: son las 4 AM) o has marcado el día como "Cerrado" en Configuración, la web pública desactivará automáticamente el botón de "Realizar Pedido". El cliente podrá ver la carta, pero verá un aviso indicando que el local está cerrado y a qué hora vuelve a abrir.',
-      example: 'Si cierras por reformas un miércoles, marca ese día como "Cerrado" en Horarios. Los clientes verán "Local Cerrado por el Momento" en lugar del carrito de compras.',
-      linkTo: 'configuracion'
-    },
-    { 
-      q: '¿Cómo se calcula exactamente el precio de envío?', 
+      q: '¿Cómo se calcula el precio de envío?', 
       a: 'Transparencia total basada en GPS y tarifas por KM.',
-      longDesc: 'El sistema usa la fórmula: [Precio Base] + ([Distancia en KM] * [Precio por KM]). IMPORTANTE: Duke Burger aplica un redondeo automático al siguiente múltiplo de $100 para evitar complicaciones con el cambio (ej: si el cálculo da $1.420, el sistema cobrará $1.500).',
-      example: 'Base: $1000, Plus/KM: $200, Distancia: 3km. Cálculo: 1000 + (3 * 200) = $1.600. El cliente verá este desglose antes de confirmar su pedido.',
+      longDesc: 'El sistema usa la fórmula: [Precio Base] + ([Distancia en KM] * [Precio por KM]), redondeando al siguiente múltiplo de $100.',
+      example: 'Base: $1000, Plus/KM: $200, Distancia: 3km. Total: $1.600.',
       linkTo: 'configuracion'
-    },
-    { 
-      q: '¿Qué pasa si modifico un pedido ya realizado?', 
-      a: 'Sincronización instantánea del ticket digital del cliente.',
-      longDesc: 'Si un cliente llama para añadir algo o cambiar un gusto, puedes editar el pedido desde el Panel. Al guardar los cambios, el "Ticket Digital" (el link que le enviaste por WhatsApp) se actualiza al instante. El cliente siempre verá la versión final real sin necesidad de que le mandes un enlace nuevo.',
-      example: 'El cliente olvidó pedir una gaseosa. La añades desde Pedidos Clientes, y cuando él refresque su link de WhatsApp, ya verá la gaseosa sumada al total.',
-      linkTo: 'pedidos'
-    },
-    { 
-      q: '¿Qué hacer ante un error en Cocina?', 
-      a: 'Gestión de platos equivocados o pedidos que deben repetirse.',
-      longDesc: 'Si la cocina se confunde, puedes buscar el pedido y cambiar su estado de "Listo" a "En Cocción" nuevamente para que vuelva a aparecer resaltado. Si el pedido debe anularse por completo por falta de insumos, usa el botón "Cancelar"; esto devolverá los productos al stock para que no haya descuadres en el inventario.',
-      example: 'El cocinero hizo una burger con cebolla por error. Marcas el pedido como "En Cocción" de nuevo para que sepa que debe repetirla prioritariamente.',
-      linkTo: 'cocina'
-    },
-    { 
-      q: '¿Flujo de Pedido Web (Online)?', 
-      a: 'Descubre cómo viaja un pedido desde la web hasta la cocina.',
-      longDesc: 'Cuando un cliente pide desde la web: 1. El pedido llega al Panel de Gestión (Sonido de alerta) y al TPV. 2. Se envía automáticamente al Monitor de Cocina. 3. Los administradores pueden imprimir el ticket y coordinar el delivery.',
-      example: 'Un cliente pide una Burger Duke desde San Juan Centro. El TPV suena, tú lo ves y a los 2 segundos el cocinero ya tiene la comanda en su pantalla.',
-      linkTo: 'pedidos'
-    },
-    { 
-      q: '¿Flujo de Pedido en Local (TPV)?', 
-      a: 'Optimiza la atención presencial usando el Punto de Venta.',
-      longDesc: 'Para pedidos en persona: 1. El cajero marca los productos en el TPV. 2. Al confirmar, el pedido aparece instantáneamente en el Monitor de Cocina. 3. Se genera un ticket físico o digital que se puede enviar por WhatsApp al cliente.',
-      example: 'Llega un cliente al mostrador. Seleccionas "2 Pachatas", pulsas "Cobrar" y envías el ticket por WhatsApp al cliente para que tenga su comprobante digital.',
-      linkTo: 'tpv'
-    },
-    { 
-      q: '¿Cómo funcionan las notificaciones (TPV, WhatsApp, Cocina)?', 
-      a: 'Sincronización total en tiempo real para evitar retrasos.',
-      longDesc: 'El sistema utiliza tecnología SSE para comunicación instantánea. Cuando entra un pedido web, se dispara una notificación sonora en el Panel y aparece en el listado del TPV. Al mismo tiempo, el Monitor de Cocina recibe el comanda sin intervención humana. Si el cliente solicita ticket por WhatsApp, el TPV abre un link directo con el mensaje pre-armado.',
-      example: 'Estás en el TPV y oyes un timbre. Es un pedido web. No tienes que refrescar, ya está ahí. El cocinero grita "¡Nuevo pedido!", porque ya le salió en su monitor.',
-      linkTo: 'admin'
-    },
-    { 
-      q: '¿Cómo cambio el horario?', 
-      a: 'Ajusta la disponibilidad semanal desde el Panel de Administración.',
-      longDesc: 'Para modificar los horarios de atención que ven tus clientes, dirígete a la sección de Configuración y pulsa en la pestaña de Horarios. Podrás definir la hora de apertura y cierre para cada día de la semana. Los cambios se guardan al instante y afectan a la posibilidad de realizar pedidos online.',
-      example: 'Si es feriado y abren más tarde, vas a Configuración > Horarios y cambias el lunes de 20:00 a 22:00. Al guardar, ningún cliente podrá pedir antes de las 22:00.',
-      linkTo: 'configuracion'
-    },
-    { 
-      q: '¿Cómo cambio las promos?', 
-      a: 'Gestiona banners y ofertas activas en el módulo de Promociones.',
-      longDesc: 'Las promociones se gestionan desde su propio módulo en el panel lateral. Puedes crear nuevas ofertas, asignarles una imagen atractiva y, lo más importante, decidir en qué días de la semana deben aparecer publicadas de forma automática.',
-      example: 'Quieres un "2x1 los Miércoles". Creas la promo, marcas "Miércoles" y el sistema la publicará sola todos los miércoles sin que tengas que hacer nada.',
-      linkTo: 'asistente'
-    },
-    { 
-      q: '¿Cómo cambio las imágenes de la galería?', 
-      a: 'Sube y reordena fotos del local desde Configuración.',
-      longDesc: 'Las fotos del carrusel principal de la web se gestionan en Configuración > Galería. Puedes subir nuevas capturas y usar el icono de las flechas para reordenarlas arrastrando cada card. Esto permite destacar las imágenes que prefieras que el cliente vea primero.',
-      example: 'Has tomado una foto increíble de una nueva hamburguesa. La subes a la Galería y la arrastras a la primera posición para que sea lo primero que vean los clientes.',
-      linkTo: 'configuracion'
-    },
-    { 
-      q: '¿Cómo añado/quito/modifico artículos?', 
-      a: 'Usa Inventario para insumos o Productos para el catálogo general.',
-      longDesc: 'Dependiendo de lo que quieras modificar: si es un insumo (como "Carne" o "Pan"), usa el módulo de Inventario. Si es un producto final que vendes (como "Burger Duke"), usa el módulo de Productos para editar su descripción o stock base.',
-      example: 'Te quedaste sin "Cheddar". Entras a Inventario, buscas "Cheddar" y pones el stock en 0. Si el sistema detecta stock 0, avisará en las alertas del Dashboard.',
-      linkTo: 'inventario'
-    },
-    { 
-      q: '¿Cómo creo un nuevo usuario?', 
-      a: 'Administra el personal desde Configuración > Personal.',
-      longDesc: 'Para dar de alta a un nuevo empleado, ve a Configuración y entra en la pestaña de Personal. Pulsa en "+ Nuevo Usuario", introduce sus datos y asígnale los permisos necesarios según su función en el local (Cajero, Cocinero, Administrador).',
-      example: 'Contratas a un nuevo cocinero. Le creas un usuario con rol "Cocinero" para que solo pueda ver el Monitor de Cocina y no las finanzas.',
-      linkTo: 'usuarios'
-    },
-    { 
-      q: '¿Cómo manejo tickets?', 
-      a: 'Usa el TPV para generar tickets y cobrarlos en mostrador.',
-      longDesc: 'El TPV (Punto de Venta) es el centro de operaciones diario. Desde allí generas los pedidos locales, imprimes tickets y gestionas las cuentas pendientes que aún no han sido cobradas.',
-      example: 'Un cliente habitual pide lo de siempre. Buscas su nombre, seleccionas el pedido y pulsas "Cobrar". El historial financiero se actualiza al instante.',
-      linkTo: 'tpv'
-    },
-    { 
-      q: '¿Cómo manejo pedidos al proveedor?', 
-      a: 'Registra compras en el módulo de Pedidos del Inventario.',
-      longDesc: 'Cuando compras mercancía, regístrala como un "Pedido a Proveedor" dentro del módulo de Inventario. Al marcarlo como "Recibido", el sistema sumará automáticamente esas cantidades al stock disponible de cada insumo.',
-      example: 'Llega el camión de las gaseosas. Vas a Inventario, pulsas "+ Pedido", marcas las cantidades recibidas y el stock se suma automáticamente al total.',
-      linkTo: 'inventario'
-    },
-    { 
-      q: '¿Cómo manejo pedidos de clientes?', 
-      a: 'Consulta y procesa ventas online en Gestión de Pedidos.',
-      longDesc: 'Todos los pedidos que los clientes realizan desde su móvil llegan a "Gestión de Pedidos". Desde aquí puedes controlar el flujo: ver el ticket, enviarlo a cocina y marcarlo como entregado una vez que el cliente lo recibe.',
-      example: 'Un cliente cancela su pedido por teléfono. Buscas el pedido por su ID en el listado y pulsas el botón rojo "Cancelar" para devolver los productos al stock.',
-      linkTo: 'pedidos'
-    },
-    { 
-      q: '¿Cómo funciona la carta?', 
-      a: 'Publica productos y asigna precios en Menú Online.',
-      longDesc: 'El catálogo de Productos es tu "almacén" de ítems, pero el "Menú Online" es tu "vitrina". Solo los productos que actives en el Menú Online con un precio asignado serán visibles para los clientes en la web.',
-      example: 'Quieres vender una hamburguesa edición limitada. La activas en el Menú Online, le pones precio de $9.500 y en 1 segundo ya aparece en la web de los clientes.',
-      linkTo: 'carta'
     }
   ];
 
@@ -402,35 +335,13 @@ const Manual = () => {
               <button className="close-btn" onClick={() => setSelectedFAQ(null)}><X size={24} /></button>
             </div>
             <div className="modal-content">
-              <div className="faq-detail-body">
-                <p className="faq-long-desc">{selectedFAQ.longDesc}</p>
-                
-                {selectedFAQ.example && (
-                  <div className="example-box faq-example">
-                    <strong>EJEMPLO PRÁCTICO:</strong>
-                    <p>{selectedFAQ.example}</p>
-                  </div>
-                )}
-
-                {selectedFAQ.linkTo && (
-                  <div className="faq-link-section">
-                    <p>Módulo relacionado:</p>
-                    <button 
-                      className="faq-link-btn" 
-                      onClick={() => {
-                        const target = modules.find(m => m.id === selectedFAQ.linkTo) || 
-                                     mainRoutes.find(r => r.id === selectedFAQ.linkTo);
-                        if (target) {
-                          setSelectedDetail(target);
-                          setSelectedFAQ(null);
-                        }
-                      }}
-                    >
-                      <ExternalLink size={18} /> Ver {selectedFAQ.linkTo.toUpperCase()}
-                    </button>
-                  </div>
-                )}
-              </div>
+              <p className="faq-long-desc">{selectedFAQ.longDesc}</p>
+              {selectedFAQ.example && (
+                <div className="example-box">
+                  <strong>EJEMPLO PRÁCTICO:</strong>
+                  <p>{selectedFAQ.example}</p>
+                </div>
+              )}
             </div>
           </div>
         </div>
@@ -451,96 +362,14 @@ const Manual = () => {
                 <div className="modal-image-box">
                   <div className={`image-wrapper ${isZoomed ? 'zoomed' : ''}`} onClick={() => setIsZoomed(!isZoomed)}>
                     <img src={drillDown ? drillDown.image : selectedDetail.image} alt="Capture" />
-                    {isZoomed && (
-                      <button className="zoom-close-btn" onClick={(e) => { e.stopPropagation(); setIsZoomed(false); }}>
-                        <X size={24} />
-                      </button>
-                    )}
-                    <div className="zoom-hint"><Maximize2 size={20} /> Click para ampliar</div>
                   </div>
-                  <div className="image-caption">Captura real: {drillDown ? drillDown.title : (selectedDetail.name || selectedDetail.title)}</div>
                 </div>
               )}
               <div className="modal-info">
                 <p className="detail-desc">{drillDown ? drillDown.longDesc : (selectedDetail.desc || selectedDetail.description)}</p>
-                
-                {!drillDown && selectedDetail.dashboardElements && (
-                  <div className="dashboard-structure">
-                    <h3>Elementos del Panel (Click para ver detalle):</h3>
-                    <div className="insight-drill-grid">
-                      {selectedDetail.dashboardElements.map((el, i) => (
-                        <button key={i} className="insight-btn" onClick={() => setDrillDown(el)}>
-                          <div className="btn-icon">{el.icon}</div>
-                          <div className="btn-text">
-                            <strong>{el.title}</strong>
-                            <span>{el.desc}</span>
-                          </div>
-                          <Maximize2 size={16} className="drill-icon" />
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-                )}
-
-                {!drillDown && selectedDetail.subSections && (
-                  <div className="sub-sections-list">
-                    {selectedDetail.subSections.map((sub, idx) => (
-                      <div key={idx} className="manual-sub-section">
-                        <h4>{sub.title}</h4>
-                        <p>{sub.desc}</p>
-                        {sub.image && (
-                          <div className="sub-image-wrapper" onClick={() => { setSelectedDetail({...selectedDetail, image: sub.image}); setIsZoomed(true); }}>
-                            <img src={sub.image} alt={sub.title} />
-                            <div className="zoom-hint"><Maximize2 size={16} /> Ver en grande</div>
-                          </div>
-                        )}
-                      </div>
-                    ))}
-                  </div>
-                )}
-
-                {selectedDetail.id === 'pedidos' && (
-                  <div className="extra-info-grid">
-                    <div className="info-item"><Search size={16} /> <strong>Buscador:</strong> Filtra por ID o Nombre.</div>
-                    <div className="info-item"><Filter size={16} /> <strong>Filtros:</strong> Por fecha y estado.</div>
-                    <div className="info-item"><Download size={16} /> <strong>Excel/PDF:</strong> Botones de descarga rápida.</div>
-                  </div>
-                )}
-
-                {selectedDetail.id === 'inventario' && (
-                  <div className="extra-info-grid">
-                    <div className="info-item"><PlusCircle size={16} /> <strong>Registro:</strong> Formulario rápido superior.</div>
-                    <div className="info-item"><AlertTriangle size={16} /> <strong>Stock Mínimo:</strong> Alertas visuales automáticas.</div>
-                    <div className="info-item"><Package size={16} /> <strong>Unidades:</strong> Soporta Kg, Unidades, Cajas, etc.</div>
-                  </div>
-                )}
-
-                {selectedDetail.id === 'finanzas' && (
-                  <div className="extra-info-grid">
-                    <div className="info-item"><TrendingUp size={16} /> <strong>Beneficio:</strong> Cálculo neto automático.</div>
-                    <div className="info-item"><PlusCircle size={16} /> <strong>Movimientos:</strong> Registro manual de gastos.</div>
-                    <div className="info-item"><Clock size={16} /> <strong>Periodos:</strong> Diario, Semanal y Mensual.</div>
-                  </div>
-                )}
-
-                {selectedDetail.example && (
-                  <div className="example-box">
-                    <strong><Sparkles size={16} /> EJEMPLO DE USO:</strong>
-                    <p>{selectedDetail.example}</p>
-                  </div>
-                )}
-
-                <h3 style={{ marginTop: '20px' }}>Funcionalidades Clave:</h3>
                 <ul className="detail-features">
-                  {(selectedDetail.features || selectedDetail.items).map((f, i) => (
-                    <li key={i}>{f}</li>
-                  ))}
+                  {selectedDetail.features?.map((f, i) => <li key={i}>{f}</li>)}
                 </ul>
-                {selectedDetail.url && (
-                  <a href={selectedDetail.url} target="_blank" rel="noreferrer" className="jump-to-url">
-                    IR AL MÓDULO EN VIVO <ExternalLink size={16} />
-                  </a>
-                )}
               </div>
             </div>
           </div>
@@ -549,10 +378,7 @@ const Manual = () => {
 
       <nav className="manual-nav">
         <div className="nav-container">
-          <button onClick={() => navigate(-1)} className="back-btn">
-            <ArrowLeft size={20} />
-            <span>VOLVER</span>
-          </button>
+          <button onClick={() => navigate(-1)} className="back-btn"><ArrowLeft size={20} /> VOLVER</button>
           <img src="/brand/duke burger 2 negativo.png" alt="Duke Logo" className="manual-logo" />
         </div>
       </nav>
@@ -560,26 +386,22 @@ const Manual = () => {
       <header className="manual-hero">
         <div className="container">
           <h1 className="hero-title">CENTRO DE <span>AYUDA</span></h1>
-          <p className="hero-subtitle">Haz clic en cualquier sección para ver la explicación completa a pantalla completa.</p>
         </div>
       </header>
 
       <main className="manual-content">
         <div className="container">
-          <section className="urls-section">
-            <h2 className="section-title">Mapa de Rutas Principales</h2>
-            <div className="route-map-grid">
-              {mainRoutes.map(route => (
-                <div key={route.id} className="route-card" onClick={() => setSelectedDetail(route)}>
-                  <h3>{route.name}</h3>
-                  <div className="route-meta">
-                    <span className="route-badge role-badge">{route.role}</span>
-                    <a href={route.url} target="_blank" rel="noreferrer" className="url-link" onClick={e => e.stopPropagation()}>
-                      <code className="url-code">{route.url}</code>
-                    </a>
+          <section className="workflow-section">
+            <h2 className="section-title">Flujo de Trabajo: Vida del Producto</h2>
+            <div className="workflow-timeline">
+              {productWorkflowSteps.map((step, index) => (
+                <div key={index} className="workflow-step-card" style={{"--step-color": step.color}}>
+                  <div className="step-number">{index + 1}</div>
+                  <div className="step-icon-box">{step.icon}</div>
+                  <div className="step-content">
+                    <h3>{step.title}</h3>
+                    <p>{step.desc}</p>
                   </div>
-                  <p>{route.desc}</p>
-                  <div className="route-action-hint">Ver Guía Completa →</div>
                 </div>
               ))}
             </div>
@@ -591,57 +413,16 @@ const Manual = () => {
               {modules.map(module => (
                 <div key={module.id} className="manual-card" style={{"--accent": module.color}} onClick={() => setSelectedDetail(module)}>
                   <div className="card-header">
-                    <div className="icon-wrapper">
-                      {module.icon}
-                    </div>
+                    <div className="icon-wrapper">{module.icon}</div>
                     <h3>{module.title}</h3>
                   </div>
                   <p className="card-desc">{module.description}</p>
-                  <div className="card-action-hint">Explorar funcionalidades</div>
                 </div>
               ))}
             </div>
           </section>
-
-          <section className="faq-section">
-            <h2 className="section-title">Preguntas Frecuentes (FAQ)</h2>
-            <div className="faq-column">
-              {faqs.map((faq, i) => (
-                <button key={i} className="faq-row-btn" onClick={() => setSelectedFAQ(faq)}>
-                  <div className="faq-row-content">
-                    <HelpCircle size={18} className="faq-icon" />
-                    <span className="faq-q">{faq.q}</span>
-                  </div>
-                  <Maximize2 size={16} className="faq-arrow" />
-                </button>
-              ))}
-            </div>
-          </section>
-
-          <section className="setup-section">
-            <div className="setup-grid">
-              <div className="setup-card">
-                <h3><Clock size={24} /> Horarios y Delivery</h3>
-                <p>Configura la disponibilidad del local y los costos de envío por kilómetro desde el panel de Administración.</p>
-              </div>
-              <div className="setup-card">
-                <h3><Smartphone size={24} /> Web Pública</h3>
-                <p>Sincronización instantánea de stock y precios para tus clientes.</p>
-              </div>
-              <div className="setup-card">
-                <h3><Sparkles size={24} /> Duke Assist</h3>
-                <p>Consulta cualquier duda operativa mediante el asistente inteligente.</p>
-              </div>
-            </div>
-          </section>
         </div>
       </main>
-
-      <footer className="manual-footer">
-        <div className="container">
-          <p>&copy; {new Date().getFullYear()} DUKE BURGER - SISTEMA DE GESTIÓN HEARTBEAT</p>
-        </div>
-      </footer>
     </div>
   );
 };

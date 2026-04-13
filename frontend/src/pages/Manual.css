@@ -1000,3 +1000,100 @@
         height: 40px;
     }
 }
+
+/* Product Workflow Timeline */
+.workflow-section {
+    margin: 6rem 0;
+    padding: 4rem 2rem;
+    background: rgba(255, 255, 255, 0.02);
+    border-radius: 40px;
+    border: 1px solid #111;
+}
+
+.workflow-timeline {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 2.5rem;
+    margin-top: 3rem;
+}
+
+.workflow-step-card {
+    background: #0d0d0d;
+    border: 1px solid #222;
+    padding: 2.5rem;
+    border-radius: 25px;
+    position: relative;
+    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    border-top: 4px solid var(--step-color);
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+
+.workflow-step-card:hover {
+    transform: translateY(-10px);
+    border-color: var(--step-color);
+    box-shadow: 0 20px 40px rgba(0,0,0,0.5);
+    background: #111;
+}
+
+.step-number {
+    position: absolute;
+    top: -18px;
+    right: 25px;
+    background: var(--step-color);
+    color: #fff;
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 900;
+    font-size: 1.2rem;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+    z-index: 2;
+}
+
+.step-icon-box {
+    margin-bottom: 1.5rem;
+    color: var(--step-color);
+    background: rgba(255,255,255,0.03);
+    width: 60px;
+    height: 60px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 15px;
+}
+
+.step-content h3 {
+    font-size: 1.4rem;
+    margin-bottom: 1rem;
+    color: #fff;
+    font-family: var(--font-heading);
+    letter-spacing: 0.5px;
+}
+
+.step-content p {
+    color: #888;
+    line-height: 1.6;
+    font-size: 0.95rem;
+    margin: 0;
+}
+
+@media (max-width: 768px) {
+    .workflow-section {
+        padding: 3rem 1.5rem;
+        margin: 4rem 0;
+    }
+    
+    .workflow-timeline {
+        grid-template-columns: 1fr;
+        gap: 2rem;
+    }
+    
+    .workflow-step-card {
+        padding: 2rem;
+    }
+}

@@ -362,14 +362,34 @@ const SupplierOrders = () => {
     };
 
     const handleExportExcel = () => {
-        const data = filteredOrders.map(o => ({
+        // Main orders data
+        const ordersData = filteredOrders.map(o => ({
             ID: o.id,
             Fecha: new Date(o.date).toLocaleString('es-AR'),
             Proveedor: o.supplier_name,
-            Total: `$${parseFloat(o.total_cost).toLocaleString('es-AR')}`,
+            Total: parseFloat(o.total_cost),
             Productos: o.items?.length || 0
         }));
-        exportToExcel(data, `Compras_Proveedores_${new Date().toISOString().split('T')[0]}`);
+
+        // Accumulated summary data
+        const summaryData = accumulatedPurchases.map(item => ({
+            ID: 'RESUMEN',
+            Fecha: 'ACUMULADO',
+            Proveedor: item.name,
+            Total: item.total_cost,
+            Productos: item.quantity
+        }));
+
+        const combinedData = [
+            { ID: 'HISTORIAL DE COMPRAS', Fecha: '', Proveedor: '', Total: '', Productos: '' },
+            ...ordersData,
+            { ID: '', Fecha: '', Proveedor: '', Total: '', Productos: '' },
+            { ID: 'RESUMEN POR MATERIAL', Fecha: '', Proveedor: '', Total: 'TOTAL INVERTIDO', Productos: 'CANTIDAD TOTAL' },
+            ...summaryData,
+            { ID: '', Fecha: '', Proveedor: 'TOTAL PERIODO', Total: accumulatedPurchases.reduce((acc, i) => acc + i.total_cost, 0), Productos: '' }
+        ];
+
+        exportToExcel(combinedData, `Compras_Proveedores_${new Date().toISOString().split('T')[0]}`);
     };
 
     const handleExportPDF = () => {
@@ -380,6 +400,7 @@ const SupplierOrders = () => {
             { header: 'Total', dataKey: 'Total' },
             { header: 'Productos', dataKey: 'Productos' }
         ];
+        
         const data = filteredOrders.map(o => ({
             ID: `#${o.id}`,
             Fecha: new Date(o.date).toLocaleString('es-AR'),
@@ -387,8 +408,22 @@ const SupplierOrders = () => {
             Total: `$${parseFloat(o.total_cost).toLocaleString('es-AR')}`,
             Productos: o.items?.length || 0
         }));
+
         const total = filteredOrders.reduce((acc, o) => acc + parseFloat(o.total_cost), 0);
-        exportToPDF(data, columns, `Compras_Proveedores_${new Date().toISOString().split('T')[0]}`, 'Reporte de Compras a Proveedores', { label: 'Inversión Total', value: `$${total.toLocaleString('es-AR')}` });
+        
+        // Prepare summary for PDF
+        const summary = [
+            { label: 'INVERSIÓN TOTAL', value: `$${total.toLocaleString('es-AR')}` },
+            { label: 'CANTIDAD DE PEDIDOS', value: filteredOrders.length.toString() }
+        ];
+
+        // Let's also add the top entries from accumulated purchases to the PDF if possible
+        // using the extra space
+        accumulatedPurchases.slice(0, 5).forEach(item => {
+            summary.push({ label: `Top: ${item.name}`, value: `$${item.total_cost.toLocaleString('es-AR')}` });
+        });
+
+        exportToPDF(data, columns, `Compras_Proveedores_${new Date().toISOString().split('T')[0]}`, 'Reporte de Compras a Proveedores', summary);
     };
 
     if (loading) return <LoadingScreen />;

@@ -409,18 +409,24 @@ const Accounting = () => {
         }
         return pages;
     };
-
     const handleExportExcel = () => {
-        const data = mergedItems.map(item => ({
-            Fecha: new Date(item.date).toLocaleString('es-AR'),
-            Tipo: item.typeIndicator === 'sal' ? 'Ingreso' : 'Egreso',
-            Descripción: item.typeIndicator === 'exp' ? item.description : 
-                        item.typeIndicator === 'ord' ? item.supplier_name : 
-                        `Venta #${item.id}`,
-            Categoría: item.typeIndicator === 'exp' ? item.category : 
-                       item.typeIndicator === 'ord' ? 'Materia Prima' : 'Venta TPV',
-            Importe: parseFloat(item.total_amount || item.total_cost || item.amount) * (item.typeIndicator === 'sal' ? 1 : -1)
-        }));
+        const data = [
+            { Fecha: 'RESUMEN', Tipo: '---', Descripción: '---', Categoría: '---', Importe: 0 },
+            { Fecha: 'INGRESOS TOTALES', Tipo: 'INGRESOS', Descripción: 'SUMA TOTAL', Categoría: '---', Importe: totalIncome },
+            { Fecha: 'GASTOS TOTALES', Tipo: 'EGRESOS', Descripción: 'SUMA TOTAL', Categoría: '---', Importe: totalExpenses * -1 },
+            { Fecha: 'BENEFICIO NETO', Tipo: 'NETO', Descripción: 'Diferencia', Categoría: '---', Importe: balance },
+            { Fecha: '---', Tipo: '---', Descripción: '---', Categoría: '---', Importe: 0 },
+            ...mergedItems.map(item => ({
+                Fecha: new Date(item.date).toLocaleString('es-AR'),
+                Tipo: item.typeIndicator === 'sal' ? 'Ingreso' : 'Egreso',
+                Descripción: item.typeIndicator === 'exp' ? item.description : 
+                            item.typeIndicator === 'ord' ? item.supplier_name : 
+                            `Venta #${item.id}`,
+                Categoría: item.typeIndicator === 'exp' ? item.category : 
+                           item.typeIndicator === 'ord' ? 'Materia Prima' : 'Venta TPV',
+                Importe: parseFloat(item.total_amount || item.total_cost || item.amount) * (item.typeIndicator === 'sal' ? 1 : -1)
+            }))
+        ];
         exportToExcel(data, `Contabilidad_${new Date().toISOString().split('T')[0]}`);
     };
 
@@ -442,7 +448,14 @@ const Accounting = () => {
                  item.typeIndicator === 'ord' ? 'Materia Prima' : 'Venta TPV',
             Imp: `${item.typeIndicator === 'sal' ? '+' : '-'}$${Math.round(parseFloat(item.total_amount || item.total_cost || item.amount)).toLocaleString('es-AR')}`
         }));
-        exportToPDF(data, columns, `Contabilidad_${new Date().toISOString().split('T')[0]}`, 'Reporte Contable Duke', { label: 'Balance de Periodo', value: `$${Math.round(balance).toLocaleString('es-AR')}` });
+        
+        const summary = [
+            { label: 'INGRESOS TOTALES (+)', value: `$${Math.round(totalIncome).toLocaleString('es-AR')}` },
+            { label: 'GASTOS TOTALES (-)', value: `$${Math.round(totalExpenses).toLocaleString('es-AR')}` },
+            { label: 'BENEFICIO NETO', value: `$${Math.round(balance).toLocaleString('es-AR')}` }
+        ];
+
+        exportToPDF(data, columns, `Contabilidad_${new Date().toISOString().split('T')[0]}`, 'Reporte Contable Duke', summary);
     };
 
     if (loading) return <LoadingScreen />;
@@ -458,6 +471,32 @@ const Accounting = () => {
                     </div>
                     <div className="header-controls">
                         <div className="controls-row">
+                            <div className="date-quick-filters" style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                                <input 
+                                    type="date" 
+                                    value={startDate} 
+                                    onChange={e => setStartDate(e.target.value)}
+                                    className="header-date-input"
+                                    title="Fecha desde"
+                                />
+                                <span style={{ color: '#888' }}>-</span>
+                                <input 
+                                    type="date" 
+                                    value={endDate} 
+                                    onChange={e => setEndDate(e.target.value)}
+                                    className="header-date-input"
+                                    title="Fecha hasta"
+                                />
+                                {(startDate || endDate) && (
+                                    <button 
+                                        onClick={() => { setStartDate(''); setEndDate(''); }}
+                                        style={{ background: 'none', border: 'none', color: '#f03e3e', cursor: 'pointer', padding: '5px' }}
+                                        title="Limpiar fechas"
+                                    >
+                                        <X size={16} />
+                                    </button>
+                                )}
+                            </div>
                             <div className="search-bar" style={{ position: 'relative', flex: 1 }}>
                                 <Search size={18} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: '#888' }} />
                                 <input 
@@ -474,7 +513,7 @@ const Accounting = () => {
                                 style={{ padding: '10px', borderRadius: '10px', border: '1px solid #ddd', background: showAdvancedFilters ? '#333' : '#fff', color: showAdvancedFilters ? '#ffffff' : '#333', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '5px' }}
                             >
                                 <Filter size={18} style={{ color: showAdvancedFilters ? '#ffffff' : '#333' }} />
-                                <span className="hide-mobile" style={{ color: showAdvancedFilters ? '#ffffff' : '#333' }}>Filtros</span>
+                                <span className="hide-mobile" style={{ color: showAdvancedFilters ? '#ffffff' : '#333' }}>Categorías</span>
                             </button>
                             <div className="export-actions">
                                 <button onClick={handleExportExcel} className="export-btn excel" title="Excel"><Download size={18} /></button>

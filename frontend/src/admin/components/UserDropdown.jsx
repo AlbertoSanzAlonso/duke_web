@@ -39,12 +39,22 @@ const UserDropdown = () => {
     const avatarUrl = me?.profile?.avatar;
     const displayName = me?.first_name ? `${me.first_name} ${me.last_name || ''}` : (me?.username || 'Admin');
 
+    // Fix for profile image URL if it's relative
+    const getFullAvatarUrl = (url) => {
+        if (!url) return null;
+        if (url.startsWith('http')) return url;
+        const baseUrl = import.meta.env.VITE_API_URL?.replace(/\/api\/?$/, '') || '';
+        return `${baseUrl}${url}`;
+    };
+
+    const finalAvatarUrl = getFullAvatarUrl(avatarUrl);
+
     return (
         <div className="user-dropdown-container" ref={dropdownRef}>
             <button className="user-profile-btn" onClick={() => setIsOpen(!isOpen)}>
                 <div className="avatar-wrapper">
-                    {avatarUrl ? (
-                        <img src={avatarUrl} alt="User" className="user-avatar-img" />
+                    {finalAvatarUrl ? (
+                        <img src={finalAvatarUrl} alt="User" className="user-avatar-img" />
                     ) : (
                         <img src="/brand/duke burger 2 negativo.png" alt="Duke Logo" className="user-avatar-img" style={{ padding: '4px', objectFit: 'contain' }} />
                     )}
