@@ -111,6 +111,7 @@ const Dashboard = () => {
             <div className="dash-header">
                 <h1 className="dash-title">
                     DUKE <span style={{ color: 'var(--admin-primary)' }}>INSIGHTS</span>
+                    <span style={{ fontSize: '0.6rem', opacity: 0.3, marginLeft: '10px' }}>v1.1</span>
                 </h1>
                 <p className="dash-subtitle">Estado operativo de la sucursal en tiempo real</p>
             </div>
@@ -140,7 +141,7 @@ const Dashboard = () => {
                     }}
                 >
                     <div className="stat-icon-box icon-gray">
-                        <History size={24} color={data.kitchenReady > 0 ? 'var(--admin-primary)' : ''} />
+                        <Utensils size={24} color={data.kitchenReady > 0 ? 'var(--admin-primary)' : ''} />
                     </div>
                     <div className="stat-content">
                         <div className="stat-label">Estado Cocina</div>
@@ -269,20 +270,20 @@ const Dashboard = () => {
                                 </div>
 
                                 <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                                    {data.kitchenReadyList.map(order => (
+                                    {Array.isArray(data?.kitchenReadyList) && data.kitchenReadyList.map(order => (
                                         <div key={order.id} onClick={() => setActionOrder({...order, currentStatus: 'READY'})} style={{ display: 'flex', justifyContent: 'space-between', padding: '12px', background: '#f8f9fa', borderRadius: '10px', borderLeft: '4px solid #40c057', cursor: 'pointer' }}>
                                             <span><strong>#{order.id}</strong> {order.customer}</span>
-                                            <span style={{ fontSize: '0.7rem', color: '#666' }}>✅ {new Date(order.updated_at).toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit', timeZone: 'America/Argentina/Buenos_Aires' })}</span>
+                                            <span style={{ fontSize: '0.7rem', color: '#666' }}>✅ {order.updated_at ? new Date(order.updated_at).toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit', timeZone: 'America/Argentina/Buenos_Aires' }) : '--:--'}</span>
                                         </div>
                                     ))}
                                 </div>
 
                                 <h4 style={{ textTransform: 'uppercase', fontSize: '0.75rem', color: '#e03131', marginTop: '20px' }}>En Cocción</h4>
                                 <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                                    {data.kitchenPendingList.map(order => (
+                                    {Array.isArray(data?.kitchenPendingList) && data.kitchenPendingList.map(order => (
                                         <div key={order.id} onClick={() => setActionOrder({...order, currentStatus: 'PENDING'})} style={{ display: 'flex', justifyContent: 'space-between', padding: '12px', background: '#f8f9fa', borderRadius: '10px', borderLeft: '4px solid #f03e3e', cursor: 'pointer' }}>
                                             <span><strong>#{order.id}</strong> {order.customer}</span>
-                                            <span style={{ fontSize: '0.7rem', color: '#e03131' }}>⏲️ {new Date(order.created_at).toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit', timeZone: 'America/Argentina/Buenos_Aires' })}</span>
+                                            <span style={{ fontSize: '0.7rem', color: '#e03131' }}>⏲️ {order.created_at ? new Date(order.created_at).toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit', timeZone: 'America/Argentina/Buenos_Aires' }) : '--:--'}</span>
                                         </div>
                                     ))}
                                 </div>
@@ -331,10 +332,10 @@ const Dashboard = () => {
                             <button onClick={() => setShowDeliveredModal(false)} style={{ background: 'none', border: 'none', fontSize: '1.5rem', cursor: 'pointer' }}>×</button>
                         </div>
                         <div style={{ flex: 1, overflowY: 'auto', padding: '20px' }}>
-                            {data.kitchenDeliveredList.map(order => (
+                            {Array.isArray(data?.kitchenDeliveredList) && data.kitchenDeliveredList.map(order => (
                                 <div key={order.id} onClick={() => setActionOrder({...order, currentStatus: 'COLLECTED'})} style={{ display: 'flex', justifyContent: 'space-between', padding: '12px', background: '#f8f9fa', borderRadius: '10px', marginBottom: '8px', cursor: 'pointer' }}>
                                     <span><strong>#{order.id}</strong> {order.customer}</span>
-                                    <span style={{ fontSize: '0.7rem' }}>⏲️ {new Date(order.created_at).toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit', timeZone: 'America/Argentina/Buenos_Aires' })}</span>
+                                    <span style={{ fontSize: '0.7rem' }}>⏲️ {order.created_at ? new Date(order.created_at).toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit', timeZone: 'America/Argentina/Buenos_Aires' }) : '--:--'}</span>
                                 </div>
                             ))}
                         </div>

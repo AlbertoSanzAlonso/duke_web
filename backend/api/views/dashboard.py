@@ -54,6 +54,17 @@ def DashboardInsightsView(request):
         many=True
     ).data
     
+    # Kitchen detail lists
+    kitchen_pending_list = sales_qs.filter(is_prepared=False).values('id', 'customer_name', 'created_at', 'total_amount')
+    kitchen_ready_list = sales_qs.filter(is_prepared=True, is_delivered=False).values('id', 'customer_name', 'updated_at', 'total_amount')
+    kitchen_delivered_list = sales_qs.filter(is_delivered=True).values('id', 'customer_name', 'updated_at', 'total_amount')
+    kitchen_delivered_count = sales_qs.filter(is_delivered=True).count()
+
+    # Rename customer_name to customer for frontend compatibility
+    pending_list = [{'id': x['id'], 'customer': x['customer_name'] or 'Cliente', 'created_at': x['created_at'], 'total': float(x['total_amount'])} for x in kitchen_pending_list]
+    ready_list = [{'id': x['id'], 'customer': x['customer_name'] or 'Cliente', 'updated_at': x['updated_at'], 'total': float(x['total_amount'])} for x in kitchen_ready_list]
+    delivered_list = [{'id': x['id'], 'customer': x['customer_name'] or 'Cliente', 'updated_at': x['updated_at'], 'total': float(x['total_amount'])} for x in kitchen_delivered_list]
+
     return Response({
         'profile': user_data,
         'today_sales': {
@@ -61,8 +72,15 @@ def DashboardInsightsView(request):
             'pending': pending_today,
             'completed': completed_today,
             'kitchen_pending': kitchen_pending,
-            'kitchen_ready': kitchen_ready
+            'kitchen_ready': kitchen_ready,
+            'kitchen_delivered': kitchen_delivered_count,
+            'kitchen_pending_list': pending_list,
+            'kitchen_ready_list': ready_list,
+            'kitchen_delivered_list': delivered_list
         },
+        'active_promos': MenuEntry.objects.filter(is_available=True).count(), # Added missing key
+        'today_hours': OpeningHourSerializer(OpeningHour.objects.filter(day=now.isoweekday()).first()).data, # Added missing key
+        'unread_mail': get_unread_mail_count(), # Added missing key
         'monthly_stats': {
             'total_sales': float(monthly_sales),
             'total_expenses': float(monthly_expenses),
