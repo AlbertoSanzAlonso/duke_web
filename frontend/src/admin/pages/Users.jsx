@@ -182,7 +182,7 @@ const Users = () => {
         <div className="admin-content users-page-content">
             {toast && <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />}
             
-            <header className="page-header users-mobile-header">
+            <header className="page-header users-header-flex">
                 <div>
                     <h2 style={{ display: 'flex', alignItems: 'center', gap: '12px', margin: 0 }}>
                         <Shield size={32} color="#f03e3e" /> Gestión de Usuarios
@@ -214,13 +214,13 @@ const Users = () => {
 
             <div className="admin-card">
                 <div className="search-bar" style={{ position: 'relative', width: '100%', maxWidth: '400px', marginBottom: '20px' }}>
-                    <Search size={18} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: '#888' }} />
+                    <Search size={20} style={{ position: 'absolute', left: '15px', top: '50%', transform: 'translateY(-50%)', color: '#888' }} />
                     <input 
                         type="text" 
                         placeholder="Buscar por nombre o email..." 
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
-                        style={{ padding: '15px 15px 15px 60px', borderRadius: '12px', border: '1px solid #ddd', width: '100%', fontSize: '1rem', background: '#fff' }}
+                        style={{ padding: '15px 15px 15px 55px', borderRadius: '12px', border: '1px solid #ddd', width: '100%', fontSize: '1rem', background: '#fff' }}
                     />
                 </div>
 
@@ -517,8 +517,17 @@ const Users = () => {
                     padding: 15px; /* Margin for the modal itself */
                 }
 
+                .users-header-flex {
+                    display: flex;
+                    justify-content: space-between;
+                    align-items: center;
+                    margin-bottom: 25px;
+                }
+
                 @media (max-width: 768px) {
-                    .users-mobile-header {
+                    .users-header-flex {
+                        flex-direction: column;
+                        align-items: flex-start;
                         margin-bottom: 20px !important;
                         padding: 0 5px;
                     }

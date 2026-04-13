@@ -487,7 +487,7 @@ const SupplierOrders = () => {
                                 placeholder="Buscar proveedor o ID..." 
                                 defaultValue={searchTerm}
                                 onChange={(e) => startTransition(() => setSearchTerm(e.target.value))}
-                                style={{ padding: '12px 15px 12px 40px', borderRadius: '10px', border: '1px solid #ddd', width: '100%', fontSize: '0.9rem' }}
+                                style={{ padding: '12px 15px 12px 55px', borderRadius: '10px', border: '1px solid #ddd', width: '100%', fontSize: '0.9rem' }}
                             />
                         </div>
                         
