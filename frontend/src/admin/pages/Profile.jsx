@@ -31,7 +31,18 @@ const Profile = () => {
             setFirstName(data.first_name || '');
             setLastName(data.last_name || '');
             setEmail(data.email || '');
-            setPreviewUrl(data.profile?.avatar);
+            
+            // Helper to get full URL
+            const getFullAvatarUrl = (url) => {
+                if (!url) return null;
+                if (url.startsWith('http') || url.startsWith('blob:')) return url;
+                let baseUrl = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+                baseUrl = baseUrl.replace(/\/api\/?$/, '').replace(/\/$/, '');
+                const formattedUrl = url.startsWith('/') ? url : `/${url}`;
+                return `${baseUrl}${formattedUrl}`;
+            };
+            
+            setPreviewUrl(getFullAvatarUrl(data.profile?.avatar));
         } catch (error) {
             setToast({ message: "Error al cargar datos", type: 'error' });
         } finally {
@@ -97,7 +108,17 @@ const Profile = () => {
                                 background: '#f8f9fa', border: '4px solid #fff', boxShadow: '0 4px 15px rgba(0,0,0,0.1)'
                             }}>
                                 {previewUrl ? (
-                                    <img src={previewUrl} alt="Avatar" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                                    <img 
+                                        src={previewUrl} 
+                                        alt="Avatar" 
+                                        style={{ width: '100%', height: '100%', objectFit: 'cover' }} 
+                                        onError={(e) => {
+                                            e.target.onerror = null;
+                                            e.target.src = "/brand/duke burger 2 negativo.png";
+                                            e.target.style.objectFit = 'contain';
+                                            e.target.style.padding = '15px';
+                                        }}
+                                    />
                                 ) : (
                                     <img src="/brand/duke burger 2 negativo.png" alt="Default Avatar" style={{ width: '100%', height: '100%', objectFit: 'contain', padding: '15px' }} />
                                 )}

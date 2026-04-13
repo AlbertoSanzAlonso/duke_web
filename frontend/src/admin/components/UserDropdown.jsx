@@ -20,13 +20,23 @@ const UserDropdown = () => {
         return () => document.removeEventListener('mousedown', handleClickOutside);
     }, []);
 
+    const getFullAvatarUrl = (url) => {
+        if (!url) return null;
+        if (url.startsWith('http') || url.startsWith('blob:')) return url;
+        
+        let baseUrl = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+        baseUrl = baseUrl.replace(/\/api\/?$/, '').replace(/\/$/, '');
+        
+        const formattedUrl = url.startsWith('/') ? url : `/${url}`;
+        return `${baseUrl}${formattedUrl}`;
+    };
+
     const loadMe = async () => {
         try {
             const data = await fetchMe();
             setMe(data);
         } catch (error) {
             console.error("Error loading profile:", error);
-            // Fallback for UI visibility during error
             setMe({ username: 'Admin', profile: {} });
         }
     };
@@ -36,25 +46,25 @@ const UserDropdown = () => {
         navigate('/login');
     };
 
-    const avatarUrl = me?.profile?.avatar;
+    const finalAvatarUrl = getFullAvatarUrl(me?.profile?.avatar);
     const displayName = me?.first_name ? `${me.first_name} ${me.last_name || ''}` : (me?.username || 'Admin');
-
-    // Fix for profile image URL if it's relative
-    const getFullAvatarUrl = (url) => {
-        if (!url) return null;
-        if (url.startsWith('http')) return url;
-        const baseUrl = import.meta.env.VITE_API_URL?.replace(/\/api\/?$/, '') || '';
-        return `${baseUrl}${url}`;
-    };
-
-    const finalAvatarUrl = getFullAvatarUrl(avatarUrl);
 
     return (
         <div className="user-dropdown-container" ref={dropdownRef}>
             <button className="user-profile-btn" onClick={() => setIsOpen(!isOpen)}>
                 <div className="avatar-wrapper">
                     {finalAvatarUrl ? (
-                        <img src={finalAvatarUrl} alt="User" className="user-avatar-img" />
+                        <img 
+                            src={finalAvatarUrl} 
+                            alt="User" 
+                            className="user-avatar-img" 
+                            onError={(e) => {
+                                e.target.onerror = null;
+                                e.target.src = "/brand/duke burger 2 negativo.png";
+                                e.target.style.objectFit = 'contain';
+                                e.target.style.padding = '4px';
+                            }}
+                        />
                     ) : (
                         <img src="/brand/duke burger 2 negativo.png" alt="Duke Logo" className="user-avatar-img" style={{ padding: '4px', objectFit: 'contain' }} />
                     )}
