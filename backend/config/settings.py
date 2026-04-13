@@ -170,7 +170,7 @@ if USE_S3:
     AWS_S3_ADDRESSING_STYLE = 'path'
     AWS_S3_SIGNATURE_VERSION = 's3v4'
     AWS_S3_FILE_OVERWRITE = False
-    AWS_QUERYSTRING_AUTH = False # Generar URLs públicas permanentes (evita expiración de firmas)
+    AWS_QUERYSTRING_AUTH = True # Generar URLs firmadas para permitir acceso a buckets privados en Supabase/S3
     
     # Si usamos firmado de URLs, mejor no forzar un dominio custom que oculte los parámetros de firma
     AWS_S3_CUSTOM_DOMAIN = None
