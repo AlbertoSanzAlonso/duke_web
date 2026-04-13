@@ -1097,3 +1097,61 @@
         padding: 2rem;
     }
 }
+
+.workflow-hero-btn {
+    margin: 2rem auto 0;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: #e31b23;
+    color: white;
+    border: none;
+    padding: 1.2rem 2.5rem;
+    border-radius: 50px;
+    font-weight: 900;
+    font-size: 1.1rem;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    box-shadow: 0 10px 30px rgba(227, 27, 35, 0.3);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.workflow-hero-btn:hover {
+    transform: translateY(-5px) scale(1.05);
+    background: #ff1f29;
+    box-shadow: 0 15px 40px rgba(227, 27, 35, 0.5);
+}
+
+.workflow-view-content {
+    background: radial-gradient(circle at center, #111 0%, #000 100%);
+    padding: 4rem 2rem !important;
+}
+
+.workflow-timeline.large {
+    max-width: 1400px;
+    margin: 0 auto;
+}
+
+.faq-section {
+    margin-top: 4rem;
+}
+
+.faq-item {
+    background: rgba(255, 255, 255, 0.03);
+    padding: 2rem;
+    border-radius: 20px;
+    border-left: 4px solid #e31b23;
+    margin-bottom: 1.5rem;
+}
+
+.faq-item h3 {
+    color: #fff;
+    margin-bottom: 0.8rem;
+    font-size: 1.2rem;
+}
+
+.faq-item p {
+    color: #aaa;
+    line-height: 1.6;
+}
