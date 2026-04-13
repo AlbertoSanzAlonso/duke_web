@@ -46,7 +46,7 @@ const UserDropdown = () => {
                     {avatarUrl ? (
                         <img src={avatarUrl} alt="User" className="user-avatar-img" />
                     ) : (
-                        <img src="/brand/logo_negro.png" alt="Duke Logo" className="user-avatar-img" style={{ padding: '4px' }} />
+                        <img src="/brand/duke burger 2 negativo.png" alt="Duke Logo" className="user-avatar-img" style={{ padding: '4px', objectFit: 'contain' }} />
                     )}
                 </div>
                 <div className="user-info-text">

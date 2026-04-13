@@ -99,7 +99,7 @@ const Profile = () => {
                                 {previewUrl ? (
                                     <img src={previewUrl} alt="Avatar" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                                 ) : (
-                                    <img src="/brand/logo_negro.png" alt="Default Avatar" style={{ width: '100%', height: '100%', objectFit: 'contain', padding: '15px' }} />
+                                    <img src="/brand/duke burger 2 negativo.png" alt="Default Avatar" style={{ width: '100%', height: '100%', objectFit: 'contain', padding: '15px' }} />
                                 )}
                             </div>
                             <label style={{ 

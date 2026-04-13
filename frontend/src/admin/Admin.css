@@ -376,7 +376,7 @@ body, .admin-container, .admin-main, .admin-content {
 /* Configuracion Tabs Layout Responsivo */
 .settings-tabs {
     display: grid;
-    grid-template-columns: repeat(5, 1fr);
+    grid-template-columns: repeat(4, 1fr);
     gap: 12px;
     width: 100%;
     margin-bottom: 20px;
