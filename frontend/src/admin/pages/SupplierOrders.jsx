@@ -250,6 +250,29 @@ const SupplierOrders = () => {
         return filtered.sort((a, b) => new Date(b.date) - new Date(a.date));
     }, [orders, searchTerm, startDate, endDate, viewMode]);
 
+    const accumulatedPurchases = useMemo(() => {
+        const summary = {};
+        filteredOrders.forEach(order => {
+            if (order.items) {
+                order.items.forEach(item => {
+                    const itemName = item.item_name;
+                    if (!summary[itemName]) {
+                        summary[itemName] = {
+                            name: itemName,
+                            quantity: 0,
+                            total_cost: 0,
+                            orders_count: 0
+                        };
+                    }
+                    summary[itemName].quantity += parseFloat(item.quantity || 0);
+                    summary[itemName].total_cost += parseFloat(item.cost || 0);
+                    summary[itemName].orders_count += 1;
+                });
+            }
+        });
+        return Object.values(summary).sort((a, b) => b.total_cost - a.total_cost);
+    }, [filteredOrders]);
+
     const paginatedOrders = useMemo(() => {
         const start = (currentPage - 1) * itemsPerPage;
         return filteredOrders.slice(start, start + itemsPerPage);
@@ -656,6 +679,61 @@ const SupplierOrders = () => {
                         </button>
                     </div>
                 )}
+            </div>
+
+            {/* Resumen de Compras Acumulado */}
+            <div className="admin-card">
+                <div className="accounting-header-main" style={{ marginBottom: '20px' }}>
+                    <h3 style={{ display: 'flex', alignItems: 'center', gap: '8px', margin: 0 }}>
+                        <ShoppingCart size={20} color="#f03e3e" /> Resumen de Inversión (Acumulados)
+                    </h3>
+                </div>
+
+                <div className="accounting-table-container">
+                    <table className="accounting-table">
+                        <thead>
+                            <tr>
+                                <th>Artículo</th>
+                                <th className="txt-right">Cantidad Comprada</th>
+                                <th className="txt-right">Total Invertido</th>
+                                <th className="txt-right">Cant. Pedidos</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {accumulatedPurchases.length === 0 ? (
+                                <tr>
+                                    <td colSpan="4" style={{ textAlign: 'center', padding: '30px', color: '#999' }}>
+                                        No hay datos de compra para el periodo seleccionado.
+                                    </td>
+                                </tr>
+                            ) : (
+                                <>
+                                    {accumulatedPurchases.map((item, idx) => (
+                                        <tr key={idx}>
+                                            <td data-label="Artículo"><strong>{item.name}</strong></td>
+                                            <td className="txt-right" data-label="Cantidad">
+                                                {parseFloat(item.quantity).toLocaleString('es-AR')}
+                                            </td>
+                                            <td className="txt-right negative" data-label="Inversión">
+                                                -${item.total_cost.toLocaleString('es-AR')}
+                                            </td>
+                                            <td className="txt-right" data-label="Pedidos">
+                                                {item.orders_count}
+                                            </td>
+                                        </tr>
+                                    ))}
+                                    <tr style={{ background: '#f8f9fa', fontWeight: '900' }}>
+                                        <td>TOTAL PERIODO</td>
+                                        <td colSpan="2" className="txt-right" style={{ fontSize: '1.2rem', color: '#f03e3e' }}>
+                                            -${accumulatedPurchases.reduce((acc, i) => acc + i.total_cost, 0).toLocaleString('es-AR')}
+                                        </td>
+                                        <td></td>
+                                    </tr>
+                                </>
+                            )}
+                        </tbody>
+                    </table>
+                </div>
             </div>
 
             {/* Modal de Nueva Compra */}
