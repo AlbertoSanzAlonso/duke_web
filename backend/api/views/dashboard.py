@@ -65,6 +65,29 @@ def DashboardInsightsView(request):
     ready_list = [{'id': x['id'], 'customer': x['customer_name'] or 'Cliente', 'updated_at': x['updated_at'], 'total': float(x['total_amount'])} for x in kitchen_ready_list]
     delivered_list = [{'id': x['id'], 'customer': x['customer_name'] or 'Cliente', 'updated_at': x['updated_at'], 'total': float(x['total_amount'])} for x in kitchen_delivered_list]
 
+    # Fetch mail settings from GlobalSettings
+    from ..models import GlobalSetting
+    imap_server = GlobalSetting.objects.filter(key='imap_server').first()
+    imap_user = GlobalSetting.objects.filter(key='imap_user').first()
+    imap_password = GlobalSetting.objects.filter(key='imap_password').first()
+    
+    unread_count = 0
+    if imap_server and imap_user and imap_password:
+        try:
+            unread_count = get_unread_mail_count(
+                imap_server.value, 
+                imap_user.value, 
+                imap_password.value
+            )
+        except:
+            unread_count = -1
+    else:
+        unread_count = -1 # Mail not configured
+
+    # Current day hours
+    today_hour_obj = OpeningHour.objects.filter(day=now.isoweekday()).first()
+    today_hours_data = OpeningHourSerializer(today_hour_obj).data if today_hour_obj else None
+
     return Response({
         'profile': user_data,
         'today_sales': {
@@ -78,9 +101,9 @@ def DashboardInsightsView(request):
             'kitchen_ready_list': ready_list,
             'kitchen_delivered_list': delivered_list
         },
-        'active_promos': MenuEntry.objects.filter(is_available=True).count(), # Added missing key
-        'today_hours': OpeningHourSerializer(OpeningHour.objects.filter(day=now.isoweekday()).first()).data, # Added missing key
-        'unread_mail': get_unread_mail_count(), # Added missing key
+        'active_promos': MenuEntry.objects.filter(is_available=True).count(),
+        'today_hours': today_hours_data,
+        'unread_mail': unread_count,
         'monthly_stats': {
             'total_sales': float(monthly_sales),
             'total_expenses': float(monthly_expenses),
@@ -129,8 +152,6 @@ def AIHelpView(request):
         critical_items = InventoryItem.objects.filter(quantity__lte=F('min_stock'))
         stock_critical_info = ", ".join([i.name for i in critical_items]) if critical_items.exists() else "Todo OK"
 
-        # (Additional summary logic would go here, omitting for brevity of migration but keeping core structure)
-        
         live_context = (
             f"ESTADO DEL SISTEMA ({now.strftime('%d/%m/%y %H:%M')}):\n"
             f"- Ventas Hoy: ${total_sales}\n"
