@@ -241,22 +241,19 @@ const Dashboard = () => {
                     <History size={20} color="var(--admin-primary)" />
                     <h3 style={{ margin: 0 }}>Historial de Actividad Reciente</h3>
                 </div>
-                <div className="recent-history-list" style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                <div className="recent-history-list">
                     {data.recentHistory.length > 0 ? data.recentHistory.map(log => (
-                        <div key={log.id} style={{ 
-                            display: 'flex', justifyContent: 'space-between', alignItems: 'center', 
-                            padding: '12px 15px', background: '#f8f9fa', borderRadius: '10px',
-                            borderLeft: '4px solid #ddd', fontSize: '0.85rem'
-                        }}>
-                            <div>
-                                <span style={{ fontWeight: 'bold', color: '#333' }}>{log.user}</span>
-                                <span style={{ margin: '0 8px', color: '#888' }}>•</span>
-                                <span style={{ color: 'var(--admin-primary)', fontWeight: 'bold' }}>{log.module}</span>
-                                <span style={{ margin: '0 8px', color: '#888' }}>:</span>
-                                <span>{log.description}</span>
+                        <div key={log.id} className="history-item">
+                            <div className="history-main">
+                                <div className="history-header">
+                                    <span className="history-user">{log.user.split('@')[0]}</span>
+                                    <span className="history-dot">•</span>
+                                    <span className="history-module">{log.module}</span>
+                                </div>
+                                <div className="history-desc">{log.description}</div>
                             </div>
-                            <div style={{ color: '#aaa', fontSize: '0.75rem' }}>
-                                {new Date(log.timestamp).toLocaleString('es-AR', { hour: '2-digit', minute: '2-digit', day: '2-digit', month: '2-digit' })}
+                            <div className="history-time">
+                                {new Date(log.timestamp).toLocaleString('es-AR', { hour: '2-digit', minute: '2-digit', day: '2-digit', month: '12' === '12' ? 'numeric' : '2-digit' })}
                             </div>
                         </div>
                     )) : (
