@@ -461,10 +461,39 @@
 
 /* Footer del Ticket */
 .ticket-footer {
-    padding: 1rem 1.5rem;
+    padding: 1rem 1.2rem;
     border-top: 2px dashed #eee;
     background: #fafafa;
     border-radius: 0 0 12px 12px;
+}
+
+@media (max-width: 768px) {
+    .ticket-footer {
+        padding: 0.8rem !important;
+    }
+}
+
+.discount-type-select {
+    width: 100px;
+    padding: 0 8px;
+    border-radius: 8px;
+    border: 1px solid #dde2e5;
+    font-size: 0.75rem;
+    font-weight: bold;
+    background: #fff;
+    height: 32px;
+    cursor: pointer;
+}
+
+.discount-value-input {
+    flex: 1;
+    min-width: 0;
+    padding: 0 12px;
+    border-radius: 8px;
+    border: 1px solid #dde2e5;
+    font-size: 0.85rem;
+    font-weight: bold;
+    height: 32px;
 }
 
 .total-row {

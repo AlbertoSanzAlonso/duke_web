@@ -843,7 +843,7 @@ const Sales = () => {
                                 )}
                             </div>
 
-                            <div className="ticket-footer" style={{ padding: '8px 12px', borderTop: '2px solid #333', background: '#fff' }}>
+                            <div className="ticket-footer" style={{ borderTop: '2px solid #333', background: '#fff' }}>
                                 <div className="total-row" style={{ marginBottom: '0px', display: 'flex', justifyContent: 'space-between', fontSize: '0.72rem' }}>
                                     <span style={{ color: '#999', fontWeight: 'bold' }}>SUBTOTAL:</span>
                                     <span style={{ color: '#666' }}>${totalOriginalPrice.toLocaleString('es-AR')}</span>
@@ -861,7 +861,7 @@ const Sales = () => {
                                         <select 
                                             value={discountType} 
                                             onChange={e => setDiscountType(e.target.value)}
-                                            style={{ padding: '0 8px', borderRadius: '8px', border: '1px solid #dde2e5', fontSize: '0.75rem', fontWeight: 'bold', background: '#fff', height: '32px', cursor: 'pointer' }}
+                                            className="discount-type-select"
                                         >
                                             <option value="fixed">$ DCTO</option>
                                             <option value="percent">% DCTO</option>
@@ -871,8 +871,7 @@ const Sales = () => {
                                             placeholder="Valor"
                                             value={discountValue || ''}
                                             onChange={e => setDiscountValue(e.target.value)}
-                                            className="no-arrows-input"
-                                            style={{ flex: 1, padding: '0 12px', borderRadius: '8px', border: '1px solid #dde2e5', fontSize: '0.85rem', fontWeight: 'bold', height: '32px' }}
+                                            className="no-arrows-input discount-value-input"
                                         />
                                     </div>
                                 </div>
