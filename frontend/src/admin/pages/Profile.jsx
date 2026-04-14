@@ -32,7 +32,8 @@ const Profile = () => {
             setLastName(data.last_name || '');
             setEmail(data.email || '');
             
-            setPreviewUrl(getMediaUrl(data.profile?.avatar));
+            const avatarUrl = data.profile?.avatar ? getMediaUrl(data.profile.avatar) : null;
+            setPreviewUrl(avatarUrl ? `${avatarUrl}?t=${new Date().getTime()}` : null);
         } catch (error) {
             setToast({ message: "Error al cargar datos", type: 'error' });
         } finally {
@@ -51,7 +52,7 @@ const Profile = () => {
     const handleSubmit = async (e) => {
         e.preventDefault();
         
-        if (password && password !== confirmPassword) {
+        if (password.trim() !== '' && password !== confirmPassword) {
             setToast({ message: "Las contraseñas no coinciden", type: 'error' });
             return;
         }
@@ -62,13 +63,14 @@ const Profile = () => {
             formData.append('first_name', firstName);
             formData.append('last_name', lastName);
             formData.append('email', email);
-            if (password) formData.append('password', password);
+            if (password.trim() !== '') formData.append('password', password);
             if (avatarFile) formData.append('avatar', avatarFile);
 
             await updateMe(formData);
             setToast({ message: "Perfil actualizado correctamente", type: 'success' });
             setPassword('');
             setConfirmPassword('');
+            setAvatarFile(null);
             loadData();
         } catch (error) {
             setToast({ message: error.message || "Error al actualizar", type: 'error' });

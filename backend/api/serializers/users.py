@@ -14,29 +14,38 @@ class UserProfileSerializer(serializers.ModelSerializer):
 
 class UserSerializer(serializers.ModelSerializer):
     profile = UserProfileSerializer(required=False)
-    password = serializers.CharField(write_only=True, required=False)
+    password = serializers.CharField(write_only=True, required=False, allow_blank=True)
+    avatar = serializers.ImageField(write_only=True, required=False)
 
     class Meta:
         model = User
-        fields = ['id', 'username', 'email', 'first_name', 'last_name', 'profile', 'password', 'is_staff', 'is_active', 'date_joined', 'is_superuser']
+        fields = ['id', 'username', 'email', 'first_name', 'last_name', 'profile', 'password', 'avatar', 'is_staff', 'is_active', 'date_joined', 'is_superuser']
 
     def create(self, validated_data):
         profile_data = validated_data.pop('profile', {})
         password = validated_data.pop('password', None)
+        avatar = validated_data.pop('avatar', None)
         user = User.objects.create(**validated_data)
         if password:
             user.set_password(password)
             user.save()
-        UserProfile.objects.create(user=user, **profile_data)
+        profile = UserProfile.objects.create(user=user, **profile_data)
+        if avatar:
+            profile.avatar = avatar
+            profile.save()
         return user
 
     def update(self, instance, validated_data):
         profile_data = validated_data.pop('profile', {})
         password = validated_data.pop('password', None)
+        avatar = validated_data.pop('avatar', None)
         
         profile, _ = UserProfile.objects.get_or_create(user=instance)
         for attr, value in profile_data.items():
             setattr(profile, attr, value)
+        
+        if avatar:
+            profile.avatar = avatar
         profile.save()
 
         if password:
