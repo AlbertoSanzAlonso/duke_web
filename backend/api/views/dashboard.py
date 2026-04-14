@@ -98,7 +98,10 @@ def DashboardInsightsView(request):
     safe_sales = to_float(monthly_sales)
     safe_expenses = to_float(monthly_expenses)
 
-    # Recent Audit Logs
+    # Recent Audit Logs Cleanup (7 days)
+    ActionLog.objects.filter(timestamp__lt=now - timedelta(days=7)).delete()
+
+    # Fetch last 10 logs after cleanup
     recent_logs = ActionLog.objects.select_related('user').all()[:10]
     logs_data = []
     for log in recent_logs:

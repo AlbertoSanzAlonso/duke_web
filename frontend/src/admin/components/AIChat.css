@@ -25,7 +25,7 @@
     display: flex !important;
     align-items: center !important;
     justify-content: center !important;
-    gap: 10px;
+    gap: 0;
     cursor: pointer !important;
     box-shadow: 0 4px 15px rgba(0,0,0,0.3) !important;
     transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) !important;
@@ -47,6 +47,7 @@
     width: 160px; /* Expansión para texto */
     padding: 12px 20px;
     justify-content: flex-start !important;
+    gap: 10px;
     background: #000 !important;
     border-color: #f03e3e !important; /* var(--admin-primary) fallback */
     transform: translateY(-3px) !important;
