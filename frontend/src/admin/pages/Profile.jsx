@@ -17,6 +17,8 @@ const Profile = () => {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
+    const [isPasswordDirty, setIsPasswordDirty] = useState(false);
+    const [isConfirmDirty, setIsConfirmDirty] = useState(false);
     const [avatarFile, setAvatarFile] = useState(null);
     const [previewUrl, setPreviewUrl] = useState(null);
 
@@ -52,9 +54,13 @@ const Profile = () => {
     const handleSubmit = async (e) => {
         e.preventDefault();
         
-        if (password.trim() !== '' && password !== confirmPassword) {
-            setToast({ message: "Las contraseñas no coinciden", type: 'error' });
-            return;
+        // Only validate if user manually touched the password fields
+        // This prevents browser auto-fill from triggering coincidence errors
+        if ((isPasswordDirty || isConfirmDirty) && password.trim() !== '') {
+            if (password !== confirmPassword) {
+                setToast({ message: "Las contraseñas no coinciden", type: 'error' });
+                return;
+            }
         }
 
         setIsSaving(true);
@@ -63,13 +69,17 @@ const Profile = () => {
             formData.append('first_name', firstName);
             formData.append('last_name', lastName);
             formData.append('email', email);
-            if (password.trim() !== '') formData.append('password', password);
+            if ((isPasswordDirty || isConfirmDirty) && password.trim() !== '') {
+                formData.append('password', password);
+            }
             if (avatarFile) formData.append('avatar', avatarFile);
 
             await updateMe(formData);
             setToast({ message: "Perfil actualizado correctamente", type: 'success' });
             setPassword('');
             setConfirmPassword('');
+            setIsPasswordDirty(false);
+            setIsConfirmDirty(false);
             setAvatarFile(null);
             loadData();
         } catch (error) {
@@ -173,8 +183,9 @@ const Profile = () => {
                                 <input 
                                     type="password" 
                                     value={password} 
-                                    onChange={e => setPassword(e.target.value)} 
+                                    onChange={e => { setPassword(e.target.value); setIsPasswordDirty(true); }} 
                                     placeholder="••••••••"
+                                    autoComplete="new-password"
                                     style={{ width: '100%', padding: '12px', borderRadius: '8px', border: '1px solid #ddd' }}
                                 />
                             </div>
@@ -183,8 +194,9 @@ const Profile = () => {
                                 <input 
                                     type="password" 
                                     value={confirmPassword} 
-                                    onChange={e => setConfirmPassword(e.target.value)} 
+                                    onChange={e => { setConfirmPassword(e.target.value); setIsConfirmDirty(true); }} 
                                     placeholder="••••••••"
+                                    autoComplete="new-password"
                                     style={{ width: '100%', padding: '12px', borderRadius: '8px', border: '1px solid #ddd' }}
                                 />
                             </div>
