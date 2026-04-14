@@ -707,14 +707,14 @@ const Sales = () => {
                                     value={customerName}
                                     onChange={e => setCustomerName(e.target.value)}
                                     className={!customerName && cart.length > 0 ? "input-required" : ""}
-                                    style={{ padding: '8px', fontSize: '0.8rem', height: '32px' }}
+                                    style={{ padding: '8px', fontSize: '0.8rem', height: '32px', width: '100%', boxSizing: 'border-box' }}
                                 />
                                 <input 
                                     type="text" 
                                     placeholder="Anotaciones (Opcional)" 
                                     value={saleNotes}
                                     onChange={e => setSaleNotes(e.target.value)}
-                                    style={{ padding: '8px', fontSize: '0.8rem', height: '32px' }}
+                                    style={{ padding: '8px', fontSize: '0.8rem', height: '32px', width: '100%', boxSizing: 'border-box' }}
                                 />
                                 <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', marginTop: '4px', padding: '6px', background: '#f8f9fa', borderRadius: '8px', border: '1px solid #eee' }}>
                                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
@@ -856,7 +856,7 @@ const Sales = () => {
                                     </div>
                                 )}
 
-                                <div className="discount-controls" style={{ background: '#f1f3f5', padding: '6px', borderRadius: '10px', marginBottom: '8px', border: '1px solid #eee' }}>
+                                <div className="discount-controls" style={{ background: '#f1f3f5', padding: '6px', borderRadius: '10px', marginBottom: '8px', border: '1px solid #eee', width: '100%', boxSizing: 'border-box' }}>
                                     <div style={{ display: 'flex', gap: '6px' }}>
                                         <select 
                                             value={discountType} 
