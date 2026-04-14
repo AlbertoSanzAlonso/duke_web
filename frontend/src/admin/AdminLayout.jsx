@@ -154,7 +154,7 @@ const AdminLayout = () => {
     { name: '1. Inventario', path: '/admin/inventario', icon: <Boxes size={20} />, perm: 'can_use_inventory' },
     { name: '2. Productos', path: '/admin/productos', icon: <Package size={20} />, perm: 'can_use_menu' },
     { name: '3. Carta', path: '/admin/carta', icon: <UtensilsCrossed size={20} />, perm: 'can_use_menu' },
-    { name: '4. Promos', path: '/admin/star', icon: <Star size={20} fill="#fcc419" color="#fcc419" />, perm: 'can_use_promos' },
+    { name: '4. Promos', path: '/admin/promos', icon: <Star size={20} fill="#fcc419" color="#fcc419" />, perm: 'can_use_promos' },
     
     { type: 'separator' },
     

@@ -23,7 +23,7 @@ class HasAccountingPermission(permissions.BasePermission):
 
 class HasMenuPermission(permissions.BasePermission):
     def has_permission(self, request, view):
-        return request.user.is_superuser or (hasattr(request.user, 'profile') and request.user.profile.can_use_menu)
+        return request.user.is_superuser or (hasattr(request.user, 'profile') and (request.user.profile.can_use_menu or request.user.profile.can_use_promos))
 
 class HasInventoryPermission(permissions.BasePermission):
     def has_permission(self, request, view):

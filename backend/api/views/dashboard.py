@@ -55,15 +55,21 @@ def DashboardInsightsView(request):
     ).data
     
     # Kitchen detail lists
-    kitchen_pending_list = sales_qs.filter(is_prepared=False).values('id', 'customer_name', 'created_at', 'total_amount')
+    kitchen_pending_list = sales_qs.filter(is_prepared=False).values('id', 'customer_name', 'date', 'total_amount')
     kitchen_ready_list = sales_qs.filter(is_prepared=True, is_delivered=False).values('id', 'customer_name', 'updated_at', 'total_amount')
     kitchen_delivered_list = sales_qs.filter(is_delivered=True).values('id', 'customer_name', 'updated_at', 'total_amount')
     kitchen_delivered_count = sales_qs.filter(is_delivered=True).count()
 
+    def to_float(val):
+        try:
+            return float(val) if val is not None else 0.0
+        except:
+            return 0.0
+
     # Rename customer_name to customer for frontend compatibility
-    pending_list = [{'id': x['id'], 'customer': x['customer_name'] or 'Cliente', 'created_at': x['created_at'], 'total': float(x['total_amount'])} for x in kitchen_pending_list]
-    ready_list = [{'id': x['id'], 'customer': x['customer_name'] or 'Cliente', 'updated_at': x['updated_at'], 'total': float(x['total_amount'])} for x in kitchen_ready_list]
-    delivered_list = [{'id': x['id'], 'customer': x['customer_name'] or 'Cliente', 'updated_at': x['updated_at'], 'total': float(x['total_amount'])} for x in kitchen_delivered_list]
+    pending_list = [{'id': x['id'], 'customer': x['customer_name'] or 'Cliente', 'created_at': x['date'], 'total': to_float(x['total_amount'])} for x in kitchen_pending_list]
+    ready_list = [{'id': x['id'], 'customer': x['customer_name'] or 'Cliente', 'updated_at': x['updated_at'], 'total': to_float(x['total_amount'])} for x in kitchen_ready_list]
+    delivered_list = [{'id': x['id'], 'customer': x['customer_name'] or 'Cliente', 'updated_at': x['updated_at'], 'total': to_float(x['total_amount'])} for x in kitchen_delivered_list]
 
     # Fetch mail settings from GlobalSettings
     from ..models import GlobalSetting
@@ -88,6 +94,23 @@ def DashboardInsightsView(request):
     today_hour_obj = OpeningHour.objects.filter(day=now.isoweekday()).first()
     today_hours_data = OpeningHourSerializer(today_hour_obj).data if today_hour_obj else None
 
+    # Stats safety
+    safe_sales = to_float(monthly_sales)
+    safe_expenses = to_float(monthly_expenses)
+
+    # Recent Audit Logs
+    recent_logs = ActionLog.objects.select_related('user').all()[:10]
+    logs_data = []
+    for log in recent_logs:
+        logs_data.append({
+            'id': log.id,
+            'user': log.user.username if log.user else 'Sistema',
+            'module': log.module,
+            'action': log.action_type,
+            'description': log.description,
+            'timestamp': log.timestamp
+        })
+
     return Response({
         'profile': user_data,
         'today_sales': {
@@ -105,11 +128,12 @@ def DashboardInsightsView(request):
         'today_hours': today_hours_data,
         'unread_mail': unread_count,
         'monthly_stats': {
-            'total_sales': float(monthly_sales),
-            'total_expenses': float(monthly_expenses),
-            'net': float(monthly_sales - monthly_expenses)
+            'total_sales': safe_sales,
+            'total_expenses': safe_expenses,
+            'net': safe_sales - safe_expenses
         },
-        'low_stock': low_stock
+        'low_stock': low_stock,
+        'recent_history': logs_data
     })
 
 @api_view(['POST'])

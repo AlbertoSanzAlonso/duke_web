@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { fetchDashboardInsights } from '../../services/api';
 import LoadingScreen from '../components/LoadingScreen';
-import { ShoppingBag, Star, Clock, AlertTriangle, Package, Mail, History, Settings as SettingsIcon, Plus, Utensils, HelpCircle } from 'lucide-react';
+import { ShoppingBag, Star, Clock, AlertTriangle, Package, Mail, History, Settings as SettingsIcon, Plus, UtensilsCrossed, HelpCircle } from 'lucide-react';
 import Toast from '../components/Toast';
 
 const Dashboard = () => {
@@ -21,7 +21,8 @@ const Dashboard = () => {
         todayHours: null,
         lowStockItems: [],
         unreadEmails: 0,
-        mailConfigured: true
+        mailConfigured: true,
+        recentHistory: []
     });
     const [profile, setProfile] = useState(null);
     const [toast, setToast] = useState(null);
@@ -49,7 +50,8 @@ const Dashboard = () => {
                 todayHours: insights.today_hours,
                 lowStockItems: insights.low_stock,
                 unreadEmails: insights.unread_mail,
-                mailConfigured: insights.unread_mail !== -1
+                mailConfigured: insights.unread_mail !== -1,
+                recentHistory: insights.recent_history || []
             });
         } catch (err) {
             console.error("Error loading dashboard:", err);
@@ -141,7 +143,7 @@ const Dashboard = () => {
                     }}
                 >
                     <div className="stat-icon-box icon-gray">
-                        <Utensils size={24} color={data.kitchenReady > 0 ? 'var(--admin-primary)' : 'inherit'} />
+                        <UtensilsCrossed size={24} color={data.kitchenReady > 0 ? '#f03e3e' : '#495057'} />
                     </div>
                     <div className="stat-content">
                         <div className="stat-label">Estado Cocina</div>
@@ -234,6 +236,35 @@ const Dashboard = () => {
                 </Link>
             </div>
 
+            <div className="admin-card" style={{ marginTop: '20px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '20px' }}>
+                    <History size={20} color="var(--admin-primary)" />
+                    <h3 style={{ margin: 0 }}>Historial de Actividad Reciente</h3>
+                </div>
+                <div className="recent-history-list" style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                    {data.recentHistory.length > 0 ? data.recentHistory.map(log => (
+                        <div key={log.id} style={{ 
+                            display: 'flex', justifyContent: 'space-between', alignItems: 'center', 
+                            padding: '12px 15px', background: '#f8f9fa', borderRadius: '10px',
+                            borderLeft: '4px solid #ddd', fontSize: '0.85rem'
+                        }}>
+                            <div>
+                                <span style={{ fontWeight: 'bold', color: '#333' }}>{log.user}</span>
+                                <span style={{ margin: '0 8px', color: '#888' }}>•</span>
+                                <span style={{ color: 'var(--admin-primary)', fontWeight: 'bold' }}>{log.module}</span>
+                                <span style={{ margin: '0 8px', color: '#888' }}>:</span>
+                                <span>{log.description}</span>
+                            </div>
+                            <div style={{ color: '#aaa', fontSize: '0.75rem' }}>
+                                {new Date(log.timestamp).toLocaleString('es-AR', { hour: '2-digit', minute: '2-digit', day: '2-digit', month: '2-digit' })}
+                            </div>
+                        </div>
+                    )) : (
+                        <p style={{ textAlign: 'center', padding: '20px', color: '#999' }}>No hay actividad reciente registrada.</p>
+                    )}
+                </div>
+            </div>
+
             {showKitchenModal && (
                 <div className="modal-overlay" onClick={() => setShowKitchenModal(false)} style={{ zIndex: 5000 }}>
                     <div className="admin-card modal-content" onClick={e => e.stopPropagation()} style={{ 
@@ -242,7 +273,7 @@ const Dashboard = () => {
                     }}>
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '20px', borderBottom: '1px solid #333', background: '#1a1b1e', color: '#fff' }}>
                             <h2 style={{ margin: 0, display: 'flex', alignItems: 'center', gap: '10px', fontSize: '1.3rem', color: '#fff' }}>
-                                <Utensils color="var(--admin-primary)" /> Control de Cocina
+                                <UtensilsCrossed color="var(--admin-primary)" /> Control de Cocina
                             </h2>
                             <button onClick={() => setShowKitchenModal(false)} style={{ background: 'none', border: 'none', fontSize: '1.5rem', cursor: 'pointer', color: '#fff' }}>×</button>
                         </div>
