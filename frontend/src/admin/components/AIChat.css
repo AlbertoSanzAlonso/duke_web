@@ -18,7 +18,7 @@
     background: #1a1b1e !important;
     color: white !important;
     border: 1px solid #333 !important;
-    padding: 12px;
+    padding: 0 !important;
     width: 48px; /* Solo icono */
     height: 48px;
     border-radius: 50px !important;
@@ -32,6 +32,7 @@
     overflow: hidden;
     white-space: nowrap !important;
     box-sizing: border-box !important;
+    position: relative;
 }
 
 .ai-chat-bubble img {
@@ -44,8 +45,8 @@
 }
 
 .ai-chat-bubble:hover {
-    width: 160px; /* Expansión para texto */
-    padding: 12px 20px;
+    width: 170px; /* Expansión para texto */
+    padding: 0 20px !important;
     justify-content: flex-start !important;
     gap: 10px;
     background: #000 !important;
@@ -59,12 +60,16 @@
     text-transform: uppercase;
     font-size: 0.75rem;
     opacity: 0;
+    width: 0;
+    display: none;
     transition: opacity 0.3s ease;
     color: #fff !important;
 }
 
 .ai-chat-bubble:hover .bubble-text {
     opacity: 1;
+    width: auto;
+    display: block;
 }
 
 .ai-chat-window {
