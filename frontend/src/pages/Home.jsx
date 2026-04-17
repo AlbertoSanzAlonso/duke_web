@@ -148,43 +148,29 @@ function Home() {
   };
 
   const getBusinessContext = () => {
-    // Default to closed while loading to avoid race conditions
     if (!isHoursLoaded || openingHours.length === 0) {
       return { isOpen: false, dayIndex: new Date().getDay() };
     }
 
     const now = new Date();
-    const argentinaTimeParts = new Intl.DateTimeFormat('en-GB', {
-      timeZone: 'America/Argentina/Buenos_Aires',
-      hour12: false,
-      year: 'numeric',
-      month: 'numeric',
-      day: 'numeric',
-      hour: 'numeric',
-      minute: 'numeric'
-    }).formatToParts(now);
-
-    const getPart = (type) => argentinaTimeParts.find(p => p.type === type)?.value;
+    // Use toLocaleString to get a string representing Argentina time, then parse it.
+    // This is widely supported and avoids Intl.DateTimeFormat property name issues.
+    const argentinaStr = now.toLocaleString("en-US", { timeZone: "America/Argentina/Buenos_Aires" });
+    const argentinaDate = new Date(argentinaStr);
     
-    // For weekday, we use a separate formatter since 'numeric' is not allowed for weekday
-    const weekdayName = new Intl.DateTimeFormat('en-US', {
-      timeZone: 'America/Argentina/Buenos_Aires',
-      weekday: 'short'
-    }).format(now);
-    
-    const weekdayMap = { 'Sun': 0, 'Mon': 1, 'Tue': 2, 'Wed': 3, 'Thu': 4, 'Fri': 5, 'Sat': 6 };
-    const currentDayIndex = weekdayMap[weekdayName];
-    
-    const currentHour = parseInt(getPart('hour'));
-    const currentMin = parseInt(getPart('minute'));
+    const currentDayIndex = argentinaDate.getDay(); // 0 (Sun) to 6 (Sat)
+    const currentHour = argentinaDate.getHours();
+    const currentMin = argentinaDate.getMinutes();
     const currentTotalMin = currentHour * 60 + currentMin;
 
     const toDayDuke = (idx) => (idx === 0 ? 7 : idx);
-
-    // 1. Check if yesterday's shift is still open (overnight)
+    const dayDuke = toDayDuke(currentDayIndex);
+    const todaySchedule = openingHours.find(h => parseInt(h.day) === dayDuke);
+    
+    // 1. Check if we are within the closing buffer of the PREVIOUS day's shift
     const prevDayIndex = (currentDayIndex + 6) % 7;
     const prevDayDuke = toDayDuke(prevDayIndex);
-    const prevSchedule = openingHours.find(h => h.day === prevDayDuke);
+    const prevSchedule = openingHours.find(h => parseInt(h.day) === prevDayDuke);
 
     if (prevSchedule && prevSchedule.is_open) {
       const [openH, openM] = (prevSchedule.opening_time || "20:00").split(':').map(Number);
