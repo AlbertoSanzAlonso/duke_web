@@ -33,6 +33,15 @@ function Home() {
   const [errorMessage, setErrorMessage] = useState(null);
   const [showClosedModal, setShowClosedModal] = useState(false);
   const [isHoursLoaded, setIsHoursLoaded] = useState(false);
+  const [isPreOrderConfirmed, setIsPreOrderConfirmed] = useState(false);
+
+  // Efecto para procesar el pedido tras confirmar que se quiere pre-pedir
+  useEffect(() => {
+    if (isPreOrderConfirmed) {
+      sendWhatsAppOrder();
+      setIsPreOrderConfirmed(false);
+    }
+  }, [isPreOrderConfirmed]);
 
   useEffect(() => {
     // Load cart from localStorage
@@ -139,7 +148,10 @@ function Home() {
   };
 
   const getBusinessContext = () => {
-    if (openingHours.length === 0) return { isOpen: !isHoursLoaded, dayIndex: new Date().getDay() };
+    // Default to closed while loading to avoid race conditions
+    if (!isHoursLoaded || openingHours.length === 0) {
+      return { isOpen: false, dayIndex: new Date().getDay() };
+    }
 
     const now = new Date();
     const argentinaTimeParts = new Intl.DateTimeFormat('en-GB', {
@@ -466,7 +478,7 @@ function Home() {
     const isClosed = !context.isOpen;
     const todaySchedule = context.schedule;
 
-    if (isClosed && !showClosedModal) {
+    if (isClosed && !isPreOrderConfirmed) {
       setShowClosedModal(true);
       return;
     }
@@ -1073,9 +1085,7 @@ function Home() {
               <button 
                 onClick={() => {
                   setShowClosedModal(false);
-                  // Trigger save
-                  const fakeEvent = { preventDefault: () => {} };
-                  setTimeout(() => sendWhatsAppOrder(), 100);
+                  setIsPreOrderConfirmed(true);
                 }}
                 className="checkout-btn"
                 style={{ width: '100%', padding: '15px' }}
