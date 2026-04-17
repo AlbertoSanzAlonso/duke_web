@@ -33,6 +33,16 @@ function Home() {
   const [errorMessage, setErrorMessage] = useState(null);
 
   useEffect(() => {
+    // Load cart from localStorage
+    const savedCart = localStorage.getItem('duke_cart');
+    if (savedCart) {
+      try {
+        setCart(JSON.parse(savedCart));
+      } catch (e) {
+        console.error("Error loading cart from localStorage", e);
+      }
+    }
+
     const handleScroll = () => {
       setIsScrolled(window.scrollY > 50);
     };
@@ -51,6 +61,11 @@ function Home() {
       document.removeEventListener('mousedown', handleClickOutside);
     };
   }, []);
+
+  // Persist cart to localStorage
+  useEffect(() => {
+    localStorage.setItem('duke_cart', JSON.stringify(cart));
+  }, [cart]);
 
   // Autocomplete debounced search
   useEffect(() => {
@@ -119,48 +134,92 @@ function Home() {
     }
   };
 
-  const isStoreOpen = () => {
-    if (openingHours.length === 0) return true; 
+  const getBusinessContext = () => {
+    if (openingHours.length === 0) return { isOpen: true, dayIndex: new Date().getDay() };
 
     const now = new Date();
-    
-    // Day calculation (Monday=1, Sunday=7)
-    const dayDukeMap = { 'Monday': 1, 'Tuesday': 2, 'Wednesday': 3, 'Thursday': 4, 'Friday': 5, 'Saturday': 6, 'Sunday': 7 };
-    const weekdayName = new Intl.DateTimeFormat('en-US', { 
-      timeZone: 'America/Argentina/Buenos_Aires', 
-      weekday: 'long' 
-    }).format(now);
-    const dayDuke = dayDukeMap[weekdayName] || 1;
-
-    // Time calculation
-    const argentinianTime = new Intl.DateTimeFormat('en-US', {
+    const argentinaTimeParts = new Intl.DateTimeFormat('en-GB', {
       timeZone: 'America/Argentina/Buenos_Aires',
       hour12: false,
-      hour: 'numeric', 
+      weekday: 'numeric',
+      hour: 'numeric',
       minute: 'numeric'
-    });
+    }).formatToParts(now);
+
+    const getPart = (type) => argentinaTimeParts.find(p => p.type === type)?.value;
     
-    const parts = argentinianTime.formatToParts(now);
-    const getPart = (type) => parts.find(p => p.type === type)?.value;
-    
-    const hour = parseInt(getPart('hour'));
-    const minute = parseInt(getPart('minute'));
-    const currentHourMin = hour * 60 + minute;
-    
-    const todaySchedule = openingHours.find(h => h.day === dayDuke);
-    if (!todaySchedule || !todaySchedule.is_open) return false;
-    
-    const [openH, openM] = (todaySchedule.opening_time || "20:00").split(':').map(Number);
-    const [closeH, closeM] = (todaySchedule.closing_time || "00:00").split(':').map(Number);
-    
-    const openTimeMin = openH * 60 + openM;
-    let closeTimeMin = closeH * 60 + closeM;
-    
-    if (closeTimeMin <= openTimeMin) {
-       // Support overnight hours (e.g. 20:00 to 02:00)
-       return currentHourMin >= openTimeMin || currentHourMin <= closeTimeMin;
+    // Day calculation (en-GB numeric weekday: 1=Mon... 7=Sun)
+    const weekdayNumeric = parseInt(getPart('weekday'));
+    const currentDayIndex = weekdayNumeric % 7; // Convert to 0=Sun, 1=Mon...
+    const currentHour = parseInt(getPart('hour'));
+    const currentMin = parseInt(getPart('minute'));
+    const currentTotalMin = currentHour * 60 + currentMin;
+
+    const toDayDuke = (idx) => (idx === 0 ? 7 : idx);
+
+    // 1. Check if yesterday's shift is still open (overnight)
+    const prevDayIndex = (currentDayIndex + 6) % 7;
+    const prevDayDuke = toDayDuke(prevDayIndex);
+    const prevSchedule = openingHours.find(h => h.day === prevDayDuke);
+
+    if (prevSchedule && prevSchedule.is_open) {
+      const [openH, openM] = (prevSchedule.opening_time || "20:00").split(':').map(Number);
+      const [closeH, closeM] = (prevSchedule.closing_time || "00:00").split(':').map(Number);
+      const openTimeMin = openH * 60 + openM;
+      let closeTimeMin = closeH * 60 + closeM;
+
+      if (closeTimeMin <= openTimeMin) {
+        // Shift crosses midnight
+        if (currentTotalMin < closeTimeMin) {
+          return { 
+            isOpen: true, 
+            dayIndex: prevDayIndex, 
+            schedule: prevSchedule 
+          };
+        }
+      }
     }
-    return currentHourMin >= openTimeMin && currentHourMin <= closeTimeMin;
+
+    // 2. Check if today's shift is active
+    const todayDuke = toDayDuke(currentDayIndex);
+    const todaySchedule = openingHours.find(h => h.day === todayDuke);
+
+    if (todaySchedule && todaySchedule.is_open) {
+      const [openH, openM] = (todaySchedule.opening_time || "20:00").split(':').map(Number);
+      const [closeH, closeM] = (todaySchedule.closing_time || "00:00").split(':').map(Number);
+      const openTimeMin = openH * 60 + openM;
+      let closeTimeMin = closeH * 60 + closeM;
+
+      if (closeTimeMin <= openTimeMin) {
+        // Overnight shift starting today
+        if (currentTotalMin >= openTimeMin) {
+          return { 
+            isOpen: true, 
+            dayIndex: currentDayIndex, 
+            schedule: todaySchedule 
+          };
+        }
+      } else {
+        // Normal shift
+        if (currentTotalMin >= openTimeMin && currentTotalMin <= closeTimeMin) {
+          return { 
+            isOpen: true, 
+            dayIndex: currentDayIndex, 
+            schedule: todaySchedule 
+          };
+        }
+      }
+    }
+
+    return { 
+      isOpen: false, 
+      dayIndex: currentDayIndex, 
+      schedule: todaySchedule 
+    };
+  };
+
+  const isStoreOpen = () => {
+    return getBusinessContext().isOpen;
   };
 
   const loadMenu = async () => {
@@ -172,11 +231,21 @@ function Home() {
       }
 
       // Group by category, prioritizing availability and scheduling
-      const fechaArg = new Date(new Date().toLocaleString("en-US", {timeZone: "America/Argentina/Buenos_Aires"}));
-      const dayIndex = fechaArg.getDay(); // 0 is Sunday, 1 Monday...
+      const context = getBusinessContext();
+      const dayIndex = context.dayIndex;
       const daysMap = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
       const currentDayField = `active_${daysMap[dayIndex]}`;
-      const todayStr = fechaArg.toISOString().split('T')[0];
+      const nowArg = new Date();
+      const argentinaNowParts = new Intl.DateTimeFormat('en-GB', {
+        timeZone: 'America/Argentina/Buenos_Aires',
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit'
+      }).formatToParts(nowArg);
+      const argDay = argentinaNowParts.find(p => p.type === 'day').value;
+      const argMonth = argentinaNowParts.find(p => p.type === 'month').value;
+      const argYear = argentinaNowParts.find(p => p.type === 'year').value;
+      const todayStr = `${argYear}-${argMonth}-${argDay}`;
 
       const grouped = entries.reduce((acc, entry) => {
         if (!entry.is_available) return acc;
@@ -381,27 +450,9 @@ function Home() {
       return;
     }
 
-    if (!isStoreOpen()) {
-      const now = new Date().toLocaleString("en-US", {timeZone: "America/Argentina/Buenos_Aires"});
-      const fechaArg = new Date(now);
-      let dayIdx = fechaArg.getDay(); // 0 (Sun) to 6 (Sat)
-      const dayDuke = dayIdx === 0 ? 7 : dayIdx;
-      const todaySchedule = openingHours.find(h => h.day === dayDuke);
-      
-      let closedMsg = "Lo sentimos, actualmente estamos CERRADOS.";
-      if (todaySchedule) {
-        if (todaySchedule.is_open) {
-          const openStr = todaySchedule.opening_time ? todaySchedule.opening_time.slice(0,5) : "20:00";
-          const closeStr = todaySchedule.closing_time ? todaySchedule.closing_time.slice(0,5) : "00:00";
-          closedMsg = `Lo sentimos, actualmente estamos CERRADOS. Hoy ${todaySchedule.day_name} atendemos de ${openStr} a ${closeStr} hs.`;
-        } else {
-          closedMsg = `Lo sentimos, actualmente estamos CERRADOS. Hoy ${todaySchedule.day_name} el local permanece cerrado.`;
-        }
-      }
-      
-      setErrorMessage(`${closedMsg} El pedido se mantendrá en tu carrito si deseas enviarlo más tarde.`);
-      return;
-    }
+    const context = getBusinessContext();
+    const isClosed = !context.isOpen;
+    const todaySchedule = context.schedule;
 
     setIsSaving(true);
     try {
@@ -412,7 +463,7 @@ function Home() {
         customer_name: customerName,
         table_number: deliveryMode === 'delivery' ? `DELIVERY: ${deliveryAddress}` : "RETIRO EN LOCAL",
         delivery_cost: deliveryMode === 'delivery' ? deliveryCost : 0,
-        notes: orderNotes ? `${orderNotes}` : "Pedido desde la Web",
+        notes: orderNotes ? `${orderNotes}${isClosed ? ' [PEDIDO FUERA DE HORARIO]' : ''}` : (isClosed ? "Pedido fuera de horario" : "Pedido desde la Web"),
         items: cartItems.map(item => ({
           menu_entry: item.id,
           quantity: item.quantity,
@@ -422,7 +473,25 @@ function Home() {
 
       const createdSale = await createSale(saleData);
 
-      // 2. Format WhatsApp Message
+      // 2. Clear Cart and show success
+      setCart({});
+      setCustomerName('');
+      setOrderNotes('');
+      setDeliveryAddress('');
+      setDeliveryCost(0);
+      setIsCartOpen(false);
+
+      if (isClosed) {
+        let closedMsg = "¡Recibimos tu pedido! Actualmente estamos CERRADOS.";
+        if (todaySchedule && todaySchedule.is_open) {
+          const openStr = todaySchedule.opening_time ? todaySchedule.opening_time.slice(0,5) : "20:00";
+          closedMsg = `¡Recibimos tu pedido! Actualmente estamos CERRADOS, pero lo guardamos para el próximo turno (Abre a las ${openStr} hs). Te contactaremos por WhatsApp apenas abramos.`;
+        }
+        setToast({ message: closedMsg, type: 'success' });
+        return;
+      }
+
+      // 3. Format WhatsApp Message (Only if OPEN)
       const phone = "5492645095054";
       const ticketUrl = `${window.location.origin}/ticket/${createdSale.id}`;
       
@@ -807,7 +876,7 @@ function Home() {
                 ) : (
                   <>
                     <MessageCircle size={20} />
-                    CONFIRMAR POR WHATSAPP
+                    {!isStoreOpen() ? 'DEJAR PEDIDO (CERRADOS)' : 'CONFIRMAR POR WHATSAPP'}
                   </>
                 )}
               </button>

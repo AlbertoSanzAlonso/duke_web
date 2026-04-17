@@ -34,14 +34,20 @@ def DashboardInsightsView(request):
     user_data = UserSerializer(request.user).data
     
     # Sales (Optimized)
-    sales_qs = Sale.objects.filter(date__gte=today_start)
-    today_sales_count = sales_qs.count()
-    pending_today = sales_qs.filter(status='PENDING').count()
-    completed_today = sales_qs.filter(status='COMPLETED').count()
+    # Today's stats use today_start
+    today_sales_qs = Sale.objects.filter(date__gte=today_start)
+    today_sales_count = today_sales_qs.count()
     
-    # Kitchen stats
-    kitchen_pending = sales_qs.filter(is_prepared=False).count()
-    kitchen_ready = sales_qs.filter(is_prepared=True, is_delivered=False).count()
+    # Pendientes: Include ALL pending orders regardless of date so pre-orders are seen
+    all_pending_qs = Sale.objects.filter(status='PENDING')
+    pending_total_count = all_pending_qs.count()
+    
+    completed_today = today_sales_qs.filter(status='COMPLETED').count()
+    
+    # Kitchen stats: Based on all pending/active orders
+    active_sales_qs = Sale.objects.filter(status='PENDING')
+    kitchen_pending = active_sales_qs.filter(is_prepared=False).count()
+    kitchen_ready = active_sales_qs.filter(is_prepared=True, is_delivered=False).count()
     
     # Monthly Stats
     month_start = now.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
@@ -118,7 +124,7 @@ def DashboardInsightsView(request):
         'profile': user_data,
         'today_sales': {
             'total_count': today_sales_count,
-            'pending': pending_today,
+            'pending': pending_total_count,
             'completed': completed_today,
             'kitchen_pending': kitchen_pending,
             'kitchen_ready': kitchen_ready,
