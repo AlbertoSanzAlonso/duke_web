@@ -141,16 +141,24 @@ function Home() {
     const argentinaTimeParts = new Intl.DateTimeFormat('en-GB', {
       timeZone: 'America/Argentina/Buenos_Aires',
       hour12: false,
-      weekday: 'numeric',
+      year: 'numeric',
+      month: 'numeric',
+      day: 'numeric',
       hour: 'numeric',
       minute: 'numeric'
     }).formatToParts(now);
 
     const getPart = (type) => argentinaTimeParts.find(p => p.type === type)?.value;
     
-    // Day calculation (en-GB numeric weekday: 1=Mon... 7=Sun)
-    const weekdayNumeric = parseInt(getPart('weekday'));
-    const currentDayIndex = weekdayNumeric % 7; // Convert to 0=Sun, 1=Mon...
+    // For weekday, we use a separate formatter since 'numeric' is not allowed for weekday
+    const weekdayName = new Intl.DateTimeFormat('en-US', {
+      timeZone: 'America/Argentina/Buenos_Aires',
+      weekday: 'short'
+    }).format(now);
+    
+    const weekdayMap = { 'Sun': 0, 'Mon': 1, 'Tue': 2, 'Wed': 3, 'Thu': 4, 'Fri': 5, 'Sat': 6 };
+    const currentDayIndex = weekdayMap[weekdayName];
+    
     const currentHour = parseInt(getPart('hour'));
     const currentMin = parseInt(getPart('minute'));
     const currentTotalMin = currentHour * 60 + currentMin;
