@@ -31,6 +31,8 @@ function Home() {
   const [isHoursModalOpen, setIsHoursModalOpen] = useState(false);
   const [toast, setToast] = useState(null);
   const [errorMessage, setErrorMessage] = useState(null);
+  const [showClosedModal, setShowClosedModal] = useState(false);
+  const [isHoursLoaded, setIsHoursLoaded] = useState(false);
 
   useEffect(() => {
     // Load cart from localStorage
@@ -129,13 +131,15 @@ function Home() {
     try {
       const data = await fetchOpeningHours();
       setOpeningHours(data);
+      setIsHoursLoaded(true);
     } catch (err) {
-      console.error("Error loading opening hours:", err);
+      console.error("Error loading hours", err);
+      setIsHoursLoaded(true);
     }
   };
 
   const getBusinessContext = () => {
-    if (openingHours.length === 0) return { isOpen: true, dayIndex: new Date().getDay() };
+    if (openingHours.length === 0) return { isOpen: !isHoursLoaded, dayIndex: new Date().getDay() };
 
     const now = new Date();
     const argentinaTimeParts = new Intl.DateTimeFormat('en-GB', {
@@ -461,6 +465,11 @@ function Home() {
     const context = getBusinessContext();
     const isClosed = !context.isOpen;
     const todaySchedule = context.schedule;
+
+    if (isClosed && !showClosedModal) {
+      setShowClosedModal(true);
+      return;
+    }
 
     setIsSaving(true);
     try {
@@ -1050,7 +1059,39 @@ function Home() {
         </div>
       )}
       <Footer />
-      {toast && <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />}
+      {showClosedModal && (
+        <div className="modal-overlay" style={{ zIndex: 10000, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <div className="admin-card modal-content" style={{ maxWidth: '400px', width: '90%', textAlign: 'center', padding: '30px' }}>
+            <div style={{ background: 'rgba(224, 49, 49, 0.1)', width: '60px', height: '60px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 20px' }}>
+              <Clock size={32} color="#e03131" />
+            </div>
+            <h3 style={{ fontSize: '1.4rem', marginBottom: '10px', color: '#fff' }}>¡Local Cerrado!</h3>
+            <p style={{ color: 'rgba(255,255,255,0.7)', marginBottom: '25px', lineHeight: '1.5' }}>
+              Actualmente no estamos tomando pedidos en vivo. ¿Querés guardar tu pedido para enviarlo apenas abramos?
+            </p>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+              <button 
+                onClick={() => {
+                  setShowClosedModal(false);
+                  // Trigger save
+                  const fakeEvent = { preventDefault: () => {} };
+                  setTimeout(() => sendWhatsAppOrder(), 100);
+                }}
+                className="checkout-btn"
+                style={{ width: '100%', padding: '15px' }}
+              >
+                SÍ, GUARDAR PRE-PEDIDO
+              </button>
+              <button 
+                onClick={() => setShowClosedModal(false)}
+                style={{ background: 'transparent', border: '1px solid rgba(255,255,255,0.2)', color: '#fff', padding: '12px', borderRadius: '12px', cursor: 'pointer' }}
+              >
+                CANCELAR
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
