@@ -1074,12 +1074,13 @@ function Home() {
               <button 
                 onClick={() => {
                   setShowClosedModal(false);
-                  // El usuario cancela: vaciamos el carrito
+                  // El usuario cancela: vaciamos el carrito y cerramos todo
                   setCart({});
                   setCustomerName('');
                   setOrderNotes('');
                   setDeliveryAddress('');
                   setDeliveryCost(0);
+                  setIsCartOpen(false);
                 }}
                 style={{ background: 'transparent', border: '1px solid rgba(255,255,255,0.2)', color: '#fff', padding: '12px', borderRadius: '12px', cursor: 'pointer' }}
               >
