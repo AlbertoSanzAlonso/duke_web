@@ -152,7 +152,7 @@ def DashboardInsightsView(request):
 class AIHelpView(APIView):
     permission_classes = [IsAuthenticated]
 
-    async def post(self, request):
+    def post(self, request):
         """
         Duke Assist: IA contextualizada con manual y estado real de la base de datos.
         """
@@ -164,7 +164,7 @@ class AIHelpView(APIView):
         if not api_key:
             return Response({'answer': 'Asistente de IA no configurado (falta GROQ_API_KEY).'})
 
-        # 1. Manual Context (truncado para no inflar el payload)
+        # 1. Manual Context
         manual_content = ""
         try:
             manual_path = os.path.join(settings.BASE_DIR, '..', 'docs', 'manual_admin.md')
@@ -174,28 +174,26 @@ class AIHelpView(APIView):
         except:
             pass
 
-        # 2. Dynamic Live Context (sync_to_async para no bloquear el event loop)
+        # 2. Live Context
         try:
-            def get_live_context():
-                now = timezone.localtime()
-                today_start = now.replace(hour=0, minute=0, second=0, microsecond=0)
-                sales_today = Sale.objects.filter(date__gte=today_start, status='COMPLETED')
-                total_sales = sales_today.aggregate(Sum('total_amount'))['total_amount__sum'] or 0
-                all_inventory = list(InventoryItem.objects.all().order_by('name'))
-                inventory_summary = "\n".join([f"- {i.name}: {i.quantity} {i.unit}" for i in all_inventory])
-                critical_items = InventoryItem.objects.filter(quantity__lte=F('min_stock'))
-                stock_critical_info = ", ".join([i.name for i in critical_items]) if critical_items.exists() else "Todo OK"
-                return (
-                    f"ESTADO DEL SISTEMA ({now.strftime('%d/%m/%y %H:%M')}):\n"
-                    f"- Ventas Hoy: ${total_sales}\n"
-                    f"- Stock Crítico: {stock_critical_info}\n\n"
-                    f"--- STOCK COMPLETO ---\n{inventory_summary}"
-                )
-            live_context = await sync_to_async(get_live_context)()
+            now = timezone.localtime()
+            today_start = now.replace(hour=0, minute=0, second=0, microsecond=0)
+            sales_today = Sale.objects.filter(date__gte=today_start, status='COMPLETED')
+            total_sales = sales_today.aggregate(Sum('total_amount'))['total_amount__sum'] or 0
+            all_inventory = list(InventoryItem.objects.all().order_by('name'))
+            inventory_summary = "\n".join([f"- {i.name}: {i.quantity} {i.unit}" for i in all_inventory])
+            critical_items = InventoryItem.objects.filter(quantity__lte=F('min_stock'))
+            stock_critical_info = ", ".join([i.name for i in critical_items]) if critical_items.exists() else "Todo OK"
+            live_context = (
+                f"ESTADO DEL SISTEMA ({now.strftime('%d/%m/%y %H:%M')}):\n"
+                f"- Ventas Hoy: ${total_sales}\n"
+                f"- Stock Crítico: {stock_critical_info}\n\n"
+                f"--- STOCK COMPLETO ---\n{inventory_summary}"
+            )
         except Exception as e:
             live_context = f"Error context: {str(e)}"
 
-        # 3. AI Interaction (async httpx — no bloquea el event loop)
+        # 3. AI call
         system_instruction = (
             "Eres el asistente virtual oficial de Duke Burger. "
             f"\n\n--- MANUAL ---\n{manual_content}\n"
@@ -211,24 +209,18 @@ class AIHelpView(APIView):
             "temperature": 0.4,
             "max_tokens": 1024
         }
-        def call_groq():
+        try:
             req = urllib.request.Request(
                 "https://api.groq.com/openai/v1/chat/completions",
                 data=json.dumps(payload).encode('utf-8'),
-                headers={
-                    'Content-Type': 'application/json',
-                    'Authorization': f'Bearer {api_key}'
-                }
+                headers={'Content-Type': 'application/json', 'Authorization': f'Bearer {api_key}'}
             )
             with urllib.request.urlopen(req, timeout=22) as res:
-                return json.loads(res.read().decode('utf-8'))
-
-        try:
-            # asyncio.to_thread ejecuta urllib en un thread sin bloquear el event loop
-            res_data = await asyncio.to_thread(call_groq)
-            return Response({'answer': res_data['choices'][0]['message']['content']})
+                res_data = json.loads(res.read().decode('utf-8'))
+                return Response({'answer': res_data['choices'][0]['message']['content']})
         except urllib.error.HTTPError as e:
             err_body = e.read().decode('utf-8')
             return Response({'error': f'Groq API Error ({e.code}): {err_body}'}, status=502)
         except Exception as e:
             return Response({'error': f'AI Assistant error: {str(e)}'}, status=502)
+

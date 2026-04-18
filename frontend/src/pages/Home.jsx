@@ -1072,7 +1072,15 @@ function Home() {
                 SÍ, GUARDAR PRE-PEDIDO
               </button>
               <button 
-                onClick={() => setShowClosedModal(false)}
+                onClick={() => {
+                  setShowClosedModal(false);
+                  // El usuario cancela: vaciamos el carrito
+                  setCart({});
+                  setCustomerName('');
+                  setOrderNotes('');
+                  setDeliveryAddress('');
+                  setDeliveryCost(0);
+                }}
                 style={{ background: 'transparent', border: '1px solid rgba(255,255,255,0.2)', color: '#fff', padding: '12px', borderRadius: '12px', cursor: 'pointer' }}
               >
                 CANCELAR
