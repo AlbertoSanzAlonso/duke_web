@@ -1072,7 +1072,7 @@ function Home() {
                   setIsPreOrderConfirmed(true);
                 }}
                 className="checkout-btn"
-                style={{ width: '100%', padding: '15px' }}
+                style={{ width: '100%', padding: '15px', background: '#e03131', color: '#fff', border: 'none' }}
               >
                 SÍ, GUARDAR PRE-PEDIDO
               </button>
