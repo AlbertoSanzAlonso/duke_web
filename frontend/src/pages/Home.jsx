@@ -486,15 +486,9 @@ function Home() {
 
       const createdSale = await createSale(saleData);
 
-      // 2. Clear Cart and show success
-      setCart({});
-      setCustomerName('');
-      setOrderNotes('');
-      setDeliveryAddress('');
-      setDeliveryCost(0);
-      setIsCartOpen(false);
-
       if (isClosed) {
+        // Pre-pedido: cerramos el modal pero mantenemos el carrito visible
+        setIsCartOpen(false);
         let closedMsg = "¡Recibimos tu pedido! Actualmente estamos CERRADOS.";
         if (todaySchedule && todaySchedule.is_open) {
           const openStr = todaySchedule.opening_time ? todaySchedule.opening_time.slice(0,5) : "20:00";
@@ -527,13 +521,14 @@ function Home() {
       const url = `https://wa.me/${phone}?text=${encodeURIComponent(message)}`;
       window.open(url, '_blank');
 
-      // 3. Reset Cart
+      // Pedido en vivo confirmado: limpiar todo
       setCart({});
       setCustomerName('');
       setOrderNotes('');
       setDeliveryAddress('');
       setDeliveryCost(0);
       setIsCartOpen(false);
+
     } catch (error) {
       console.error("Error creating sale:", error);
       setErrorMessage("Hubo un error al procesar tu pedido. Por favor, intenta de nuevo.");
