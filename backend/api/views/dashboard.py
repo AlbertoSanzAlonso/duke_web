@@ -1,5 +1,8 @@
 import os
 import json
+import urllib.request
+import urllib.error
+import asyncio
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
 from rest_framework.permissions import AllowAny, IsAuthenticated
@@ -10,7 +13,6 @@ from django.db.models.functions import TruncDate, TruncMonth
 from datetime import timedelta
 from django.conf import settings
 from asgiref.sync import sync_to_async
-import httpx
 
 from ..models import Sale, Expense, InventoryItem, MenuEntry, Product, ActionLog, InventoryMovement, InventoryDailyConsumption, SupplierOrder, SaleItem
 from ..serializers import UserSerializer, InventoryItemSerializer, OpeningHourSerializer
@@ -209,17 +211,24 @@ class AIHelpView(APIView):
             "temperature": 0.4,
             "max_tokens": 1024
         }
+        def call_groq():
+            req = urllib.request.Request(
+                "https://api.groq.com/openai/v1/chat/completions",
+                data=json.dumps(payload).encode('utf-8'),
+                headers={
+                    'Content-Type': 'application/json',
+                    'Authorization': f'Bearer {api_key}'
+                }
+            )
+            with urllib.request.urlopen(req, timeout=22) as res:
+                return json.loads(res.read().decode('utf-8'))
+
         try:
-            async with httpx.AsyncClient(timeout=25.0) as client:
-                res = await client.post(
-                    "https://api.groq.com/openai/v1/chat/completions",
-                    json=payload,
-                    headers={'Authorization': f'Bearer {api_key}'}
-                )
-                res.raise_for_status()
-                res_data = res.json()
-                return Response({'answer': res_data['choices'][0]['message']['content']})
-        except httpx.HTTPStatusError as e:
-            return Response({'error': f'Groq API Error ({e.response.status_code}): {e.response.text}'}, status=502)
+            # asyncio.to_thread ejecuta urllib en un thread sin bloquear el event loop
+            res_data = await asyncio.to_thread(call_groq)
+            return Response({'answer': res_data['choices'][0]['message']['content']})
+        except urllib.error.HTTPError as e:
+            err_body = e.read().decode('utf-8')
+            return Response({'error': f'Groq API Error ({e.code}): {err_body}'}, status=502)
         except Exception as e:
             return Response({'error': f'AI Assistant error: {str(e)}'}, status=502)
