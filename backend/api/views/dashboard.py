@@ -61,10 +61,13 @@ def DashboardInsightsView(request):
     ).data
     
     # Kitchen detail lists
-    kitchen_pending_list = sales_qs.filter(is_prepared=False).values('id', 'customer_name', 'date', 'total_amount')
-    kitchen_ready_list = sales_qs.filter(is_prepared=True, is_delivered=False).values('id', 'customer_name', 'updated_at', 'total_amount')
-    kitchen_delivered_list = sales_qs.filter(is_delivered=True).values('id', 'customer_name', 'updated_at', 'total_amount')
-    kitchen_delivered_count = sales_qs.filter(is_delivered=True).count()
+    # Pending and Ready come from active_sales_qs (all pending regardless of date)
+    kitchen_pending_list = active_sales_qs.filter(is_prepared=False).values('id', 'customer_name', 'date', 'total_amount')
+    kitchen_ready_list = active_sales_qs.filter(is_prepared=True, is_delivered=False).values('id', 'customer_name', 'updated_at', 'total_amount')
+    
+    # Delivered comes from today_sales_qs (only today's delivered activity)
+    kitchen_delivered_list = today_sales_qs.filter(is_delivered=True).values('id', 'customer_name', 'updated_at', 'total_amount')
+    kitchen_delivered_count = today_sales_qs.filter(is_delivered=True).count()
 
     def to_float(val):
         try:
@@ -217,8 +220,8 @@ def AIHelpView(request):
             url, data=json.dumps(payload).encode('utf-8'),
             headers={'Content-Type': 'application/json', 'Authorization': f'Bearer {api_key}'}
         )
-        with urllib.request.urlopen(req, timeout=15) as res:
+        with urllib.request.urlopen(req, timeout=30) as res:
             res_data = json.loads(res.read().decode('utf-8'))
             return Response({'answer': res_data['choices'][0]['message']['content']})
     except Exception as e:
-        return Response({'error': str(e)}, status=502)
+        return Response({'error': f'AI Assistant error: {str(e)}'}, status=502)
