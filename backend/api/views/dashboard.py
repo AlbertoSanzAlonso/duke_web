@@ -160,13 +160,13 @@ def AIHelpView(request):
     if not api_key:
         return Response({'answer': 'Asistente de IA no configurado (falta GROQ_API_KEY).'})
 
-    # 1. Manual Context
+    # 1. Manual Context (truncado para no inflar el payload)
     manual_content = ""
     try:
         manual_path = os.path.join(settings.BASE_DIR, '..', 'docs', 'manual_admin.md')
         if os.path.exists(manual_path):
             with open(manual_path, 'r', encoding='utf-8') as f:
-                manual_content = f.read()
+                manual_content = f.read()[:4000]  # Max 4k chars para evitar tokens excesivos
     except: pass
 
     # 2. Dynamic Live Context
@@ -210,7 +210,8 @@ def AIHelpView(request):
             {"role": "system", "content": system_instruction},
             {"role": "user", "content": question}
         ],
-        "temperature": 0.4
+        "temperature": 0.4,
+        "max_tokens": 1024
     }
 
     try:
@@ -218,7 +219,8 @@ def AIHelpView(request):
             url, data=json.dumps(payload).encode('utf-8'),
             headers={'Content-Type': 'application/json', 'Authorization': f'Bearer {api_key}'}
         )
-        with urllib.request.urlopen(req, timeout=30) as res:
+        # Timeout reducido a 20s para terminar antes que el proxy (30s) corte la conexión
+        with urllib.request.urlopen(req, timeout=20) as res:
             res_data = json.loads(res.read().decode('utf-8'))
             return Response({'answer': res_data['choices'][0]['message']['content']})
     except urllib.error.HTTPError as he:

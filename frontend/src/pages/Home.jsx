@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { Link } from 'react-router-dom';
-import { Menu, X, ShoppingCart, Minus, Plus, MessageCircle, MapPin, Instagram, Facebook, ChevronDown, Phone } from 'lucide-react';
+import { Menu, X, ShoppingCart, Minus, Plus, MessageCircle, MapPin, Instagram, Facebook, ChevronDown, Phone, Clock } from 'lucide-react';
 import { fetchMenuEntries, createSale, fetchOpeningHours, getMediaUrl } from '../services/api';
 import Toast from '../admin/components/Toast';
 import Footer from '../components/Footer';
