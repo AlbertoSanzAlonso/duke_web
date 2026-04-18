@@ -1,15 +1,16 @@
 import os
 import json
-import urllib.request
-import urllib.error
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
 from rest_framework.permissions import AllowAny, IsAuthenticated
+from rest_framework.views import APIView
 from django.utils import timezone
 from django.db.models import Sum, F, Count
 from django.db.models.functions import TruncDate, TruncMonth
 from datetime import timedelta
 from django.conf import settings
+from asgiref.sync import sync_to_async
+import httpx
 
 from ..models import Sale, Expense, InventoryItem, MenuEntry, Product, ActionLog, InventoryMovement, InventoryDailyConsumption, SupplierOrder, SaleItem
 from ..serializers import UserSerializer, InventoryItemSerializer, OpeningHourSerializer
@@ -146,85 +147,79 @@ def DashboardInsightsView(request):
         'recent_history': logs_data
     })
 
-@api_view(['POST'])
-@permission_classes([IsAuthenticated])
-def AIHelpView(request):
-    """
-    Duke Assist: IA contextualizada con manual y estado real de la base de datos.
-    """
-    question = request.data.get('question')
-    if not question:
-        return Response({'error': 'Pregunta requerida'}, status=400)
-    
-    api_key = os.environ.get('GROQ_API_KEY')
-    if not api_key:
-        return Response({'answer': 'Asistente de IA no configurado (falta GROQ_API_KEY).'})
+class AIHelpView(APIView):
+    permission_classes = [IsAuthenticated]
 
-    # 1. Manual Context (truncado para no inflar el payload)
-    manual_content = ""
-    try:
-        manual_path = os.path.join(settings.BASE_DIR, '..', 'docs', 'manual_admin.md')
-        if os.path.exists(manual_path):
-            with open(manual_path, 'r', encoding='utf-8') as f:
-                manual_content = f.read()[:4000]  # Max 4k chars para evitar tokens excesivos
-    except: pass
+    async def post(self, request):
+        """
+        Duke Assist: IA contextualizada con manual y estado real de la base de datos.
+        """
+        question = request.data.get('question')
+        if not question:
+            return Response({'error': 'Pregunta requerida'}, status=400)
 
-    # 2. Dynamic Live Context
-    try:
-        now = timezone.localtime()
-        today_start = now.replace(hour=0, minute=0, second=0, microsecond=0)
-        
-        # Financials
-        sales_today = Sale.objects.filter(date__gte=today_start, status='COMPLETED')
-        total_sales = sales_today.aggregate(Sum('total_amount'))['total_amount__sum'] or 0
-        
-        # Inventory summary
-        all_inventory = InventoryItem.objects.all().order_by('name')
-        inventory_summary = "\n".join([f"- {i.name}: {i.quantity} {i.unit}" for i in all_inventory])
-        
-        # Critical stock
-        critical_items = InventoryItem.objects.filter(quantity__lte=F('min_stock'))
-        stock_critical_info = ", ".join([i.name for i in critical_items]) if critical_items.exists() else "Todo OK"
+        api_key = os.environ.get('GROQ_API_KEY')
+        if not api_key:
+            return Response({'answer': 'Asistente de IA no configurado (falta GROQ_API_KEY).'})
 
-        live_context = (
-            f"ESTADO DEL SISTEMA ({now.strftime('%d/%m/%y %H:%M')}):\n"
-            f"- Ventas Hoy: ${total_sales}\n"
-            f"- Stock Crítico: {stock_critical_info}\n\n"
-            f"--- STOCK COMPLETO ---\n{inventory_summary}"
+        # 1. Manual Context (truncado para no inflar el payload)
+        manual_content = ""
+        try:
+            manual_path = os.path.join(settings.BASE_DIR, '..', 'docs', 'manual_admin.md')
+            if os.path.exists(manual_path):
+                with open(manual_path, 'r', encoding='utf-8') as f:
+                    manual_content = f.read()[:4000]
+        except:
+            pass
+
+        # 2. Dynamic Live Context (sync_to_async para no bloquear el event loop)
+        try:
+            def get_live_context():
+                now = timezone.localtime()
+                today_start = now.replace(hour=0, minute=0, second=0, microsecond=0)
+                sales_today = Sale.objects.filter(date__gte=today_start, status='COMPLETED')
+                total_sales = sales_today.aggregate(Sum('total_amount'))['total_amount__sum'] or 0
+                all_inventory = list(InventoryItem.objects.all().order_by('name'))
+                inventory_summary = "\n".join([f"- {i.name}: {i.quantity} {i.unit}" for i in all_inventory])
+                critical_items = InventoryItem.objects.filter(quantity__lte=F('min_stock'))
+                stock_critical_info = ", ".join([i.name for i in critical_items]) if critical_items.exists() else "Todo OK"
+                return (
+                    f"ESTADO DEL SISTEMA ({now.strftime('%d/%m/%y %H:%M')}):\n"
+                    f"- Ventas Hoy: ${total_sales}\n"
+                    f"- Stock Crítico: {stock_critical_info}\n\n"
+                    f"--- STOCK COMPLETO ---\n{inventory_summary}"
+                )
+            live_context = await sync_to_async(get_live_context)()
+        except Exception as e:
+            live_context = f"Error context: {str(e)}"
+
+        # 3. AI Interaction (async httpx — no bloquea el event loop)
+        system_instruction = (
+            "Eres el asistente virtual oficial de Duke Burger. "
+            f"\n\n--- MANUAL ---\n{manual_content}\n"
+            f"\n\n--- ESTADO LIVE ---\n{live_context}\n"
+            "Reglas: Responde en Markdown, sé profesional y usa datos reales."
         )
-    except Exception as e:
-        live_context = f"Error context: {str(e)}"
-
-    # 3. AI Interaction
-    system_instruction = (
-        "Eres el asistente virtual oficial de Duke Burger. "
-        f"\n\n--- MANUAL ---\n{manual_content}\n"
-        f"\n\n--- ESTADO LIVE ---\n{live_context}\n"
-        "Reglas: Responde en Markdown, sé profesional y usa datos reales."
-    )
-
-    url = "https://api.groq.com/openai/v1/chat/completions"
-    payload = {
-        "model": "llama-3.3-70b-versatile",
-        "messages": [
-            {"role": "system", "content": system_instruction},
-            {"role": "user", "content": question}
-        ],
-        "temperature": 0.4,
-        "max_tokens": 1024
-    }
-
-    try:
-        req = urllib.request.Request(
-            url, data=json.dumps(payload).encode('utf-8'),
-            headers={'Content-Type': 'application/json', 'Authorization': f'Bearer {api_key}'}
-        )
-        # Timeout reducido a 20s para terminar antes que el proxy (30s) corte la conexión
-        with urllib.request.urlopen(req, timeout=20) as res:
-            res_data = json.loads(res.read().decode('utf-8'))
-            return Response({'answer': res_data['choices'][0]['message']['content']})
-    except urllib.error.HTTPError as he:
-        err_body = he.read().decode('utf-8')
-        return Response({'error': f'Groq API Error ({he.code}): {err_body}'}, status=502)
-    except Exception as e:
-        return Response({'error': f'AI Assistant error: {str(e)}'}, status=502)
+        payload = {
+            "model": "llama-3.3-70b-versatile",
+            "messages": [
+                {"role": "system", "content": system_instruction},
+                {"role": "user", "content": question}
+            ],
+            "temperature": 0.4,
+            "max_tokens": 1024
+        }
+        try:
+            async with httpx.AsyncClient(timeout=25.0) as client:
+                res = await client.post(
+                    "https://api.groq.com/openai/v1/chat/completions",
+                    json=payload,
+                    headers={'Authorization': f'Bearer {api_key}'}
+                )
+                res.raise_for_status()
+                res_data = res.json()
+                return Response({'answer': res_data['choices'][0]['message']['content']})
+        except httpx.HTTPStatusError as e:
+            return Response({'error': f'Groq API Error ({e.response.status_code}): {e.response.text}'}, status=502)
+        except Exception as e:
+            return Response({'error': f'AI Assistant error: {str(e)}'}, status=502)
