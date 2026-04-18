@@ -170,7 +170,7 @@ class AIHelpView(APIView):
             manual_path = os.path.join(settings.BASE_DIR, '..', 'docs', 'manual_admin.md')
             if os.path.exists(manual_path):
                 with open(manual_path, 'r', encoding='utf-8') as f:
-                    manual_content = f.read()[:4000]
+                    manual_content = f.read()[:2000] # Reducido a 2k para mayor velocidad
         except:
             pass
 
@@ -198,15 +198,15 @@ class AIHelpView(APIView):
             "Eres el asistente virtual oficial de Duke Burger. "
             f"\n\n--- MANUAL ---\n{manual_content}\n"
             f"\n\n--- ESTADO LIVE ---\n{live_context}\n"
-            "Reglas: Responde en Markdown, sé profesional y usa datos reales."
+            "Reglas: Responde en Markdown, sé conciso, rápido y usa datos reales."
         )
         payload = {
-            "model": "llama-3.3-70b-versatile",
+            "model": "llama3-8b-8192", # Modelo super rápido para evitar timeouts 502
             "messages": [
                 {"role": "system", "content": system_instruction},
                 {"role": "user", "content": question}
             ],
-            "temperature": 0.4,
+            "temperature": 0.3,
             "max_tokens": 1024
         }
         try:
