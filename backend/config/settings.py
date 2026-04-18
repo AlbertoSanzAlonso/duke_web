@@ -196,7 +196,13 @@ ALLOWED_HOSTS = ['api.dukeburger-sj.com', 'dukeburger-sj.com', 'localhost', '127
 # CORS and Security
 CORS_ALLOWED_ORIGINS = [
     "https://dukeburger-sj.com",
+    "https://www.dukeburger-sj.com",
     "https://api.dukeburger-sj.com",
+    "https://duke-web-git-main-albertosanzdevs-projects.vercel.app",
+]
+# Cubre automáticamente cualquier preview URL de Vercel
+CORS_ALLOWED_ORIGIN_REGEXES = [
+    r"^https://duke-web.*\.vercel\.app$",
 ]
 CORS_ALLOW_CREDENTIALS = True
 CORS_ALLOW_HEADERS = [
