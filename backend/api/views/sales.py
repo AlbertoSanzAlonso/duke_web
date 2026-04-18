@@ -131,29 +131,47 @@ async def OrderStreamView(request):
     async def event_stream():
         yield f"data: {json.dumps({'type': 'connection_ready'})}\n\n"
         
-        # Get initial ID
+        # Get initial state
         last_sale = await sync_to_async(lambda: Sale.objects.order_by('-id').first())()
         last_seen_id = last_sale.id if last_sale else 0
         last_check_time = timezone.now()
+        ping_counter = 0
         
         while True:
             current_time = timezone.now()
             
-            # New orders (Use sync_to_async list conversion for safety in WSGI/gthread)
-            new_sales_list = await sync_to_async(lambda: list(Sale.objects.filter(id__gt=last_seen_id).values('id', 'customer_name').order_by('id')))()
+            # 1. New orders
+            new_sales_list = await sync_to_async(lambda: list(Sale.objects.filter(id__gt=last_seen_id).values('id', 'customer_name', 'total_amount').order_by('id')))()
             for sale in new_sales_list:
-                yield f"data: {json.dumps({'type': 'new_order', 'id': sale['id'], 'customer': sale['customer_name']})}\n\n"
+                yield f"data: {json.dumps({
+                    'type': 'new_order', 
+                    'id': sale['id'], 
+                    'customer': sale['customer_name'],
+                    'total': float(sale['total_amount'])
+                })}\n\n"
                 last_seen_id = sale['id']
             
-            # Updated orders
-            updated_sales_list = await sync_to_async(lambda: list(Sale.objects.filter(updated_at__gt=last_check_time, id__lte=last_seen_id).values('id', 'status')))()
+            # 2. Updated orders (including preparation/delivery status changes)
+            updated_sales_list = await sync_to_async(lambda: list(Sale.objects.filter(updated_at__gt=last_check_time, id__lte=last_seen_id).values('id', 'status', 'is_prepared', 'is_delivered')))()
             for sale in updated_sales_list:
-                yield f"data: {json.dumps({'type': 'order_updated', 'id': sale['id'], 'status': sale['status']})}\n\n"
+                yield f"data: {json.dumps({
+                    'type': 'order_updated', 
+                    'id': sale['id'], 
+                    'status': sale['status'],
+                    'is_prepared': sale['is_prepared'],
+                    'is_delivered': sale['is_delivered']
+                })}\n\n"
             
             last_check_time = current_time
-            yield ": ping\n\n"
+            
+            # Heartbeat every 15s (3 cycles of 5s)
+            ping_counter += 1
+            if ping_counter >= 3:
+                yield ": ping\n\n"
+                ping_counter = 0
+                
             import asyncio
-            await asyncio.sleep(15)
+            await asyncio.sleep(5) # Más reactivo (5s en lugar de 15s)
 
     response = StreamingHttpResponse(event_stream(), content_type='text/event-stream')
     for k, v in cors_headers.items(): response[k] = v
