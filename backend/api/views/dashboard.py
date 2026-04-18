@@ -107,11 +107,8 @@ def DashboardInsightsView(request):
     safe_sales = to_float(monthly_sales)
     safe_expenses = to_float(monthly_expenses)
 
-    # Recent Audit Logs Cleanup (7 days)
-    ActionLog.objects.filter(timestamp__lt=now - timedelta(days=7)).delete()
-
-    # Fetch last 10 logs after cleanup
-    recent_logs = ActionLog.objects.select_related('user').all()[:10]
+    # Fetch last 10 logs
+    recent_logs = ActionLog.objects.select_related('user').all().order_by('-timestamp')[:10]
     logs_data = []
     for log in recent_logs:
         logs_data.append({
@@ -223,5 +220,8 @@ def AIHelpView(request):
         with urllib.request.urlopen(req, timeout=30) as res:
             res_data = json.loads(res.read().decode('utf-8'))
             return Response({'answer': res_data['choices'][0]['message']['content']})
+    except urllib.error.HTTPError as he:
+        err_body = he.read().decode('utf-8')
+        return Response({'error': f'Groq API Error ({he.code}): {err_body}'}, status=502)
     except Exception as e:
         return Response({'error': f'AI Assistant error: {str(e)}'}, status=502)

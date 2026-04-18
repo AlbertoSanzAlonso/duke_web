@@ -97,12 +97,20 @@ class SaleViewSet(viewsets.ModelViewSet):
 async def OrderStreamView(request):
     """SSE para notificaciones en tiempo real (Asíncrono)."""
     origin = request.headers.get('Origin') or 'https://dukeburger-sj.com'
+    
+    # Manejo explícito de CORS para prevenir bloqueos en caso de error pre-stream
+    cors_headers = {
+        'Access-Control-Allow-Origin': origin,
+        'Access-Control-Allow-Credentials': 'true',
+        'X-Accel-Buffering': 'no',
+        'Cache-Control': 'no-cache',
+    }
+    
     if request.method == 'OPTIONS':
         response = HttpResponse()
-        response['Access-Control-Allow-Origin'] = origin
+        for k, v in cors_headers.items(): response[k] = v
         response['Access-Control-Allow-Methods'] = 'GET, OPTIONS'
         response['Access-Control-Allow-Headers'] = 'Authorization, Content-Type'
-        response['Access-Control-Allow-Credentials'] = 'true'
         return response
 
     from rest_framework.authtoken.models import Token
@@ -110,11 +118,15 @@ async def OrderStreamView(request):
     
     token_key = request.GET.get('token')
     if not token_key:
-        return HttpResponse(status=401)
+        response = HttpResponse(status=401)
+        for k, v in cors_headers.items(): response[k] = v
+        return response
         
-    token_exists = await sync_to_async(Token.objects.filter(key=token_key.strip()).exists)()
+    token_exists = await sync_to_async(lambda: Token.objects.filter(key=token_key.strip()).exists())()
     if not token_exists:
-        return HttpResponse(status=401)
+        response = HttpResponse(status=401)
+        for k, v in cors_headers.items(): response[k] = v
+        return response
 
     async def event_stream():
         yield f"data: {json.dumps({'type': 'connection_ready'})}\n\n"
@@ -127,16 +139,16 @@ async def OrderStreamView(request):
         while True:
             current_time = timezone.now()
             
-            # New orders
-            new_sales_qs = Sale.objects.filter(id__gt=last_seen_id).order_by('id')
-            async for sale in new_sales_qs.aiter():
-                yield f"data: {json.dumps({'type': 'new_order', 'id': sale.id, 'customer': sale.customer_name})}\n\n"
-                last_seen_id = sale.id
+            # New orders (Use sync_to_async list conversion for safety in WSGI/gthread)
+            new_sales_list = await sync_to_async(lambda: list(Sale.objects.filter(id__gt=last_seen_id).values('id', 'customer_name').order_by('id')))()
+            for sale in new_sales_list:
+                yield f"data: {json.dumps({'type': 'new_order', 'id': sale['id'], 'customer': sale['customer_name']})}\n\n"
+                last_seen_id = sale['id']
             
             # Updated orders
-            updated_sales_qs = Sale.objects.filter(updated_at__gt=last_check_time, id__lte=last_seen_id)
-            async for sale in updated_sales_qs.aiter():
-                yield f"data: {json.dumps({'type': 'order_updated', 'id': sale.id, 'status': sale.status})}\n\n"
+            updated_sales_list = await sync_to_async(lambda: list(Sale.objects.filter(updated_at__gt=last_check_time, id__lte=last_seen_id).values('id', 'status')))()
+            for sale in updated_sales_list:
+                yield f"data: {json.dumps({'type': 'order_updated', 'id': sale['id'], 'status': sale['status']})}\n\n"
             
             last_check_time = current_time
             yield ": ping\n\n"
@@ -144,8 +156,5 @@ async def OrderStreamView(request):
             await asyncio.sleep(15)
 
     response = StreamingHttpResponse(event_stream(), content_type='text/event-stream')
-    response['X-Accel-Buffering'] = 'no'
-    response['Cache-Control'] = 'no-cache'
-    response['Access-Control-Allow-Origin'] = origin
-    response['Access-Control-Allow-Credentials'] = 'true'
+    for k, v in cors_headers.items(): response[k] = v
     return response
