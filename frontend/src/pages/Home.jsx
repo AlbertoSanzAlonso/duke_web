@@ -190,9 +190,7 @@ function Home() {
       }
     }
 
-    // 2. Check if today's shift is active
-    const todayDuke = toDayDuke(currentDayIndex);
-    const todaySchedule = openingHours.find(h => h.day === todayDuke);
+    // 2. Check if today's shift is active (uses todaySchedule declared above)
 
     if (todaySchedule && todaySchedule.is_open) {
       const [openH, openM] = (todaySchedule.opening_time || "20:00").split(':').map(Number);
