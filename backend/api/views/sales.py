@@ -94,8 +94,8 @@ class SaleViewSet(viewsets.ModelViewSet):
         return Response({'message': 'Preparación revertida.'})
 
 @csrf_exempt
-def OrderStreamView(request):
-    """SSE para notificaciones en tiempo real."""
+async def OrderStreamView(request):
+    """SSE para notificaciones en tiempo real (Asíncrono)."""
     origin = request.headers.get('Origin') or 'https://dukeburger-sj.com'
     if request.method == 'OPTIONS':
         response = HttpResponse()
@@ -106,24 +106,42 @@ def OrderStreamView(request):
         return response
 
     from rest_framework.authtoken.models import Token
+    from asgiref.sync import sync_to_async
+    
     token_key = request.GET.get('token')
-    if not token_key or not Token.objects.filter(key=token_key.strip()).exists():
+    if not token_key:
+        return HttpResponse(status=401)
+        
+    token_exists = await sync_to_async(Token.objects.filter(key=token_key.strip()).exists)()
+    if not token_exists:
         return HttpResponse(status=401)
 
-    def event_stream():
+    async def event_stream():
         yield f"data: {json.dumps({'type': 'connection_ready'})}\n\n"
-        last_seen_id = (Sale.objects.order_by('-id').first().id if Sale.objects.exists() else 0)
+        
+        # Get initial ID
+        last_sale = await sync_to_async(lambda: Sale.objects.order_by('-id').first())()
+        last_seen_id = last_sale.id if last_sale else 0
         last_check_time = timezone.now()
+        
         while True:
             current_time = timezone.now()
-            for sale in Sale.objects.filter(id__gt=last_seen_id).order_by('id'):
+            
+            # New orders
+            new_sales_qs = Sale.objects.filter(id__gt=last_seen_id).order_by('id')
+            async for sale in new_sales_qs.aiter():
                 yield f"data: {json.dumps({'type': 'new_order', 'id': sale.id, 'customer': sale.customer_name})}\n\n"
                 last_seen_id = sale.id
-            for sale in Sale.objects.filter(updated_at__gt=last_check_time, id__lte=last_seen_id):
+            
+            # Updated orders
+            updated_sales_qs = Sale.objects.filter(updated_at__gt=last_check_time, id__lte=last_seen_id)
+            async for sale in updated_sales_qs.aiter():
                 yield f"data: {json.dumps({'type': 'order_updated', 'id': sale.id, 'status': sale.status})}\n\n"
+            
             last_check_time = current_time
             yield ": ping\n\n"
-            time.sleep(15)
+            import asyncio
+            await asyncio.sleep(15)
 
     response = StreamingHttpResponse(event_stream(), content_type='text/event-stream')
     response['X-Accel-Buffering'] = 'no'
