@@ -545,6 +545,7 @@ function Home() {
       <Helmet>
         <title>Duke Burger | Hamburguesería Artesanal en San Juan</title>
         <meta name="description" content="Hamburguesería artesanal en San Juan, Argentina. Especialistas en hamburguesas, lomos y pachatas. Hacé tu pedido online para retiro en el local o delivery a domicilio." />
+        <meta name="author" content="Alberto sanz (albertosanz.dev)" />
         <link rel="canonical" href="https://dukeburger-sj.com/" />
         
         {/* Open Graph Tags for Social Sharing */}

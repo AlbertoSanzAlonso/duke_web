@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import QRCode from 'qrcode';
+import { Helmet } from 'react-helmet-async';
 import { ShoppingBag, MapPin, Calendar, Clock, ChevronLeft, Download, Printer } from 'lucide-react';
 import LoadingScreen from '../admin/components/LoadingScreen';
 
@@ -61,6 +62,11 @@ const PublicTicket = () => {
 
     return (
         <div key={order?.id} className="public-ticket-container" style={{ minHeight: '100vh', background: '#0a0a0a', color: '#fff', padding: '20px', fontFamily: 'Inter, sans-serif' }}>
+            <Helmet>
+                <title>Ticket #{order.id} | Duke Burger</title>
+                <meta name="author" content="Alberto sanz (albertosanz.dev)" />
+                <meta name="robots" content="noindex" />
+            </Helmet>
             <style>
                 {`
                     @media print {

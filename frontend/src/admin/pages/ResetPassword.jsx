@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { Helmet } from 'react-helmet-async';
 import { useParams, useNavigate } from 'react-router-dom';
 import { resetPasswordConfirm } from '../../services/api';
 import Toast from '../components/Toast';
@@ -35,6 +36,11 @@ const ResetPassword = () => {
 
     return (
         <div className="login-page">
+            <Helmet>
+                <title>Restablecer Contraseña | Duke Burger</title>
+                <meta name="author" content="Alberto sanz (albertosanz.dev)" />
+                <meta name="robots" content="noindex" />
+            </Helmet>
             {toast && <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />}
             
             <div className="login-card">

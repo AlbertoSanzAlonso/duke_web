@@ -179,6 +179,8 @@ const Manual = () => {
     <div className="manual-page">
       <Helmet>
         <title>Manual de Usuario | Duke Burger</title>
+        <meta name="author" content="Alberto sanz (albertosanz.dev)" />
+        <meta name="robots" content="noindex" />
       </Helmet>
 
       {/* Modal de Vida del Producto (Workflow) */}

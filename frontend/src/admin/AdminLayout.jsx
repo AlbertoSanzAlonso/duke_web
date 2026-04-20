@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { Helmet } from 'react-helmet-async';
 import { Outlet, NavLink, Link, useNavigate } from 'react-router-dom';
 import { logout, fetchMe } from '../services/api';
 import Toast from './components/Toast';
@@ -172,6 +173,10 @@ const AdminLayout = () => {
 
   return (
     <div className="admin-container">
+      <Helmet>
+        <meta name="author" content="Alberto sanz (albertosanz.dev)" />
+        <meta name="robots" content="noindex" />
+      </Helmet>
       {/* Overlay to close sidebar on mobile when clicking outside */}
       <div className={`sidebar-overlay ${isMobileOpen ? 'visible' : ''}`} onClick={() => setIsMobileOpen(false)}></div>
 
