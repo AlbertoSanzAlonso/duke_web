@@ -1,0 +1,16 @@
+# Agents & AI tools
+.agents/
+AGENTS.md
+SKILLS.md
+skills/
+skills-lock.json
+.claude/
+.continue/
+
+# Dependencies
+node_modules/
+package-lock.json
+
+# OS files
+.DS_Store
+Thumbs.db
